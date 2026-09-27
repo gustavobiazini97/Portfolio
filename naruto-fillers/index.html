@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naruto Fillers</title>
+<meta name="description" content="Lista rápida de todos os episódios filler de Naruto, Naruto Shippuden e Boruto.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M97 115a8 8 0 0 1 16 0a16 16 0 0 1-32 0a24 24 0 0 1 48 0a32 32 0 0 1-64 0L38 50l58 30' fill='none' stroke='%23f57c00' stroke-width='16' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+
+<!-- Hitai-ate: faixa de tecido a toda a largura + placa de metal vetorial (nítida em qualquer ecrã) -->
+<header class="headband" aria-label="Hitai-ate da Aldeia da Folha">
+  <div class="cloth"></div>
+  <svg class="plate" viewBox="0 0 600 240" role="img" aria-label="Placa com o símbolo da Folha">
+    <defs>
+      <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f4f7fa"/>
+        <stop offset=".3" stop-color="#b9c3cd"/>
+        <stop offset=".55" stop-color="#e8edf1"/>
+        <stop offset=".8" stop-color="#8f9ba7"/>
+        <stop offset="1" stop-color="#c9d1d9"/>
+      </linearGradient>
+      <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset="1" stop-color="#5d6873"/>
+      </linearGradient>
+      <radialGradient id="rivet" cx=".35" cy=".35" r=".7">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset=".45" stop-color="#b3bdc7"/>
+        <stop offset="1" stop-color="#4f5963"/>
+      </radialGradient>
+      <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+        <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000" flood-opacity=".45"/>
+      </filter>
+      <path id="leafPath" d="M97 115a8 8 0 0 1 16 0a16 16 0 0 1-32 0a24 24 0 0 1 48 0a32 32 0 0 1-64 0L38 50l58 30"/>
+    </defs>
+    <rect x="12" y="12" width="576" height="216" rx="22" fill="url(#steel)" stroke="url(#edge)" stroke-width="4" filter="url(#shadow)"/>
+    <rect x="26" y="26" width="548" height="188" rx="14" fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="2"/>
+    <path d="M60 12 L230 12 L120 228 L20 228 Z" fill="#fff" opacity=".22"/>
+    <g fill="url(#rivet)" stroke="#59636d" stroke-width="1.5">
+      <circle cx="50" cy="50" r="10"/><circle cx="550" cy="50" r="10"/>
+      <circle cx="50" cy="190" r="10"/><circle cx="550" cy="190" r="10"/>
+    </g>
+    <!-- gravação: realce claro por baixo, sulco escuro por cima -->
+    <g transform="translate(190 8) scale(1.12)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#leafPath" stroke="#ffffff" stroke-opacity=".85" stroke-width="12" transform="translate(1.5 2)"/>
+      <use href="#leafPath" stroke="#3a434d" stroke-width="11"/>
+      <use href="#leafPath" stroke="#1f262d" stroke-width="4"/>
+    </g>
+  </svg>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>Lista de <span>Fillers</span></h1>
+    <p>Todos os episódios filler, sem mais nada. Escolhe a saga e salta à vontade.</p>
+  </section>
+
+  <nav class="tabs" aria-label="Sagas">
+    <a href="#naruto" data-show="naruto">Naruto</a>
+    <a href="#naruto-shippuden" data-show="naruto-shippuden">Naruto Shippuden</a>
+    <a href="#boruto-naruto-next-generations" data-show="boruto-naruto-next-generations">Boruto</a>
+  </nav>
+
+  <section class="stats" id="stats" aria-live="polite"></section>
+
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="Procurar por número ou título…" autocomplete="off">
+    <div class="toggle" role="group" aria-label="Vista">
+      <button type="button" data-view="cards" aria-pressed="true">Detalhe</button>
+      <button type="button" data-view="compact" aria-pressed="false">Só números</button>
+    </div>
+  </div>
+
+  <div class="ranges" id="ranges"></div>
+  <div id="list"></div>
+</main>
+
+<footer class="wrap footer">
+  <span id="source"></span>
+  Dados: <a href="https://www.animefillerlist.com/" target="_blank" rel="noopener">animefillerlist.com</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

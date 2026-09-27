@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1d4a"/>
+      <stop offset=".45" stop-color="#2a4fa3"/>
+      <stop offset=".75" stop-color="#f08a24"/>
+      <stop offset="1" stop-color="#ffb347"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset=".35" stop-color="#ffc466"/>
+      <stop offset="1" stop-color="#ff8a1f" stop-opacity="0"/>
+    </radialGradient>
+    <symbol id="leaf" viewBox="0 0 200 200">
+      <path d="M97 115a8 8 0 0 1 16 0a16 16 0 0 1-32 0a24 24 0 0 1 48 0a32 32 0 0 1-64 0L38 50l58 30"
+            fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <path id="l" d="M0 0c10-14 30-14 40 0c-10 14-30 14-40 0z"/>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1380" cy="700" r="420" fill="url(#sun)"/>
+
+  <!-- símbolo da Folha no céu -->
+  <use href="#leaf" x="380" y="80" width="560" height="560" color="#ffffff" opacity=".12"/>
+
+  <!-- montanhas distantes -->
+  <path d="M0 760 L180 640 L330 700 L520 560 L700 690 L880 610 L1060 700 L1250 580 L1440 690 L1620 600 L1920 720 V1080 H0Z" fill="#23407f" opacity=".85"/>
+  <!-- rochedo dos Hokage -->
+  <path d="M760 1080 V720 q20-60 70-70 q30-40 80-30 q30-50 90-35 q40-45 100-25 q40-30 90 0 q50-5 70 50 q30 20 40 80 V1080Z" fill="#6b4a3a"/>
+  <g fill="#4e3429" opacity=".9">
+    <ellipse cx="850" cy="720" rx="38" ry="48"/>
+    <ellipse cx="955" cy="690" rx="40" ry="52"/>
+    <ellipse cx="1065" cy="680" rx="40" ry="52"/>
+    <ellipse cx="1170" cy="705" rx="38" ry="48"/>
+  </g>
+  <!-- telhados da aldeia -->
+  <g fill="#132a5c">
+    <path d="M0 900 h140 l40-50 h120 l40 50 h90 V1080 H0Z"/>
+    <path d="M380 920 l60-70 h160 l60 70 h40 V1080 H380Z"/>
+    <path d="M1300 910 l50-60 h180 l50 60 h60 l30-40 h140 l40 40 h70 V1080 H1300Z"/>
+    <circle cx="1440" cy="820" r="70"/>
+    <path d="M620 960 h700 V1080 H620Z"/>
+  </g>
+  <!-- folhas a cair -->
+  <g fill="#ff9a2e" opacity=".75">
+    <use href="#l" transform="translate(220 260) rotate(25)"/>
+    <use href="#l" transform="translate(1600 180) rotate(-30)"/>
+    <use href="#l" transform="translate(1180 360) rotate(60) scale(.8)"/>
+    <use href="#l" transform="translate(300 620) rotate(-45) scale(1.2)"/>
+    <use href="#l" transform="translate(1750 520) rotate(15) scale(.9)"/>
+    <use href="#l" transform="translate(700 300) rotate(80) scale(.7)"/>
+  </g>
+</svg>
