@@ -80,8 +80,8 @@ async function select(show) {
   }
   document.title = `${current.name} · Fillers`;
   $('#source').innerHTML = current.source === 'live'
-    ? '<span class="badge live">ao vivo</span>'
-    : '<span class="badge">cópia local</span>';
+    ? '<span class="badge live" title="Lista lida agora de animefillerlist.com">ao vivo</span>'
+    : '<span class="badge" title="Sem ligação ao animefillerlist.com: a mostrar a lista guardada na página">lista guardada</span>';
   renderStats(current);
   render();
 }
