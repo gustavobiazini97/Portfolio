@@ -5,12 +5,24 @@
 #   chmod +x ~/.shortcuts/"Naruto Fillers"
 
 DIR="$HOME/naruto-fillers"
-PORT=8000
+URL="http://localhost:8000"
 
-if ! curl -s -o /dev/null "http://localhost:$PORT"; then
-  cd "$DIR" || { echo "Pasta $DIR não encontrada"; exit 1; }
-  nohup php -S "localhost:$PORT" >/dev/null 2>&1 &
-  sleep 1
+if curl -s -o /dev/null "$URL"; then
+  termux-open-url "$URL"
+  exit 0
 fi
 
-termux-open-url "http://localhost:$PORT"
+cd "$DIR" || { echo "Pasta $DIR não encontrada"; read -r; exit 1; }
+php -S localhost:8000 >/dev/null 2>&1 &
+
+# Só abre o browser quando o servidor já responde.
+for _ in $(seq 30); do
+  curl -s -o /dev/null "$URL" && break
+  sleep 0.2
+done
+termux-open-url "$URL"
+
+# O servidor vive enquanto esta sessão do Termux estiver aberta
+# (fechar a sessão ou Ctrl+C desliga-o).
+echo "Servidor ligado em $URL — fecha esta sessão para o desligar."
+wait
