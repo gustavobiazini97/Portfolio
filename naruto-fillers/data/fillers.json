@@ -1,6 +1,5 @@
 {
  "source": "offline",
- "note": "Cópia local aproximada. Corre scripts/update_fillers.py para sincronizar com animefillerlist.com (inclui títulos e datas).",
  "shows": {
   "naruto": {
    "name": "Naruto",
@@ -9,458 +8,453 @@
    "episodes": [
     {
      "n": 26,
-     "title": null,
-     "date": null
+     "title": "Special Report: Live from the Forest of Death!",
+     "date": "2003-04-02"
     },
     {
      "n": 97,
-     "title": null,
-     "date": null
+     "title": "Kidnapped! Naruto's Hot Spring Adventure!",
+     "date": "2004-08-18"
     },
     {
      "n": 101,
-     "title": null,
-     "date": null
+     "title": "Gotta See! Gotta Know! Kakashi-Sensei's True Face!",
+     "date": "2004-09-15"
     },
     {
      "n": 102,
-     "title": null,
-     "date": null
+     "title": "Mission: Help an Old Friend in the Land of Tea",
+     "date": "2004-09-22"
     },
     {
      "n": 103,
-     "title": null,
-     "date": null
+     "title": "The Race is on! Trouble on the High Seas!",
+     "date": "2004-09-29"
     },
     {
      "n": 104,
-     "title": null,
-     "date": null
+     "title": "Run Idate Run! Nagi Island Awaits!",
+     "date": "2004-10-13"
     },
     {
      "n": 105,
-     "title": null,
-     "date": null
+     "title": "A Fierce Battle of Rolling Thunder!",
+     "date": "2004-10-20"
     },
     {
      "n": 106,
-     "title": null,
-     "date": null
+     "title": "The Last Leg: A Final Act of Desperation",
+     "date": "2004-10-27"
     },
     {
      "n": 136,
-     "title": null,
-     "date": null
+     "title": "Deep Cover!? A Super S-Ranked Mission!",
+     "date": "2005-05-25"
     },
     {
      "n": 137,
-     "title": null,
-     "date": null
+     "title": "A Town of Outlaws, the Shadow of the Fuma Clan",
+     "date": "2005-06-01"
     },
     {
      "n": 138,
-     "title": null,
-     "date": null
+     "title": "Pure Betrayal, and a Fleeting Plea!",
+     "date": "2005-06-08"
     },
     {
      "n": 139,
-     "title": null,
-     "date": null
+     "title": "Pure Terror! The House of Orochimaru",
+     "date": "2005-06-15"
     },
     {
      "n": 140,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 141,
-     "title": null,
-     "date": null
+     "title": "Two Heartbeats: Kabuto's Trap",
+     "date": "2005-06-22"
     },
     {
      "n": 143,
-     "title": null,
-     "date": null
+     "title": "Tonton! I'm Counting on You!",
+     "date": "2005-07-13"
     },
     {
      "n": 144,
-     "title": null,
-     "date": null
+     "title": "A New Squad! Two People and a Dog?!",
+     "date": "2005-07-20"
     },
     {
      "n": 145,
-     "title": null,
-     "date": null
+     "title": "A New Formation: Ino-Shika-Cho!",
+     "date": "2005-07-27"
     },
     {
      "n": 146,
-     "title": null,
-     "date": null
+     "title": "Orochimaru's Shadow",
+     "date": "2005-08-10"
     },
     {
      "n": 147,
-     "title": null,
-     "date": null
+     "title": "A Clash of Fate: You Can't Bring Me Down",
+     "date": "2005-08-17"
     },
     {
      "n": 148,
-     "title": null,
-     "date": null
+     "title": "Search for the Rare Bikochu Beetle",
+     "date": "2005-08-17"
     },
     {
      "n": 149,
-     "title": null,
-     "date": null
+     "title": "What's the Difference? Don't All Insects Look Alike?",
+     "date": "2005-08-24"
     },
     {
      "n": 150,
-     "title": null,
-     "date": null
+     "title": "A Battle of Bugs: The Deceivers and the Deceived",
+     "date": "2005-08-31"
     },
     {
      "n": 151,
-     "title": null,
-     "date": null
+     "title": "Blaze Away Byakugan: This Is My Ninja Way",
+     "date": "2005-09-14"
     },
     {
      "n": 152,
-     "title": null,
-     "date": null
+     "title": "Funeral March for the Living",
+     "date": "2005-09-21"
     },
     {
      "n": 153,
-     "title": null,
-     "date": null
+     "title": "A Lesson Learned: The Iron Fist of Love",
+     "date": "2005-09-28"
     },
     {
      "n": 154,
-     "title": null,
-     "date": null
+     "title": "The Enemy of the Byakugan",
+     "date": "2005-10-05"
     },
     {
      "n": 155,
-     "title": null,
-     "date": null
+     "title": "The Dark Creeping Clouds",
+     "date": "2005-10-12"
     },
     {
      "n": 156,
-     "title": null,
-     "date": null
+     "title": "Raiga's Counterattack",
+     "date": "2005-10-19"
     },
     {
      "n": 157,
-     "title": null,
-     "date": null
+     "title": "Run! The Curry of Life",
+     "date": "2005-10-26"
     },
     {
      "n": 158,
-     "title": null,
-     "date": null
+     "title": "Follow My Lead! The Great Survival Challenge",
+     "date": "2005-11-02"
     },
     {
      "n": 159,
-     "title": null,
-     "date": null
+     "title": "Bounty Hunter from the Wilderness",
+     "date": "2005-11-09"
     },
     {
      "n": 160,
-     "title": null,
-     "date": null
+     "title": "Hunt or Be Hunted?! Showdown at the O.K. Temple!",
+     "date": "2005-11-16"
     },
     {
      "n": 161,
-     "title": null,
-     "date": null
+     "title": "The Appearance of Strange Visitors",
+     "date": "2005-11-23"
     },
     {
      "n": 162,
-     "title": null,
-     "date": null
+     "title": "The Cursed Warrior",
+     "date": "2005-11-30"
     },
     {
      "n": 163,
-     "title": null,
-     "date": null
+     "title": "The Tactician's Intent",
+     "date": "2005-12-07"
     },
     {
      "n": 164,
-     "title": null,
-     "date": null
+     "title": "Too Late for Help",
+     "date": "2005-12-14"
     },
     {
      "n": 165,
-     "title": null,
-     "date": null
+     "title": "The Death of Naruto",
+     "date": "2005-12-21"
     },
     {
      "n": 166,
-     "title": null,
-     "date": null
+     "title": "When Time Stands Still",
+     "date": "2006-01-04"
     },
     {
      "n": 167,
-     "title": null,
-     "date": null
+     "title": "When Egrets Flap Their Wings",
+     "date": "2006-01-04"
     },
     {
      "n": 168,
-     "title": null,
-     "date": null
+     "title": "Mix It, Stretch It, Boil It Up! Burn, Copper Pot, Burn!",
+     "date": "2006-01-18"
     },
     {
      "n": 169,
-     "title": null,
-     "date": null
+     "title": "Remembrance: The Lost Page",
+     "date": "2006-01-25"
     },
     {
      "n": 170,
-     "title": null,
-     "date": null
+     "title": "The Closed Door",
+     "date": "2006-02-01"
     },
     {
      "n": 171,
-     "title": null,
-     "date": null
+     "title": "Infiltration: The Set-Up!",
+     "date": "2006-02-08"
     },
     {
      "n": 172,
-     "title": null,
-     "date": null
+     "title": "Despair: A Fractured Heart",
+     "date": "2006-02-15"
     },
     {
      "n": 173,
-     "title": null,
-     "date": null
+     "title": "The Battle at Sea: The Power Unleashed!",
+     "date": "2006-02-22"
     },
     {
      "n": 174,
-     "title": null,
-     "date": null
+     "title": "Impossible! Celebrity Ninja Art - Money Style Jutsu!",
+     "date": "2006-03-01"
     },
     {
      "n": 175,
-     "title": null,
-     "date": null
+     "title": "The Treasure Hunt is On!",
+     "date": "2006-03-08"
     },
     {
      "n": 176,
-     "title": null,
-     "date": null
+     "title": "Run, Dodge, Zigzag! Chase or Be Chased!",
+     "date": "2006-03-15"
     },
     {
      "n": 177,
-     "title": null,
-     "date": null
+     "title": "Please, Mr. Postman!",
+     "date": "2006-03-22"
     },
     {
      "n": 178,
-     "title": null,
-     "date": null
+     "title": "Encounter! The Boy with a Star's Name",
+     "date": "2006-03-29"
     },
     {
      "n": 179,
-     "title": null,
-     "date": null
+     "title": "The Remembered Lullaby",
+     "date": "2006-04-05"
     },
     {
      "n": 180,
-     "title": null,
-     "date": null
+     "title": "Hidden Jutsu: The Price of The Ninja Art: Kujaku",
+     "date": "2006-04-12"
     },
     {
      "n": 181,
-     "title": null,
-     "date": null
+     "title": "Hoshikage, The Buried Truth",
+     "date": "2006-04-19"
     },
     {
      "n": 182,
-     "title": null,
-     "date": null
+     "title": "Reunion, The Remaining time",
+     "date": "2006-04-26"
     },
     {
      "n": 183,
-     "title": null,
-     "date": null
+     "title": "The Star's Radiance",
+     "date": "2006-05-03"
     },
     {
      "n": 184,
-     "title": null,
-     "date": null
+     "title": "Kiba's Long Day!",
+     "date": "2006-05-10"
     },
     {
      "n": 185,
-     "title": null,
-     "date": null
+     "title": "A Legend from the Hidden Leaf: The Onbaa!",
+     "date": "2006-05-17"
     },
     {
      "n": 186,
-     "title": null,
-     "date": null
+     "title": "Laughing Shino",
+     "date": "2006-05-24"
     },
     {
      "n": 187,
-     "title": null,
-     "date": null
+     "title": "Open for Business! The Leaf Moving Service",
+     "date": "2006-05-31"
     },
     {
      "n": 188,
-     "title": null,
-     "date": null
+     "title": "Mystery of the Targeted Merchants",
+     "date": "2006-06-07"
     },
     {
      "n": 189,
-     "title": null,
-     "date": null
+     "title": "A Limitless Supply of Ninja Tools",
+     "date": "2006-06-14"
     },
     {
      "n": 190,
-     "title": null,
-     "date": null
+     "title": "The Byakugan Sees the Blind Spot",
+     "date": "2006-06-21"
     },
     {
      "n": 191,
-     "title": null,
-     "date": null
+     "title": "Forecast: Death! Cloudy with Chance of Sun",
+     "date": "2006-06-28"
     },
     {
      "n": 192,
-     "title": null,
-     "date": null
+     "title": "Ino Screams! Chubby Paradise!",
+     "date": "2006-07-05"
     },
     {
      "n": 193,
-     "title": null,
-     "date": null
+     "title": "Viva Dojo Challenge! Youth Is All About Passion!",
+     "date": "2006-07-12"
     },
     {
      "n": 194,
-     "title": null,
-     "date": null
+     "title": "The Mysterious Curse of the Haunted Castle",
+     "date": "2006-07-19"
     },
     {
      "n": 195,
-     "title": null,
-     "date": null
+     "title": "The Third Super-Beast!",
+     "date": "2006-07-26"
     },
     {
      "n": 196,
-     "title": null,
-     "date": null
+     "title": "Hot-Blooded Confrontation: Student vs. Sensei",
+     "date": "2006-08-09"
     },
     {
      "n": 197,
-     "title": null,
-     "date": null
+     "title": "Crisis! The Hidden Leaf 11 Gather!",
+     "date": "2006-08-16"
     },
     {
      "n": 198,
-     "title": null,
-     "date": null
+     "title": "The ANBU Gives Up? Naruto's Recollection",
+     "date": "2006-08-23"
     },
     {
      "n": 199,
-     "title": null,
-     "date": null
+     "title": "The Missed Target",
+     "date": "2006-08-30"
     },
     {
      "n": 200,
-     "title": null,
-     "date": null
+     "title": "The Powerful Helper",
+     "date": "2006-09-13"
     },
     {
      "n": 201,
-     "title": null,
-     "date": null
+     "title": "Multiple Traps! Countdown to Destruction",
+     "date": "2006-09-20"
     },
     {
      "n": 202,
-     "title": null,
-     "date": null
+     "title": "The Top 5 Ninja Battles",
+     "date": "2006-09-27"
     },
     {
      "n": 203,
-     "title": null,
-     "date": null
+     "title": "Kurenai's Decision, Squad 8 Left Behind",
+     "date": "2006-10-05"
     },
     {
      "n": 204,
-     "title": null,
-     "date": null
+     "title": "Yakumo's Sealed Ability",
+     "date": "2006-10-05"
     },
     {
      "n": 205,
-     "title": null,
-     "date": null
+     "title": "Kurenai's Top-Secret Mission: The Promise With the Third Hokage",
+     "date": "2006-10-05"
     },
     {
      "n": 206,
-     "title": null,
-     "date": null
+     "title": "Genjutsu or Reality?",
+     "date": "2006-10-19"
     },
     {
      "n": 207,
-     "title": null,
-     "date": null
+     "title": "The Supposed Sealed Ability",
+     "date": "2006-10-26"
     },
     {
      "n": 208,
-     "title": null,
-     "date": null
+     "title": "The Weight of the Prized Artifact!",
+     "date": "2006-11-02"
     },
     {
      "n": 209,
-     "title": null,
-     "date": null
+     "title": "The Enemy: Ninja Dropouts",
+     "date": "2006-11-09"
     },
     {
      "n": 210,
-     "title": null,
-     "date": null
+     "title": "The Bewildering Forest",
+     "date": "2006-11-16"
     },
     {
      "n": 211,
-     "title": null,
-     "date": null
+     "title": "Memory of Flames",
+     "date": "2006-11-30"
     },
     {
      "n": 212,
-     "title": null,
-     "date": null
+     "title": "To Each His Own Path",
+     "date": "2006-12-07"
     },
     {
      "n": 213,
-     "title": null,
-     "date": null
+     "title": "Vanished Memories",
+     "date": "2006-12-14"
     },
     {
      "n": 214,
-     "title": null,
-     "date": null
+     "title": "Bringing Back Reality",
+     "date": "2006-12-21"
     },
     {
      "n": 215,
-     "title": null,
-     "date": null
+     "title": "A Past to Be Erased",
+     "date": "2006-12-21"
     },
     {
      "n": 216,
-     "title": null,
-     "date": null
+     "title": "The Targeted Shukaku",
+     "date": "2007-01-11"
     },
     {
      "n": 217,
-     "title": null,
-     "date": null
+     "title": "Sand Alliance with the Leaf Shinobi",
+     "date": "2007-01-18"
     },
     {
      "n": 218,
-     "title": null,
-     "date": null
+     "title": "The Counterattack!",
+     "date": "2007-01-25"
     },
     {
      "n": 219,
-     "title": null,
-     "date": null
+     "title": "The Ultimate Weapon Reborn",
+     "date": "2007-02-01"
     }
    ]
   },
@@ -470,1029 +464,1019 @@
    "years": "2007–2017",
    "episodes": [
     {
-     "n": 28,
-     "title": null,
-     "date": null
-    },
-    {
      "n": 57,
-     "title": null,
-     "date": null
+     "title": "Robbed of Sleep",
+     "date": "2008-05-08"
     },
     {
      "n": 58,
-     "title": null,
-     "date": null
+     "title": "Loneliness",
+     "date": "2008-05-08"
     },
     {
      "n": 59,
-     "title": null,
-     "date": null
+     "title": "A New Enemy",
+     "date": "2008-05-15"
     },
     {
      "n": 60,
-     "title": null,
-     "date": null
+     "title": "Impermanence",
+     "date": "2008-05-22"
     },
     {
      "n": 61,
-     "title": null,
-     "date": null
+     "title": "Contact",
+     "date": "2008-05-29"
     },
     {
      "n": 62,
-     "title": null,
-     "date": null
+     "title": "Teammate",
+     "date": "2008-06-05"
     },
     {
      "n": 63,
-     "title": null,
-     "date": null
+     "title": "The Two Kings",
+     "date": "2008-06-19"
     },
     {
      "n": 64,
-     "title": null,
-     "date": null
+     "title": "The Jet-Black Signal Fire",
+     "date": "2008-07-03"
     },
     {
      "n": 65,
-     "title": null,
-     "date": null
+     "title": "Lockdown of Darkness",
+     "date": "2008-07-03"
     },
     {
      "n": 66,
-     "title": null,
-     "date": null
+     "title": "Revived Souls",
+     "date": "2008-07-10"
     },
     {
      "n": 67,
-     "title": null,
-     "date": null
+     "title": "Everyone's Struggle to the Death",
+     "date": "2008-07-24"
     },
     {
      "n": 68,
-     "title": null,
-     "date": null
+     "title": "Moment of Awakening",
+     "date": "2008-07-31"
     },
     {
      "n": 69,
-     "title": null,
-     "date": null
+     "title": "Despair",
+     "date": "2008-07-31"
     },
     {
      "n": 70,
-     "title": null,
-     "date": null
+     "title": "Resonance",
+     "date": "2008-08-07"
     },
     {
      "n": 71,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 90,
-     "title": null,
-     "date": null
+     "title": "My Friend",
+     "date": "2008-08-14"
     },
     {
      "n": 91,
-     "title": null,
-     "date": null
+     "title": "Orochimaru's Hideout Discovered",
+     "date": "2009-01-08"
     },
     {
      "n": 92,
-     "title": null,
-     "date": null
+     "title": "Encounter",
+     "date": "2009-01-15"
     },
     {
      "n": 93,
-     "title": null,
-     "date": null
+     "title": "Connecting Hearts",
+     "date": "2009-01-22"
     },
     {
      "n": 94,
-     "title": null,
-     "date": null
+     "title": "A Night of Rain",
+     "date": "2009-01-29"
     },
     {
      "n": 95,
-     "title": null,
-     "date": null
+     "title": "The Two Charms",
+     "date": "2009-02-05"
     },
     {
      "n": 96,
-     "title": null,
-     "date": null
+     "title": "The Unseeing Enemy",
+     "date": "2009-02-12"
     },
     {
      "n": 97,
-     "title": null,
-     "date": null
+     "title": "The Labyrinth of Distorted Reflection",
+     "date": "2009-02-19"
     },
     {
      "n": 98,
-     "title": null,
-     "date": null
+     "title": "The Target Appears",
+     "date": "2009-02-26"
     },
     {
      "n": 99,
-     "title": null,
-     "date": null
+     "title": "The Rampaging Tailed Beast",
+     "date": "2009-03-05"
     },
     {
      "n": 100,
-     "title": null,
-     "date": null
+     "title": "Inside the Mist",
+     "date": "2009-03-12"
     },
     {
      "n": 101,
-     "title": null,
-     "date": null
+     "title": "Everyone's Feelings",
+     "date": "2009-03-26"
     },
     {
      "n": 102,
-     "title": null,
-     "date": null
+     "title": "Regroup!",
+     "date": "2009-03-26"
     },
     {
      "n": 103,
-     "title": null,
-     "date": null
+     "title": "The Four-Corner Sealing Barrier",
+     "date": "2009-04-09"
     },
     {
      "n": 104,
-     "title": null,
-     "date": null
+     "title": "Breaking the Crystal Style",
+     "date": "2009-04-09"
     },
     {
      "n": 105,
-     "title": null,
-     "date": null
+     "title": "The Battle Over the Barrier",
+     "date": "2009-04-16"
     },
     {
      "n": 106,
-     "title": null,
-     "date": null
+     "title": "Red Camellia",
+     "date": "2009-04-23"
     },
     {
      "n": 107,
-     "title": null,
-     "date": null
+     "title": "Strange Bedfellows",
+     "date": "2009-04-30"
     },
     {
      "n": 108,
-     "title": null,
-     "date": null
+     "title": "Guidepost of the Camellia",
+     "date": "2009-05-07"
     },
     {
      "n": 109,
-     "title": null,
-     "date": null
+     "title": "Cursed Seal Counterattack",
+     "date": "2009-05-14"
     },
     {
      "n": 110,
-     "title": null,
-     "date": null
+     "title": "Memory of Guilt",
+     "date": "2009-05-21"
     },
     {
      "n": 111,
-     "title": null,
-     "date": null
+     "title": "Shattered Promise",
+     "date": "2009-05-28"
     },
     {
      "n": 112,
-     "title": null,
-     "date": null
+     "title": "A Place to Return To",
+     "date": "2009-06-04"
     },
     {
      "n": 144,
-     "title": null,
-     "date": null
+     "title": "Wanderer",
+     "date": "2010-01-21"
     },
     {
      "n": 145,
-     "title": null,
-     "date": null
+     "title": "Successor of the Forbidden Jutsu",
+     "date": "2010-01-28"
     },
     {
      "n": 146,
-     "title": null,
-     "date": null
+     "title": "The Successor's Wish",
+     "date": "2010-02-04"
     },
     {
      "n": 147,
-     "title": null,
-     "date": null
+     "title": "Rogue Ninja's Past",
+     "date": "2010-02-11"
     },
     {
      "n": 148,
-     "title": null,
-     "date": null
+     "title": "Heir to Darkness",
+     "date": "2010-02-18"
     },
     {
      "n": 149,
-     "title": null,
-     "date": null
+     "title": "Separation",
+     "date": "2010-02-25"
     },
     {
      "n": 150,
-     "title": null,
-     "date": null
+     "title": "The Forbidden Jutsu Released",
+     "date": "2010-03-04"
     },
     {
      "n": 151,
-     "title": null,
-     "date": null
+     "title": "Master and Student",
+     "date": "2010-03-11"
     },
     {
      "n": 170,
-     "title": null,
-     "date": null
+     "title": "Big Adventure! The Quest for the Fourth Hokage's Legacy, Part 1",
+     "date": "2010-07-29"
     },
     {
      "n": 171,
-     "title": null,
-     "date": null
+     "title": "Big Adventure! The Quest for the Fourth Hokage's Legacy, Part 2",
+     "date": "2010-07-29"
     },
     {
      "n": 176,
-     "title": null,
-     "date": null
+     "title": "Rookie Instructor Iruka",
+     "date": "2010-09-02"
     },
     {
      "n": 177,
-     "title": null,
-     "date": null
+     "title": "Iruka's Ordeal",
+     "date": "2010-09-09"
     },
     {
      "n": 178,
-     "title": null,
-     "date": null
+     "title": "Iruka's Decision",
+     "date": "2010-09-16"
     },
     {
      "n": 179,
-     "title": null,
-     "date": null
+     "title": "Kakashi Hatake, the Jonin in Charge",
+     "date": "2010-09-30"
     },
     {
      "n": 180,
-     "title": null,
-     "date": null
+     "title": "Inari's Courage Put to the Test",
+     "date": "2010-10-07"
     },
     {
      "n": 181,
-     "title": null,
-     "date": null
+     "title": "Naruto's School of Revenge",
+     "date": "2010-10-14"
     },
     {
      "n": 182,
-     "title": null,
-     "date": null
+     "title": "Gaara's Bond",
+     "date": "2010-10-21"
     },
     {
      "n": 183,
-     "title": null,
-     "date": null
+     "title": "Naruto: Outbreak",
+     "date": "2010-10-28"
     },
     {
      "n": 184,
-     "title": null,
-     "date": null
+     "title": "Deploy! Team Tenten",
+     "date": "2010-11-04"
     },
     {
      "n": 185,
-     "title": null,
-     "date": null
+     "title": "Animal District",
+     "date": "2010-11-11"
     },
     {
      "n": 186,
-     "title": null,
-     "date": null
+     "title": "Ah, the Medicine of Youth",
+     "date": "2010-11-18"
     },
     {
      "n": 187,
-     "title": null,
-     "date": null
+     "title": "Gutsy Master and Student: The Training",
+     "date": "2010-11-25"
     },
     {
      "n": 188,
-     "title": null,
-     "date": null
+     "title": "Record of the Gutsy Ninja Master and Student",
+     "date": "2010-11-25"
     },
     {
      "n": 189,
-     "title": null,
-     "date": null
+     "title": "Sasuke's Paw Encyclopedia",
+     "date": "2010-12-02"
     },
     {
      "n": 190,
-     "title": null,
-     "date": null
+     "title": "Naruto and the Old Soldier",
+     "date": "2010-12-09"
     },
     {
      "n": 191,
-     "title": null,
-     "date": null
+     "title": "Kakashi Love Song",
+     "date": "2010-12-16"
     },
     {
      "n": 192,
-     "title": null,
-     "date": null
+     "title": "Neji Chronicles",
+     "date": "2010-12-23"
     },
     {
      "n": 193,
-     "title": null,
-     "date": null
+     "title": "The Man Who Died Twice",
+     "date": "2011-01-06"
     },
     {
      "n": 194,
-     "title": null,
-     "date": null
+     "title": "The Worst Three-Legged Race",
+     "date": "2011-01-13"
     },
     {
      "n": 195,
-     "title": null,
-     "date": null
+     "title": "Team 10's Teamwork",
+     "date": "2011-01-20"
     },
     {
      "n": 196,
-     "title": null,
-     "date": null
+     "title": "Drive Towards Darkness",
+     "date": "2011-01-27"
     },
     {
      "n": 223,
-     "title": null,
-     "date": null
+     "title": "The Young Man and the Sea",
+     "date": "2011-08-04"
     },
     {
      "n": 224,
-     "title": null,
-     "date": null
+     "title": "The Ninja of Benisu",
+     "date": "2011-08-11"
     },
     {
      "n": 225,
-     "title": null,
-     "date": null
+     "title": "The Cursed Ghost Ship",
+     "date": "2011-08-18"
     },
     {
      "n": 226,
-     "title": null,
-     "date": null
+     "title": "Battleship Island",
+     "date": "2011-08-25"
     },
     {
      "n": 227,
-     "title": null,
-     "date": null
+     "title": "The Forgotten Island",
+     "date": "2011-09-01"
     },
     {
      "n": 228,
-     "title": null,
-     "date": null
+     "title": "Fight! Rock Lee!",
+     "date": "2011-09-08"
     },
     {
      "n": 229,
-     "title": null,
-     "date": null
+     "title": "Eat or Die! Mushrooms from Hell",
+     "date": "2011-09-22"
     },
     {
      "n": 230,
-     "title": null,
-     "date": null
+     "title": "Revenge of the Shadow Clones",
+     "date": "2011-09-29"
     },
     {
      "n": 231,
-     "title": null,
-     "date": null
+     "title": "The Closed Route",
+     "date": "2011-10-06"
     },
     {
      "n": 232,
-     "title": null,
-     "date": null
+     "title": "The Girls Get-Together",
+     "date": "2011-10-13"
     },
     {
      "n": 233,
-     "title": null,
-     "date": null
+     "title": "Naruto's Imposter",
+     "date": "2011-10-20"
     },
     {
      "n": 234,
-     "title": null,
-     "date": null
+     "title": "Naruto's Favorite Student",
+     "date": "2011-10-27"
     },
     {
      "n": 235,
-     "title": null,
-     "date": null
+     "title": "The Kunoichi of Nadeshiko Village",
+     "date": "2011-11-03"
     },
     {
      "n": 236,
-     "title": null,
-     "date": null
+     "title": "Friends You Can Count On",
+     "date": "2011-11-10"
     },
     {
      "n": 237,
-     "title": null,
-     "date": null
+     "title": "Ah, My Hero Lady Tsunade!",
+     "date": "2011-11-24"
     },
     {
      "n": 238,
-     "title": null,
-     "date": null
+     "title": "Sai's Day Off",
+     "date": "2011-12-01"
     },
     {
      "n": 239,
-     "title": null,
-     "date": null
+     "title": "The Legendary Ino-Shika-Cho Trio",
+     "date": "2011-12-08"
     },
     {
      "n": 240,
-     "title": null,
-     "date": null
+     "title": "Kiba's Determination",
+     "date": "2011-12-15"
     },
     {
      "n": 241,
-     "title": null,
-     "date": null
+     "title": "Kakashi, My Eternal Rival!",
+     "date": "2011-12-22"
     },
     {
      "n": 242,
-     "title": null,
-     "date": null
+     "title": "Naruto's Vow",
+     "date": "2011-12-28"
     },
     {
      "n": 257,
-     "title": null,
-     "date": null
+     "title": "Meeting",
+     "date": "2012-04-05"
     },
     {
      "n": 258,
-     "title": null,
-     "date": null
+     "title": "Rivals",
+     "date": "2012-04-12"
     },
     {
      "n": 259,
-     "title": null,
-     "date": null
+     "title": "Rift",
+     "date": "2012-04-19"
     },
     {
      "n": 260,
-     "title": null,
-     "date": null
+     "title": "Parting",
+     "date": "2012-04-26"
     },
     {
      "n": 271,
-     "title": null,
-     "date": null
+     "title": "Road to Sakura",
+     "date": "2012-07-26"
     },
     {
      "n": 279,
-     "title": null,
-     "date": null
+     "title": "White Zetsu's Trap",
+     "date": "2012-09-13"
     },
     {
      "n": 280,
-     "title": null,
-     "date": null
+     "title": "Aesthetics of an Artist",
+     "date": "2012-09-20"
     },
     {
      "n": 281,
-     "title": null,
-     "date": null
+     "title": "The Allied Mom Force!",
+     "date": "2012-09-27"
     },
     {
      "n": 284,
-     "title": null,
-     "date": null
+     "title": "Helmet Splitter: Jinin Akebino!",
+     "date": "2012-10-18"
     },
     {
      "n": 285,
-     "title": null,
-     "date": null
+     "title": "User of the Scorch Style: Pakura of the Sand!",
+     "date": "2012-10-25"
     },
     {
      "n": 286,
-     "title": null,
-     "date": null
+     "title": "Things You Can't Get Back",
+     "date": "2012-11-01"
     },
     {
      "n": 287,
-     "title": null,
-     "date": null
+     "title": "One Worth Betting On",
+     "date": "2012-11-01"
     },
     {
      "n": 288,
-     "title": null,
-     "date": null
+     "title": "Danger: Jinpachi and Kushimaru!",
+     "date": "2012-11-08"
     },
     {
      "n": 289,
-     "title": null,
-     "date": null
+     "title": "The Lightning Blade: Ameyuri Ringo!",
+     "date": "2012-11-15"
     },
     {
      "n": 290,
-     "title": null,
-     "date": null
+     "title": "Power: Episode 1",
+     "date": "2012-11-22"
     },
     {
      "n": 291,
-     "title": null,
-     "date": null
+     "title": "Power: Episode 2",
+     "date": "2012-11-29"
     },
     {
      "n": 292,
-     "title": null,
-     "date": null
+     "title": "Power: Episode 3",
+     "date": "2012-12-06"
     },
     {
      "n": 293,
-     "title": null,
-     "date": null
+     "title": "Power: Episode 4",
+     "date": "2012-12-13"
     },
     {
      "n": 294,
-     "title": null,
-     "date": null
+     "title": "Power: Episode 5",
+     "date": "2012-12-20"
     },
     {
      "n": 295,
-     "title": null,
-     "date": null
+     "title": "Power: Episode Final",
+     "date": "2013-01-10"
     },
     {
      "n": 303,
-     "title": null,
-     "date": null
+     "title": "Ghosts from the Past",
+     "date": "2013-03-07"
     },
     {
      "n": 304,
-     "title": null,
-     "date": null
+     "title": "The Underworld Transfer Jutsu",
+     "date": "2013-03-14"
     },
     {
      "n": 305,
-     "title": null,
-     "date": null
+     "title": "The Vengeful",
+     "date": "2013-03-21"
     },
     {
      "n": 306,
-     "title": null,
-     "date": null
+     "title": "The Heart's Eye",
+     "date": "2013-03-28"
     },
     {
      "n": 307,
-     "title": null,
-     "date": null
+     "title": "Fade Into the Moonlight",
+     "date": "2013-04-04"
     },
     {
      "n": 308,
-     "title": null,
-     "date": null
+     "title": "Crescent Moon Night",
+     "date": "2013-04-11"
     },
     {
      "n": 309,
-     "title": null,
-     "date": null
+     "title": "The A-Rank Mission: Food Fight!",
+     "date": "2013-04-18"
     },
     {
      "n": 310,
-     "title": null,
-     "date": null
+     "title": "The Fallen Castle",
+     "date": "2013-04-25"
     },
     {
      "n": 311,
-     "title": null,
-     "date": null
+     "title": "Prologue of Road to Ninja",
+     "date": "2013-05-02"
     },
     {
      "n": 312,
-     "title": null,
-     "date": null
+     "title": "The Old Master and the Dragon's Eye",
+     "date": "2013-05-09"
     },
     {
      "n": 313,
-     "title": null,
-     "date": null
+     "title": "Rain Followed by Snow, with Some Lightning",
+     "date": "2013-05-16"
     },
     {
      "n": 314,
-     "title": null,
-     "date": null
+     "title": "The Sad Sun Shower",
+     "date": "2013-05-23"
     },
     {
      "n": 315,
-     "title": null,
-     "date": null
+     "title": "Lingering Snow",
+     "date": "2013-05-30"
     },
     {
      "n": 316,
-     "title": null,
-     "date": null
+     "title": "The Reanimated Allied Forces",
+     "date": "2013-06-06"
     },
     {
      "n": 317,
-     "title": null,
-     "date": null
+     "title": "Shino vs. Torune",
+     "date": "2013-06-13"
     },
     {
      "n": 318,
-     "title": null,
-     "date": null
+     "title": "A Hole in the Heart: the Other Jinchuriki",
+     "date": "2013-06-20"
     },
     {
      "n": 319,
-     "title": null,
-     "date": null
+     "title": "The Soul Living Inside the Puppet",
+     "date": "2013-06-27"
     },
     {
      "n": 320,
-     "title": null,
-     "date": null
+     "title": "Run, Omoi!",
+     "date": "2013-07-04"
     },
     {
      "n": 347,
-     "title": null,
-     "date": null
+     "title": "Creeping Shadow",
+     "date": "2014-01-23"
     },
     {
      "n": 348,
-     "title": null,
-     "date": null
+     "title": "The New Akatsuki",
+     "date": "2014-01-30"
     },
     {
      "n": 349,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – A Mask That Hides the Heart",
+     "date": "2014-02-06"
     },
     {
      "n": 350,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Minato's Death",
+     "date": "2014-02-13"
     },
     {
      "n": 351,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Hashirama's Cells",
+     "date": "2014-02-20"
     },
     {
      "n": 352,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – The Rogue Ninja Orochimaru",
+     "date": "2014-02-27"
     },
     {
      "n": 353,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Orochimaru's Test Subjects",
+     "date": "2014-03-06"
     },
     {
      "n": 354,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Their Own Paths",
+     "date": "2014-03-06"
     },
     {
      "n": 355,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – The Targeted Sharingan",
+     "date": "2014-03-13"
     },
     {
      "n": 356,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – A Shinobi of the Leaf",
+     "date": "2014-03-20"
     },
     {
      "n": 357,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – An Uchiha ANBU",
+     "date": "2014-04-03"
     },
     {
      "n": 358,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Coup D'État",
+     "date": "2014-04-10"
     },
     {
      "n": 359,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – The Night of the Tragedy",
+     "date": "2014-04-17"
     },
     {
      "n": 360,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Jonin Leader",
+     "date": "2014-04-24"
     },
     {
      "n": 361,
-     "title": null,
-     "date": null
+     "title": "Kakashi: Shadow of the ANBU Black Ops – Squad Seven",
+     "date": "2014-05-08"
     },
     {
      "n": 376,
-     "title": null,
-     "date": null
+     "title": "The Directive to Take the Nine Tails",
+     "date": "2014-09-11"
     },
     {
      "n": 377,
-     "title": null,
-     "date": null
+     "title": "Naruto vs. Mecha Naruto",
+     "date": "2014-09-11"
     },
     {
      "n": 388,
-     "title": null,
-     "date": null
+     "title": "My First Friend",
+     "date": "2014-11-27"
     },
     {
      "n": 389,
-     "title": null,
-     "date": null
+     "title": "The Adored Elder Sister",
+     "date": "2014-12-04"
     },
     {
      "n": 390,
-     "title": null,
-     "date": null
+     "title": "Hanabi's Decision",
+     "date": "2014-12-04"
     },
     {
      "n": 394,
-     "title": null,
-     "date": null
+     "title": "The New Chunin Exams",
+     "date": "2015-01-08"
     },
     {
      "n": 395,
-     "title": null,
-     "date": null
+     "title": "The Chunin Exams Begin!",
+     "date": "2015-01-15"
     },
     {
      "n": 396,
-     "title": null,
-     "date": null
+     "title": "The Three Questions",
+     "date": "2015-01-22"
     },
     {
      "n": 397,
-     "title": null,
-     "date": null
+     "title": "One Worthy As A Leader",
+     "date": "2015-01-29"
     },
     {
      "n": 398,
-     "title": null,
-     "date": null
+     "title": "The Night Before the Second Exam",
+     "date": "2015-02-05"
     },
     {
      "n": 399,
-     "title": null,
-     "date": null
+     "title": "Demon Desert Survival",
+     "date": "2015-02-12"
     },
     {
      "n": 400,
-     "title": null,
-     "date": null
+     "title": "As a Taijutsu User",
+     "date": "2015-02-19"
     },
     {
      "n": 401,
-     "title": null,
-     "date": null
+     "title": "The Ultimate",
+     "date": "2015-02-26"
     },
     {
      "n": 402,
-     "title": null,
-     "date": null
+     "title": "Escape vs. Pursuit",
+     "date": "2015-03-05"
     },
     {
      "n": 403,
-     "title": null,
-     "date": null
+     "title": "Unwavering Gutsiness",
+     "date": "2015-03-12"
     },
     {
      "n": 404,
-     "title": null,
-     "date": null
+     "title": "Tenten's Troubles",
+     "date": "2015-03-19"
     },
     {
      "n": 405,
-     "title": null,
-     "date": null
+     "title": "The Imprisoned Pair",
+     "date": "2015-03-26"
     },
     {
      "n": 406,
-     "title": null,
-     "date": null
+     "title": "The Place Where I Belong",
+     "date": "2015-04-02"
     },
     {
      "n": 407,
-     "title": null,
-     "date": null
+     "title": "The Yamanaka Clan: Secret Ninjutsu",
+     "date": "2015-04-09"
     },
     {
      "n": 408,
-     "title": null,
-     "date": null
+     "title": "The Cursed Puppet",
+     "date": "2015-04-16"
     },
     {
      "n": 409,
-     "title": null,
-     "date": null
+     "title": "Their Backs",
+     "date": "2015-04-23"
     },
     {
      "n": 410,
-     "title": null,
-     "date": null
+     "title": "The Hidden Plot Set Into Motion",
+     "date": "2015-04-30"
     },
     {
      "n": 411,
-     "title": null,
-     "date": null
+     "title": "The Targeted Tailed Beast",
+     "date": "2015-05-07"
     },
     {
      "n": 412,
-     "title": null,
-     "date": null
+     "title": "Neji’s Judgement",
+     "date": "2015-05-14"
     },
     {
      "n": 413,
-     "title": null,
-     "date": null
+     "title": "Hopes Entrusted to the Future",
+     "date": "2015-05-21"
     },
     {
      "n": 416,
-     "title": null,
-     "date": null
+     "title": "The Formation of Team Minato",
+     "date": "2015-06-11"
+    },
+    {
+     "n": 417,
+     "title": "You’ll Be My Backup",
+     "date": "2015-06-25"
     },
     {
      "n": 422,
-     "title": null,
-     "date": null
+     "title": "The One Who Will Inherit",
+     "date": "2015-08-06"
     },
     {
      "n": 423,
-     "title": null,
-     "date": null
+     "title": "Naruto's Rival",
+     "date": "2015-08-06"
     },
     {
      "n": 427,
-     "title": null,
-     "date": null
+     "title": "To the Dream World",
+     "date": "2015-09-03"
     },
     {
      "n": 428,
-     "title": null,
-     "date": null
+     "title": "Where Tenten Belongs",
+     "date": "2015-09-03"
     },
     {
      "n": 429,
-     "title": null,
-     "date": null
+     "title": "Killer Bee Rappuden, Part 1",
+     "date": "2015-09-10"
     },
     {
      "n": 430,
-     "title": null,
-     "date": null
+     "title": "Killer Bee Rappuden, Part 2",
+     "date": "2015-09-17"
     },
     {
      "n": 431,
-     "title": null,
-     "date": null
+     "title": "To See That Smile, Just One More Time",
+     "date": "2015-09-24"
     },
     {
      "n": 432,
-     "title": null,
-     "date": null
+     "title": "The Loser Ninja",
+     "date": "2015-10-01"
     },
     {
      "n": 433,
-     "title": null,
-     "date": null
+     "title": "The Search Mission",
+     "date": "2015-10-08"
     },
     {
      "n": 434,
-     "title": null,
-     "date": null
+     "title": "Team Jiraiya",
+     "date": "2015-10-15"
     },
     {
      "n": 435,
-     "title": null,
-     "date": null
+     "title": "Order of Priority",
+     "date": "2015-10-22"
     },
     {
      "n": 436,
-     "title": null,
-     "date": null
+     "title": "The Masked Man",
+     "date": "2015-11-05"
     },
     {
      "n": 437,
-     "title": null,
-     "date": null
+     "title": "The Sealed Power",
+     "date": "2015-11-12"
     },
     {
      "n": 438,
-     "title": null,
-     "date": null
+     "title": "The Rules or a Comrade",
+     "date": "2015-11-19"
     },
     {
      "n": 439,
-     "title": null,
-     "date": null
+     "title": "The Child of Prophecy",
+     "date": "2015-11-26"
     },
     {
      "n": 440,
-     "title": null,
-     "date": null
+     "title": "The Caged Bird",
+     "date": "2015-12-03"
     },
     {
      "n": 441,
-     "title": null,
-     "date": null
+     "title": "Returning Home",
+     "date": "2015-12-10"
     },
     {
      "n": 442,
-     "title": null,
-     "date": null
+     "title": "The Mutual Path",
+     "date": "2015-12-17"
     },
     {
      "n": 443,
-     "title": null,
-     "date": null
+     "title": "The Difference in Power",
+     "date": "2015-12-24"
     },
     {
      "n": 444,
-     "title": null,
-     "date": null
+     "title": "Leaving the Village",
+     "date": "2016-01-14"
     },
     {
      "n": 445,
-     "title": null,
-     "date": null
+     "title": "Pursuers",
+     "date": "2016-01-21"
     },
     {
      "n": 446,
-     "title": null,
-     "date": null
+     "title": "Collision",
+     "date": "2016-01-28"
     },
     {
      "n": 447,
-     "title": null,
-     "date": null
+     "title": "Another Moon",
+     "date": "2016-02-04"
     },
     {
      "n": 448,
-     "title": null,
-     "date": null
+     "title": "Comrade",
+     "date": "2016-02-11"
     },
     {
      "n": 449,
-     "title": null,
-     "date": null
+     "title": "The Shinobi Unite",
+     "date": "2016-02-18"
     },
     {
      "n": 450,
-     "title": null,
-     "date": null
+     "title": "Rival",
+     "date": "2016-02-25"
     },
     {
      "n": 464,
-     "title": null,
-     "date": null
+     "title": "Ninshū: The Ninja Creed",
+     "date": "2016-06-09"
     },
     {
      "n": 465,
-     "title": null,
-     "date": null
+     "title": "Ashura and Indra",
+     "date": "2016-06-16"
     },
     {
      "n": 466,
-     "title": null,
-     "date": null
+     "title": "The Tumultuous Journey",
+     "date": "2016-06-30"
     },
     {
      "n": 467,
-     "title": null,
-     "date": null
+     "title": "Ashura's Decision",
+     "date": "2016-07-07"
     },
     {
      "n": 468,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 469,
-     "title": null,
-     "date": null
+     "title": "The Successor",
+     "date": "2016-07-21"
     },
     {
      "n": 480,
-     "title": null,
-     "date": null
+     "title": "Naruto and Hinata",
+     "date": "2016-10-20"
     },
     {
      "n": 481,
-     "title": null,
-     "date": null
+     "title": "Sasuke and Sakura",
+     "date": "2016-10-27"
     },
     {
      "n": 482,
-     "title": null,
-     "date": null
+     "title": "Gaara and Shikamaru",
+     "date": "2016-11-03"
     },
     {
      "n": 483,
-     "title": null,
-     "date": null
+     "title": "Jiraiya and Kakashi",
+     "date": "2016-11-10"
     }
    ]
   },
@@ -1503,628 +1487,143 @@
    "episodes": [
     {
      "n": 16,
-     "title": null,
-     "date": null
+     "title": "Crisis: The Threat of Failing!",
+     "date": "2017-07-19"
     },
     {
      "n": 17,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 18,
-     "title": null,
-     "date": null
+     "title": "Run, Sarada!",
+     "date": "2017-07-26"
     },
     {
      "n": 40,
-     "title": null,
-     "date": null
+     "title": "Team 7: The First Mission!",
+     "date": "2018-01-10"
     },
     {
      "n": 41,
-     "title": null,
-     "date": null
+     "title": "Strength in Unity",
+     "date": "2018-01-17"
     },
     {
      "n": 48,
-     "title": null,
-     "date": null
+     "title": "The Genin Documentary!",
+     "date": "2018-03-07"
     },
     {
      "n": 49,
-     "title": null,
-     "date": null
+     "title": "Wasabi and Namida",
+     "date": "2018-03-14"
     },
     {
      "n": 50,
-     "title": null,
-     "date": null
+     "title": "The Chunin Exams: The Recommendation Meeting",
+     "date": "2018-03-21"
     },
     {
      "n": 67,
-     "title": null,
-     "date": null
+     "title": "Super Cho-Cho Butterfly Mode!",
+     "date": "2018-08-02"
     },
     {
      "n": 68,
-     "title": null,
-     "date": null
+     "title": "Super Cho-Cho Kiss Mode!",
+     "date": "2018-08-09"
     },
     {
      "n": 69,
-     "title": null,
-     "date": null
+     "title": "Super Cho-Cho Love Upheaval!",
+     "date": "2018-08-16"
     },
     {
      "n": 96,
-     "title": null,
-     "date": null
+     "title": "Blood, Sweat and Namida",
+     "date": "2019-03-03"
     },
     {
      "n": 97,
-     "title": null,
-     "date": null
+     "title": "Shikadai's Decision",
+     "date": "2019-03-10"
     },
     {
-     "n": 98,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 103,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 104,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 106,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 107,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 108,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 109,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 110,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 111,
-     "title": null,
-     "date": null
+     "n": 112,
+     "title": "The Chunin Selection Conference",
+     "date": "2019-06-23"
     },
     {
      "n": 113,
-     "title": null,
-     "date": null
+     "title": "The Qualities of a Captain",
+     "date": "2019-06-30"
     },
     {
      "n": 114,
-     "title": null,
-     "date": null
+     "title": "X Cards Proxy War!",
+     "date": "2019-07-07"
     },
     {
-     "n": 121,
-     "title": null,
-     "date": null
+     "n": 115,
+     "title": "Team 25",
+     "date": "2019-07-14"
     },
     {
-     "n": 122,
-     "title": null,
-     "date": null
+     "n": 116,
+     "title": "Konohamaru and Remon",
+     "date": "2019-07-21"
     },
     {
-     "n": 125,
-     "title": null,
-     "date": null
+     "n": 117,
+     "title": "Remon’s Secret",
+     "date": "2019-07-28"
     },
     {
-     "n": 127,
-     "title": null,
-     "date": null
+     "n": 118,
+     "title": "Something That Steals Memories",
+     "date": "2019-08-04"
     },
     {
-     "n": 128,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 130,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 131,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 132,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 133,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 134,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 135,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 136,
-     "title": null,
-     "date": null
+     "n": 119,
+     "title": "Konohamaru’s Ninja Way",
+     "date": "2019-08-11"
     },
     {
      "n": 138,
-     "title": null,
-     "date": null
+     "title": "Hiashi's Birthday",
+     "date": "2019-12-29"
+    },
+    {
+     "n": 139,
+     "title": "The Terror! Enko Onikuma",
+     "date": "2020-01-12"
     },
     {
      "n": 140,
-     "title": null,
-     "date": null
+     "title": "The Mind Transfer Jutsu That Lost to Potato Chips",
+     "date": "2020-01-19"
     },
     {
      "n": 152,
-     "title": null,
-     "date": null
+     "title": "Developing One's Medical Ninjutsu",
+     "date": "2020-04-12"
     },
     {
      "n": 153,
-     "title": null,
-     "date": null
+     "title": "Harmony in Gold",
+     "date": "2020-04-19"
     },
     {
      "n": 154,
-     "title": null,
-     "date": null
+     "title": "Himawari's Ninja Trial Session",
+     "date": "2020-04-26"
     },
     {
-     "n": 155,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 159,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 160,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 161,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 162,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 164,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 171,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 172,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 185,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 187,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 188,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 191,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 192,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 193,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 194,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 195,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 196,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 197,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 198,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 199,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 200,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 201,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 203,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 220,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 222,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 223,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 224,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 225,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 226,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 227,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 228,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 229,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 230,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 231,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 232,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 233,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 234,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 235,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 237,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 238,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 239,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 240,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 243,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 244,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 245,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 246,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 247,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 248,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 249,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 250,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 251,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 252,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 253,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 254,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 255,
-     "title": null,
-     "date": null
+     "n": 156,
+     "title": "I Can't Stay in My Slim Form",
+     "date": "2020-07-12"
     },
     {
      "n": 256,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 257,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 258,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 259,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 260,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 261,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 262,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 263,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 264,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 265,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 266,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 267,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 268,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 269,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 270,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 271,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 272,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 273,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 274,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 275,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 276,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 277,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 278,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 279,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 280,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 283,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 285,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 286,
-     "title": null,
-     "date": null
-    },
-    {
-     "n": 293,
-     "title": null,
-     "date": null
+     "title": "The Ultimate Recipe",
+     "date": "2022-07-03"
     }
    ]
   }
