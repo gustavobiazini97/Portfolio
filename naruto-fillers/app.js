@@ -5,6 +5,7 @@ const $ = (sel) => document.querySelector(sel);
 const cache = {};
 let current = null;
 let localData = null;
+let view = 'cards';
 
 async function loadShow(show) {
   if (cache[show]) return cache[show];
@@ -59,7 +60,7 @@ function render() {
         <article class="ep">
           <span class="n">${ep.n}</span>
           <span class="info">
-            <span class="t">${esc(ep.title || 'Episódio filler')}</span>
+            <span class="t">${esc(ep.title || '—')}</span>
             ${ep.date ? `<span class="d">${esc(ep.date)}</span>` : ''}
           </span>
         </article>`).join('')}
@@ -83,7 +84,17 @@ async function select(show) {
     ? '<span class="badge live" title="Lista lida agora de animefillerlist.com">ao vivo</span>'
     : '<span class="badge" title="Sem ligação ao animefillerlist.com: a mostrar a lista guardada na página">lista guardada</span>';
   renderStats(current);
+  applyView();
   render();
+}
+
+// Sem títulos, a vista "Detalhe" não acrescenta nada: mostra só os números.
+function applyView() {
+  const hasTitles = !!current?.episodes.some((ep) => ep.title);
+  $('.toggle').hidden = !hasTitles;
+  $('#search').placeholder = hasTitles ? 'Procurar por número ou título…' : 'Procurar por número…';
+  document.querySelectorAll('.toggle button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.view === view));
+  $('#list').classList.toggle('compact', !hasTitles || view === 'compact');
 }
 
 // Âncoras de grupo (#g-123) não mudam de saga.
@@ -94,12 +105,12 @@ function route() {
 
 $('#search').addEventListener('input', render);
 document.querySelectorAll('.toggle button').forEach((btn) => btn.addEventListener('click', () => {
-  document.querySelectorAll('.toggle button').forEach((b) => b.setAttribute('aria-pressed', b === btn));
-  $('#list').classList.toggle('compact', btn.dataset.view === 'compact');
-  try { localStorage.setItem('view', btn.dataset.view); } catch {}
+  view = btn.dataset.view;
+  try { localStorage.setItem('view', view); } catch {}
+  applyView();
 }));
 try {
-  if (localStorage.getItem('view') === 'compact') document.querySelector('[data-view="compact"]').click();
+  if (localStorage.getItem('view') === 'compact') view = 'compact';
 } catch {}
 
 window.addEventListener('hashchange', route);

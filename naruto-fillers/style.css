@@ -123,6 +123,7 @@ a { color: var(--orange-soft); }
 }
 .toolbar input:focus { border-color: var(--orange); }
 .toolbar input::placeholder { color: var(--ink-soft); }
+.toggle[hidden] { display: none; }
 .toggle { display: flex; background: var(--glass); border: 1px solid var(--glass-line); border-radius: 999px; padding: 4px; }
 .toggle button {
   font: inherit; color: var(--ink-soft); background: none; border: 0;
