@@ -83,50 +83,34 @@ body {
 .chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); font-style: normal; }
 .chip.learning i { background: var(--accent); }
 
-/* Projects — expandable accordion rows */
-.proj { border-top: 1px solid var(--rule); }
-.proj:last-child { border-bottom: 1px solid var(--rule); }
-.proj-btn {
-  width: 100%; background: none; border: none; cursor: pointer; color: inherit;
-  font-family: inherit; text-align: left;
-  display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 22px;
-  padding: 26px 6px; transition: padding 0.35s cubic-bezier(.2,.7,.3,1), background 0.35s;
+/* Projects — two groups of cards */
+.proj-group + .proj-group { margin-top: 56px; }
+.group-title { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; color: var(--ink-faint); margin-bottom: 18px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.card {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 24px; border: 1px solid var(--rule); border-radius: 14px; background: var(--card);
+  transition: border-color 0.3s, transform 0.3s cubic-bezier(.2,.7,.3,1);
 }
-.proj-btn:hover { padding-left: 18px; background: linear-gradient(90deg, color-mix(in oklch, var(--accent) 7%, transparent), transparent 55%); }
-.proj-num { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 19px; color: var(--ink-faint); }
-.proj-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(26px, 3.4vw, 36px); letter-spacing: -0.015em; line-height: 1.05; transition: color 0.3s; }
-.proj-btn:hover .proj-title, .proj[data-open] .proj-title { color: var(--accent); }
-.proj-right { display: flex; align-items: center; gap: 20px; white-space: nowrap; }
-.proj-tags { font-size: 13px; color: var(--ink-faint); letter-spacing: 0.02em; }
-@media (max-width: 640px){ .proj-tags { display: none; } }
-.proj-year { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 19px; color: var(--ink-faint); }
-.plus { width: 26px; height: 26px; position: relative; flex: 0 0 auto; }
-.plus::before, .plus::after { content: ""; position: absolute; background: var(--ink-faint); border-radius: 2px; transition: transform 0.4s cubic-bezier(.2,.7,.3,1), background 0.3s; }
-.plus::before { left: 0; right: 0; top: 50%; height: 1.6px; transform: translateY(-50%); }
-.plus::after { top: 0; bottom: 0; left: 50%; width: 1.6px; transform: translateX(-50%); }
-.proj[data-open] .plus::after { transform: translateX(-50%) rotate(90deg); opacity: 0; }
-.proj[data-open] .plus::before, .proj-btn:hover .plus::before, .proj-btn:hover .plus::after { background: var(--accent); }
-
-.proj-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.45s cubic-bezier(.2,.7,.3,1); }
-.proj[data-open] .proj-panel { grid-template-rows: 1fr; }
-.proj-panel-in { overflow: hidden; }
-.proj-body { padding: 4px 6px 36px 110px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
-@media (max-width: 720px){ .proj-body { grid-template-columns: 1fr; gap: 24px; padding-left: 6px; } }
-.proj-body p { color: var(--ink); font-size: 16px; text-wrap: pretty; }
-.learned { margin-top: 18px; }
-.learned h5 { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px; }
-.learned ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
-.learned li { font-size: 15px; color: var(--ink-soft); padding-left: 20px; position: relative; }
+.card:hover { border-color: color-mix(in oklch, var(--accent) 45%, var(--rule)); transform: translateY(-3px); }
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.card-year { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 18px; color: var(--ink-faint); }
+.card-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 30px; line-height: 1.05; letter-spacing: -0.015em; }
+.card-desc { font-size: 15px; color: var(--ink-soft); text-wrap: pretty; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.card-tags span { font-size: 12.5px; padding: 4px 11px; border: 1px solid var(--rule); border-radius: 100px; color: var(--ink-soft); }
+.learned summary { cursor: pointer; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); list-style: none; }
+.learned summary::-webkit-details-marker { display: none; }
+.learned summary::before { content: "+ "; color: var(--accent); }
+.learned[open] summary::before { content: "− "; }
+.learned ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.learned li { font-size: 14.5px; color: var(--ink-soft); padding-left: 20px; position: relative; }
 .learned li::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
-.proj-meta { display: flex; flex-direction: column; gap: 16px; }
-.meta-row { display: flex; flex-direction: column; gap: 5px; }
-.meta-row .k { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
-.meta-row .v { font-size: 15px; }
-.status { align-self: flex-start; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 11px; border-radius: 100px; font-weight: 600; white-space: nowrap; }
+.status { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 11px; border-radius: 100px; font-weight: 600; white-space: nowrap; }
 .status.done { color: var(--accent); border: 1px solid color-mix(in oklch, var(--accent) 40%, var(--rule)); }
 .status.wip { color: var(--ink-soft); border: 1px solid var(--rule); }
-.proj-link { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 2px; align-self: flex-start; transition: gap 0.25s; }
-.proj-link:hover { gap: 12px; }
+.card-link { margin-top: auto; align-self: flex-start; display: inline-flex; gap: 8px; font-size: 14.5px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 2px; transition: gap 0.25s; }
+.card-link:hover { gap: 12px; }
 
 /* Timeline */
 .tl { display: flex; flex-direction: column; }
