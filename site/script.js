@@ -11,6 +11,23 @@ const bar = document.getElementById('topbar');
 const onScroll = () => bar.classList.toggle('scrolled', window.scrollY > 12);
 window.addEventListener('scroll', onScroll); onScroll();
 
+// Project cards: details open in a dialog
+const dlg = document.getElementById('proj-dialog');
+document.querySelectorAll('.card-face').forEach(face => {
+  face.addEventListener('click', () => {
+    const card = face.closest('.card');
+    dlg.style.setProperty('--h', card.style.getPropertyValue('--h'));
+    dlg.querySelector('.dlg-cover').innerHTML = card.querySelector('.cover').innerHTML;
+    dlg.querySelector('.dlg-title').textContent = card.querySelector('.card-title').textContent;
+    dlg.querySelector('.dlg-tags').textContent = card.querySelector('.card-sub span').textContent;
+    dlg.querySelector('.dlg-info').replaceChildren(card.querySelector('.card-info').content.cloneNode(true));
+    dlg.showModal();
+    dlg.scrollTop = 0;
+  });
+});
+dlg.querySelector('.dlg-close').addEventListener('click', () => dlg.close());
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
 // Reveal on scroll, with safe fallback
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
