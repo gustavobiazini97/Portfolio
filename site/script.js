@@ -11,16 +11,6 @@ const bar = document.getElementById('topbar');
 const onScroll = () => bar.classList.toggle('scrolled', window.scrollY > 12);
 window.addEventListener('scroll', onScroll); onScroll();
 
-// Project accordion (one open at a time)
-document.querySelectorAll('.proj-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const proj = btn.closest('.proj');
-    const open = proj.hasAttribute('data-open');
-    document.querySelectorAll('.proj[data-open]').forEach(p => { p.removeAttribute('data-open'); p.querySelector('.proj-btn').setAttribute('aria-expanded','false'); });
-    if (!open) { proj.setAttribute('data-open',''); btn.setAttribute('aria-expanded','true'); }
-  });
-});
-
 // Reveal on scroll, with safe fallback
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
