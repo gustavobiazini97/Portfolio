@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gustavo — Portfólio</title>
+<script>document.documentElement.classList.add('reveal-ready');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <div class="brand">Gustavo<span class="deg">°</span></div>
+    <nav class="topnav">
+      <a class="lnk" href="#sobre">Sobre</a>
+      <a class="lnk" href="#projetos">Projetos</a>
+      <a class="lnk" href="#trajetoria">Trajetória</a>
+      <button class="toggle" id="toggle" aria-label="Alternar tema"><span id="toggle-ico">☾</span></button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow reveal">Programador em formação</div>
+      <h1 class="giant reveal">Gus<em>ta</em>vo</h1>
+      <div class="hero-foot">
+        <p class="lede reveal">Estou <b>a aprender a programar</b> e este é o espaço onde reúno cada projeto que construo pelo caminho — da lógica em C aos ecrãs na web.</p>
+        <span class="avail reveal"><span class="pulse"></span>Aberto a aprender e colaborar</span>
+      </div>
+    </section>
+
+    <section class="sec" id="sobre">
+      <div class="sec-head reveal"><span class="sec-num">i</span><span class="sec-title">Sobre mim</span></div>
+      <div class="about-grid">
+        <p class="big reveal">Gosto de entender como as coisas funcionam <em>por dentro</em> — e a melhor forma que encontrei de aprender é construir.</p>
+        <div class="about-side reveal">
+          <p>Comecei pelo básico da web e hoje transito entre front-end, back-end e a lógica de baixo nível. Cada projeto aqui é um degrau na minha aprendizagem, e a curva está apenas a começar.</p>
+          <div class="stack">
+            <span class="chip"><i></i>HTML &amp; CSS</span>
+            <span class="chip learning"><i></i>PHP</span>
+            <span class="chip learning"><i></i>C#</span>
+            <span class="chip learning"><i></i>C</span>
+            <span class="chip"><i></i>Python · bases</span>
+            <span class="chip learning"><i></i>Android · em breve</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="projetos">
+      <div class="sec-head reveal"><span class="sec-num">ii</span><span class="sec-title">Projetos</span></div>
+      <div class="proj-list reveal">
+
+        <div class="proj">
+          <button class="proj-btn" aria-expanded="false">
+            <span class="proj-num">01</span>
+            <span class="proj-title">Portfólio pessoal</span>
+            <span class="proj-right"><span class="proj-tags">HTML · CSS</span><span class="proj-year">’26</span><span class="plus"></span></span>
+          </button>
+          <div class="proj-panel"><div class="proj-panel-in"><div class="proj-body">
+            <div>
+              <p>O meu primeiro projeto pensado de ponta a ponta — do layout à tipografia. Quis algo que se parecesse comigo: calmo, mas com personalidade.</p>
+              <div class="learned"><h5>O que aprendi</h5><ul>
+                <li>Estruturar uma página com HTML semântico</li>
+                <li>Layout responsivo com CSS Grid e Flexbox</li>
+                <li>Tema claro/escuro e microinterações</li>
+              </ul></div>
+            </div>
+            <div class="proj-meta">
+              <span class="status done">Concluído</span>
+              <div class="meta-row"><span class="k">Tipo</span><span class="v">Site pessoal</span></div>
+              <div class="meta-row"><span class="k">Ano</span><span class="v">2026</span></div>
+              <a class="proj-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver projeto →</a>
+            </div>
+          </div></div></div>
+        </div>
+
+        <div class="proj">
+          <button class="proj-btn" aria-expanded="false">
+            <span class="proj-num">02</span>
+            <span class="proj-title">Sistema de login</span>
+            <span class="proj-right"><span class="proj-tags">PHP · MySQL</span><span class="proj-year">’26</span><span class="plus"></span></span>
+          </button>
+          <div class="proj-panel"><div class="proj-panel-in"><div class="proj-body">
+            <div>
+              <p>Registo e autenticação de utilizadores com PHP e base de dados — o meu primeiro contacto a sério com back-end e com a ideia de guardar e proteger informação.</p>
+              <div class="learned"><h5>O que aprendi</h5><ul>
+                <li>Ligar o PHP a uma base de dados MySQL</li>
+                <li>Operações de registo, leitura e validação</li>
+                <li>Noções de segurança e palavras-passe</li>
+              </ul></div>
+            </div>
+            <div class="proj-meta">
+              <span class="status wip">Em progresso</span>
+              <div class="meta-row"><span class="k">Tipo</span><span class="v">Aplicação web</span></div>
+              <div class="meta-row"><span class="k">Ano</span><span class="v">2026</span></div>
+              <a class="proj-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver projeto →</a>
+            </div>
+          </div></div></div>
+        </div>
+
+        <div class="proj">
+          <button class="proj-btn" aria-expanded="false">
+            <span class="proj-num">03</span>
+            <span class="proj-title">Gestor de tarefas</span>
+            <span class="proj-right"><span class="proj-tags">C# · .NET</span><span class="proj-year">’26</span><span class="plus"></span></span>
+          </button>
+          <div class="proj-panel"><div class="proj-panel-in"><div class="proj-body">
+            <div>
+              <p>Aplicação desktop em C# para organizar afazeres. Foi onde comecei a pensar em orientação a objetos e a separar dados, lógica e interface.</p>
+              <div class="learned"><h5>O que aprendi</h5><ul>
+                <li>Classes, objetos e métodos em C#</li>
+                <li>Construir uma interface desktop com .NET</li>
+                <li>Organizar o código em partes reutilizáveis</li>
+              </ul></div>
+            </div>
+            <div class="proj-meta">
+              <span class="status wip">Em progresso</span>
+              <div class="meta-row"><span class="k">Tipo</span><span class="v">App desktop</span></div>
+              <div class="meta-row"><span class="k">Ano</span><span class="v">2026</span></div>
+              <a class="proj-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver projeto →</a>
+            </div>
+          </div></div></div>
+        </div>
+
+        <div class="proj">
+          <button class="proj-btn" aria-expanded="false">
+            <span class="proj-num">04</span>
+            <span class="proj-title">Calculadora em C</span>
+            <span class="proj-right"><span class="proj-tags">C · Console</span><span class="proj-year">’25</span><span class="plus"></span></span>
+          </button>
+          <div class="proj-panel"><div class="proj-panel-in"><div class="proj-body">
+            <div>
+              <p>Programa de console focado em lógica pura: entrada, operações e a base de como o computador lida com memória. Pequeno, mas ensinou-me muito.</p>
+              <div class="learned"><h5>O que aprendi</h5><ul>
+                <li>Tipos, variáveis e fluxo de controlo</li>
+                <li>Funções e ponteiros</li>
+                <li>Pensar passo a passo como a máquina</li>
+              </ul></div>
+            </div>
+            <div class="proj-meta">
+              <span class="status done">Concluído</span>
+              <div class="meta-row"><span class="k">Tipo</span><span class="v">Programa de console</span></div>
+              <div class="meta-row"><span class="k">Ano</span><span class="v">2025</span></div>
+              <a class="proj-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver projeto →</a>
+            </div>
+          </div></div></div>
+        </div>
+
+        <div class="proj">
+          <button class="proj-btn" aria-expanded="false">
+            <span class="proj-num">05</span>
+            <span class="proj-title">Script de automação</span>
+            <span class="proj-right"><span class="proj-tags">Python</span><span class="proj-year">’25</span><span class="plus"></span></span>
+          </button>
+          <div class="proj-panel"><div class="proj-panel-in"><div class="proj-body">
+            <div>
+              <p>Um pequeno utilitário em Python para automatizar tarefas repetitivas do dia a dia. O primeiro gostinho de pôr o computador a trabalhar por mim.</p>
+              <div class="learned"><h5>O que aprendi</h5><ul>
+                <li>Sintaxe e estruturas básicas do Python</li>
+                <li>Ler e escrever ficheiros</li>
+                <li>Automatizar passos manuais</li>
+              </ul></div>
+            </div>
+            <div class="proj-meta">
+              <span class="status done">Concluído</span>
+              <div class="meta-row"><span class="k">Tipo</span><span class="v">Script / automação</span></div>
+              <div class="meta-row"><span class="k">Ano</span><span class="v">2025</span></div>
+              <a class="proj-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver projeto →</a>
+            </div>
+          </div></div></div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="sec" id="trajetoria">
+      <div class="sec-head reveal"><span class="sec-num">iii</span><span class="sec-title">Trajetória</span></div>
+      <div class="tl">
+        <div class="tl-row reveal"><span class="tl-year">2026</span><div class="tl-body"><h4>A aprofundar o back-end</h4><p>A estudar PHP, bases de dados e os primeiros sistemas web completos.</p></div></div>
+        <div class="tl-row reveal"><span class="tl-year">2026</span><div class="tl-body"><h4>Primeiros passos em C#</h4><p>A explorar orientação a objetos e aplicações desktop com .NET.</p></div></div>
+        <div class="tl-row reveal"><span class="tl-year">2025</span><div class="tl-body"><h4>Fundamentos com C</h4><p>Lógica de programação, ponteiros e a base de como o computador funciona.</p></div></div>
+        <div class="tl-row reveal"><span class="tl-year">2025</span><div class="tl-body"><h4>O início da jornada</h4><p>Primeiro contacto com HTML, CSS e os princípios da programação.</p></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p class="foot-h reveal">Vamos<br>conversar? <a href="mailto:gustavobiazini97@gmail.com">↗</a></p>
+      <div class="foot-links reveal">
+        <a href="mailto:gustavobiazini97@gmail.com">gustavobiazini97@gmail.com</a>
+        <a href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/gustavo-biazini-a44720261" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+      <p class="copy reveal">© 2026 Gustavo · Feito com curiosidade.</p>
+    </div>
+  </footer>
+
+<script src="script.js"></script>
+</body>
+</html>
