@@ -2,9 +2,15 @@
 
 Portfólio pessoal de Gustavo Biazini — https://gustavobiazini97.github.io/Portfolio/
 
-## Projetos
+## Estrutura
 
-Pequenos projetos, cada um na sua pasta dentro de [`projetos/`](projetos/).
+```
+site/       a página do portfólio (HTML, CSS e JS)
+projetos/   microprojetos, cada um na sua pasta
+index.html  só redireciona para site/ (o GitHub Pages abre sempre o index.html da raiz)
+```
+
+## Projetos
 
 | Projeto | Descrição | Ver online |
 |---|---|---|
