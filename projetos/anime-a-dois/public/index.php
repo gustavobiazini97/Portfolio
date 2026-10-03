@@ -22,6 +22,7 @@ $rotas = [
     'auth'  => ['login', 'entrar', 'registo', 'registar', 'sair'],
     'home'  => ['index'],
     'serie' => ['ver', 'marcar'],
+    'perfil' => ['index', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword'],
 ];
 
 // Por defeito: dashboard (que manda para o login se não houver sessão)

@@ -43,3 +43,13 @@ CREATE TABLE IF NOT EXISTS vistos (
   CONSTRAINT fk_visto_user     FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
   CONSTRAINT fk_visto_episodio FOREIGN KEY (episodio_id) REFERENCES episodios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Fotos de perfil: uma por utilizador, guardada na base de dados
+-- (uma pasta de uploads seria apagada a cada deploy, porque o rsync espelha o repositório)
+CREATE TABLE IF NOT EXISTS fotos (
+  user_id       INT UNSIGNED PRIMARY KEY,
+  imagem        MEDIUMBLOB   NOT NULL,             -- já cortada ao quadrado e reduzida (320px)
+  tipo          VARCHAR(20)  NOT NULL,             -- image/webp ou image/jpeg
+  atualizada_em DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- entra no URL, para o browser não mostrar a antiga
+  CONSTRAINT fk_foto_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

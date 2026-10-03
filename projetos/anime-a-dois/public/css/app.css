@@ -211,6 +211,39 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .avatar { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 16px; color: var(--no-pastel); }
 .avatar-tu  { background: var(--tu); }
 .avatar-par { background: var(--par); }
+.avatar { overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }   /* foto de perfil no lugar da inicial */
+
+/* Avatar no topo do início: abre o perfil */
+.avatar-link { display: block; border-radius: 50%; text-decoration: none; }
+.avatar-topo { width: 44px; height: 44px; box-shadow: 0 0 0 2px var(--vidro-borda), 0 6px 16px var(--sombra); }
+
+/* ---------- Perfil ---------- */
+.perfil-foto { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 26px 20px 20px; }
+.foto-escolher { position: relative; display: block; cursor: pointer; border-radius: 50%; }
+.avatar-xl { width: 112px; height: 112px; font-size: 40px; box-shadow: 0 0 0 4px var(--vidro-borda), 0 14px 30px var(--sombra); }
+.foto-camara {                          /* botãozinho de câmara no canto do avatar */
+  position: absolute; right: -2px; bottom: -2px;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--btn); color: var(--btn-txt);
+  box-shadow: 0 0 0 3px var(--bg);
+}
+.foto-camara svg { width: 18px; height: 18px; }
+.foto-escolher.a-enviar { opacity: .5; pointer-events: none; }
+.escondido { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }   /* input de ficheiro invisível mas acessível */
+.foto-escolher:focus-within { outline: 2px solid var(--tu-txt); outline-offset: 4px; }
+.perfil-nome { margin-top: 14px; font-size: 18px; font-weight: 500; }
+.perfil-user { font-size: 13px; color: var(--suave); }
+.link-suave { margin-top: 10px; background: none; border: 0; padding: 6px; font-size: 13px; color: var(--suave); text-decoration: underline; cursor: pointer; }
+
+/* Secção que abre e fecha (mudar palavra-passe) */
+.dobravel { gap: 0; }
+.dobravel summary { cursor: pointer; font-size: 15px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.dobravel summary::-webkit-details-marker { display: none; }
+.dobravel summary::after { content: "+"; font-size: 20px; color: var(--suave); }
+.dobravel[open] summary::after { content: "–"; }
+.dobravel-corpo { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
 .ultimo-texto { flex: 1; min-width: 0; }
 .ultimo-texto p:first-child { font-size: 13px; color: var(--suave); }
 .ultimo-texto p:last-child { margin-top: 2px; font-size: 17px; font-weight: 500; }

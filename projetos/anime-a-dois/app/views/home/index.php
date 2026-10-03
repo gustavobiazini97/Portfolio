@@ -10,12 +10,10 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
   </a>
   <div class="topo-acoes">
     <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
-    <form method="post" action="<?= e(url('auth', 'sair')) ?>">
-      <?= csrf_campo() ?>
-      <button type="submit" class="btn-redondo vidro" aria-label="Terminar sessão">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></svg>
-      </button>
-    </form>
+    <!-- O teu avatar abre o perfil (foto, nome, palavra-passe, sair) -->
+    <a class="avatar-link" href="<?= e(url('perfil')) ?>" aria-label="Abrir o teu perfil">
+      <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-topo'; require __DIR__ . '/../layout/avatar.php'; ?>
+    </a>
   </div>
 </div>
 
@@ -32,7 +30,7 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
 <?php if ($parceiro && $ultimoPar): ?>
   <!-- Último episódio que o par viu (em qualquer série) -->
   <section class="painel vidro ultimo">
-    <span class="avatar avatar-par" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($parceiro->nome, 0, 1))) ?></span>
+    <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = ''; require __DIR__ . '/../layout/avatar.php'; ?>
     <div class="ultimo-texto">
       <p><?= e($parceiro->nome . ' viu ' . tempo_relativo($ultimoPar->pivot->visto_em)) ?></p>
       <p><?= e($ultimoPar->serie->nomeCurto() . ' · episódio ' . $ultimoPar->numero) ?></p>

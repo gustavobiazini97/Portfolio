@@ -230,6 +230,65 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   window.addEventListener('appinstalled', function () { botao.hidden = true; });
 })();
 
+// ---------- Foto de perfil: reduz no telemóvel e envia logo ----------
+(function () {
+  var input = document.getElementById('input-foto');
+  var form = document.getElementById('form-foto');
+  if (!input || !form || !window.fetch) return;   // sem fetch: fica o botão "Enviar foto" do <noscript>
+
+  var rotulo = form.querySelector('.foto-escolher');
+  var aviso = document.getElementById('aviso');
+
+  function avisar(texto, erro) {
+    aviso.textContent = texto;
+    aviso.classList.toggle('erro', !!erro);
+    aviso.hidden = false;
+    requestAnimationFrame(function () { aviso.classList.add('mostrar'); });
+    setTimeout(function () { aviso.classList.remove('mostrar'); }, 2400);
+  }
+
+  // Desenha a foto num canvas com no máximo 1024px de lado e devolve um JPEG (~150 KB em vez de 5–10 MB)
+  function reduzir(ficheiro) {
+    return new Promise(function (resolver, rejeitar) {
+      var img = new Image();
+      var url = URL.createObjectURL(ficheiro);
+      img.onload = function () {
+        var escala = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.naturalWidth * escala);
+        canvas.height = Math.round(img.naturalHeight * escala);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);   // a rotação da câmara já vem aplicada
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function (blob) { blob ? resolver(blob) : rejeitar(); }, 'image/jpeg', 0.9);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rejeitar(); };
+      img.src = url;
+    });
+  }
+
+  input.addEventListener('change', function () {
+    var ficheiro = input.files && input.files[0];
+    if (!ficheiro) return;
+    rotulo.classList.add('a-enviar');
+
+    reduzir(ficheiro)
+      .catch(function () { return ficheiro; })   // se o browser não conseguir reduzir, manda o original
+      .then(function (blob) {
+        var dados = new FormData();
+        dados.append('_csrf', form.querySelector('input[name="_csrf"]').value);
+        dados.append('foto', blob, 'foto.jpg');
+        return fetch(form.action, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (resposta) {
+        if (!resposta.ok) { avisar(resposta.mensagem, true); return; }
+        location.reload();   // mostra a foto nova (e o "Remover foto")
+      })
+      .catch(function () { avisar('Não foi possível enviar a foto.', true); })
+      .then(function () { rotulo.classList.remove('a-enviar'); input.value = ''; });
+  });
+})();
+
 // ---------- App instalável: regista o service worker ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {

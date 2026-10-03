@@ -31,6 +31,73 @@ class User extends Model
                     ->first();
     }
 
+    // ---------- Perfil ----------
+
+    // Dados da foto SEM os bytes (só para saber se existe e a data, que entra no URL)
+    public function foto()
+    {
+        return $this->hasOne(Foto::class, 'user_id')->select(['user_id', 'tipo', 'atualizada_em']);
+    }
+
+    // URL da foto de perfil, ou null se não tiver; ?v muda a cada troca de foto
+    public function fotoUrl(): ?string
+    {
+        $foto = $this->foto;
+        return $foto ? url('perfil', 'foto', ['id' => $this->id, 'v' => strtotime($foto->atualizada_em)]) : null;
+    }
+
+    // Inicial para o avatar sem foto
+    public function inicial(): string
+    {
+        return mb_strtoupper(mb_substr($this->nome, 0, 1));
+    }
+
+    // Guarda (ou troca) a foto a partir de um ficheiro enviado
+    public function definirFoto(string $caminho): void
+    {
+        [$bytes, $tipo] = Foto::processar($caminho);
+        Foto::updateOrCreate(
+            ['user_id' => $this->id],
+            ['imagem' => $bytes, 'tipo' => $tipo, 'atualizada_em' => date('Y-m-d H:i:s')]
+        );
+        $this->unsetRelation('foto');
+    }
+
+    // Tira a foto (volta a aparecer a inicial)
+    public function removerFoto(): void
+    {
+        Foto::where('user_id', $this->id)->delete();
+        $this->unsetRelation('foto');
+    }
+
+    // Muda o nome que aparece na app
+    public function alterarNome(string $nome): void
+    {
+        $nome = trim($nome);
+        $tam = mb_strlen($nome);
+        if ($tam < 2 || $tam > 40) {
+            throw new InvalidArgumentException('O nome tem de ter entre 2 e 40 caracteres.');
+        }
+        $this->nome = $nome;
+        $this->save();
+    }
+
+    // Muda a palavra-passe, confirmando a atual
+    public function alterarPassword(string $atual, string $nova, string $confirmar): void
+    {
+        if (!password_verify($atual, $this->password_hash)) {
+            throw new InvalidArgumentException('A palavra-passe atual não está certa.');
+        }
+        if (strlen($nova) < 8) {
+            throw new InvalidArgumentException('A nova palavra-passe tem de ter pelo menos 8 caracteres.');
+        }
+        if ($nova !== $confirmar) {
+            throw new InvalidArgumentException('As palavras-passe novas não coincidem.');
+        }
+        $this->password_hash = password_hash($nova, PASSWORD_DEFAULT);
+        $this->save();
+    }
+
     // Indica se este episódio já está marcado como visto
     public function viu(Episodio $episodio): bool
     {
