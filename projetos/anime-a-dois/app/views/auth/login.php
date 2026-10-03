@@ -10,6 +10,7 @@
     <img class="logo logo-grande" src="img/logo.svg" alt="" width="96" height="96">
     <h1 class="auth-titulo">anime a dois</h1>
     <p class="auth-sub">o que cada um já viu, lado a lado</p>
+    <?php require __DIR__ . '/../layout/botao-instalar.php'; ?>
   </div>
 
   <?php require __DIR__ . '/../layout/flash.php'; ?>

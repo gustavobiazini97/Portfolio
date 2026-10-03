@@ -167,6 +167,16 @@ a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul 
 .auth-sub { margin-top: 6px; font-size: 13.5px; color: var(--suave); }
 .auth-sub strong { color: var(--par-txt); font-weight: 500; }
 .auth .form { margin-top: auto; }
+
+/* Botão "Instalar app" no hero: só aparece quando o Chrome deixa instalar */
+.btn-instalar {
+  margin-top: 18px; height: 40px; padding: 0 18px 0 14px; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px; font-weight: 500; color: var(--tu-txt); cursor: pointer;
+  box-shadow: inset 0 1px 0 var(--brilho), 0 8px 20px var(--sombra);
+}
+.btn-instalar[hidden] { display: none; }        /* o hidden tem de ganhar ao inline-flex */
+.btn-instalar svg { width: 16px; height: 16px; }
 .auth-rodape { margin-top: 16px; text-align: center; font-size: 13.5px; color: var(--suave); }
 .auth-rodape a { font-weight: 500; }
 

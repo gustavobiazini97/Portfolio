@@ -205,6 +205,30 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   atualizarBotao();
 })();
 
+// ---------- Botão "Instalar app" no hero ----------
+(function () {
+  var botao = document.getElementById('btn-instalar');
+  if (!botao) return;
+
+  // Já está a correr como app instalada: o botão não faz sentido
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+  var aviso = null;   // o evento do Chrome, guardado para usar no clique
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();          // em vez da mini-barra automática, usamos o nosso botão
+    aviso = e;
+    botao.hidden = false;
+  });
+
+  botao.addEventListener('click', function () {
+    if (!aviso) return;
+    aviso.prompt();              // abre a janela de instalação do Android
+    aviso.userChoice.then(function () { aviso = null; botao.hidden = true; });   // só dá para usar uma vez
+  });
+
+  window.addEventListener('appinstalled', function () { botao.hidden = true; });
+})();
+
 // ---------- App instalável: regista o service worker ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {

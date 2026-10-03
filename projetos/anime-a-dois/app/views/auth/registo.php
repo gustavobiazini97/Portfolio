@@ -16,6 +16,7 @@
     <?php else: ?>
       <p class="auth-sub">conta 1 de 2 · a segunda fica para o teu par</p>
     <?php endif; ?>
+    <?php require __DIR__ . '/../layout/botao-instalar.php'; ?>
   </div>
 
   <?php require __DIR__ . '/../layout/flash.php'; ?>
