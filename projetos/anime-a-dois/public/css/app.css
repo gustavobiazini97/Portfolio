@@ -103,7 +103,9 @@ a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul 
 }
 /* Página da série: o ecrã tem a altura exata do telemóvel e a pista fica com o espaço que sobra,
    por isso o botão nunca sai do ecrã (na app instalada há mais altura do que no browser) */
-.pagina-serie .ecra { height: 100dvh; min-height: 0; }
+html:has(body.pagina-serie) { height: 100%; overflow: hidden; overscroll-behavior: none; }   /* nada para baixo: sem scroll nem "esticar" */
+body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-behavior: none; }
+.pagina-serie .ecra { height: 100%; min-height: 0; }   /* 100% da janela real (o 100dvh contava com as barras na app instalada) */
 
 /* App instalada: o Android pode desenhar a página por baixo das barras do sistema.
    viewport-fit=cover (no <head>) faz o env() devolver a altura delas; o max() é uma margem
@@ -262,17 +264,16 @@ a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul 
 .pista {
   display: flex; gap: 12px;
   margin: 0 -20px;                       /* sai das margens para ir de ponta a ponta */
-  flex: 1 1 0; min-height: 270px;        /* ocupa o espaço livre entre o mapa e o painel */
+  flex: 1 1 0; min-height: 0;            /* ocupa o espaço livre entre o mapa e o painel; os cartões ficam ao meio */
   align-items: center;
-  padding: 14px calc(50% - 95px) 34px;   /* o primeiro e o último também ficam centrados; folga para a sombra */
+  padding: 10px calc(50% - 86px) 26px;   /* o primeiro e o último também ficam centrados; folga para a sombra */
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
 }
 .pista::-webkit-scrollbar { display: none; }
 .ep {
-  flex: 0 0 190px;
-  height: 100%; min-height: 220px; max-height: 340px;   /* tão alto quanto a pista deixar, até 340px */
+  flex: 0 0 172px; height: 214px;       /* tamanho fixo: compacto em qualquer ecrã */
   scroll-snap-align: center;
   border-radius: 30px; padding: 18px;
   display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
@@ -282,7 +283,7 @@ a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul 
 }
 .ep.ativo { transform: scale(1); border-color: var(--tu-txt); }
 .ep-cima { display: flex; width: 100%; justify-content: space-between; font-size: 12px; color: var(--suave); }
-.ep-num { font-size: clamp(56px, 8dvh, 72px); font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.ep-num { font-size: 52px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
 .ep-estados { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--suave); }
 .ep-estado { display: flex; align-items: center; gap: 7px; }
 .ponto { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid; }
