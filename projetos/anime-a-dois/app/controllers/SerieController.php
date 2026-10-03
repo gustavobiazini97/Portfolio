@@ -25,8 +25,9 @@ class SerieController extends Controller
         }
 
         $this->render('serie/ver', [
-            'titulo'    => $serie->nome,
-            'serieSlug' => $serie->slug,
+            'titulo'     => $serie->nome,
+            'serieSlug'  => $serie->slug,
+            'classeBody' => 'pagina-serie',   // ecrã de altura fixa: a pista ocupa o que sobra
             'user'      => $user,
             'parceiro'  => $parceiro,
             'serie'     => $serie,

@@ -3,7 +3,7 @@
 <html lang="pt" data-tema="claro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F5F3F8">
 <title><?= e($titulo === $appNome ? $appNome : $titulo . ' · ' . $appNome) ?></title>
 <!-- Tema guardado aplicado antes de pintar a página -->
@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </head>
-<body data-serie="<?= e($serieSlug ?? '') ?>">
+<body class="<?= e($classeBody ?? '') ?>" data-serie="<?= e($serieSlug ?? '') ?>">
 
 <!-- Manchas difusas por trás do vidro; a terceira tem a cor da série aberta -->
 <div class="fundo" aria-hidden="true">
