@@ -16,6 +16,14 @@ function url(string $c, string $a = 'index', array $params = []): string
     return 'index.php?' . http_build_query(['c' => $c, 'a' => $a] + $params);
 }
 
+// Endereço completo da app (para partilhar), ex.: https://animeadois.alwaysdata.net/
+function url_absoluto(): string
+{
+    $https = !empty($_SERVER['HTTPS']) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    $pasta = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/');
+    return ($https ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $pasta . '/';
+}
+
 // Caminho de um ficheiro de public/ com a versão no fim (?v=data de modificação):
 // cada deploy muda o endereço, por isso nem o browser nem o service worker servem uma cópia antiga
 function asset(string $caminho): string

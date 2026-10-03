@@ -271,10 +271,18 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .vs-par .barra::-moz-progress-bar { background: var(--par); border-radius: 6px; }
 .vs-resumo { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--linha); font-size: 13px; color: var(--suave); }
 
+/* Cartões que são links: sem sublinhado, com seta e reação ao toque */
+.painel-link { display: block; color: inherit; text-decoration: none; transition: transform .15s; }
+.painel-link.ultimo { display: flex; }
+.painel-link:active { transform: scale(.985); }
+.painel-titulo span { display: inline-flex; align-items: center; gap: 4px; }
+.painel-seta { width: 15px; height: 15px; color: var(--suave); }
+.btn-convite { margin-top: 14px; }
+
 /* Estado vazio (série por começar, par por criar conta) */
 .vazio { text-align: center; padding: 28px 20px; }
 .vazio p:first-child { font-size: 15px; font-weight: 500; }
-.vazio p:last-child { margin-top: 6px; font-size: 13px; color: var(--suave); }
+.vazio p + p { margin-top: 6px; font-size: 13px; color: var(--suave); }   /* a frase de apoio (mesmo com um botão a seguir) */
 
 .acao-fundo { margin-top: auto; }
 

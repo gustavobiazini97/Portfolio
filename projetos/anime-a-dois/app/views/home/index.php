@@ -28,15 +28,15 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
 </nav>
 
 <?php if ($parceiro && $ultimoPar): ?>
-  <!-- Último episódio que o par viu (em qualquer série) -->
-  <section class="painel vidro ultimo">
+  <!-- Último episódio que o par viu (em qualquer série): abre a série nesse episódio -->
+  <a class="painel vidro ultimo painel-link" href="<?= e(url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero])) ?>">
     <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = ''; require __DIR__ . '/../layout/avatar.php'; ?>
     <div class="ultimo-texto">
       <p><?= e($parceiro->nome . ' viu ' . tempo_relativo($ultimoPar->pivot->visto_em)) ?></p>
       <p><?= e($ultimoPar->serie->nomeCurto() . ' · episódio ' . $ultimoPar->numero) ?></p>
     </div>
     <span class="ultimo-num"><?= $ultimoPar->numero ?></span>
-  </section>
+  </a>
 <?php elseif ($parceiro): ?>
   <section class="painel vidro vazio">
     <p><?= e($parceiro->nome) ?> ainda não marcou nenhum episódio</p>
@@ -45,16 +45,20 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
 <?php else: ?>
   <section class="painel vidro vazio">
     <p>À espera do teu par</p>
-    <p>Quando a segunda conta for criada, aparece aqui e o registo fecha.</p>
+    <p>Envia-lhe o link: quando criar a conta, aparece aqui e o registo fecha.</p>
+    <!-- Partilha o link da app (menu do Android); sem partilha nativa, copia o link -->
+    <button type="button" class="btn-texto vidro btn-convite" data-convidar="<?= e(url_absoluto()) ?>">
+      Enviar convite
+    </button>
   </section>
 <?php endif; ?>
 
 <?php if ($comecou): ?>
-  <!-- Vs da série aberta: uma barra fina por pessoa -->
-  <section class="painel vidro">
+  <!-- Vs da série aberta: uma barra fina por pessoa; o cartão todo abre a série -->
+  <a class="painel vidro painel-link" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
     <div class="painel-titulo">
       <h2><?= $parceiro ? e('Tu e ' . $parceiro->nome . ' em ' . $serie->nomeCurto()) : e('O teu progresso em ' . $serie->nomeCurto()) ?></h2>
-      <span><?= $serie->total_episodios ?> ep.</span>
+      <span><?= $serie->total_episodios ?> ep. <svg class="painel-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
     </div>
 
     <div class="vs-linhas">
@@ -71,7 +75,7 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
     </div>
 
     <p class="vs-resumo"><?= e($resumo) ?></p>
-  </section>
+  </a>
 <?php else: ?>
   <section class="painel vidro vazio">
     <p>Ainda nenhum dos dois começou <?= e($serie->nome) ?></p>
