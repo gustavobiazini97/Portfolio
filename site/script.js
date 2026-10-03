@@ -38,6 +38,38 @@ const reveals = document.querySelectorAll('.reveal');
 reveals.forEach((el, i) => { el.style.transitionDelay = (i % 5 * 45) + 'ms'; io.observe(el); });
 setTimeout(() => reveals.forEach(el => { if (!el.classList.contains('in')) { el.style.transition = 'none'; el.classList.add('in'); } }), 900);
 
+// Botão "Instalar": o Chrome avisa (beforeinstallprompt) quando a app pode ser instalada;
+// guardamos esse aviso e só mostramos o botão nessa altura
+const installBtn = document.getElementById('install-btn');
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();                 // trava a mini-barra automática; usamos o nosso botão
+  installPrompt = e;
+  installBtn.hidden = false;
+});
+installBtn.addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();             // abre a janela de instalação do sistema
+  await installPrompt.userChoice;     // o aviso só pode ser usado uma vez
+  installPrompt = null;
+  installBtn.hidden = true;
+});
+// Depois de instalada (ou se já abriu como app), o botão deixa de fazer sentido
+window.addEventListener('appinstalled', () => { installBtn.hidden = true; });
+
+// Botão "Partilhar": usa o menu de partilha nativo, se o browser o tiver
+const shareBtn = document.getElementById('share-btn');
+if (navigator.share) {
+  shareBtn.hidden = false;
+  shareBtn.addEventListener('click', () => {
+    navigator.share({
+      title: 'Gustavo — Portfólio',
+      text: 'Projetos e percurso do Gustavo, programador em formação.',
+      url: 'https://gustavobiazini97.github.io/Portfolio/site/'
+    }).catch(() => {});               // cancelar a partilha não é erro
+  });
+}
+
 // App instalável: regista o service worker (cache offline) depois de a página carregar
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

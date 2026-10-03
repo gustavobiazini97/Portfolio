@@ -53,6 +53,27 @@ body {
 }
 .toggle:hover { color: var(--ink); border-color: var(--ink-faint); transform: rotate(18deg); }
 
+/* Botões da app (Instalar / Partilhar): mesmo traço do botão de tema */
+.icon-btn {
+  appearance: none; border: 1px solid var(--rule); background: transparent;
+  color: var(--ink-soft); height: 38px; min-width: 38px; border-radius: 100px;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font: 500 13.5px 'Archivo', sans-serif;
+  transition: border-color 0.25s, color 0.25s, background 0.25s;
+}
+.icon-btn[hidden] { display: none; }                 /* o atributo hidden tem de ganhar ao inline-flex */
+.icon-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+.icon-btn:focus-visible, .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* "Instalar" em destaque: é a ação principal quando aparece */
+.icon-btn.pill { padding: 0 15px 0 12px; color: var(--accent); border-color: color-mix(in oklch, var(--accent) 45%, var(--rule)); }
+.icon-btn.pill:hover { background: color-mix(in oklch, var(--accent) 9%, transparent); color: var(--accent); }
+/* No telemóvel os links somem, por isso os botões ficam mais juntos */
+@media (max-width: 600px){ .topnav { gap: 10px; } }
+
+/* Âncoras (atalhos da app e menu) não ficam escondidas debaixo da barra fixa */
+section[id], footer[id] { scroll-margin-top: 80px; }
+
 /* Hero */
 .hero { padding: 12vh 0 9vh; }
 .eyebrow { font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 28px; }
