@@ -3,7 +3,7 @@
 // porque têm dados pessoais e tokens de sessão; sem rede mostra-se a página offline.html.
 
 // Mudar a versão força a atualização da cache nas apps instaladas
-const CACHE = 'anime-a-dois-v2';
+const CACHE = 'anime-a-dois-v3';
 
 const ESTATICOS = [
   './css/app.css',
@@ -12,7 +12,8 @@ const ESTATICOS = [
   './offline.html',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './img/logo.svg'
 ];
 
 // Instalação: guarda os estáticos e ativa logo

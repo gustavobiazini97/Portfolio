@@ -5,7 +5,7 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
 ?>
 <div class="topo">
   <a class="marca" href="<?= e(url('home')) ?>">
-    <span class="logo" aria-hidden="true"><i></i><i></i></span>
+    <img class="logo" src="img/logo.svg" alt="" width="34" height="34">
     anime a dois
   </a>
   <div class="topo-acoes">

@@ -7,7 +7,7 @@
 <section class="auth">
   <!-- Logótipo, nome e frase, ao centro -->
   <div class="auth-cabeca">
-    <div class="logo logo-grande" aria-hidden="true"><i></i><i></i></div>
+    <img class="logo logo-grande" src="img/logo.svg" alt="" width="96" height="96">
     <h1 class="auth-titulo">anime a dois</h1>
     <p class="auth-sub">o que cada um já viu, lado a lado</p>
   </div>

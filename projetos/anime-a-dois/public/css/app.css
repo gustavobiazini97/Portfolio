@@ -111,13 +111,9 @@ a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul 
 .topo-acoes { display: flex; gap: 8px; }
 .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 15px; font-weight: 700; }
 
-/* Logótipo: duas pílulas de comprimentos diferentes (os dois progressos) */
-.logo { display: flex; flex-direction: column; gap: 3px; width: 22px; }
-.logo i { display: block; height: 4px; border-radius: 4px; }
-.logo i:first-child { width: 100%; background: var(--tu); }
-.logo i:last-child  { width: 70%;  background: var(--par); }
-.logo-grande { width: 40px; gap: 5px; }
-.logo-grande i { height: 7px; border-radius: 7px; }
+/* Logótipo (img/logo.svg): dois ecrãs empilhados — o teu à frente, o do par atrás */
+.logo { display: block; width: 34px; height: 34px; flex-shrink: 0; }
+.logo-grande { width: 96px; height: 96px; }
 
 /* Botão redondo de vidro (tema, voltar, sair) */
 .btn-redondo {

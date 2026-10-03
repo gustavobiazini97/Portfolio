@@ -8,7 +8,7 @@
 
 <section class="auth">
   <div class="auth-cabeca">
-    <div class="logo logo-grande" aria-hidden="true"><i></i><i></i></div>
+    <img class="logo logo-grande" src="img/logo.svg" alt="" width="96" height="96">
     <h1 class="auth-titulo">criar conta</h1>
     <?php if ($primeiro): ?>
       <!-- Segunda conta: fica ligada à primeira e o registo fecha a seguir -->
