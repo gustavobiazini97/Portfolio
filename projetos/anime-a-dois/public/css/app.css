@@ -1,0 +1,130 @@
+/* Anime a Dois — estilos da app. Mobile primeiro; o ecrã largo é o caso especial. */
+
+/* ---------- Cores e medidas ---------- */
+:root {
+  --fundo: #0b1226;          /* azul-noite (o mesmo tom do Naruto Fillers) */
+  --superficie: #131c38;     /* cartões */
+  --superficie-2: #1a2547;   /* campos e elementos dentro dos cartões */
+  --linha: #263257;          /* bordas discretas */
+  --texto: #eef1fa;
+  --texto-suave: #a3adcc;
+  --texto-fraco: #6f7aa0;
+  --tu: #ff8a1f;             /* cor de quem está a usar a app (laranja Naruto) */
+  --par: #5b8cff;            /* cor do par (azul) */
+  --erro: #ff6b6b;
+  --sucesso: #3ecf8e;
+  --raio: 18px;              /* cantos dos cartões */
+}
+
+/* ---------- Base ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgb(255 138 31 / 0.10), transparent 60%),   /* brilho laranja no canto */
+    radial-gradient(120% 60% at 100% 100%, rgb(91 140 255 / 0.10), transparent 60%), /* brilho azul no canto oposto */
+    var(--fundo);
+  color: var(--texto);
+  font: 400 16px/1.5 'Outfit', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--tu); }
+strong { font-weight: 600; }
+
+/* Largura máxima do conteúdo: pensado para telemóvel, centrado no PC */
+.conteudo { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px 16px 48px; }
+
+/* ---------- Barra de topo ---------- */
+.topo {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 480px; margin: 0 auto; padding: 14px 16px;
+  background: rgb(11 18 38 / 0.82);
+  backdrop-filter: blur(10px);
+}
+.marca { display: flex; align-items: center; gap: 10px; color: var(--texto); text-decoration: none; font-weight: 600; }
+
+/* ---------- As duas bolas (logótipo) ---------- */
+.marca-bolas, .auth-marca { display: inline-flex; }
+.bola { display: block; border-radius: 50%; }
+.marca-bolas .bola { width: 18px; height: 18px; }
+.marca-bolas .bola + .bola { margin-left: -7px; }              /* sobrepostas: "a dois" */
+.bola.tu  { background: var(--tu); }
+.bola.par { background: var(--par); mix-blend-mode: screen; }  /* a interseção fica mais clara */
+
+/* ---------- Botões ---------- */
+.btn {
+  display: block; width: 100%;
+  padding: 14px 18px; border: 0; border-radius: 14px;
+  background: var(--tu); color: #1b0f02;
+  font: 600 16px 'Outfit', sans-serif; cursor: pointer;
+  transition: transform 0.15s, filter 0.2s;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(0.98); }
+.btn-texto {
+  background: none; border: 1px solid var(--linha); border-radius: 100px;
+  color: var(--texto-suave); padding: 7px 14px;
+  font: 500 14px 'Outfit', sans-serif; cursor: pointer;
+}
+.btn-texto:hover { color: var(--texto); border-color: var(--texto-fraco); }
+.btn:focus-visible, .btn-texto:focus-visible, a:focus-visible { outline: 2px solid var(--par); outline-offset: 3px; }
+
+/* ---------- Cartões e formulários ---------- */
+.cartao { background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio); padding: 20px; }
+.form { display: grid; gap: 16px; }
+.campo { display: grid; gap: 6px; }
+.campo > span { font-size: 14px; font-weight: 500; color: var(--texto-suave); }
+.campo small { font-size: 12.5px; color: var(--texto-fraco); }
+.campo input {
+  width: 100%; padding: 13px 14px;
+  background: var(--superficie-2); color: var(--texto);
+  border: 1px solid var(--linha); border-radius: 12px;
+  font: 400 16px 'Outfit', sans-serif;   /* 16px evita o zoom automático no iPhone */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.campo input:focus { outline: none; border-color: var(--tu); box-shadow: 0 0 0 3px rgb(255 138 31 / 0.18); }
+
+/* ---------- Mensagens flash ---------- */
+.flash { margin-bottom: 16px; padding: 12px 14px; border-radius: 12px; font-size: 14.5px; border: 1px solid; }
+.flash-erro    { color: var(--erro);    border-color: rgb(255 107 107 / 0.35); background: rgb(255 107 107 / 0.08); }
+.flash-sucesso { color: var(--sucesso); border-color: rgb(62 207 142 / 0.35);  background: rgb(62 207 142 / 0.08); }
+.flash-info    { color: var(--par);     border-color: rgb(91 140 255 / 0.35);  background: rgb(91 140 255 / 0.08); }
+
+/* ---------- Login e registo ---------- */
+.auth { padding-top: 6vh; }
+.auth-marca { margin-bottom: 18px; }
+.auth-marca .bola { width: 46px; height: 46px; }
+.auth-marca .bola + .bola { margin-left: -18px; }
+.auth-titulo { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.auth-sub { margin: 8px 0 22px; color: var(--texto-suave); }
+.auth-sub strong { color: var(--par); }
+.auth-rodape { margin-top: 18px; text-align: center; color: var(--texto-suave); font-size: 15px; }
+
+/* ---------- Dashboard ---------- */
+.ola { margin: 10px 0 20px; }
+.ola-pre { color: var(--texto-suave); }
+.ola-nome { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+
+/* Cartão do par: avatares à esquerda, texto à direita */
+.par-cartao { display: flex; align-items: center; gap: 16px; }
+.par-titulo { font-weight: 600; }
+.par-sub { color: var(--texto-suave); font-size: 14.5px; }
+.par-cartao.espera { border-style: dashed; }
+
+/* Avatares com a inicial do nome, sobrepostos como o logótipo */
+.duo { display: flex; flex-shrink: 0; }
+.avatar {
+  display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  font-weight: 700; color: #10162b;
+  border: 3px solid var(--superficie);   /* separa os dois círculos */
+}
+.avatar + .avatar { margin-left: -12px; }
+.avatar.tu    { background: var(--tu); }
+.avatar.par   { background: var(--par); }
+.avatar.vazio { background: var(--superficie-2); color: var(--texto-fraco); border-style: dashed; border-color: var(--linha); }
+
+/* Menos movimento para quem o pede nas definições do sistema */
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
