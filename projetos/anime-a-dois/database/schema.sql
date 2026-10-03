@@ -1,9 +1,7 @@
 -- Anime a Dois — estrutura da base de dados (MySQL / MariaDB)
--- Correr uma vez: mysql -u root -p < database/schema.sql
-
-CREATE DATABASE IF NOT EXISTS anime_a_dois
-  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE anime_a_dois;
+-- Não corras isto à mão: o database/migrate.php aplica-o na base de dados do config.php.
+-- (A base de dados em si é criada antes: no WAMP/phpMyAdmin ou no painel do alojamento.)
+-- Só usa CREATE TABLE IF NOT EXISTS, por isso pode correr-se várias vezes sem perder dados.
 
 -- Contas (no máximo duas; o limite é aplicado no Model User)
 CREATE TABLE IF NOT EXISTS users (

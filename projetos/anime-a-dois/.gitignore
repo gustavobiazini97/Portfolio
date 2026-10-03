@@ -2,3 +2,5 @@
 /vendor/
 # Credenciais locais (criar a partir de config.example.php)
 /config/config.php
+# Cópia do fillers.json feita pelo deploy (o original está em ../naruto-fillers)
+/database/fillers.json

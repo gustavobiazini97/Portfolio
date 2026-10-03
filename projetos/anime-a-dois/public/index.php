@@ -2,11 +2,13 @@
 // Ponto de entrada único (front controller). Todos os pedidos passam por aqui:
 // index.php?c=<controller>&a=<ação>
 
-// Cookie de sessão: inacessível ao JavaScript e não enviado por outros sites
+// Cookie de sessão: inacessível ao JavaScript e não enviado por outros sites.
+// HTTPS direto ou atrás do proxy do alojamento (X-Forwarded-Proto) → cookie só por HTTPS
+$https = !empty($_SERVER['HTTPS']) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
 session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax',
-    'secure'   => !empty($_SERVER['HTTPS']),   // só por HTTPS quando o site o tiver
+    'secure'   => $https,
 ]);
 session_start();
 

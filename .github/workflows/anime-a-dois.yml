@@ -1,0 +1,97 @@
+# Deploy automático do Anime a Dois para o alwaysdata.
+# Corre a cada push que mexa na app (ou à mão, no separador Actions).
+# Precisa de um único secret no repo: AD_PASSWORD (a palavra-passe da conta alwaysdata).
+
+name: Deploy Anime a Dois
+
+on:
+  push:
+    branches: [main, feat/anime-a-dois]
+    paths:
+      - 'projetos/anime-a-dois/**'
+      - 'projetos/naruto-fillers/data/fillers.json'
+      - '.github/workflows/anime-a-dois.yml'
+  workflow_dispatch:
+
+# Nunca dois deploys ao mesmo tempo; um novo cancela o que estiver à espera
+concurrency:
+  group: deploy-anime-a-dois
+  cancel-in-progress: false
+
+env:
+  AD_CONTA: animeadois                              # nome da conta = utilizador SSH e MySQL
+  AD_SSH: ssh-animeadois.alwaysdata.net
+  AD_DB_HOST: mysql-animeadois.alwaysdata.net
+  AD_DB_NOME: animeadois_app
+  AD_PASTA: anime-a-dois                            # pasta na home do alojamento
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projetos/anime-a-dois
+    env:
+      SSHPASS: ${{ secrets.AD_PASSWORD }}           # lida pelo sshpass -e; nunca aparece no log
+    steps:
+      # Sem o secret ainda configurado, o deploy é saltado em vez de falhar
+      - name: Verificar o secret
+        id: secret
+        run: |
+          if [ -z "$SSHPASS" ]; then
+            echo "::notice::Falta o secret AD_PASSWORD — deploy saltado."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secret.outputs.ok == 'true'
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.secret.outputs.ok == 'true'
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      # Dependências de produção (o vendor/ não está no Git)
+      - name: composer install
+        if: steps.secret.outputs.ok == 'true'
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      # config.php gerado a partir do exemplo, com os dados do alwaysdata
+      - name: Gerar config.php
+        if: steps.secret.outputs.ok == 'true'
+        run: |
+          php -r '
+            $c = require "config/config.example.php";
+            $c["db"]["host"]     = getenv("AD_DB_HOST");
+            $c["db"]["database"] = getenv("AD_DB_NOME");
+            $c["db"]["username"] = getenv("AD_CONTA");
+            $c["db"]["password"] = getenv("SSHPASS");
+            file_put_contents("config/config.php", "<?php\n// Gerado pelo deploy (GitHub Actions). Não editar no servidor.\nreturn " . var_export($c, true) . ";\n");
+          '
+
+      # O seed procura o fillers.json aqui quando a pasta naruto-fillers não existe
+      - name: Copiar os dados dos episódios
+        if: steps.secret.outputs.ok == 'true'
+        run: cp ../naruto-fillers/data/fillers.json database/fillers.json
+
+      - name: Instalar sshpass
+        if: steps.secret.outputs.ok == 'true'
+        run: sudo apt-get install -y -qq sshpass
+
+      # Envia a app; --delete remove do servidor ficheiros que já não existem no repo
+      - name: Enviar para o alwaysdata
+        if: steps.secret.outputs.ok == 'true'
+        run: |
+          sshpass -e rsync -az --delete \
+            -e "ssh -o StrictHostKeyChecking=accept-new" \
+            ./ "$AD_CONTA@$AD_SSH:$AD_PASTA/"
+
+      # Cria/atualiza as tabelas e os episódios (não mexe em contas nem vistos)
+      - name: Base de dados
+        if: steps.secret.outputs.ok == 'true'
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=accept-new "$AD_CONTA@$AD_SSH" \
+            "cd $AD_PASTA && php database/migrate.php && php database/seed.php"

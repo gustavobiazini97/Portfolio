@@ -12,9 +12,24 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Login e logout (sessões, `password_hash`, CSRF)
 - [ ] Página da série: filtro, progresso dos dois e marcar episódios
 - [ ] Dashboard: último episódio do par e o Vs
-- [ ] PWA e alojamento
+- [x] Deploy automático para o alwaysdata
+- [ ] PWA
 
-## Instalar (WAMP)
+## Online (alwaysdata)
+
+A app está alojada no alwaysdata e instala-se no Android a partir do browser.
+O deploy é automático: cada push que mexa nesta pasta corre o workflow
+`.github/workflows/anime-a-dois.yml`, que:
+
+1. instala as dependências (`composer install`);
+2. gera o `config.php` com os dados do alwaysdata;
+3. envia a app por SSH;
+4. corre `database/migrate.php` e `database/seed.php` no servidor.
+
+Só precisa do secret **`AD_PASSWORD`** no repo (Settings → Secrets and variables → Actions).
+No painel do alwaysdata, o site aponta para a pasta `anime-a-dois/public/`.
+
+## Correr localmente (WAMP ou Termux)
 
 ```bash
 # 1. Dependências
@@ -23,15 +38,11 @@ composer install
 # 2. Configuração: copiar e preencher (no WAMP, root sem palavra-passe)
 cp config/config.example.php config/config.php
 
-# 3. Base de dados e episódios
-mysql -u root < database/schema.sql
+# 3. Criar a base de dados anime_a_dois (phpMyAdmin ou mysql) e depois:
+php database/migrate.php
 php database/seed.php
-```
 
-Depois aponta o browser para a pasta `public/`, por exemplo `http://localhost/anime-a-dois/public/`,
-ou usa o servidor do PHP:
-
-```bash
+# 4. Servidor
 php -S localhost:8000 -t public
 ```
 
@@ -47,7 +58,7 @@ app/
   models/           User, Serie, Episodio (a lógica vive aqui)
   views/            layout, auth, home
 config/             config.example.php (o config.php fica fora do Git)
-database/           schema.sql e seed.php
+database/           schema.sql, migrate.php e seed.php
 public/             index.php (front controller) e css/
 ```
 

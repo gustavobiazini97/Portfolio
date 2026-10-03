@@ -12,10 +12,14 @@ if (PHP_SAPI !== 'cli') {
     exit('Corre este script no terminal: php database/seed.php');
 }
 
-// Os dados vivem no projeto irmão (projetos/naruto-fillers)
+// Os dados vivem no projeto irmão (projetos/naruto-fillers). No alojamento essa pasta
+// não existe: o deploy copia o ficheiro para database/fillers.json, que é usado em alternativa.
 $ficheiro = __DIR__ . '/../../naruto-fillers/data/fillers.json';
 if (!is_file($ficheiro)) {
-    exit("Não encontrei $ficheiro\n");
+    $ficheiro = __DIR__ . '/fillers.json';
+}
+if (!is_file($ficheiro)) {
+    exit("Não encontrei o fillers.json (nem no projeto naruto-fillers, nem em database/)\n");
 }
 $dados = json_decode(file_get_contents($ficheiro), true);
 
