@@ -1,0 +1,15 @@
+# Diagnóstico pontual: conta linhas das tabelas no servidor (sem dados pessoais). Apagar depois de usar.
+name: Diagnóstico Anime a Dois
+on:
+  push:
+    paths: ['.github/workflows/anime-a-dois-diagnostico.yml']
+jobs:
+  contar:
+    runs-on: ubuntu-latest
+    env:
+      SSHPASS: ${{ secrets.AD_PASSWORD }}
+    steps:
+      - run: sudo apt-get install -y -qq sshpass
+      - run: |
+          sshpass -e ssh -o StrictHostKeyChecking=accept-new animeadois@ssh-animeadois.alwaysdata.net \
+            "cd anime-a-dois && php -r 'require \"app/bootstrap.php\"; use Illuminate\Database\Capsule\Manager as C; foreach ([\"users\",\"vistos\",\"comentarios\",\"fotos\",\"preferencias\",\"subscricoes\",\"config_app\",\"episodios\"] as \$t) { echo \$t, \": \", C::table(\$t)->count(), PHP_EOL; } echo \"utilizadores criados em: \", implode(\", \", C::table(\"users\")->pluck(\"criado_em\")->all()), PHP_EOL;'"
