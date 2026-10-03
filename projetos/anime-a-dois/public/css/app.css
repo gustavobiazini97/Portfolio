@@ -105,6 +105,14 @@ a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul 
    por isso o botão nunca sai do ecrã (na app instalada há mais altura do que no browser) */
 .pagina-serie .ecra { height: 100dvh; min-height: 0; }
 
+/* App instalada: o Android pode desenhar a página por baixo das barras do sistema.
+   viewport-fit=cover (no <head>) faz o env() devolver a altura delas; o max() é uma margem
+   mínima (44px, a barra de navegação típica) para telemóveis que não a indicam. */
+@media (display-mode: standalone) {
+  .ecra { padding-bottom: calc(20px + max(env(safe-area-inset-bottom), 44px)); }
+}
+.app-instalada .ecra { padding-bottom: calc(20px + max(env(safe-area-inset-bottom), 44px)); }   /* o mesmo, via js/tema.js */
+
 /* ---------- Barra de topo ---------- */
 .topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .topo-meio { font-size: 16px; font-weight: 500; }
