@@ -2,7 +2,9 @@ const root = document.documentElement;
 const toggle = document.getElementById('toggle');
 const ico = document.getElementById('toggle-ico');
 const KEY = 'pf-hybrid-theme';
-function setTheme(t){ root.setAttribute('data-theme', t); ico.textContent = t === 'dark' ? '☀' : '☾'; try{ localStorage.setItem(KEY, t); }catch(e){} }
+// Cor da barra de estado na app instalada, a acompanhar o tema (valores de --paper)
+const themeMeta = document.getElementById('theme-color');
+function setTheme(t){ root.setAttribute('data-theme', t); ico.textContent = t === 'dark' ? '☀' : '☾'; if (themeMeta) themeMeta.content = t === 'dark' ? '#120f0c' : '#fbf8f3'; try{ localStorage.setItem(KEY, t); }catch(e){} }
 try { setTheme(localStorage.getItem(KEY) || 'light'); } catch(e) { setTheme('light'); }
 toggle.addEventListener('click', () => setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
@@ -35,3 +37,10 @@ const io = new IntersectionObserver((entries) => {
 const reveals = document.querySelectorAll('.reveal');
 reveals.forEach((el, i) => { el.style.transitionDelay = (i % 5 * 45) + 'ms'; io.observe(el); });
 setTimeout(() => reveals.forEach(el => { if (!el.classList.contains('in')) { el.style.transition = 'none'; el.classList.add('in'); } }), 900);
+
+// App instalável: regista o service worker (cache offline) depois de a página carregar
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}

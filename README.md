@@ -10,6 +10,19 @@ projetos/   microprojetos, cada um na sua pasta
 index.html  só redireciona para site/ (o GitHub Pages abre sempre o index.html da raiz)
 ```
 
+## Instalar como app
+
+O portfólio é uma PWA: abre o site no Chrome (Android) e escolhe **Instalar app** no menu ⋮.
+Fica com ícone próprio, abre sem a barra do browser e funciona offline.
+
+```
+site/manifest.json   nome, cores e ícones da app
+site/sw.js           service worker (cache offline)
+site/icons/          ícones 192/512, versão maskable e apple-touch-icon
+```
+
+Ao alterar CSS/JS, sobe a versão em `CACHE` no `sw.js` para forçar a atualização nas apps instaladas.
+
 ## Projetos
 
 | Projeto | Descrição | Ver online |
