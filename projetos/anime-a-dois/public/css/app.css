@@ -287,19 +287,50 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .acao-fundo { margin-top: auto; }
 
 /* ---------- Página da série: mapa dos episódios ---------- */
-.mapa { border-radius: var(--raio); padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 12px; }
-.mapa-info { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--suave); }
-.mapa-linha { display: grid; grid-template-columns: minmax(26px, auto) minmax(0, 1fr) 36px; align-items: center; gap: 8px; font-size: 12.5px; }
-.mapa-pct { text-align: right; font-weight: 700; }
-.mapa-tu .mapa-pct  { color: var(--tu-txt); }
-.mapa-par .mapa-pct { color: var(--par-txt); }
+.mapa { border-radius: var(--raio); padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 12px; }
+.mapa-info { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--suave); }
+.mapa-legenda { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; }
+.mapa-legenda i { width: 10px; height: 10px; border-radius: 3px; }
+.mapa-legenda i + i, .mapa-legenda i:not(:first-child) { margin-left: 6px; }
+.leg-visto  { background: linear-gradient(90deg, var(--tu) 50%, var(--par) 50%); }   /* as duas cores = "visto" */
+.leg-filler { background: var(--trilho); outline: 1px dashed var(--suave); outline-offset: -1px; }
+
+/* UMA grelha para as duas pessoas: coluna do nome com a largura do nome maior (até 104px),
+   barra com o resto, percentagem à direita — as barras ficam sempre iguais e alinhadas */
+.mapa-grade {
+  display: grid;
+  grid-template-columns: fit-content(104px) minmax(0, 1fr) auto;
+  align-items: center; column-gap: 10px; row-gap: 10px;
+}
+.mapa-quem { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: 12.5px; }
+.mapa-quem .avatar { width: 22px; height: 22px; font-size: 10px; box-shadow: 0 0 0 1.5px var(--vidro-borda); }
+.mapa-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* nomes compridos não empurram a barra */
+
+/* Percentagem numa pastilha com a cor da pessoa */
+.mapa-pct {
+  min-width: 46px; text-align: center;
+  padding: 3px 8px; border-radius: 10px;
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.pct-tu  { color: var(--tu-txt);  background: color-mix(in srgb, var(--tu) 30%, transparent); }
+.pct-par { color: var(--par-txt); background: color-mix(in srgb, var(--par) 30%, transparent); }
 
 /* Riscos: um por episódio; preenchido = visto, mais claro = filler */
-.riscos { display: flex; height: 18px; border-radius: 6px; overflow: hidden; background: var(--trilho); }
+.riscos {
+  display: flex; height: 20px; border-radius: 7px; overflow: hidden;
+  background: var(--trilho);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .08);          /* "calha" ligeiramente cavada */
+}
 .riscos i { flex: 1 1 0; }
-.mapa-tu  .riscos i.v { background: var(--tu); }
-.mapa-par .riscos i.v { background: var(--par); }
+.riscos-tu  i.v { background: var(--tu); }
+.riscos-par i.v { background: var(--par); }
 .riscos i.f { opacity: .35; }
+
+/* Régua 1 · metade · total, alinhada com as barras */
+.mapa-escala {
+  grid-column: 2; display: flex; justify-content: space-between;
+  margin-top: -4px; font-size: 10.5px; color: var(--suave); font-variant-numeric: tabular-nums;
+}
 
 /* ---------- Pista: cartões de episódio que deslizam e encaixam ao centro ---------- */
 .pista {

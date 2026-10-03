@@ -33,30 +33,35 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 
 <?php require __DIR__ . '/../layout/flash.php'; ?>
 
-<!-- Mapa: um risco por episódio, uma linha por pessoa (o JS atualiza a linha "Tu" ao marcar) -->
+<!-- Mapa: um risco por episódio, uma linha por pessoa.
+     As duas linhas partilham a MESMA grelha (nome | barra | %), por isso as barras têm sempre
+     o mesmo comprimento, seja qual for o tamanho dos nomes (o JS atualiza a linha "Tu" ao marcar). -->
 <section class="mapa vidro" aria-label="Episódios vistos por cada um">
   <div class="mapa-info">
-    <span><?= e($serie->total_episodios . ' episódios · ' . $fillers . ' fillers') ?></span>
-    <span>um risco por episódio</span>
+    <span><?= e($serie->total_episodios . ' episódios') ?></span>
+    <span class="mapa-legenda"><i class="leg-visto"></i>visto <i class="leg-filler"></i>filler</span>
   </div>
 
-  <div class="mapa-linha mapa-tu">
-    <span>Tu</span>
-    <div class="riscos" id="riscos-tu" aria-hidden="true">
+  <div class="mapa-grade">
+    <span class="mapa-quem"><?= $avTu ?><span class="mapa-nome">Tu</span></span>
+    <div class="riscos riscos-tu" id="riscos-tu" aria-hidden="true">
       <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['tu'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
     </div>
-    <span class="mapa-pct" id="pct-tu"><?= $meu['pct'] ?>%</span>
-  </div>
+    <span class="mapa-pct pct-tu" id="pct-tu"><?= $meu['pct'] ?>%</span>
 
-  <?php if ($parceiro): ?>
-    <div class="mapa-linha mapa-par">
-      <span><?= e($nomePar) ?></span>
-      <div class="riscos" aria-hidden="true">
+    <?php if ($parceiro): ?>
+      <span class="mapa-quem"><?= $avPar ?><span class="mapa-nome"><?= e($nomePar) ?></span></span>
+      <div class="riscos riscos-par" aria-hidden="true">
         <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['par'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
       </div>
-      <span class="mapa-pct"><?= $dele['pct'] ?>%</span>
+      <span class="mapa-pct pct-par"><?= $dele['pct'] ?>%</span>
+    <?php endif; ?>
+
+    <!-- Régua por baixo das barras (só na coluna do meio) -->
+    <div class="mapa-escala" aria-hidden="true">
+      <span>1</span><span><?= intdiv($serie->total_episodios, 2) ?></span><span><?= $serie->total_episodios ?></span>
     </div>
-  <?php endif; ?>
+  </div>
 </section>
 
 <!-- Pista: desliza para os lados; o cartão do centro é o selecionado
