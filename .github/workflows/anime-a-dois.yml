@@ -37,6 +37,7 @@ jobs:
       # Sem o secret ainda configurado, o deploy é saltado em vez de falhar
       - name: Verificar o secret
         id: secret
+        working-directory: .                          # corre antes do checkout: a pasta da app ainda não existe
         run: |
           if [ -z "$SSHPASS" ]; then
             echo "::notice::Falta o secret AD_PASSWORD — deploy saltado."
