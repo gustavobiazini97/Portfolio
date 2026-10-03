@@ -16,6 +16,14 @@ function url(string $c, string $a = 'index', array $params = []): string
     return 'index.php?' . http_build_query(['c' => $c, 'a' => $a] + $params);
 }
 
+// Caminho de um ficheiro de public/ com a versão no fim (?v=data de modificação):
+// cada deploy muda o endereço, por isso nem o browser nem o service worker servem uma cópia antiga
+function asset(string $caminho): string
+{
+    $ficheiro = __DIR__ . '/../../public/' . $caminho;
+    return $caminho . (is_file($ficheiro) ? '?v=' . filemtime($ficheiro) : '');
+}
+
 // "1 episódio" / "15 episódios"
 function plural(int $n, string $um, string $varios): string
 {

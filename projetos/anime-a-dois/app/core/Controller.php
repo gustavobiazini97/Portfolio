@@ -26,6 +26,21 @@ abstract class Controller
         exit;
     }
 
+    // O pedido veio do JavaScript (fetch) e quer JSON em vez de uma página?
+    protected function querJson(): bool
+    {
+        return str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
+    }
+
+    // Responde com JSON e termina o pedido
+    protected function json(array $dados, int $estado = 200): never
+    {
+        http_response_code($estado);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($dados, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     // Guarda uma mensagem para mostrar no próximo pedido; $tipo: sucesso | erro | info
     protected function flash(string $tipo, string $mensagem): void
     {
@@ -59,6 +74,9 @@ abstract class Controller
     {
         $token = $_POST['_csrf'] ?? '';
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !hash_equals($_SESSION['_csrf'] ?? '', $token)) {
+            if ($this->querJson()) {
+                $this->json(['ok' => false, 'mensagem' => 'A sessão expirou. Recarrega a página.'], 419);
+            }
             $this->flash('erro', 'Pedido inválido. Tenta outra vez.');
             $this->redirect('auth', 'login');
         }
@@ -77,6 +95,9 @@ abstract class Controller
         $user = $this->utilizador();
         if ($user === null) {                  // null guard depois do find()
             unset($_SESSION['user_id']);
+            if ($this->querJson()) {
+                $this->json(['ok' => false, 'mensagem' => 'Entra outra vez na tua conta.'], 401);
+            }
             $this->redirect('auth', 'login');   // sem aviso: na primeira visita seria só ruído
         }
         return $user;

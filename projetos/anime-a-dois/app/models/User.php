@@ -31,18 +31,37 @@ class User extends Model
                     ->first();
     }
 
-    // Marca o episódio como visto, ou desmarca se já estava; devolve true se ficou visto
-    public function alternarVisto(Episodio $episodio): bool
+    // Indica se este episódio já está marcado como visto
+    public function viu(Episodio $episodio): bool
     {
-        $jaVisto = $this->vistos()->where('episodios.id', $episodio->id)->exists();
+        return $this->vistos()->where('episodios.id', $episodio->id)->exists();
+    }
 
-        if ($jaVisto) {
-            $this->vistos()->detach($episodio->id);
-            return false;
+    // Marca (ou desmarca) vários episódios de uma vez; devolve quantos mudaram de estado.
+    // Ao marcar, só insere os que ainda não estavam vistos (os antigos mantêm a data original).
+    public function definirVistos(array $ids, bool $visto): int
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if ($ids === []) {
+            return 0;
         }
 
-        $this->vistos()->attach($episodio->id, ['visto_em' => date('Y-m-d H:i:s')]);
-        return true;
+        if (!$visto) {
+            return $this->vistos()->detach($ids);
+        }
+
+        // IDs que já estavam vistos: ficam como estão
+        $jaVistos = $this->vistos()->whereIn('episodios.id', $ids)->pluck('episodios.id')->all();
+        $novos = array_diff($ids, $jaVistos);
+
+        $agora = date('Y-m-d H:i:s');
+        $linhas = [];
+        foreach ($novos as $id) {
+            $linhas[$id] = ['visto_em' => $agora];
+        }
+        $this->vistos()->attach($linhas);
+
+        return count($novos);
     }
 
     // A outra conta (a app só tem duas); null enquanto o parceiro não se registar

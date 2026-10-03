@@ -1,7 +1,8 @@
 <?php
 /* Página da série.
    Variáveis: $serie, $user, $parceiro (ou null), $fillers, $meu, $dele, $episodios, $inicial, $flash */
-$nomePar = $parceiro ? $parceiro->nome : null;
+$nomePar   = $parceiro ? $parceiro->nome : null;
+$epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do painel e do botão (funciona sem JS)
 ?>
 <div class="topo">
   <a class="btn-redondo vidro" href="<?= e(url('home', 'index', ['serie' => $serie->slug])) ?>" aria-label="Voltar ao início">
@@ -13,7 +14,7 @@ $nomePar = $parceiro ? $parceiro->nome : null;
 
 <?php require __DIR__ . '/../layout/flash.php'; ?>
 
-<!-- Mapa: um risco por episódio, uma linha por pessoa -->
+<!-- Mapa: um risco por episódio, uma linha por pessoa (o JS atualiza a linha "Tu" ao marcar) -->
 <section class="mapa vidro" aria-label="Episódios vistos por cada um">
   <div class="mapa-info">
     <span><?= e($serie->total_episodios . ' episódios · ' . $fillers . ' fillers') ?></span>
@@ -22,10 +23,10 @@ $nomePar = $parceiro ? $parceiro->nome : null;
 
   <div class="mapa-linha mapa-tu">
     <span>Tu</span>
-    <div class="riscos" aria-hidden="true">
+    <div class="riscos" id="riscos-tu" aria-hidden="true">
       <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['tu'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
     </div>
-    <span class="mapa-pct"><?= $meu['pct'] ?>%</span>
+    <span class="mapa-pct" id="pct-tu"><?= $meu['pct'] ?>%</span>
   </div>
 
   <?php if ($parceiro): ?>
@@ -39,18 +40,25 @@ $nomePar = $parceiro ? $parceiro->nome : null;
   <?php endif; ?>
 </section>
 
-<!-- Pista: desliza para os lados; o cartão do centro é o selecionado -->
+<!-- Pista: desliza para os lados; o cartão do centro é o selecionado
+     (em "Selecionar vários", tocar num cartão junta-o à seleção) -->
 <div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>">
   <?php foreach ($episodios as $ep): ?>
     <button type="button"
             class="ep vidro<?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
-            data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>" data-tu="<?= $ep['tu'] ? '1' : '0' ?>"
+            data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>"
+            data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-par="<?= $ep['par'] ? '1' : '0' ?>"
+            data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
             <?= $ep['numero'] === $inicial ? 'data-inicial' : '' ?>
             aria-label="Episódio <?= $ep['numero'] ?>">
-      <span class="ep-cima"><span>episódio</span><span><?= $ep['filler'] ? 'filler' : '' ?></span></span>
+      <span class="ep-cima">
+        <span><?= $ep['filler'] ? 'filler' : 'episódio' ?></span>
+        <!-- Visto de seleção: só aparece no modo "Selecionar vários" -->
+        <span class="ep-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+      </span>
       <span class="ep-num"><?= $ep['numero'] ?></span>
       <span class="ep-estados">
-        <span class="ep-estado"><i class="ponto ponto-tu<?= $ep['tu'] ? ' v' : '' ?>"></i>tu · <?= $ep['tu'] ? 'visto' : 'por ver' ?></span>
+        <span class="ep-estado ep-estado-tu"><i class="ponto ponto-tu<?= $ep['tu'] ? ' v' : '' ?>"></i><span>tu · <?= $ep['tu'] ? 'visto' : 'por ver' ?></span></span>
         <?php if ($parceiro): ?>
           <span class="ep-estado"><i class="ponto ponto-par<?= $ep['par'] ? ' v' : '' ?>"></i><?= e(mb_strtolower($nomePar)) ?> · <?= $ep['par'] ? 'visto' : 'por ver' ?></span>
         <?php endif; ?>
@@ -59,14 +67,36 @@ $nomePar = $parceiro ? $parceiro->nome : null;
   <?php endforeach; ?>
 </div>
 
-<?php
-// Estado do episódio inicial, para o botão funcionar mesmo sem JavaScript
-$epInicial = $episodios[$inicial - 1] ?? $episodios[0];
-?>
-<form id="form-marcar" class="acao-fundo" method="post" action="<?= e(url('serie', 'marcar')) ?>">
+<!-- Painel do episódio ao centro (o JS mantém-no atualizado) -->
+<section class="detalhe vidro" id="detalhe" aria-live="polite">
+  <div class="detalhe-cima">
+    <h2 id="detalhe-titulo">Episódio <?= $epInicial['numero'] ?></h2>
+    <span class="chip" id="detalhe-tipo"><?= $epInicial['filler'] ? 'filler' : 'canónico' ?></span>
+  </div>
+  <p class="detalhe-nome" id="detalhe-nome"><?= e($epInicial['titulo'] ?? '') ?></p>
+  <div class="detalhe-estados">
+    <span><i class="ponto ponto-tu<?= $epInicial['tu'] ? ' v' : '' ?>" id="detalhe-ponto-tu"></i><span>Tu · <b id="detalhe-tu"><?= $epInicial['tu'] ? 'visto' : 'por ver' ?></b></span></span>
+    <?php if ($parceiro): ?>
+      <span><i class="ponto ponto-par<?= $epInicial['par'] ? ' v' : '' ?>" id="detalhe-ponto-par"></i><span><?= e($nomePar) ?> · <b id="detalhe-par"><?= $epInicial['par'] ? 'visto' : 'por ver' ?></b></span></span>
+    <?php endif; ?>
+  </div>
+</section>
+
+<!-- Ações: um episódio (o do centro) ou vários (modo seleção) -->
+<form id="form-marcar" class="acoes" method="post" action="<?= e(url('serie', 'marcar')) ?>" data-serie="<?= e($serie->slug) ?>">
   <?= csrf_campo() ?>
-  <input type="hidden" name="episodio_id" value="<?= $epInicial['id'] ?>">
-  <button type="submit" class="btn<?= $epInicial['tu'] ? ' btn-secundario' : '' ?>">
+  <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+  <input type="hidden" name="acao" value="alternar">
+  <input type="hidden" name="episodio_ids[]" value="<?= $epInicial['id'] ?>">
+
+  <div class="acoes-linha">
+    <button type="button" class="btn-texto vidro" id="btn-modo">Selecionar vários</button>
+    <span class="acoes-info" id="acoes-info"></span>
+  </div>
+  <button type="submit" class="btn<?= $epInicial['tu'] ? ' btn-secundario' : '' ?>" id="btn-marcar">
     <?= $epInicial['tu'] ? 'Desmarcar episódio ' . $epInicial['numero'] : 'Marcar episódio ' . $epInicial['numero'] . ' como visto' ?>
   </button>
 </form>
+
+<!-- Aviso curto depois de marcar (substitui o recarregar da página) -->
+<p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>
