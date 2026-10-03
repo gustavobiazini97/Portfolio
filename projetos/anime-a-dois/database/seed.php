@@ -19,7 +19,8 @@ if (!is_file($ficheiro)) {
     $ficheiro = __DIR__ . '/fillers.json';
 }
 if (!is_file($ficheiro)) {
-    exit("Não encontrei o fillers.json (nem no projeto naruto-fillers, nem em database/)\n");
+    fwrite(STDERR, "Não encontrei o fillers.json (nem no projeto naruto-fillers, nem em database/)\n");
+    exit(1);   // código de erro: o deploy pára aqui em vez de seguir sem episódios
 }
 $dados = json_decode(file_get_contents($ficheiro), true);
 

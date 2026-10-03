@@ -20,6 +20,31 @@ class User extends Model
                     ->withPivot('visto_em');
     }
 
+    // Último episódio marcado (em qualquer série), com a série carregada; null se ainda nenhum.
+    // A data em que foi marcado fica em $episodio->pivot->visto_em
+    public function ultimoVisto(): ?Episodio
+    {
+        return $this->vistos()
+                    ->with('serie')
+                    ->orderByPivot('visto_em', 'desc')
+                    ->orderBy('episodios.numero', 'desc')   // desempate quando têm a mesma hora
+                    ->first();
+    }
+
+    // Marca o episódio como visto, ou desmarca se já estava; devolve true se ficou visto
+    public function alternarVisto(Episodio $episodio): bool
+    {
+        $jaVisto = $this->vistos()->where('episodios.id', $episodio->id)->exists();
+
+        if ($jaVisto) {
+            $this->vistos()->detach($episodio->id);
+            return false;
+        }
+
+        $this->vistos()->attach($episodio->id, ['visto_em' => date('Y-m-d H:i:s')]);
+        return true;
+    }
+
     // A outra conta (a app só tem duas); null enquanto o parceiro não se registar
     public function parceiro(): ?User
     {

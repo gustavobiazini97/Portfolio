@@ -1,130 +1,272 @@
-/* Anime a Dois — estilos da app. Mobile primeiro; o ecrã largo é o caso especial. */
+/* Anime a Dois — estilos da app.
+   Visual: vidro fosco (glassmorphism) sobre manchas difusas, letra arredondada e pequena.
+   Cores: sálvia = tu, alperce = o teu par; cada série tem um acento só para o separador e o brilho. */
 
-/* ---------- Cores e medidas ---------- */
+/* ---------- Tokens: tema claro (por defeito) ---------- */
 :root {
-  --fundo: #0b1226;          /* azul-noite (o mesmo tom do Naruto Fillers) */
-  --superficie: #131c38;     /* cartões */
-  --superficie-2: #1a2547;   /* campos e elementos dentro dos cartões */
-  --linha: #263257;          /* bordas discretas */
-  --texto: #eef1fa;
-  --texto-suave: #a3adcc;
-  --texto-fraco: #6f7aa0;
-  --tu: #ff8a1f;             /* cor de quem está a usar a app (laranja Naruto) */
-  --par: #5b8cff;            /* cor do par (azul) */
-  --erro: #ff6b6b;
-  --sucesso: #3ecf8e;
-  --raio: 18px;              /* cantos dos cartões */
+  --bg: #F5F3F8;                         /* fundo quase branco, ligeiramente lilás */
+  --vidro: rgba(255, 255, 255, .52);     /* painéis translúcidos */
+  --vidro-borda: rgba(255, 255, 255, .75);
+  --brilho: rgba(255, 255, 255, .9);     /* reflexo no topo de cada painel */
+  --sombra: rgba(30, 40, 70, .10);
+  --campo: rgba(255, 255, 255, .6);      /* fundo dos inputs */
+  --selec: rgba(255, 255, 255, .95);
+  --tinta: #1A1F2B;                      /* texto principal */
+  --suave: #5E6676;                      /* texto secundário */
+  --linha: rgba(26, 31, 43, .10);
+  --trilho: rgba(26, 31, 43, .08);       /* parte vazia das barras */
+  --tu: #B9D3B0;                         /* sálvia (pastel: barras, pontos) */
+  --par: #F5C89A;                        /* alperce */
+  --tu-txt: #4E7A43;                     /* versões escuras para números e texto */
+  --par-txt: #A0581C;
+  --no-pastel: #2A2433;                  /* texto por cima de um fundo pastel */
+  --orbe-tu: rgba(185, 211, 176, .55);   /* manchas difusas do fundo */
+  --orbe-par: rgba(245, 200, 154, .55);
+  --btn: #1A1F2B;
+  --btn-txt: #FFFFFF;
+  --erro: #B4413A;
+  --raio: 28px;                          /* cantos dos painéis */
+  --blur: blur(24px) saturate(160%);     /* o efeito de vidro */
+  color-scheme: light;
 }
+
+/* ---------- Tokens: tema escuro ---------- */
+[data-tema="escuro"] {
+  --bg: #0E1116;
+  --vidro: rgba(255, 255, 255, .06);
+  --vidro-borda: rgba(255, 255, 255, .12);
+  --brilho: rgba(255, 255, 255, .14);
+  --sombra: rgba(0, 0, 0, .35);
+  --campo: rgba(255, 255, 255, .07);
+  --selec: rgba(255, 255, 255, .16);
+  --tinta: #E9ECF2;
+  --suave: #A0A8B6;
+  --linha: rgba(255, 255, 255, .10);
+  --trilho: rgba(255, 255, 255, .10);
+  --tu-txt: #CDE0C6;
+  --par-txt: #F8D7B4;
+  --no-pastel: #1F1A28;
+  --orbe-tu: rgba(150, 190, 135, .22);
+  --orbe-par: rgba(230, 170, 110, .22);
+  --btn: #E9ECF2;
+  --btn-txt: #0E1116;
+  --erro: #F08A82;
+  color-scheme: dark;
+}
+
+/* ---------- Acento de cada série (separador ativo + brilho no topo) ---------- */
+[data-serie="naruto"]    { --acento: #F7C59F; --brilho-serie: rgba(247, 197, 159, .6); }
+[data-serie="shippuden"] { --acento: #F2A7A0; --brilho-serie: rgba(242, 167, 160, .6); }
+[data-serie="boruto"]    { --acento: #A9C4EE; --brilho-serie: rgba(169, 196, 238, .6); }
+[data-tema="escuro"] [data-serie="naruto"]    { --brilho-serie: rgba(247, 197, 159, .28); }
+[data-tema="escuro"] [data-serie="shippuden"] { --brilho-serie: rgba(242, 167, 160, .28); }
+[data-tema="escuro"] [data-serie="boruto"]    { --brilho-serie: rgba(169, 196, 238, .28); }
 
 /* ---------- Base ---------- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   min-height: 100dvh;
-  background:
-    radial-gradient(120% 60% at 0% 0%, rgb(255 138 31 / 0.10), transparent 60%),   /* brilho laranja no canto */
-    radial-gradient(120% 60% at 100% 100%, rgb(91 140 255 / 0.10), transparent 60%), /* brilho azul no canto oposto */
-    var(--fundo);
-  color: var(--texto);
-  font: 400 16px/1.5 'Outfit', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--tinta);
+  font: 400 14px/1.5 'M PLUS Rounded 1c', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background .4s, color .4s;
 }
-a { color: var(--tu); }
-strong { font-weight: 600; }
+a { color: var(--tinta); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--tu-txt); outline-offset: 3px; }
 
-/* Largura máxima do conteúdo: pensado para telemóvel, centrado no PC */
-.conteudo { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px 16px 48px; }
+/* ---------- Fundo: manchas difusas que dão vida ao vidro ---------- */
+.fundo { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.orbe { position: absolute; border-radius: 50%; filter: blur(70px); }
+.orbe-tu    { width: 320px; height: 320px; background: var(--orbe-tu);  top: 50px;  left: -110px; }
+.orbe-par   { width: 300px; height: 300px; background: var(--orbe-par); top: 420px; right: -100px; }
+.orbe-serie { width: 380px; height: 260px; background: var(--brilho-serie, transparent); top: -120px; left: 50%; transform: translateX(-50%); filter: blur(80px); transition: background .6s; }
+
+/* ---------- Vidro: classe partilhada por todos os painéis ---------- */
+.vidro {
+  background: var(--vidro);
+  border: 1px solid var(--vidro-borda);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: inset 0 1px 0 var(--brilho), 0 18px 40px var(--sombra);
+}
+
+/* Largura de telemóvel, centrada em ecrãs maiores */
+.ecra { width: 100%; max-width: 480px; min-height: 100dvh; margin: 0 auto; padding: 18px 20px 28px; display: flex; flex-direction: column; gap: 14px; }
 
 /* ---------- Barra de topo ---------- */
-.topo {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 480px; margin: 0 auto; padding: 14px 16px;
-  background: rgb(11 18 38 / 0.82);
-  backdrop-filter: blur(10px);
+.topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.topo-meio { font-size: 16px; font-weight: 500; }
+.topo-acoes { display: flex; gap: 8px; }
+.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 15px; font-weight: 700; }
+
+/* Logótipo: duas pílulas de comprimentos diferentes (os dois progressos) */
+.logo { display: flex; flex-direction: column; gap: 3px; width: 22px; }
+.logo i { display: block; height: 4px; border-radius: 4px; }
+.logo i:first-child { width: 100%; background: var(--tu); }
+.logo i:last-child  { width: 70%;  background: var(--par); }
+.logo-grande { width: 40px; gap: 5px; }
+.logo-grande i { height: 7px; border-radius: 7px; }
+
+/* Botão redondo de vidro (tema, voltar, sair) */
+.btn-redondo {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--tinta); cursor: pointer; text-decoration: none;
+  box-shadow: inset 0 1px 0 var(--brilho);
 }
-.marca { display: flex; align-items: center; gap: 10px; color: var(--texto); text-decoration: none; font-weight: 600; }
+.btn-redondo svg { width: 17px; height: 17px; }
 
-/* ---------- As duas bolas (logótipo) ---------- */
-.marca-bolas, .auth-marca { display: inline-flex; }
-.bola { display: block; border-radius: 50%; }
-.marca-bolas .bola { width: 18px; height: 18px; }
-.marca-bolas .bola + .bola { margin-left: -7px; }              /* sobrepostas: "a dois" */
-.bola.tu  { background: var(--tu); }
-.bola.par { background: var(--par); mix-blend-mode: screen; }  /* a interseção fica mais clara */
+/* Ícone do tema: lua no claro, sol no escuro */
+.icone-sol { display: none; }
+[data-tema="escuro"] .icone-sol { display: block; }
+[data-tema="escuro"] .icone-lua { display: none; }
 
-/* ---------- Botões ---------- */
+/* ---------- Botões principais ---------- */
 .btn {
-  display: block; width: 100%;
-  padding: 14px 18px; border: 0; border-radius: 14px;
-  background: var(--tu); color: #1b0f02;
-  font: 600 16px 'Outfit', sans-serif; cursor: pointer;
-  transition: transform 0.15s, filter 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; height: 52px; border-radius: 26px; border: 0;
+  background: var(--btn); color: var(--btn-txt);
+  font-size: 15px; font-weight: 500; text-decoration: none; cursor: pointer;
+  transition: transform .15s, opacity .2s;
 }
-.btn:hover { filter: brightness(1.08); }
-.btn:active { transform: scale(0.98); }
-.btn-texto {
-  background: none; border: 1px solid var(--linha); border-radius: 100px;
-  color: var(--texto-suave); padding: 7px 14px;
-  font: 500 14px 'Outfit', sans-serif; cursor: pointer;
-}
-.btn-texto:hover { color: var(--texto); border-color: var(--texto-fraco); }
-.btn:focus-visible, .btn-texto:focus-visible, a:focus-visible { outline: 2px solid var(--par); outline-offset: 3px; }
+.btn:active { transform: scale(.98); }
+.btn svg { width: 16px; height: 16px; }
+.btn-secundario { background: var(--vidro); color: var(--tinta); border: 1px solid var(--vidro-borda); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
 
-/* ---------- Cartões e formulários ---------- */
-.cartao { background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio); padding: 20px; }
-.form { display: grid; gap: 16px; }
-.campo { display: grid; gap: 6px; }
-.campo > span { font-size: 14px; font-weight: 500; color: var(--texto-suave); }
-.campo small { font-size: 12.5px; color: var(--texto-fraco); }
+/* ---------- Formulários ---------- */
+.form { border-radius: var(--raio); padding: 22px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
+.campo { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--suave); }
+.campo > span { padding-left: 4px; }
 .campo input {
-  width: 100%; padding: 13px 14px;
-  background: var(--superficie-2); color: var(--texto);
-  border: 1px solid var(--linha); border-radius: 12px;
-  font: 400 16px 'Outfit', sans-serif;   /* 16px evita o zoom automático no iPhone */
-  transition: border-color 0.2s, box-shadow 0.2s;
+  height: 48px; border-radius: 16px; padding: 0 16px;
+  border: 1px solid var(--linha); background: var(--campo); color: var(--tinta);
+  font-size: 16px;                       /* 16px evita o zoom automático do telemóvel */
+  transition: border-color .2s;
 }
-.campo input:focus { outline: none; border-color: var(--tu); box-shadow: 0 0 0 3px rgb(255 138 31 / 0.18); }
+.campo input:focus { outline: none; border-color: var(--tu-txt); }
+.campo small { padding-left: 4px; font-size: 12px; color: var(--suave); }
+.form .btn { margin-top: 6px; }
 
 /* ---------- Mensagens flash ---------- */
-.flash { margin-bottom: 16px; padding: 12px 14px; border-radius: 12px; font-size: 14.5px; border: 1px solid; }
-.flash-erro    { color: var(--erro);    border-color: rgb(255 107 107 / 0.35); background: rgb(255 107 107 / 0.08); }
-.flash-sucesso { color: var(--sucesso); border-color: rgb(62 207 142 / 0.35);  background: rgb(62 207 142 / 0.08); }
-.flash-info    { color: var(--par);     border-color: rgb(91 140 255 / 0.35);  background: rgb(91 140 255 / 0.08); }
+.flash { border-radius: 20px; padding: 12px 16px; font-size: 13.5px; }
+.flash-erro { color: var(--erro); }
+.flash-sucesso, .flash-info { color: var(--tinta); }
 
-/* ---------- Login e registo ---------- */
-.auth { padding-top: 6vh; }
-.auth-marca { margin-bottom: 18px; }
-.auth-marca .bola { width: 46px; height: 46px; }
-.auth-marca .bola + .bola { margin-left: -18px; }
-.auth-titulo { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-.auth-sub { margin: 8px 0 22px; color: var(--texto-suave); }
-.auth-sub strong { color: var(--par); }
-.auth-rodape { margin-top: 18px; text-align: center; color: var(--texto-suave); font-size: 15px; }
+/* ---------- Entrar / criar conta ---------- */
+.auth { flex: 1; display: flex; flex-direction: column; }
+.auth-cabeca { margin: 12vh 0 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.auth-titulo { margin-top: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.auth-sub { margin-top: 6px; font-size: 13.5px; color: var(--suave); }
+.auth-sub strong { color: var(--par-txt); font-weight: 500; }
+.auth .form { margin-top: auto; }
+.auth-rodape { margin-top: 16px; text-align: center; font-size: 13.5px; color: var(--suave); }
+.auth-rodape a { font-weight: 500; }
 
-/* ---------- Dashboard ---------- */
-.ola { margin: 10px 0 20px; }
-.ola-pre { color: var(--texto-suave); }
-.ola-nome { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-
-/* Cartão do par: avatares à esquerda, texto à direita */
-.par-cartao { display: flex; align-items: center; gap: 16px; }
-.par-titulo { font-weight: 600; }
-.par-sub { color: var(--texto-suave); font-size: 14.5px; }
-.par-cartao.espera { border-style: dashed; }
-
-/* Avatares com a inicial do nome, sobrepostos como o logótipo */
-.duo { display: flex; flex-shrink: 0; }
-.avatar {
+/* ---------- Separadores de séries (controlo segmentado) ---------- */
+.separadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 22px; box-shadow: inset 0 1px 0 var(--brilho); }
+.separador {
+  height: 38px; border-radius: 18px;
   display: grid; place-items: center;
-  width: 44px; height: 44px; border-radius: 50%;
-  font-weight: 700; color: #10162b;
-  border: 3px solid var(--superficie);   /* separa os dois círculos */
+  font-size: 13.5px; color: var(--suave); text-decoration: none;
+  transition: background .4s, color .4s;
 }
-.avatar + .avatar { margin-left: -12px; }
-.avatar.tu    { background: var(--tu); }
-.avatar.par   { background: var(--par); }
-.avatar.vazio { background: var(--superficie-2); color: var(--texto-fraco); border-style: dashed; border-color: var(--linha); }
+.separador[aria-current="page"] { background: var(--acento); color: var(--no-pastel); font-weight: 500; box-shadow: 0 2px 10px var(--sombra); }
 
-/* Menos movimento para quem o pede nas definições do sistema */
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* ---------- Painéis da dashboard ---------- */
+.painel { border-radius: var(--raio); padding: 20px; }
+.painel-titulo { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.painel-titulo h2 { font-size: 15px; font-weight: 500; }
+.painel-titulo span { font-size: 12.5px; color: var(--suave); }
+
+/* Último episódio do par: avatar, texto e número */
+.ultimo { display: flex; align-items: center; gap: 14px; }
+.avatar { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 16px; color: var(--no-pastel); }
+.avatar-tu  { background: var(--tu); }
+.avatar-par { background: var(--par); }
+.ultimo-texto { flex: 1; min-width: 0; }
+.ultimo-texto p:first-child { font-size: 13px; color: var(--suave); }
+.ultimo-texto p:last-child { margin-top: 2px; font-size: 17px; font-weight: 500; }
+.ultimo-num { font-size: 30px; font-weight: 700; letter-spacing: -.02em; color: var(--par-txt); }
+
+/* Vs: uma barra fina por pessoa */
+.vs-linhas { margin-top: 18px; display: flex; flex-direction: column; gap: 16px; }
+.vs-linha { display: flex; flex-direction: column; gap: 8px; }
+.vs-rotulo { display: flex; justify-content: space-between; font-size: 13px; }
+.vs-rotulo span:last-child { color: var(--suave); }
+.vs-rotulo b { font-weight: 700; }
+.vs-tu b  { color: var(--tu-txt); }
+.vs-par b { color: var(--par-txt); }
+.barra {                                 /* <progress>: a largura vem do value, sem CSS inline */
+  display: block; width: 100%; height: 6px;
+  -webkit-appearance: none; appearance: none;
+  border: 0; border-radius: 6px; overflow: hidden;
+  background: var(--trilho);
+}
+.barra::-webkit-progress-bar { background: var(--trilho); border-radius: 6px; }
+.barra::-webkit-progress-value { border-radius: 6px; }
+.vs-tu .barra::-webkit-progress-value  { background: var(--tu); }
+.vs-par .barra::-webkit-progress-value { background: var(--par); }
+.vs-tu .barra::-moz-progress-bar  { background: var(--tu); border-radius: 6px; }
+.vs-par .barra::-moz-progress-bar { background: var(--par); border-radius: 6px; }
+.vs-resumo { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--linha); font-size: 13px; color: var(--suave); }
+
+/* Estado vazio (série por começar, par por criar conta) */
+.vazio { text-align: center; padding: 28px 20px; }
+.vazio p:first-child { font-size: 15px; font-weight: 500; }
+.vazio p:last-child { margin-top: 6px; font-size: 13px; color: var(--suave); }
+
+.acao-fundo { margin-top: auto; }
+
+/* ---------- Página da série: mapa dos episódios ---------- */
+.mapa { border-radius: var(--raio); padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 12px; }
+.mapa-info { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--suave); }
+.mapa-linha { display: grid; grid-template-columns: minmax(26px, auto) minmax(0, 1fr) 36px; align-items: center; gap: 8px; font-size: 12.5px; }
+.mapa-pct { text-align: right; font-weight: 700; }
+.mapa-tu .mapa-pct  { color: var(--tu-txt); }
+.mapa-par .mapa-pct { color: var(--par-txt); }
+
+/* Riscos: um por episódio; preenchido = visto, mais claro = filler */
+.riscos { display: flex; height: 18px; border-radius: 6px; overflow: hidden; background: var(--trilho); }
+.riscos i { flex: 1 1 0; }
+.mapa-tu  .riscos i.v { background: var(--tu); }
+.mapa-par .riscos i.v { background: var(--par); }
+.riscos i.f { opacity: .35; }
+
+/* ---------- Pista: cartões de episódio que deslizam e encaixam ao centro ---------- */
+.pista {
+  display: flex; gap: 12px;
+  margin: 12px -20px 0;                  /* sai das margens para ir de ponta a ponta */
+  padding: 14px calc(50% - 84px) 40px;   /* o primeiro e o último também ficam centrados; folga para a sombra */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.pista::-webkit-scrollbar { display: none; }
+.ep {
+  flex: 0 0 168px; height: 196px;
+  scroll-snap-align: center;
+  border-radius: 30px; padding: 18px;
+  display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
+  text-align: left; cursor: pointer;
+  transform: scale(.94); transition: transform .25s, border-color .25s;
+  box-shadow: inset 0 1px 0 var(--brilho), 0 10px 22px var(--sombra);  /* mais curta: cabe na pista sem ser cortada */
+}
+.ep.ativo { transform: scale(1); border-color: var(--tu-txt); }
+.ep-cima { display: flex; width: 100%; justify-content: space-between; font-size: 12px; color: var(--suave); }
+.ep-num { font-size: 46px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.ep-estados { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--suave); }
+.ep-estado { display: flex; align-items: center; gap: 7px; }
+.ponto { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid; }
+.ponto-tu  { border-color: var(--tu-txt); }
+.ponto-par { border-color: var(--par-txt); }
+.ponto-tu.v  { background: var(--tu-txt); }
+.ponto-par.v { background: var(--par-txt); }
+
+/* Reduz animações para quem o pede no sistema */
+@media (prefers-reduced-motion: reduce) {
+  *, .pista { transition: none !important; scroll-behavior: auto !important; }
+}

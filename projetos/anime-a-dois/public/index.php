@@ -19,8 +19,9 @@ $_SESSION['_csrf'] ??= bin2hex(random_bytes(32));
 
 // Rotas permitidas: controller => [ações]. O que não estiver aqui dá 404.
 $rotas = [
-    'auth' => ['login', 'entrar', 'registo', 'registar', 'sair'],
-    'home' => ['index'],
+    'auth'  => ['login', 'entrar', 'registo', 'registar', 'sair'],
+    'home'  => ['index'],
+    'serie' => ['ver', 'marcar'],
 ];
 
 // Por defeito: dashboard (que manda para o login se não houver sessão)

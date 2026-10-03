@@ -10,8 +10,9 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Base de dados e seed das séries (1013 episódios, com os fillers marcados)
 - [x] Registo com nome personalizado; fecha sozinho depois da 2.ª conta
 - [x] Login e logout (sessões, `password_hash`, CSRF)
-- [ ] Página da série: filtro, progresso dos dois e marcar episódios
-- [ ] Dashboard: último episódio do par e o Vs
+- [x] Página da série: mapa dos dois, pista de episódios que desliza, marcar/desmarcar
+- [x] Dashboard: separadores por série, último episódio do par e o Vs
+- [x] Visual em vidro (sálvia + alperce), tema claro/escuro
 - [x] Deploy automático para o alwaysdata
 - [ ] PWA
 
@@ -54,12 +55,12 @@ A primeira pessoa a abrir cria a conta 1, e a segunda cria a conta 2. A partir d
 app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
-  controllers/      AuthController, HomeController
+  controllers/      AuthController, HomeController, SerieController
   models/           User, Serie, Episodio (a lógica vive aqui)
-  views/            layout, auth, home
+  views/            layout, auth, home, serie
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php
-public/             index.php (front controller) e css/
+public/             index.php (front controller), css/ e js/
 ```
 
 Rotas no formato `index.php?c=<controller>&a=<ação>`; só as que estão listadas em `public/index.php` existem.

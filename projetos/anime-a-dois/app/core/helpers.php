@@ -16,6 +16,29 @@ function url(string $c, string $a = 'index', array $params = []): string
     return 'index.php?' . http_build_query(['c' => $c, 'a' => $a] + $params);
 }
 
+// "1 episódio" / "15 episódios"
+function plural(int $n, string $um, string $varios): string
+{
+    return $n . ' ' . ($n === 1 ? $um : $varios);
+}
+
+// Data em linguagem de conversa: "agora mesmo", "há 5 min", "há 2 horas", "ontem", "há 3 dias", "12/09"
+function tempo_relativo(?string $data): string
+{
+    if ($data === null) {
+        return '';
+    }
+    $quando = strtotime($data);
+    $seg = time() - $quando;
+
+    if ($seg < 60)     return 'agora mesmo';
+    if ($seg < 3600)   return 'há ' . intdiv($seg, 60) . ' min';
+    if ($seg < 86400)  return 'há ' . plural(intdiv($seg, 3600), 'hora', 'horas');
+    if ($seg < 172800) return 'ontem';
+    if ($seg < 604800) return 'há ' . intdiv($seg, 86400) . ' dias';
+    return date('d/m', $quando);
+}
+
 // Campo escondido com o token CSRF, para pôr dentro de todos os <form method="post">
 function csrf_campo(): string
 {

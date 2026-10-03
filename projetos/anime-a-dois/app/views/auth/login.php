@@ -1,21 +1,31 @@
-<?php /* Login. Variáveis: $registoAberto, $antigo */ ?>
-<section class="auth">
-  <!-- Logótipo: as duas bolas são "tu" e "o teu par" -->
-  <div class="auth-marca" aria-hidden="true"><i class="bola tu"></i><i class="bola par"></i></div>
-  <h1 class="auth-titulo"><?= e($appNome) ?></h1>
-  <p class="auth-sub">Os episódios que vocês os dois já viram, lado a lado.</p>
+<?php /* Entrar. Variáveis: $registoAberto, $antigo, $flash */ ?>
+<div class="topo">
+  <span></span>
+  <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
+</div>
 
-  <form class="cartao form" method="post" action="<?= e(url('auth', 'entrar')) ?>">
+<section class="auth">
+  <!-- Logótipo, nome e frase, ao centro -->
+  <div class="auth-cabeca">
+    <div class="logo logo-grande" aria-hidden="true"><i></i><i></i></div>
+    <h1 class="auth-titulo">anime a dois</h1>
+    <p class="auth-sub">o que cada um já viu, lado a lado</p>
+  </div>
+
+  <?php require __DIR__ . '/../layout/flash.php'; ?>
+
+  <!-- Formulário num painel de vidro, encostado ao fundo do ecrã -->
+  <form class="form vidro" method="post" action="<?= e(url('auth', 'entrar')) ?>">
     <?= csrf_campo() ?>
 
     <label class="campo">
-      <span>Utilizador</span>
+      <span>utilizador</span>
       <input type="text" name="username" value="<?= e($antigo['username'] ?? '') ?>"
-             autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+             autocomplete="username" autocapitalize="none" spellcheck="false" required>
     </label>
 
     <label class="campo">
-      <span>Palavra-passe</span>
+      <span>palavra-passe</span>
       <input type="password" name="password" autocomplete="current-password" required>
     </label>
 

@@ -77,8 +77,7 @@ abstract class Controller
         $user = $this->utilizador();
         if ($user === null) {                  // null guard depois do find()
             unset($_SESSION['user_id']);
-            $this->flash('info', 'Entra na tua conta para continuar.');
-            $this->redirect('auth', 'login');
+            $this->redirect('auth', 'login');   // sem aviso: na primeira visita seria só ruído
         }
         return $user;
     }
