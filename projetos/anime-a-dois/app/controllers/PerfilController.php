@@ -77,7 +77,7 @@ class PerfilController extends Controller
         }
     }
 
-    // POST: muda o nome
+    // POST: muda o nome e o nome de utilizador
     public function guardarNome(): void
     {
         $this->exigirPost();
@@ -85,9 +85,10 @@ class PerfilController extends Controller
 
         try {
             $user->alterarNome($_POST['nome'] ?? '');
-            $this->responder(true, 'Nome atualizado.');
+            $user->alterarUsername($_POST['username'] ?? $user->username);
+            $this->responder(true, 'Dados atualizados.');
         } catch (InvalidArgumentException $e) {
-            $this->guardarAntigo(['nome' => $_POST['nome'] ?? '']);
+            $this->guardarAntigo(['nome' => $_POST['nome'] ?? '', 'username' => $_POST['username'] ?? '']);
             $this->responder(false, $e->getMessage());
         } catch (PDOException $e) {
             $this->responder(false, 'Não foi possível guardar o nome.');

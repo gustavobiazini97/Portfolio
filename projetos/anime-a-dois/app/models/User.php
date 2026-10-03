@@ -82,6 +82,23 @@ class User extends Model
         $this->save();
     }
 
+    // Muda o nome de utilizador (o que se usa para entrar); mesmas regras do registo
+    public function alterarUsername(string $username): void
+    {
+        $username = strtolower(trim($username));
+        if ($username === $this->username) {
+            return;
+        }
+        if (!preg_match('/^[a-z0-9._-]{3,30}$/', $username)) {
+            throw new InvalidArgumentException('O utilizador só pode ter letras, números, ponto, hífen ou _ (3 a 30).');
+        }
+        if (static::where('username', $username)->where('id', '!=', $this->id)->exists()) {
+            throw new InvalidArgumentException('Esse nome de utilizador já está em uso.');
+        }
+        $this->username = $username;
+        $this->save();
+    }
+
     // Muda a palavra-passe, confirmando a atual
     public function alterarPassword(string $atual, string $nova, string $confirmar): void
     {

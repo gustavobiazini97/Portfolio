@@ -35,7 +35,7 @@
   <?php endif; ?>
 </section>
 
-<!-- Nome que aparece na app -->
+<!-- Nome que aparece na app e nome de utilizador para entrar -->
 <form class="form vidro" method="post" action="<?= e(url('perfil', 'guardarNome')) ?>">
   <?= csrf_campo() ?>
   <label class="campo">
@@ -43,7 +43,14 @@
     <input type="text" name="nome" value="<?= e($antigo['nome'] ?? $user->nome) ?>" maxlength="40" autocomplete="nickname" required>
     <small>é assim que apareces para o teu par</small>
   </label>
-  <button type="submit" class="btn btn-secundario">Guardar nome</button>
+  <label class="campo">
+    <span>utilizador</span>
+    <input type="text" name="username" value="<?= e($antigo['username'] ?? $user->username) ?>"
+           maxlength="30" pattern="[A-Za-z0-9._\-]{3,30}" autocomplete="username"
+           autocapitalize="none" spellcheck="false" required>
+    <small>para entrar · letras, números, ponto, hífen ou _</small>
+  </label>
+  <button type="submit" class="btn btn-secundario">Guardar</button>
 </form>
 
 <!-- Palavra-passe (fechado por defeito, para o ecrã não ficar cheio) -->
