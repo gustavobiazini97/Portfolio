@@ -71,11 +71,18 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
             <?= $ep['numero'] === $inicial ? 'data-inicial' : '' ?>
             aria-label="Episódio <?= $ep['numero'] ?>">
       <span class="ep-cima">
-        <span><?= $ep['filler'] ? 'filler' : 'episódio' ?></span>
+        <?php if ($ep['filler']): ?>
+          <span class="etiqueta-filler">filler</span>
+        <?php else: ?>
+          <span>episódio</span>
+        <?php endif; ?>
         <!-- Visto de seleção: só aparece no modo "Selecionar vários" -->
         <span class="ep-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
       </span>
-      <span class="ep-num"><?= $ep['numero'] ?></span>
+      <span class="ep-meio">
+        <span class="ep-num"><?= $ep['numero'] ?></span>
+        <span class="ep-titulo"><?= e($ep['titulo'] ?? '') ?></span>
+      </span>
       <!-- Quem viu: avatares a cores = viu, esbatidos = ainda não -->
       <span class="ep-quem">
         <span class="ep-avs">
@@ -92,7 +99,7 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 <section class="detalhe vidro" id="detalhe" aria-live="polite">
   <div class="detalhe-cima">
     <h2 id="detalhe-titulo">Episódio <?= $epInicial['numero'] ?></h2>
-    <span class="chip" id="detalhe-tipo"><?= $epInicial['filler'] ? 'filler' : 'canónico' ?></span>
+    <span class="chip<?= $epInicial['filler'] ? ' etiqueta-filler' : '' ?>" id="detalhe-tipo"><?= $epInicial['filler'] ? 'filler' : 'canónico' ?></span>
   </div>
   <p class="detalhe-nome" id="detalhe-nome"><?= e($epInicial['titulo'] ?? '') ?></p>
   <div class="detalhe-estados">

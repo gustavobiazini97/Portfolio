@@ -24,6 +24,18 @@ if (!is_file($ficheiro)) {
 }
 $dados = json_decode(file_get_contents($ficheiro), true);
 
+// Títulos de TODOS os episódios (gerado pelo database/titulos.py no GitHub Actions).
+// Se não existir, ficam só os títulos dos fillers, como antes.
+$todos = [];
+$ficheiroTitulos = __DIR__ . '/episodios.json';
+if (is_file($ficheiroTitulos)) {
+    foreach (json_decode(file_get_contents($ficheiroTitulos), true) as $slugApp => $lista) {
+        foreach ($lista as $ep) {
+            $todos[$slugApp][(int) $ep['n']] = $ep['titulo'] ?? null;
+        }
+    }
+}
+
 // Slug no JSON → slug curto usado na app, pela ordem do filtro
 $mapa = [
     'naruto'                         => 'naruto',
@@ -31,7 +43,7 @@ $mapa = [
     'boruto-naruto-next-generations' => 'boruto',
 ];
 
-Capsule::connection()->transaction(function () use ($dados, $mapa) {
+Capsule::connection()->transaction(function () use ($dados, $mapa, $todos) {
     $ordem = 0;
     foreach ($mapa as $origem => $slug) {
         $show = $dados['shows'][$origem] ?? null;
@@ -63,13 +75,13 @@ Capsule::connection()->transaction(function () use ($dados, $mapa) {
             $linhas[] = [
                 'serie_id' => $serie->id,
                 'numero'   => $n,
-                'titulo'   => $fillers[$n] ?? null,
+                'titulo'   => $todos[$slug][$n] ?? $fillers[$n] ?? null,   // título de todos; senão só o do filler
                 'filler'   => array_key_exists($n, $fillers) ? 1 : 0,
             ];
         }
         Episodio::upsert($linhas, ['serie_id', 'numero'], ['titulo', 'filler']);
 
-        printf("%-18s %3d episódios, %3d fillers\n", $show['name'], $show['total'], count($fillers));
+        printf("%-18s %3d episódios, %3d fillers, %3d títulos\n", $show['name'], $show['total'], count($fillers), count(array_filter($todos[$slug] ?? [])));
     }
 });
 

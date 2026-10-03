@@ -314,7 +314,7 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 }
 .pista::-webkit-scrollbar { display: none; }
 .ep {
-  flex: 0 0 172px; height: 214px;       /* tamanho fixo: compacto em qualquer ecrã */
+  flex: 0 0 172px; height: 236px;       /* tamanho fixo: compacto em qualquer ecrã (com espaço para o título) */
   scroll-snap-align: center;
   border-radius: 30px; padding: 18px;
   display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
@@ -324,7 +324,7 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 }
 .ep.ativo { transform: scale(1); border-color: var(--tu-txt); }
 .ep-cima { display: flex; width: 100%; justify-content: space-between; font-size: 12px; color: var(--suave); }
-.ep-num { font-size: 52px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.ep-num { font-size: 46px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
 .ep-estados { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--suave); }
 .ep-estado { display: flex; align-items: center; gap: 7px; }
 .ponto { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid; }
@@ -332,6 +332,31 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .ponto-par { border-color: var(--par-txt); }
 .ponto-tu.v  { background: var(--tu-txt); }
 .ponto-par.v { background: var(--par-txt); }
+
+/* Ecrãs baixos: os cartões já mostram título e quem viu, por isso o painel de baixo sai
+   para os cartões caberem inteiros */
+@media (max-height: 760px) {
+  .pagina-serie .detalhe { display: none; }
+}
+
+/* Etiqueta "filler": escura e sólida, salta à vista em qualquer cor de cartão e tema */
+.etiqueta-filler {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px 3px 8px; border-radius: 10px;
+  background: var(--tinta); color: var(--bg);
+  font-size: 11.5px; font-weight: 500; letter-spacing: .02em;
+}
+.etiqueta-filler::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .7; }
+.chip.etiqueta-filler { padding: 3px 12px 3px 10px; font-size: 12px; background: var(--tinta); color: var(--bg); }   /* ganha ao cinzento do .chip */
+
+/* Número e título do episódio no meio do cartão */
+.ep-meio { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.ep-titulo {
+  font-size: 11.5px; line-height: 1.35; color: var(--suave);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;   /* no máximo 2 linhas */
+  min-height: 2.7em;
+}
+.ep.visto .ep-titulo, .ep.par-viu .ep-titulo { color: var(--tinta); opacity: .75; }
 
 /* Cor do cartão conta quem viu: sálvia = só tu, alperce = só o par, degradê = os dois */
 .ep.visto {

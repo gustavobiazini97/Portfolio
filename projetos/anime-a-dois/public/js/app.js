@@ -50,7 +50,9 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   // ----- Painel do episódio ao centro -----
   function atualizarDetalhe(c) {
     document.getElementById('detalhe-titulo').textContent = 'Episódio ' + c.dataset.n;
-    document.getElementById('detalhe-tipo').textContent = c.dataset.filler === '1' ? 'filler' : 'canónico';
+    var tipo = document.getElementById('detalhe-tipo');
+    tipo.textContent = c.dataset.filler === '1' ? 'filler' : 'canónico';
+    tipo.classList.toggle('etiqueta-filler', c.dataset.filler === '1');   // etiqueta escura e sólida
     document.getElementById('detalhe-nome').textContent = c.dataset.titulo || '';
     var tu = c.dataset.tu === '1';
     document.getElementById('detalhe-tu').textContent = tu ? 'visto' : 'por ver';
