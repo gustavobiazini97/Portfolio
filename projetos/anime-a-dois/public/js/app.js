@@ -73,3 +73,10 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   centrar(inicial, false);
   ativar(inicial);
 })();
+
+// ---------- App instalável: regista o service worker ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* sem SW a app funciona na mesma */ });
+  });
+}

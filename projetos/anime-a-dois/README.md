@@ -14,7 +14,7 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Dashboard: separadores por série, último episódio do par e o Vs
 - [x] Visual em vidro (sálvia + alperce), tema claro/escuro
 - [x] Deploy automático para o alwaysdata
-- [ ] PWA
+- [x] PWA: instalável no Android, atalhos por série no ícone, página offline
 
 ## Online (alwaysdata)
 
