@@ -1,4 +1,4 @@
-<?php /* Perfil. Variáveis: $user, $antigo, $flash */ ?>
+<?php /* Perfil. Variáveis: $user, $pref (Preferencia), $vapidPublica, $telemoveis, $antigo, $flash */ ?>
 <div class="topo">
   <a class="btn-redondo vidro" href="<?= e(url('home')) ?>" aria-label="Voltar ao início">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
@@ -51,6 +51,47 @@
     <small>para entrar · letras, números, ponto, hífen ou _</small>
   </label>
   <button type="submit" class="btn btn-secundario">Guardar</button>
+</form>
+
+<!-- Notificações: o que receber (linhas) e por onde (colunas) -->
+<form class="form vidro notif" method="post" action="<?= e(url('perfil', 'guardarNotificacoes')) ?>">
+  <?= csrf_campo() ?>
+  <h2 class="notif-titulo">Notificações</h2>
+  <p class="notif-sub">Quando o teu par marca episódios ou comenta.</p>
+
+  <div class="notif-grade" role="group" aria-label="O que receber e por onde">
+    <span></span><span class="notif-col">Telemóvel</span><span class="notif-col">Email</span>
+
+    <span>Episódios marcados</span>
+    <label class="interruptor"><input type="checkbox" name="ep_push" value="1" <?= $pref->ep_push ? 'checked' : '' ?>><i></i><span class="escondido">Episódios no telemóvel</span></label>
+    <label class="interruptor"><input type="checkbox" name="ep_email" value="1" <?= $pref->ep_email ? 'checked' : '' ?>><i></i><span class="escondido">Episódios por email</span></label>
+
+    <span>Comentários</span>
+    <label class="interruptor"><input type="checkbox" name="com_push" value="1" <?= $pref->com_push ? 'checked' : '' ?>><i></i><span class="escondido">Comentários no telemóvel</span></label>
+    <label class="interruptor"><input type="checkbox" name="com_email" value="1" <?= $pref->com_email ? 'checked' : '' ?>><i></i><span class="escondido">Comentários por email</span></label>
+  </div>
+
+  <label class="campo">
+    <span>email</span>
+    <input type="email" name="email" value="<?= e($pref->email ?? '') ?>" autocomplete="email" placeholder="só se quiseres receber por email">
+  </label>
+
+  <button type="submit" class="btn btn-secundario">Guardar notificações</button>
+
+  <!-- Este telemóvel: pedir permissão e subscrever (js/app.js) -->
+  <div class="notif-telemovel" id="notif-telemovel"
+       data-vapid="<?= e($vapidPublica) ?>"
+       data-url-subscrever="<?= e(url('perfil', 'subscrever')) ?>"
+       data-url-desubscrever="<?= e(url('perfil', 'desubscrever')) ?>"
+       data-url-testar="<?= e(url('perfil', 'testarNotificacao')) ?>">
+    <p class="notif-estado" id="notif-estado">
+      <?= $telemoveis ? 'Notificações ativas em ' . plural($telemoveis, 'telemóvel', 'telemóveis') . '.' : 'Ainda não ativaste as notificações em nenhum telemóvel.' ?>
+    </p>
+    <div class="notif-botoes">
+      <button type="button" class="btn-texto vidro" id="btn-notif-ativar">Ativar neste telemóvel</button>
+      <button type="button" class="btn-texto vidro" id="btn-notif-testar">Enviar teste</button>
+    </div>
+  </div>
 </form>
 
 <!-- Palavra-passe (fechado por defeito, para o ecrã não ficar cheio) -->

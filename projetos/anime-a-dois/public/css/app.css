@@ -237,6 +237,36 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .perfil-user { font-size: 13px; color: var(--suave); }
 .link-suave { margin-top: 10px; background: none; border: 0; padding: 6px; font-size: 13px; color: var(--suave); text-decoration: underline; cursor: pointer; }
 
+/* ---------- Notificações (perfil) ---------- */
+.notif-titulo { font-size: 15px; font-weight: 500; }
+.notif-sub { margin-top: -8px; font-size: 13px; color: var(--suave); }
+/* Grelha: o quê (linhas) × por onde (colunas) */
+.notif-grade { display: grid; grid-template-columns: 1fr 72px 56px; align-items: center; row-gap: 12px; font-size: 14px; }
+.notif-col { font-size: 12px; color: var(--suave); text-align: center; }
+.notif-grade .interruptor { justify-self: center; }
+
+/* Interruptor (checkbox com aspeto de botão deslizante) */
+.interruptor { position: relative; display: inline-block; width: 44px; height: 26px; cursor: pointer; }
+.interruptor input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.interruptor i {
+  position: absolute; inset: 0; border-radius: 13px;
+  background: var(--trilho); border: 1px solid var(--linha);
+  transition: background .2s;
+}
+.interruptor i::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--selec); box-shadow: 0 1px 3px var(--sombra);
+  transition: transform .2s;
+}
+.interruptor input:checked + i { background: var(--tu-txt); border-color: transparent; }
+.interruptor input:checked + i::after { transform: translateX(18px); background: #fff; }
+.interruptor input:focus-visible + i { outline: 2px solid var(--tu-txt); outline-offset: 2px; }
+
+.notif-telemovel { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--linha); }
+.notif-estado { font-size: 13px; color: var(--suave); }
+.notif-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+
 /* Secção que abre e fecha (mudar palavra-passe) */
 .dobravel { gap: 0; }
 .dobravel summary { cursor: pointer; font-size: 15px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; align-items: center; }

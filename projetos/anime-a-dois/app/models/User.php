@@ -121,17 +121,19 @@ class User extends Model
         return $this->vistos()->where('episodios.id', $episodio->id)->exists();
     }
 
-    // Marca (ou desmarca) vários episódios de uma vez; devolve quantos mudaram de estado.
+    // Marca (ou desmarca) vários episódios de uma vez; devolve os IDs que mudaram de estado.
     // Ao marcar, só insere os que ainda não estavam vistos (os antigos mantêm a data original).
-    public function definirVistos(array $ids, bool $visto): int
+    public function definirVistos(array $ids, bool $visto): array
     {
         $ids = array_values(array_unique(array_map('intval', $ids)));
         if ($ids === []) {
-            return 0;
+            return [];
         }
 
         if (!$visto) {
-            return $this->vistos()->detach($ids);
+            $tinha = $this->vistos()->whereIn('episodios.id', $ids)->pluck('episodios.id')->all();
+            $this->vistos()->detach($ids);
+            return array_map('intval', $tinha);
         }
 
         // IDs que já estavam vistos: ficam como estão
@@ -145,7 +147,7 @@ class User extends Model
         }
         $this->vistos()->attach($linhas);
 
-        return count($novos);
+        return array_values($novos);
     }
 
     // A outra conta (a app só tem duas); null enquanto o parceiro não se registar

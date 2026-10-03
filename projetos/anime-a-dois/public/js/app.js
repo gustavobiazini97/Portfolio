@@ -421,6 +421,88 @@ document.querySelectorAll('[data-convidar]').forEach(function (botao) {
   });
 });
 
+// ---------- Notificações neste telemóvel (perfil) ----------
+(function () {
+  var caixa = document.getElementById('notif-telemovel');
+  if (!caixa) return;
+  var estado = document.getElementById('notif-estado');
+  var btnAtivar = document.getElementById('btn-notif-ativar');
+  var btnTestar = document.getElementById('btn-notif-testar');
+  var csrf = document.querySelector('input[name="_csrf"]').value;
+
+  // Sem suporte (browser antigo, ou iPhone fora da app instalada)
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+    estado.textContent = 'Este browser não suporta notificações. Usa a app instalada no Chrome.';
+    btnAtivar.disabled = true;
+    return;
+  }
+
+  // A chave VAPID vem em base64url; o browser quer bytes
+  function chaveEmBytes(b64) {
+    var pad = '='.repeat((4 - b64.length % 4) % 4);
+    var bin = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function post(url, campos) {
+    var dados = new FormData();
+    dados.append('_csrf', csrf);
+    Object.keys(campos).forEach(function (k) { dados.append(k, campos[k]); });
+    return fetch(url, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); });
+  }
+
+  var subAtual = null;
+  function mostrar(sub) {
+    subAtual = sub;
+    btnAtivar.textContent = sub ? 'Desligar neste telemóvel' : 'Ativar neste telemóvel';
+    if (Notification.permission === 'denied') {
+      estado.textContent = 'Bloqueaste as notificações. Ativa-as no Chrome: ⋮ → Definições → Notificações.';
+    } else if (sub) {
+      estado.textContent = 'Notificações ativas neste telemóvel.';
+    }
+  }
+
+  navigator.serviceWorker.ready
+    .then(function (reg) { return reg.pushManager.getSubscription(); })
+    .then(mostrar)
+    .catch(function () {});
+
+  btnAtivar.addEventListener('click', function () {
+    btnAtivar.disabled = true;
+    navigator.serviceWorker.ready.then(function (reg) {
+      // Já ativo → desligar
+      if (subAtual) {
+        var endpoint = subAtual.endpoint;
+        return subAtual.unsubscribe()
+          .then(function () { return post(caixa.dataset.urlDesubscrever, { endpoint: endpoint }); })
+          .then(function (r) { estado.textContent = r.mensagem; mostrar(null); });
+      }
+      // Pede a permissão do Android e subscreve
+      return Notification.requestPermission().then(function (perm) {
+        if (perm !== 'granted') { mostrar(null); return; }
+        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveEmBytes(caixa.dataset.vapid) })
+          .then(function (sub) {
+            return post(caixa.dataset.urlSubscrever, { subscricao: JSON.stringify(sub) })
+              .then(function (r) { mostrar(sub); estado.textContent = r.mensagem; });
+          });
+      });
+    })
+      .catch(function () { estado.textContent = 'Não foi possível ativar. Tenta outra vez.'; })
+      .then(function () { btnAtivar.disabled = false; });
+  });
+
+  btnTestar.addEventListener('click', function () {
+    btnTestar.disabled = true;
+    post(caixa.dataset.urlTestar, {})
+      .then(function (r) { estado.textContent = r.mensagem; })
+      .catch(function () { estado.textContent = 'Sem ligação. Tenta outra vez.'; })
+      .then(function () { btnTestar.disabled = false; });
+  });
+})();
+
 // ---------- App instalável: regista o service worker ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {

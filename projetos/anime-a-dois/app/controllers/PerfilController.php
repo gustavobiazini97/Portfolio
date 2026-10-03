@@ -9,8 +9,11 @@ class PerfilController extends Controller
         $user = $this->exigirLogin();
 
         $this->render('perfil/index', [
-            'titulo' => 'Perfil',
-            'user'   => $user,
+            'titulo'      => 'Perfil',
+            'user'        => $user,
+            'pref'        => Preferencia::de($user),
+            'vapidPublica' => Notificador::vapid()['publicKey'],   // o browser precisa dela para subscrever
+            'telemoveis'  => Subscricao::where('user_id', $user->id)->count(),
         ]);
     }
 
@@ -110,6 +113,70 @@ class PerfilController extends Controller
         } catch (PDOException $e) {
             $this->responder(false, 'Não foi possível alterar a palavra-passe.');
         }
+    }
+
+    // ---------- Notificações ----------
+
+    // POST: o que quero receber e por onde
+    public function guardarNotificacoes(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            Preferencia::guardar($user, $_POST);
+            $this->responder(true, 'Notificações guardadas.');
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível guardar.');
+        }
+    }
+
+    // POST (JSON do browser): ativa as notificações neste telemóvel
+    public function subscrever(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            Subscricao::registar($user, json_decode($_POST['subscricao'] ?? '', true) ?: []);
+            $this->json(['ok' => true, 'mensagem' => 'Notificações ativas neste telemóvel.']);
+        } catch (InvalidArgumentException $e) {
+            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);
+        }
+    }
+
+    // POST: desativa as notificações neste telemóvel
+    public function desubscrever(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+        Subscricao::remover($user, $_POST['endpoint'] ?? '');
+        $this->json(['ok' => true, 'mensagem' => 'Notificações desligadas neste telemóvel.']);
+    }
+
+    // POST: envia uma notificação de teste para ti (telemóvel e/ou email)
+    public function testarNotificacao(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+        $pref = Preferencia::de($user);
+
+        $msg = ['titulo' => 'Anime a Dois', 'corpo' => 'As notificações estão a funcionar 🎉',
+                'url' => url_absoluto() . url('home'), 'tag' => 'teste'];
+
+        $partes = [];
+        try {
+            $n = Notificador::push($user, $msg);
+            $partes[] = $n > 0 ? 'enviada para ' . plural($n, 'telemóvel', 'telemóveis') : 'nenhum telemóvel ativo';
+        } catch (Throwable $e) {
+            $partes[] = 'o push falhou';
+        }
+        if ($pref->email) {
+            $partes[] = Notificador::email($pref->email, $msg) ? 'email enviado' : 'o email falhou';
+        }
+        $this->json(['ok' => true, 'mensagem' => 'Teste: ' . implode(', ', $partes) . '.']);
     }
 
     // Resposta comum: JSON para o fetch, ou aviso + volta ao perfil (Post/Redirect/Get)

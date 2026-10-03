@@ -20,4 +20,7 @@ return [
 
     // Número máximo de contas: o registo fecha quando chega a este valor
     'max_contas' => 2,
+
+    // Remetente dos emails de notificação (no alwaysdata, o email da conta)
+    'email_de' => 'animeadois@alwaysdata.net',
 ];

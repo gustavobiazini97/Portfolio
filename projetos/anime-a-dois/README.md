@@ -17,6 +17,7 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] PWA: instalável no Android, atalhos por série no ícone, página offline
 - [x] Perfil: foto (guardada na base de dados), nome, utilizador, palavra-passe, terminar sessão
 - [x] Comentários por episódio (os dois veem; cada um apaga os seus)
+- [x] Notificações ao par (episódios e comentários) por telemóvel (Web Push) e/ou email, escolhidas no perfil
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
 
 ## Online (alwaysdata)
@@ -31,6 +32,7 @@ O deploy é automático: cada push que mexa nesta pasta corre o workflow
 4. corre `database/migrate.php` e `database/seed.php` no servidor.
 
 Só precisa do secret **`AD_PASSWORD`** no repo (Settings → Secrets and variables → Actions).
+As chaves VAPID das notificações são geradas no próprio servidor na primeira utilização (tabela `config_app`).
 No painel do alwaysdata, o site aponta para a pasta `anime-a-dois/public/`.
 
 ## Correr localmente (WAMP ou Termux)
@@ -59,7 +61,7 @@ app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
   controllers/      AuthController, HomeController, SerieController, PerfilController
-  models/           User, Serie, Episodio, Foto, Comentario (a lógica vive aqui)
+  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php

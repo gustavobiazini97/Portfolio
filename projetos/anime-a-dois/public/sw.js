@@ -3,7 +3,7 @@
 // porque têm dados pessoais e tokens de sessão; sem rede mostra-se a página offline.html.
 
 // Mudar a versão força a atualização da cache nas apps instaladas
-const CACHE = 'anime-a-dois-v3';
+const CACHE = 'anime-a-dois-v4';
 
 const ESTATICOS = [
   './css/app.css',
@@ -59,5 +59,36 @@ self.addEventListener('fetch', (e) => {
         return guardado || rede;
       })
     )
+  );
+});
+
+// ---------- Notificações (Web Push) ----------
+
+// Chega uma notificação do servidor: mostra-a (título, texto, ícone; tocar abre o episódio)
+self.addEventListener('push', (e) => {
+  let msg = { titulo: 'Anime a Dois', corpo: '', url: './', tag: 'geral' };
+  try { msg = Object.assign(msg, e.data.json()); } catch (erro) { /* payload inválido: mostra o genérico */ }
+
+  e.waitUntil(self.registration.showNotification(msg.titulo, {
+    body: msg.corpo,
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    tag: msg.tag,          // a mesma tag substitui a anterior em vez de empilhar
+    renotify: true,        // mas volta a vibrar/tocar
+    data: { url: msg.url }
+  }));
+});
+
+// Tocar na notificação: abre a app nesse episódio (reaproveita uma janela já aberta)
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((janelas) => {
+      for (const j of janelas) {
+        if ('navigate' in j) { return j.focus().then(() => j.navigate(url)); }
+      }
+      return self.clients.openWindow(url);
+    })
   );
 });

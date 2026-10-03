@@ -68,7 +68,14 @@ class SerieController extends Controller
             }
             $visto = $acao === 'marcar';
 
-            $user->definirVistos($episodios->pluck('id')->all(), $visto);
+            $mudaram = $user->definirVistos($episodios->pluck('id')->all(), $visto);
+
+            // Avisa o par só dos episódios que ficaram vistos agora (não dos que já estavam)
+            if ($visto && $mudaram !== []) {
+                $novos = $episodios->whereIn('id', $mudaram);
+                Notificador::episodios($user, $serie, $novos->pluck('numero')->map(fn ($x) => (int) $x)->all(),
+                                       $novos->pluck('titulo', 'numero')->all());
+            }
 
             // Mensagem curta para o aviso
             $n = $episodios->count();
@@ -125,7 +132,8 @@ class SerieController extends Controller
                 $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
             }
 
-            Comentario::escrever($user, $episodio, $_POST['texto'] ?? '');
+            $comentario = Comentario::escrever($user, $episodio, $_POST['texto'] ?? '');
+            Notificador::comentario($user, $comentario);   // avisa o par (telemóvel/email, conforme ele quiser)
             $_GET['episodio'] = $episodio->id;
             $this->comentarios();
         } catch (InvalidArgumentException $e) {

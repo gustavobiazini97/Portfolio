@@ -65,3 +65,32 @@ CREATE TABLE IF NOT EXISTS comentarios (
   CONSTRAINT fk_comentario_user     FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
   CONSTRAINT fk_comentario_episodio FOREIGN KEY (episodio_id) REFERENCES episodios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Valores internos da app (ex.: as chaves VAPID das notificações, geradas no próprio servidor)
+CREATE TABLE IF NOT EXISTS config_app (
+  chave VARCHAR(50)  PRIMARY KEY,
+  valor TEXT         NOT NULL
+) ENGINE=InnoDB;
+
+-- O que cada pessoa quer receber, e por onde (sem linha = valores por defeito)
+CREATE TABLE IF NOT EXISTS preferencias (
+  user_id    INT UNSIGNED PRIMARY KEY,
+  email      VARCHAR(190) NULL,                    -- para onde vão os emails (opcional)
+  ep_push    TINYINT(1)   NOT NULL DEFAULT 1,      -- episódios marcados → telemóvel
+  ep_email   TINYINT(1)   NOT NULL DEFAULT 0,      -- episódios marcados → email
+  com_push   TINYINT(1)   NOT NULL DEFAULT 1,      -- comentários → telemóvel
+  com_email  TINYINT(1)   NOT NULL DEFAULT 0,      -- comentários → email
+  CONSTRAINT fk_pref_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Telemóveis/browsers com notificações ativas (uma pessoa pode ter vários)
+CREATE TABLE IF NOT EXISTS subscricoes (
+  id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id    INT UNSIGNED NOT NULL,
+  endpoint   TEXT         NOT NULL,                -- URL do serviço de push (FCM, Mozilla, ...)
+  chave_hash CHAR(64)     NOT NULL UNIQUE,         -- sha256 do endpoint: evita duplicados
+  p256dh     VARCHAR(255) NOT NULL,
+  auth       VARCHAR(255) NOT NULL,
+  criado_em  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sub_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
