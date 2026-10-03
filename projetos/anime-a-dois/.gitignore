@@ -1,0 +1,4 @@
+# Dependências do Composer (instalar com: composer install)
+/vendor/
+# Credenciais locais (criar a partir de config.example.php)
+/config/config.php
