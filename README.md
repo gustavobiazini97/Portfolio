@@ -12,13 +12,15 @@ index.html  só redireciona para site/ (o GitHub Pages abre sempre o index.html 
 
 ## Instalar como app
 
-O portfólio é uma PWA: abre o site no Chrome (Android) e escolhe **Instalar app** no menu ⋮.
-Fica com ícone próprio, abre sem a barra do browser e funciona offline.
+O portfólio é uma PWA: abre o site no Chrome (Android) e toca em **Instalar** no topo da página
+(ou ⋮ → Adicionar ao ecrã principal → Instalar). Fica com ícone próprio, abre sem a barra do browser
+e funciona offline. Carregar no ícone sem largar mostra os atalhos **Projetos** e **Contacto**.
 
 ```
 site/manifest.json   nome, cores e ícones da app
 site/sw.js           service worker (cache offline)
-site/icons/          ícones 192/512, versão maskable e apple-touch-icon
+site/icons/          ícones 192/512, maskable, apple-touch-icon e ícones dos atalhos
+site/screenshots/    capturas mostradas na janela de instalação
 ```
 
 Ao alterar CSS/JS, sobe a versão em `CACHE` no `sw.js` para forçar a atualização nas apps instaladas.

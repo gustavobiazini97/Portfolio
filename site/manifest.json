@@ -10,9 +10,31 @@
   "orientation": "portrait",
   "background_color": "#fbf8f3",
   "theme_color": "#fbf8f3",
+  "categories": ["education", "personalization"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Projetos",
+      "short_name": "Projetos",
+      "description": "Ver os projetos",
+      "url": "./#projetos",
+      "icons": [{ "src": "icons/shortcut-projetos.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Contacto",
+      "short_name": "Contacto",
+      "description": "Email, GitHub e LinkedIn",
+      "url": "./#contacto",
+      "icons": [{ "src": "icons/shortcut-contacto.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    { "src": "screenshots/inicio.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "Página inicial" },
+    { "src": "screenshots/projetos.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "Lista de projetos" },
+    { "src": "screenshots/projeto-aberto.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "Detalhes de um projeto, em tema escuro" }
   ]
 }
