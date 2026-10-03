@@ -15,7 +15,9 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Visual em vidro (sálvia + alperce), tema claro/escuro
 - [x] Deploy automático para o alwaysdata
 - [x] PWA: instalável no Android, atalhos por série no ícone, página offline
-- [x] Perfil: foto (guardada na base de dados), nome, palavra-passe, terminar sessão
+- [x] Perfil: foto (guardada na base de dados), nome, utilizador, palavra-passe, terminar sessão
+- [x] Comentários por episódio (os dois veem; cada um apaga os seus)
+- [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
 
 ## Online (alwaysdata)
 
@@ -57,7 +59,7 @@ app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
   controllers/      AuthController, HomeController, SerieController, PerfilController
-  models/           User, Serie, Episodio, Foto (a lógica vive aqui)
+  models/           User, Serie, Episodio, Foto, Comentario (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php

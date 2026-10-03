@@ -94,6 +94,7 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
     atual = c;
     atualizarDetalhe(c);
     if (!multiplo) atualizarBotao();
+    atualizarBotaoComent();
   }
 
   // Centra um cartão na pista
@@ -210,6 +211,110 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
       .catch(function () { mostrarAviso('Sem ligação. Tenta outra vez.', true); })
       .then(function () { ocupado = false; atualizarBotao(); });
   });
+
+  // ----- Comentários do episódio ao centro -----
+  var btnComent = document.getElementById('btn-coment');
+  var btnComentTxt = document.getElementById('btn-coment-txt');
+  var folha = document.getElementById('folha-coment');
+  var lista = document.getElementById('folha-lista');
+  var vazio = document.getElementById('folha-vazio');
+  var formComent = document.getElementById('folha-form');
+  var texto = document.getElementById('folha-texto');
+  var csrf = form.querySelector('input[name="_csrf"]').value;
+  var aberto = null;   // cartão cujos comentários estão na folha
+
+  // "Comentários" ou "Comentários · 3"
+  function atualizarBotaoComent() {
+    if (!btnComentTxt || !atual) return;
+    var n = parseInt(atual.dataset.coment || '0', 10);
+    btnComentTxt.textContent = n ? 'Comentários · ' + n : 'Comentários';
+  }
+
+  // Atualiza o número no cartão (balão) e no botão
+  function definirContagem(cartao, n) {
+    cartao.dataset.coment = n;
+    var balao = cartao.querySelector('.ep-coment');
+    balao.hidden = n === 0;
+    balao.querySelector('span').textContent = n;
+    if (cartao === atual) atualizarBotaoComent();
+  }
+
+  // Desenha a lista; o texto entra sempre com textContent (nunca como HTML)
+  function desenhar(comentarios) {
+    lista.innerHTML = '';
+    vazio.hidden = comentarios.length > 0;
+    comentarios.forEach(function (c) {
+      var li = document.createElement('li'); li.className = 'coment';
+
+      var av = document.createElement('span');
+      av.className = 'avatar ' + (c.meu ? 'avatar-tu' : 'avatar-par');
+      if (c.foto) { var img = document.createElement('img'); img.src = c.foto; img.alt = ''; av.appendChild(img); }
+      else av.textContent = c.inicial;
+
+      var corpo = document.createElement('div'); corpo.className = 'coment-corpo';
+      var cima = document.createElement('div'); cima.className = 'coment-cima';
+      var nome = document.createElement('b'); nome.textContent = c.meu ? 'Tu' : c.autor;
+      var quando = document.createElement('span'); quando.textContent = c.quando;
+      cima.appendChild(nome); cima.appendChild(quando);
+      if (c.meu) {
+        var apagar = document.createElement('button');
+        apagar.type = 'button'; apagar.className = 'coment-apagar'; apagar.textContent = 'apagar';
+        apagar.addEventListener('click', function () { enviar(folha.dataset.urlApagar, { id: c.id }); });
+        cima.appendChild(apagar);
+      }
+      var p = document.createElement('p'); p.className = 'coment-texto'; p.textContent = c.texto;
+      corpo.appendChild(cima); corpo.appendChild(p);
+
+      li.appendChild(av); li.appendChild(corpo);
+      lista.appendChild(li);
+    });
+    lista.scrollTop = lista.scrollHeight;   // o mais recente fica à vista
+    if (aberto) definirContagem(aberto, comentarios.length);
+  }
+
+  // POST (comentar/apagar) → a resposta traz a lista atualizada
+  function enviar(urlAcao, campos) {
+    var dados = new FormData();
+    dados.append('_csrf', csrf);
+    Object.keys(campos).forEach(function (k) { dados.append(k, campos[k]); });
+    return fetch(urlAcao, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resposta) {
+        if (!resposta.ok) { mostrarAviso(resposta.mensagem || 'Não foi possível guardar.', true); return false; }
+        desenhar(resposta.comentarios);
+        return true;
+      })
+      .catch(function () { mostrarAviso('Sem ligação. Tenta outra vez.', true); return false; });
+  }
+
+  if (btnComent && folha) {
+    btnComent.addEventListener('click', function () {
+      if (!atual) return;
+      aberto = atual;
+      document.getElementById('folha-titulo').textContent = 'Episódio ' + atual.dataset.n;
+      lista.innerHTML = ''; vazio.hidden = true;
+      folha.showModal();
+      fetch(btnComent.dataset.url + '&episodio=' + encodeURIComponent(atual.dataset.id), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (resposta) { if (resposta.ok) desenhar(resposta.comentarios); })
+        .catch(function () { mostrarAviso('Sem ligação. Tenta outra vez.', true); });
+    });
+
+    formComent.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (!aberto || !texto.value.trim()) return;
+      enviar(folha.dataset.urlComentar, { episodio_id: aberto.dataset.id, texto: texto.value })
+        .then(function (ok) { if (ok) texto.value = ''; });
+    });
+
+    // Enter envia; Shift+Enter muda de linha (no teclado do telemóvel o botão é a forma principal)
+    texto.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); formComent.requestSubmit(); }
+    });
+
+    document.getElementById('folha-fechar').addEventListener('click', function () { folha.close(); });
+    folha.addEventListener('click', function (ev) { if (ev.target === folha) folha.close(); });   // tocar fora fecha
+  }
 
   // ----- Abertura: o cartão indicado pelo servidor -----
   var inicial = pista.querySelector('.ep[data-inicial]') || cartoes[0];

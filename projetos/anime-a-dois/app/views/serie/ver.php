@@ -68,6 +68,7 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
             data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>"
             data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-par="<?= $ep['par'] ? '1' : '0' ?>"
             data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
+            data-coment="<?= $ep['coment'] ?>"
             <?= $ep['numero'] === $inicial ? 'data-inicial' : '' ?>
             aria-label="Episódio <?= $ep['numero'] ?>">
       <span class="ep-cima">
@@ -76,6 +77,8 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
         <?php else: ?>
           <span>episódio</span>
         <?php endif; ?>
+        <!-- Balão com o número de comentários (só se houver) -->
+        <span class="ep-coment"<?= $ep['coment'] ? '' : ' hidden' ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg><span><?= $ep['coment'] ?></span></span>
         <!-- Visto de seleção: só aparece no modo "Selecionar vários" -->
         <span class="ep-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
       </span>
@@ -126,6 +129,12 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
   <div class="acoes-linha">
     <button type="button" class="btn-texto vidro" id="btn-modo">Selecionar vários</button>
     <span class="acoes-info" id="acoes-info"></span>
+    <!-- Abre a folha de comentários do episódio ao centro -->
+    <button type="button" class="btn-texto vidro btn-coment" id="btn-coment"
+            data-url="<?= e(url('serie', 'comentarios')) ?>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg>
+      <span id="btn-coment-txt">Comentários</span>
+    </button>
   </div>
   <button type="submit" class="btn<?= $epInicial['tu'] ? ' btn-secundario' : '' ?>" id="btn-marcar">
     <?= $epInicial['tu'] ? 'Desmarcar episódio ' . $epInicial['numero'] : 'Marcar episódio ' . $epInicial['numero'] . ' como visto' ?>
@@ -134,3 +143,25 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 
 <!-- Aviso curto depois de marcar (substitui o recarregar da página) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>
+
+<!-- Folha de comentários (abre por cima, a partir de baixo) -->
+<dialog class="folha vidro" id="folha-coment" aria-labelledby="folha-titulo"
+        data-url-comentar="<?= e(url('serie', 'comentar')) ?>" data-url-apagar="<?= e(url('serie', 'apagarComentario')) ?>">
+  <div class="folha-cima">
+    <h2 id="folha-titulo">Comentários</h2>
+    <button type="button" class="btn-redondo vidro" id="folha-fechar" aria-label="Fechar comentários">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+
+  <!-- Lista preenchida pelo js/app.js (texto sempre inserido como texto, nunca como HTML) -->
+  <ul class="folha-lista" id="folha-lista"></ul>
+  <p class="folha-vazio" id="folha-vazio" hidden>Ainda ninguém comentou este episódio. Começa tu.</p>
+
+  <form class="folha-form" id="folha-form">
+    <textarea name="texto" id="folha-texto" rows="2" maxlength="500" placeholder="O que achaste deste episódio?" required></textarea>
+    <button type="submit" class="btn folha-enviar" aria-label="Enviar comentário">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </button>
+  </form>
+</dialog>

@@ -95,6 +95,63 @@ class SerieController extends Controller
         }
     }
 
+    // GET ?episodio=<id>: comentários de um episódio, em JSON (para a folha de comentários)
+    public function comentarios(): void
+    {
+        $user = $this->exigirLogin();
+        $episodio = Episodio::find((int) ($_GET['episodio'] ?? 0));
+
+        // Null guard depois do find()
+        if ($episodio === null) {
+            $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
+        }
+
+        $lista = Comentario::with('autor')->where('episodio_id', $episodio->id)->orderBy('criado_em')->orderBy('id')->get();
+        $this->json([
+            'ok'          => true,
+            'comentarios' => $lista->map(fn ($c) => $c->paraJson($user))->all(),
+        ]);
+    }
+
+    // POST: escreve um comentário (responde com a lista atualizada)
+    public function comentar(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $episodio = Episodio::find((int) ($_POST['episodio_id'] ?? 0));
+            if ($episodio === null) {
+                $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
+            }
+
+            Comentario::escrever($user, $episodio, $_POST['texto'] ?? '');
+            $_GET['episodio'] = $episodio->id;
+            $this->comentarios();
+        } catch (InvalidArgumentException $e) {
+            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);
+        } catch (PDOException $e) {
+            $this->json(['ok' => false, 'mensagem' => 'Não foi possível guardar o comentário.'], 500);
+        }
+    }
+
+    // POST: apaga um comentário — só o próprio autor pode
+    public function apagarComentario(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        $comentario = Comentario::find((int) ($_POST['id'] ?? 0));
+        if ($comentario === null || $comentario->user_id !== $user->id) {
+            $this->json(['ok' => false, 'mensagem' => 'Só podes apagar os teus comentários.'], 403);
+        }
+
+        $episodioId = $comentario->episodio_id;
+        $comentario->delete();
+        $_GET['episodio'] = $episodioId;
+        $this->comentarios();
+    }
+
     // Erro no marcar: JSON para o fetch, aviso + início para o formulário normal
     private function falhar(string $mensagem): never
     {

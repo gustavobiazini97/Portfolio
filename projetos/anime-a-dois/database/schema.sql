@@ -53,3 +53,15 @@ CREATE TABLE IF NOT EXISTS fotos (
   atualizada_em DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- entra no URL, para o browser não mostrar a antiga
   CONSTRAINT fk_foto_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Comentários sobre um episódio (os dois veem os de ambos)
+CREATE TABLE IF NOT EXISTS comentarios (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT UNSIGNED NOT NULL,
+  episodio_id INT UNSIGNED NOT NULL,
+  texto       VARCHAR(500) NOT NULL,
+  criado_em   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_comentarios_episodio (episodio_id, criado_em),
+  CONSTRAINT fk_comentario_user     FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
+  CONSTRAINT fk_comentario_episodio FOREIGN KEY (episodio_id) REFERENCES episodios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

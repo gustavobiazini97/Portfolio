@@ -86,6 +86,15 @@ class Serie extends Model
         $doTu  = $vistosDe($tu);
         $doPar = $vistosDe($par);
 
+        // Quantos comentários tem cada episódio desta série (uma só consulta)
+        $comentarios = Capsule::table('comentarios')
+            ->join('episodios', 'episodios.id', '=', 'comentarios.episodio_id')
+            ->where('episodios.serie_id', $this->id)
+            ->groupBy('comentarios.episodio_id')
+            ->selectRaw('comentarios.episodio_id AS id, COUNT(*) AS n')
+            ->pluck('n', 'id')
+            ->all();
+
         $lista = [];
         foreach ($this->episodios()->get(['id', 'numero', 'titulo', 'filler']) as $ep) {
             $lista[] = [
@@ -95,6 +104,7 @@ class Serie extends Model
                 'filler' => $ep->filler,
                 'tu'     => isset($doTu[$ep->id]),
                 'par'    => isset($doPar[$ep->id]),
+                'coment' => (int) ($comentarios[$ep->id] ?? 0),
             ];
         }
         return $lista;
