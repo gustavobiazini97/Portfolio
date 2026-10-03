@@ -1,0 +1,5073 @@
+{
+ "naruto": [
+  {
+   "n": 1,
+   "titulo": "Enter: Naruto Uzumaki!",
+   "filler": false
+  },
+  {
+   "n": 2,
+   "titulo": "My Name is Konohamaru!",
+   "filler": false
+  },
+  {
+   "n": 3,
+   "titulo": "Sasuke and Sakura: Friends or Foes?",
+   "filler": false
+  },
+  {
+   "n": 4,
+   "titulo": "Pass or Fail: Survival Test",
+   "filler": false
+  },
+  {
+   "n": 5,
+   "titulo": "You Failed! Kakashi's Final Decision",
+   "filler": false
+  },
+  {
+   "n": 6,
+   "titulo": "A Dangerous Mission! Journey to the Land of Waves!",
+   "filler": false
+  },
+  {
+   "n": 7,
+   "titulo": "The Assassin of the Mist!",
+   "filler": false
+  },
+  {
+   "n": 8,
+   "titulo": "The Oath of Pain",
+   "filler": false
+  },
+  {
+   "n": 9,
+   "titulo": "Kakashi: Sharingan Warrior",
+   "filler": false
+  },
+  {
+   "n": 10,
+   "titulo": "The Forest of Chakra",
+   "filler": false
+  },
+  {
+   "n": 11,
+   "titulo": "The Land Where a Hero Once Lived",
+   "filler": false
+  },
+  {
+   "n": 12,
+   "titulo": "Battle on the Bridge! Zabuza Returns!!",
+   "filler": false
+  },
+  {
+   "n": 13,
+   "titulo": "Haku's Secret Jutsu: Crystal Ice Mirrors",
+   "filler": false
+  },
+  {
+   "n": 14,
+   "titulo": "The Number One Hyperactive, Knucklehead Ninja Joins the Fight!!",
+   "filler": false
+  },
+  {
+   "n": 15,
+   "titulo": "Zero Visibility: The Sharingan Shatters",
+   "filler": false
+  },
+  {
+   "n": 16,
+   "titulo": "The Broken Seal",
+   "filler": false
+  },
+  {
+   "n": 17,
+   "titulo": "White Past: Hidden Ambition",
+   "filler": false
+  },
+  {
+   "n": 18,
+   "titulo": "The Weapons Known as Shinobi",
+   "filler": false
+  },
+  {
+   "n": 19,
+   "titulo": "The Demon in the Snow",
+   "filler": false
+  },
+  {
+   "n": 20,
+   "titulo": "A New Chapter Begins: The Chunin Exam!",
+   "filler": false
+  },
+  {
+   "n": 21,
+   "titulo": "Identify Yourself: Powerful New Rivals",
+   "filler": false
+  },
+  {
+   "n": 22,
+   "titulo": "Chunin Challenge: Rock Lee vs. Sasuke!",
+   "filler": false
+  },
+  {
+   "n": 23,
+   "titulo": "Genin Takedown! All Nine Rookies Face Off!",
+   "filler": false
+  },
+  {
+   "n": 24,
+   "titulo": "Start Your Engines: The Chunin Exam Begins!",
+   "filler": false
+  },
+  {
+   "n": 25,
+   "titulo": "The Tenth Question: All or Nothing!",
+   "filler": false
+  },
+  {
+   "n": 26,
+   "titulo": "Special Report: Live from the Forest of Death!",
+   "filler": true
+  },
+  {
+   "n": 27,
+   "titulo": "The Chunin Exam Stage 2: The Forest of Death",
+   "filler": false
+  },
+  {
+   "n": 28,
+   "titulo": "Eat or be Eaten: Panic in the Forest",
+   "filler": false
+  },
+  {
+   "n": 29,
+   "titulo": "Naruto's Counterattack: Never Give In!",
+   "filler": false
+  },
+  {
+   "n": 30,
+   "titulo": "The Sharingan Revived: Dragon-Flame Jutsu!",
+   "filler": false
+  },
+  {
+   "n": 31,
+   "titulo": "Bushy Brow's Pledge: Undying Love and Protection!",
+   "filler": false
+  },
+  {
+   "n": 32,
+   "titulo": "Sakura Blossoms!",
+   "filler": false
+  },
+  {
+   "n": 33,
+   "titulo": "Battle Formation: Ino-Shika-Cho!",
+   "filler": false
+  },
+  {
+   "n": 34,
+   "titulo": "Akamaru Trembles: Gaara's Cruel Strength!",
+   "filler": false
+  },
+  {
+   "n": 35,
+   "titulo": "The Scroll's Secret: No Peeking Allowed",
+   "filler": false
+  },
+  {
+   "n": 36,
+   "titulo": "Clone vs. Clone: Mine are Better than Yours!",
+   "filler": false
+  },
+  {
+   "n": 37,
+   "titulo": "Surviving the Cut! The Rookie Nine Together Again!",
+   "filler": false
+  },
+  {
+   "n": 38,
+   "titulo": "Narrowing the Field: Sudden Death Elimination!",
+   "filler": false
+  },
+  {
+   "n": 39,
+   "titulo": "Bushy Brow's Jealousy: Lions Barrage Unleashed!",
+   "filler": false
+  },
+  {
+   "n": 40,
+   "titulo": "Kakashi and Orochimaru: Face-to-Face!",
+   "filler": false
+  },
+  {
+   "n": 41,
+   "titulo": "Kunoichi Rumble: The Rivals Get Serious!",
+   "filler": false
+  },
+  {
+   "n": 42,
+   "titulo": "The Ultimate Battle: Cha!",
+   "filler": false
+  },
+  {
+   "n": 43,
+   "titulo": "Killer Kunoichi and a Shaky Shikamaru",
+   "filler": false
+  },
+  {
+   "n": 44,
+   "titulo": "Akamaru Unleashed! Who's Top Dog Now?",
+   "filler": false
+  },
+  {
+   "n": 45,
+   "titulo": "Surprise Attack! Naruto's Secret Weapon!",
+   "filler": false
+  },
+  {
+   "n": 46,
+   "titulo": "Byakugan Battle: Hinata Grows Bold!",
+   "filler": false
+  },
+  {
+   "n": 47,
+   "titulo": "A Failure Stands Tall!",
+   "filler": false
+  },
+  {
+   "n": 48,
+   "titulo": "Gaara vs. Rock Lee: The Power of Youth Explodes!",
+   "filler": false
+  },
+  {
+   "n": 49,
+   "titulo": "Lee's Hidden Strength: Forbidden Secret Jutsu!",
+   "filler": false
+  },
+  {
+   "n": 50,
+   "titulo": "The Fifth Gate: A Splendid Ninja is Born",
+   "filler": false
+  },
+  {
+   "n": 51,
+   "titulo": "A Shadow in Darkness: Danger Approaches Sasuke",
+   "filler": false
+  },
+  {
+   "n": 52,
+   "titulo": "Ebisu Returns: Naruto's Toughest Training Yet!",
+   "filler": false
+  },
+  {
+   "n": 53,
+   "titulo": "Long Time No See: Jiraiya Returns!",
+   "filler": false
+  },
+  {
+   "n": 54,
+   "titulo": "The Summoning Jutsu: Wisdom of the Toad Sage!",
+   "filler": false
+  },
+  {
+   "n": 55,
+   "titulo": "A Feeling of Yearning, A Flower Full of Hope",
+   "filler": false
+  },
+  {
+   "n": 56,
+   "titulo": "Live or Die: Risk it All to Win it All!",
+   "filler": false
+  },
+  {
+   "n": 57,
+   "titulo": "He Flies! He Jumps! He Lurks! Chief Toad Appears!",
+   "filler": false
+  },
+  {
+   "n": 58,
+   "titulo": "Hospital Besieged: The Evil Hand Revealed!",
+   "filler": false
+  },
+  {
+   "n": 59,
+   "titulo": "The Final Rounds: Rush to the Battle Arena!",
+   "filler": false
+  },
+  {
+   "n": 60,
+   "titulo": "Byakugan vs. Shadow Clone",
+   "filler": false
+  },
+  {
+   "n": 61,
+   "titulo": "Ultimate Defense: Zero Blind Spot!",
+   "filler": false
+  },
+  {
+   "n": 62,
+   "titulo": "A Failure's True Power",
+   "filler": false
+  },
+  {
+   "n": 63,
+   "titulo": "Hit it or Quit it: The Final Rounds Get Complicated!",
+   "filler": false
+  },
+  {
+   "n": 64,
+   "titulo": "Zero Motivation: The Guy with Cloud Envy!",
+   "filler": false
+  },
+  {
+   "n": 65,
+   "titulo": "Dancing Leaf, Squirming Sand",
+   "filler": false
+  },
+  {
+   "n": 66,
+   "titulo": "Bushy Brow's Jutsu: Sasuke Style!",
+   "filler": false
+  },
+  {
+   "n": 67,
+   "titulo": "Late for the Show, But Ready to Go! The Ultimate Secret Technique is Born!",
+   "filler": false
+  },
+  {
+   "n": 68,
+   "titulo": "Zero Hour! The Destruction of the Hidden Leaf Village Begins!",
+   "filler": false
+  },
+  {
+   "n": 69,
+   "titulo": "Village in Distress: A New A-Ranked Mission!",
+   "filler": false
+  },
+  {
+   "n": 70,
+   "titulo": "A Shirker's Call to Action: A Layabout No More!",
+   "filler": false
+  },
+  {
+   "n": 71,
+   "titulo": "An Unrivaled Match: Hokage Battle Royale!",
+   "filler": false
+  },
+  {
+   "n": 72,
+   "titulo": "A Mistake from the Past: A Face Revealed!",
+   "filler": false
+  },
+  {
+   "n": 73,
+   "titulo": "Forbidden Secret Technique: Reaper Death Seal!",
+   "filler": false
+  },
+  {
+   "n": 74,
+   "titulo": "Astonishing Truth! Gaara's Identity Emerges!",
+   "filler": false
+  },
+  {
+   "n": 75,
+   "titulo": "Sasuke's Decision: Pushed to the Edge!",
+   "filler": false
+  },
+  {
+   "n": 76,
+   "titulo": "Assassin of the Moonlit Night",
+   "filler": false
+  },
+  {
+   "n": 77,
+   "titulo": "Light vs. Dark: The Two Faces of Gaara",
+   "filler": false
+  },
+  {
+   "n": 78,
+   "titulo": "Naruto's Ninja Handbook",
+   "filler": false
+  },
+  {
+   "n": 79,
+   "titulo": "Beyond the Limit of Darkness and Light",
+   "filler": false
+  },
+  {
+   "n": 80,
+   "titulo": "The Third Hokage, Forever...",
+   "filler": false
+  },
+  {
+   "n": 81,
+   "titulo": "Return of the Morning Mist",
+   "filler": false
+  },
+  {
+   "n": 82,
+   "titulo": "Eye to Eye: Sharingan vs. Sharingan!",
+   "filler": false
+  },
+  {
+   "n": 83,
+   "titulo": "Jiraiya: Naruto's Potential Disaster!",
+   "filler": false
+  },
+  {
+   "n": 84,
+   "titulo": "Roar, Chidori! Brother vs. Brother!",
+   "filler": false
+  },
+  {
+   "n": 85,
+   "titulo": "Hate Among the Uchihas: The Last of the Clan!",
+   "filler": false
+  },
+  {
+   "n": 86,
+   "titulo": "A New Training Begins: I Will Be Strong!",
+   "filler": false
+  },
+  {
+   "n": 87,
+   "titulo": "Keep on Training: Pop Goes the Water Balloon!",
+   "filler": false
+  },
+  {
+   "n": 88,
+   "titulo": "Focal Point: The Mark of the Leaf",
+   "filler": false
+  },
+  {
+   "n": 89,
+   "titulo": "An Impossible Choice: The Pain Within Tsunade's Heart",
+   "filler": false
+  },
+  {
+   "n": 90,
+   "titulo": "Unforgivable! A Total Lack of Respect!",
+   "filler": false
+  },
+  {
+   "n": 91,
+   "titulo": "Inheritence! The Necklace of Death!",
+   "filler": false
+  },
+  {
+   "n": 92,
+   "titulo": "A Dubious Offer! Tsunade's Choice!",
+   "filler": false
+  },
+  {
+   "n": 93,
+   "titulo": "Breakdown! The Deal is Off!",
+   "filler": false
+  },
+  {
+   "n": 94,
+   "titulo": "Attack! Fury of the Rasengan!",
+   "filler": false
+  },
+  {
+   "n": 95,
+   "titulo": "The Fifth Hokage! A Life on the Line!",
+   "filler": false
+  },
+  {
+   "n": 96,
+   "titulo": "Deadlock! Sannin Showdown!",
+   "filler": false
+  },
+  {
+   "n": 97,
+   "titulo": "Kidnapped! Naruto's Hot Spring Adventure!",
+   "filler": true
+  },
+  {
+   "n": 98,
+   "titulo": "Tsunade's Warning: Ninja No More!",
+   "filler": false
+  },
+  {
+   "n": 99,
+   "titulo": "The Will of Fire Still Burns!",
+   "filler": false
+  },
+  {
+   "n": 100,
+   "titulo": "Sensei and Student: The Bond of the Shinobi",
+   "filler": false
+  },
+  {
+   "n": 101,
+   "titulo": "Gotta See! Gotta Know! Kakashi-Sensei's True Face!",
+   "filler": true
+  },
+  {
+   "n": 102,
+   "titulo": "Mission: Help an Old Friend in the Land of Tea",
+   "filler": true
+  },
+  {
+   "n": 103,
+   "titulo": "The Race is on! Trouble on the High Seas!",
+   "filler": true
+  },
+  {
+   "n": 104,
+   "titulo": "Run Idate Run! Nagi Island Awaits!",
+   "filler": true
+  },
+  {
+   "n": 105,
+   "titulo": "A Fierce Battle of Rolling Thunder!",
+   "filler": true
+  },
+  {
+   "n": 106,
+   "titulo": "The Last Leg: A Final Act of Desperation",
+   "filler": true
+  },
+  {
+   "n": 107,
+   "titulo": "The Battle Begins: Naruto vs. Sasuke",
+   "filler": false
+  },
+  {
+   "n": 108,
+   "titulo": "Bitter Rivals and Broken Bonds",
+   "filler": false
+  },
+  {
+   "n": 109,
+   "titulo": "An Invitation from the Sound",
+   "filler": false
+  },
+  {
+   "n": 110,
+   "titulo": "Formation! The Sasuke Retrieval Squad",
+   "filler": false
+  },
+  {
+   "n": 111,
+   "titulo": "Sound vs. Leaf",
+   "filler": false
+  },
+  {
+   "n": 112,
+   "titulo": "Squad Mutiny: Everything Falls Apart!",
+   "filler": false
+  },
+  {
+   "n": 113,
+   "titulo": "Full Throttle Power! Choji, Ablaze!",
+   "filler": false
+  },
+  {
+   "n": 114,
+   "titulo": "Good-bye Old Friend...! I'll Always Believe in You!",
+   "filler": false
+  },
+  {
+   "n": 115,
+   "titulo": "Your Opponent Is Me!",
+   "filler": false
+  },
+  {
+   "n": 116,
+   "titulo": "360 Degrees of Vision: The Byakugan's Blind Spot",
+   "filler": false
+  },
+  {
+   "n": 117,
+   "titulo": "Losing is Not an Option!",
+   "filler": false
+  },
+  {
+   "n": 118,
+   "titulo": "The Vessel Arrives Too Late",
+   "filler": false
+  },
+  {
+   "n": 119,
+   "titulo": "Miscalculation: A New Enemy Appears!",
+   "filler": false
+  },
+  {
+   "n": 120,
+   "titulo": "Roar and Howl! The Ultimate Tag Team",
+   "filler": false
+  },
+  {
+   "n": 121,
+   "titulo": "To Each His Own Battle",
+   "filler": false
+  },
+  {
+   "n": 122,
+   "titulo": "Fakeout: Shikamaru's Comeback!",
+   "filler": false
+  },
+  {
+   "n": 123,
+   "titulo": "The Leaf's Handsome Devil!",
+   "filler": false
+  },
+  {
+   "n": 124,
+   "titulo": "The Beast Within",
+   "filler": false
+  },
+  {
+   "n": 125,
+   "titulo": "The Sand Shinobi: Allies of the Leaf",
+   "filler": false
+  },
+  {
+   "n": 126,
+   "titulo": "Showdown: Gaara vs. Kimimaro!",
+   "filler": false
+  },
+  {
+   "n": 127,
+   "titulo": "Vengeful Strike! The Bracken Dance",
+   "filler": false
+  },
+  {
+   "n": 128,
+   "titulo": "A Cry on Deaf Ears",
+   "filler": false
+  },
+  {
+   "n": 129,
+   "titulo": "Brothers: Distance Among the Uchiha",
+   "filler": false
+  },
+  {
+   "n": 130,
+   "titulo": "Father and Son, the Broken Crest",
+   "filler": false
+  },
+  {
+   "n": 131,
+   "titulo": "The Secrets of the Mangekyo Sharingan!",
+   "filler": false
+  },
+  {
+   "n": 132,
+   "titulo": "For a Friend",
+   "filler": false
+  },
+  {
+   "n": 133,
+   "titulo": "A Plea From a Friend",
+   "filler": false
+  },
+  {
+   "n": 134,
+   "titulo": "The End of Tears",
+   "filler": false
+  },
+  {
+   "n": 135,
+   "titulo": "The Promise That Could Not Be Kept",
+   "filler": false
+  },
+  {
+   "n": 136,
+   "titulo": "Deep Cover!? A Super S-Ranked Mission!",
+   "filler": true
+  },
+  {
+   "n": 137,
+   "titulo": "A Town of Outlaws, the Shadow of the Fuma Clan",
+   "filler": true
+  },
+  {
+   "n": 138,
+   "titulo": "Pure Betrayal, and a Fleeting Plea!",
+   "filler": true
+  },
+  {
+   "n": 139,
+   "titulo": "Pure Terror! The House of Orochimaru",
+   "filler": true
+  },
+  {
+   "n": 140,
+   "titulo": "Two Heartbeats: Kabuto's Trap",
+   "filler": true
+  },
+  {
+   "n": 141,
+   "titulo": "Sakura's Determination",
+   "filler": false
+  },
+  {
+   "n": 142,
+   "titulo": "The Three Villains from the Maximum Security Prison",
+   "filler": false
+  },
+  {
+   "n": 143,
+   "titulo": "Tonton! I'm Counting on You!",
+   "filler": true
+  },
+  {
+   "n": 144,
+   "titulo": "A New Squad! Two People and a Dog?!",
+   "filler": true
+  },
+  {
+   "n": 145,
+   "titulo": "A New Formation: Ino-Shika-Cho!",
+   "filler": true
+  },
+  {
+   "n": 146,
+   "titulo": "Orochimaru's Shadow",
+   "filler": true
+  },
+  {
+   "n": 147,
+   "titulo": "A Clash of Fate: You Can't Bring Me Down",
+   "filler": true
+  },
+  {
+   "n": 148,
+   "titulo": "Search for the Rare Bikochu Beetle",
+   "filler": true
+  },
+  {
+   "n": 149,
+   "titulo": "What's the Difference? Don't All Insects Look Alike?",
+   "filler": true
+  },
+  {
+   "n": 150,
+   "titulo": "A Battle of Bugs: The Deceivers and the Deceived",
+   "filler": true
+  },
+  {
+   "n": 151,
+   "titulo": "Blaze Away Byakugan: This Is My Ninja Way",
+   "filler": true
+  },
+  {
+   "n": 152,
+   "titulo": "Funeral March for the Living",
+   "filler": true
+  },
+  {
+   "n": 153,
+   "titulo": "A Lesson Learned: The Iron Fist of Love",
+   "filler": true
+  },
+  {
+   "n": 154,
+   "titulo": "The Enemy of the Byakugan",
+   "filler": true
+  },
+  {
+   "n": 155,
+   "titulo": "The Dark Creeping Clouds",
+   "filler": true
+  },
+  {
+   "n": 156,
+   "titulo": "Raiga's Counterattack",
+   "filler": true
+  },
+  {
+   "n": 157,
+   "titulo": "Run! The Curry of Life",
+   "filler": true
+  },
+  {
+   "n": 158,
+   "titulo": "Follow My Lead! The Great Survival Challenge",
+   "filler": true
+  },
+  {
+   "n": 159,
+   "titulo": "Bounty Hunter from the Wilderness",
+   "filler": true
+  },
+  {
+   "n": 160,
+   "titulo": "Hunt or Be Hunted?! Showdown at the O.K. Temple!",
+   "filler": true
+  },
+  {
+   "n": 161,
+   "titulo": "The Appearance of Strange Visitors",
+   "filler": true
+  },
+  {
+   "n": 162,
+   "titulo": "The Cursed Warrior",
+   "filler": true
+  },
+  {
+   "n": 163,
+   "titulo": "The Tactician's Intent",
+   "filler": true
+  },
+  {
+   "n": 164,
+   "titulo": "Too Late for Help",
+   "filler": true
+  },
+  {
+   "n": 165,
+   "titulo": "The Death of Naruto",
+   "filler": true
+  },
+  {
+   "n": 166,
+   "titulo": "When Time Stands Still",
+   "filler": true
+  },
+  {
+   "n": 167,
+   "titulo": "When Egrets Flap Their Wings",
+   "filler": true
+  },
+  {
+   "n": 168,
+   "titulo": "Mix It, Stretch It, Boil It Up! Burn, Copper Pot, Burn!",
+   "filler": true
+  },
+  {
+   "n": 169,
+   "titulo": "Remembrance: The Lost Page",
+   "filler": true
+  },
+  {
+   "n": 170,
+   "titulo": "The Closed Door",
+   "filler": true
+  },
+  {
+   "n": 171,
+   "titulo": "Infiltration: The Set-Up!",
+   "filler": true
+  },
+  {
+   "n": 172,
+   "titulo": "Despair: A Fractured Heart",
+   "filler": true
+  },
+  {
+   "n": 173,
+   "titulo": "The Battle at Sea: The Power Unleashed!",
+   "filler": true
+  },
+  {
+   "n": 174,
+   "titulo": "Impossible! Celebrity Ninja Art - Money Style Jutsu!",
+   "filler": true
+  },
+  {
+   "n": 175,
+   "titulo": "The Treasure Hunt is On!",
+   "filler": true
+  },
+  {
+   "n": 176,
+   "titulo": "Run, Dodge, Zigzag! Chase or Be Chased!",
+   "filler": true
+  },
+  {
+   "n": 177,
+   "titulo": "Please, Mr. Postman!",
+   "filler": true
+  },
+  {
+   "n": 178,
+   "titulo": "Encounter! The Boy with a Star's Name",
+   "filler": true
+  },
+  {
+   "n": 179,
+   "titulo": "The Remembered Lullaby",
+   "filler": true
+  },
+  {
+   "n": 180,
+   "titulo": "Hidden Jutsu: The Price of The Ninja Art: Kujaku",
+   "filler": true
+  },
+  {
+   "n": 181,
+   "titulo": "Hoshikage, The Buried Truth",
+   "filler": true
+  },
+  {
+   "n": 182,
+   "titulo": "Reunion, The Remaining time",
+   "filler": true
+  },
+  {
+   "n": 183,
+   "titulo": "The Star's Radiance",
+   "filler": true
+  },
+  {
+   "n": 184,
+   "titulo": "Kiba's Long Day!",
+   "filler": true
+  },
+  {
+   "n": 185,
+   "titulo": "A Legend from the Hidden Leaf: The Onbaa!",
+   "filler": true
+  },
+  {
+   "n": 186,
+   "titulo": "Laughing Shino",
+   "filler": true
+  },
+  {
+   "n": 187,
+   "titulo": "Open for Business! The Leaf Moving Service",
+   "filler": true
+  },
+  {
+   "n": 188,
+   "titulo": "Mystery of the Targeted Merchants",
+   "filler": true
+  },
+  {
+   "n": 189,
+   "titulo": "A Limitless Supply of Ninja Tools",
+   "filler": true
+  },
+  {
+   "n": 190,
+   "titulo": "The Byakugan Sees the Blind Spot",
+   "filler": true
+  },
+  {
+   "n": 191,
+   "titulo": "Forecast: Death! Cloudy with Chance of Sun",
+   "filler": true
+  },
+  {
+   "n": 192,
+   "titulo": "Ino Screams! Chubby Paradise!",
+   "filler": true
+  },
+  {
+   "n": 193,
+   "titulo": "Viva Dojo Challenge! Youth Is All About Passion!",
+   "filler": true
+  },
+  {
+   "n": 194,
+   "titulo": "The Mysterious Curse of the Haunted Castle",
+   "filler": true
+  },
+  {
+   "n": 195,
+   "titulo": "The Third Super-Beast!",
+   "filler": true
+  },
+  {
+   "n": 196,
+   "titulo": "Hot-Blooded Confrontation: Student vs. Sensei",
+   "filler": true
+  },
+  {
+   "n": 197,
+   "titulo": "Crisis! The Hidden Leaf 11 Gather!",
+   "filler": true
+  },
+  {
+   "n": 198,
+   "titulo": "The ANBU Gives Up? Naruto's Recollection",
+   "filler": true
+  },
+  {
+   "n": 199,
+   "titulo": "The Missed Target",
+   "filler": true
+  },
+  {
+   "n": 200,
+   "titulo": "The Powerful Helper",
+   "filler": true
+  },
+  {
+   "n": 201,
+   "titulo": "Multiple Traps! Countdown to Destruction",
+   "filler": true
+  },
+  {
+   "n": 202,
+   "titulo": "The Top 5 Ninja Battles",
+   "filler": true
+  },
+  {
+   "n": 203,
+   "titulo": "Kurenai's Decision, Squad 8 Left Behind",
+   "filler": true
+  },
+  {
+   "n": 204,
+   "titulo": "Yakumo's Sealed Ability",
+   "filler": true
+  },
+  {
+   "n": 205,
+   "titulo": "Kurenai's Top-Secret Mission: The Promise With the Third Hokage",
+   "filler": true
+  },
+  {
+   "n": 206,
+   "titulo": "Genjutsu or Reality?",
+   "filler": true
+  },
+  {
+   "n": 207,
+   "titulo": "The Supposed Sealed Ability",
+   "filler": true
+  },
+  {
+   "n": 208,
+   "titulo": "The Weight of the Prized Artifact!",
+   "filler": true
+  },
+  {
+   "n": 209,
+   "titulo": "The Enemy: Ninja Dropouts",
+   "filler": true
+  },
+  {
+   "n": 210,
+   "titulo": "The Bewildering Forest",
+   "filler": true
+  },
+  {
+   "n": 211,
+   "titulo": "Memory of Flames",
+   "filler": true
+  },
+  {
+   "n": 212,
+   "titulo": "To Each His Own Path",
+   "filler": true
+  },
+  {
+   "n": 213,
+   "titulo": "Vanished Memories",
+   "filler": true
+  },
+  {
+   "n": 214,
+   "titulo": "Bringing Back Reality",
+   "filler": true
+  },
+  {
+   "n": 215,
+   "titulo": "A Past to Be Erased",
+   "filler": true
+  },
+  {
+   "n": 216,
+   "titulo": "The Targeted Shukaku",
+   "filler": true
+  },
+  {
+   "n": 217,
+   "titulo": "Sand Alliance with the Leaf Shinobi",
+   "filler": true
+  },
+  {
+   "n": 218,
+   "titulo": "The Counterattack!",
+   "filler": true
+  },
+  {
+   "n": 219,
+   "titulo": "The Ultimate Weapon Reborn",
+   "filler": true
+  },
+  {
+   "n": 220,
+   "titulo": "Departure",
+   "filler": false
+  }
+ ],
+ "shippuden": [
+  {
+   "n": 1,
+   "titulo": "Homecoming",
+   "filler": false
+  },
+  {
+   "n": 2,
+   "titulo": "The Akatsuki Makes Its Move",
+   "filler": false
+  },
+  {
+   "n": 3,
+   "titulo": "The Results of Training",
+   "filler": false
+  },
+  {
+   "n": 4,
+   "titulo": "The Jinchuriki of the Sand",
+   "filler": false
+  },
+  {
+   "n": 5,
+   "titulo": "The Kazekage Stands Tall",
+   "filler": false
+  },
+  {
+   "n": 6,
+   "titulo": "Mission Cleared",
+   "filler": false
+  },
+  {
+   "n": 7,
+   "titulo": "Run, Kankuro",
+   "filler": false
+  },
+  {
+   "n": 8,
+   "titulo": "Team Kakashi, Deployed",
+   "filler": false
+  },
+  {
+   "n": 9,
+   "titulo": "The Jinchuriki's Tears",
+   "filler": false
+  },
+  {
+   "n": 10,
+   "titulo": "Sealing Jutsu: Nine Phantom Dragons",
+   "filler": false
+  },
+  {
+   "n": 11,
+   "titulo": "The Medical Ninja's Student",
+   "filler": false
+  },
+  {
+   "n": 12,
+   "titulo": "The Retired Granny's Determination",
+   "filler": false
+  },
+  {
+   "n": 13,
+   "titulo": "A Meeting With Destiny",
+   "filler": false
+  },
+  {
+   "n": 14,
+   "titulo": "Naruto's Growth",
+   "filler": false
+  },
+  {
+   "n": 15,
+   "titulo": "The Secret Weapon is Called....",
+   "filler": false
+  },
+  {
+   "n": 16,
+   "titulo": "The Secret of Jinchuriki",
+   "filler": false
+  },
+  {
+   "n": 17,
+   "titulo": "The Death of Gaara!",
+   "filler": false
+  },
+  {
+   "n": 18,
+   "titulo": "Charge Tactic! Button Hook Entry!!",
+   "filler": false
+  },
+  {
+   "n": 19,
+   "titulo": "Traps Activate! Team Guy's Enemies",
+   "filler": false
+  },
+  {
+   "n": 20,
+   "titulo": "Hiruko vs. Two Kunoichi!",
+   "filler": false
+  },
+  {
+   "n": 21,
+   "titulo": "Sasori's Real Face",
+   "filler": false
+  },
+  {
+   "n": 22,
+   "titulo": "Chiyo's Secret Skills",
+   "filler": false
+  },
+  {
+   "n": 23,
+   "titulo": "Father and Mother",
+   "filler": false
+  },
+  {
+   "n": 24,
+   "titulo": "The Third Kazekage",
+   "filler": false
+  },
+  {
+   "n": 25,
+   "titulo": "Three Minutes Between Life and Death",
+   "filler": false
+  },
+  {
+   "n": 26,
+   "titulo": "Puppet Fight: 10 vs. 100!",
+   "filler": false
+  },
+  {
+   "n": 27,
+   "titulo": "Impossible Dream",
+   "filler": false
+  },
+  {
+   "n": 28,
+   "titulo": "Beasts! Alive Again!",
+   "filler": false
+  },
+  {
+   "n": 29,
+   "titulo": "Kakashi Enlightened!",
+   "filler": false
+  },
+  {
+   "n": 30,
+   "titulo": "Aesthetics of an Instant",
+   "filler": false
+  },
+  {
+   "n": 31,
+   "titulo": "The Legacy!",
+   "filler": false
+  },
+  {
+   "n": 32,
+   "titulo": "Return of the Kazekage",
+   "filler": false
+  },
+  {
+   "n": 33,
+   "titulo": "The New Target",
+   "filler": false
+  },
+  {
+   "n": 34,
+   "titulo": "Formation! New Team Kakashi!",
+   "filler": false
+  },
+  {
+   "n": 35,
+   "titulo": "An Unnecessary Addition",
+   "filler": false
+  },
+  {
+   "n": 36,
+   "titulo": "The Fake Smile",
+   "filler": false
+  },
+  {
+   "n": 37,
+   "titulo": "Untitled",
+   "filler": false
+  },
+  {
+   "n": 38,
+   "titulo": "Simulation",
+   "filler": false
+  },
+  {
+   "n": 39,
+   "titulo": "The Tenchi Bridge",
+   "filler": false
+  },
+  {
+   "n": 40,
+   "titulo": "Nine-Tails Unleashed",
+   "filler": false
+  },
+  {
+   "n": 41,
+   "titulo": "The Top-Secret Mission Begins",
+   "filler": false
+  },
+  {
+   "n": 42,
+   "titulo": "Orochimaru vs. Jinchuriki",
+   "filler": false
+  },
+  {
+   "n": 43,
+   "titulo": "Sakura's Tears",
+   "filler": false
+  },
+  {
+   "n": 44,
+   "titulo": "The Secret of the Battle!",
+   "filler": false
+  },
+  {
+   "n": 45,
+   "titulo": "The Consequences of Betrayal",
+   "filler": false
+  },
+  {
+   "n": 46,
+   "titulo": "The Unfinished Page",
+   "filler": false
+  },
+  {
+   "n": 47,
+   "titulo": "Infiltration: The Den of the Snake!",
+   "filler": false
+  },
+  {
+   "n": 48,
+   "titulo": "Bonds",
+   "filler": false
+  },
+  {
+   "n": 49,
+   "titulo": "Something Important...",
+   "filler": false
+  },
+  {
+   "n": 50,
+   "titulo": "The Picture Book's Story",
+   "filler": false
+  },
+  {
+   "n": 51,
+   "titulo": "Reunion",
+   "filler": false
+  },
+  {
+   "n": 52,
+   "titulo": "The Power of the Uchiha",
+   "filler": false
+  },
+  {
+   "n": 53,
+   "titulo": "Title",
+   "filler": false
+  },
+  {
+   "n": 54,
+   "titulo": "Nightmare",
+   "filler": false
+  },
+  {
+   "n": 55,
+   "titulo": "Wind",
+   "filler": false
+  },
+  {
+   "n": 56,
+   "titulo": "Squirming",
+   "filler": false
+  },
+  {
+   "n": 57,
+   "titulo": "Robbed of Sleep",
+   "filler": true
+  },
+  {
+   "n": 58,
+   "titulo": "Loneliness",
+   "filler": true
+  },
+  {
+   "n": 59,
+   "titulo": "A New Enemy",
+   "filler": true
+  },
+  {
+   "n": 60,
+   "titulo": "Impermanence",
+   "filler": true
+  },
+  {
+   "n": 61,
+   "titulo": "Contact",
+   "filler": true
+  },
+  {
+   "n": 62,
+   "titulo": "Teammate",
+   "filler": true
+  },
+  {
+   "n": 63,
+   "titulo": "The Two Kings",
+   "filler": true
+  },
+  {
+   "n": 64,
+   "titulo": "The Jet-Black Signal Fire",
+   "filler": true
+  },
+  {
+   "n": 65,
+   "titulo": "Lockdown of Darkness",
+   "filler": true
+  },
+  {
+   "n": 66,
+   "titulo": "Revived Souls",
+   "filler": true
+  },
+  {
+   "n": 67,
+   "titulo": "Everyone's Struggle to the Death",
+   "filler": true
+  },
+  {
+   "n": 68,
+   "titulo": "Moment of Awakening",
+   "filler": true
+  },
+  {
+   "n": 69,
+   "titulo": "Despair",
+   "filler": true
+  },
+  {
+   "n": 70,
+   "titulo": "Resonance",
+   "filler": true
+  },
+  {
+   "n": 71,
+   "titulo": "My Friend",
+   "filler": true
+  },
+  {
+   "n": 72,
+   "titulo": "The Quietly Approaching Threat",
+   "filler": false
+  },
+  {
+   "n": 73,
+   "titulo": "Akatsuki's Invasion",
+   "filler": false
+  },
+  {
+   "n": 74,
+   "titulo": "Under the Starry Sky",
+   "filler": false
+  },
+  {
+   "n": 75,
+   "titulo": "The Old Monk's Prayer",
+   "filler": false
+  },
+  {
+   "n": 76,
+   "titulo": "The Next Step",
+   "filler": false
+  },
+  {
+   "n": 77,
+   "titulo": "Climbing Silver",
+   "filler": false
+  },
+  {
+   "n": 78,
+   "titulo": "The Judgment",
+   "filler": false
+  },
+  {
+   "n": 79,
+   "titulo": "Unfulfilled Scream",
+   "filler": false
+  },
+  {
+   "n": 80,
+   "titulo": "Last Words",
+   "filler": false
+  },
+  {
+   "n": 81,
+   "titulo": "Sad News",
+   "filler": false
+  },
+  {
+   "n": 82,
+   "titulo": "Team Ten",
+   "filler": false
+  },
+  {
+   "n": 83,
+   "titulo": "Target: Locked On",
+   "filler": false
+  },
+  {
+   "n": 84,
+   "titulo": "Kakuzu's Abilities",
+   "filler": false
+  },
+  {
+   "n": 85,
+   "titulo": "Terrifying Secret",
+   "filler": false
+  },
+  {
+   "n": 86,
+   "titulo": "Shikamaru's Genius",
+   "filler": false
+  },
+  {
+   "n": 87,
+   "titulo": "When You Curse Someone, You Dig Your Own Grave",
+   "filler": false
+  },
+  {
+   "n": 88,
+   "titulo": "Wind Style: Rasen Shuriken!",
+   "filler": false
+  },
+  {
+   "n": 89,
+   "titulo": "The Price of Power",
+   "filler": false
+  },
+  {
+   "n": 90,
+   "titulo": "A Shinobi's Determination",
+   "filler": false
+  },
+  {
+   "n": 91,
+   "titulo": "Orochimaru's Hideout Discovered",
+   "filler": true
+  },
+  {
+   "n": 92,
+   "titulo": "Encounter",
+   "filler": true
+  },
+  {
+   "n": 93,
+   "titulo": "Connecting Hearts",
+   "filler": true
+  },
+  {
+   "n": 94,
+   "titulo": "A Night of Rain",
+   "filler": true
+  },
+  {
+   "n": 95,
+   "titulo": "The Two Charms",
+   "filler": true
+  },
+  {
+   "n": 96,
+   "titulo": "The Unseeing Enemy",
+   "filler": true
+  },
+  {
+   "n": 97,
+   "titulo": "The Labyrinth of Distorted Reflection",
+   "filler": true
+  },
+  {
+   "n": 98,
+   "titulo": "The Target Appears",
+   "filler": true
+  },
+  {
+   "n": 99,
+   "titulo": "The Rampaging Tailed Beast",
+   "filler": true
+  },
+  {
+   "n": 100,
+   "titulo": "Inside the Mist",
+   "filler": true
+  },
+  {
+   "n": 101,
+   "titulo": "Everyone's Feelings",
+   "filler": true
+  },
+  {
+   "n": 102,
+   "titulo": "Regroup!",
+   "filler": true
+  },
+  {
+   "n": 103,
+   "titulo": "The Four-Corner Sealing Barrier",
+   "filler": true
+  },
+  {
+   "n": 104,
+   "titulo": "Breaking the Crystal Style",
+   "filler": true
+  },
+  {
+   "n": 105,
+   "titulo": "The Battle Over the Barrier",
+   "filler": true
+  },
+  {
+   "n": 106,
+   "titulo": "Red Camellia",
+   "filler": true
+  },
+  {
+   "n": 107,
+   "titulo": "Strange Bedfellows",
+   "filler": true
+  },
+  {
+   "n": 108,
+   "titulo": "Guidepost of the Camellia",
+   "filler": true
+  },
+  {
+   "n": 109,
+   "titulo": "Cursed Seal Counterattack",
+   "filler": true
+  },
+  {
+   "n": 110,
+   "titulo": "Memory of Guilt",
+   "filler": true
+  },
+  {
+   "n": 111,
+   "titulo": "Shattered Promise",
+   "filler": true
+  },
+  {
+   "n": 112,
+   "titulo": "A Place to Return To",
+   "filler": true
+  },
+  {
+   "n": 113,
+   "titulo": "The Serpent's Pupil",
+   "filler": false
+  },
+  {
+   "n": 114,
+   "titulo": "Eye of a Hawk",
+   "filler": false
+  },
+  {
+   "n": 115,
+   "titulo": "Zabuza's Blade",
+   "filler": false
+  },
+  {
+   "n": 116,
+   "titulo": "Guardian of the Iron Wall",
+   "filler": false
+  },
+  {
+   "n": 117,
+   "titulo": "Jugo of the Northern Hideout",
+   "filler": false
+  },
+  {
+   "n": 118,
+   "titulo": "Formation!",
+   "filler": false
+  },
+  {
+   "n": 119,
+   "titulo": "Kakashi Chronicles: A Boy's Life on the Battlefield, Part 1",
+   "filler": false
+  },
+  {
+   "n": 120,
+   "titulo": "Kakashi Chronicles: A Boy's Life on the Battlefield, Part 2",
+   "filler": false
+  },
+  {
+   "n": 121,
+   "titulo": "Assemble",
+   "filler": false
+  },
+  {
+   "n": 122,
+   "titulo": "The Hunt",
+   "filler": false
+  },
+  {
+   "n": 123,
+   "titulo": "Clash!",
+   "filler": false
+  },
+  {
+   "n": 124,
+   "titulo": "Art",
+   "filler": false
+  },
+  {
+   "n": 125,
+   "titulo": "Disappearance",
+   "filler": false
+  },
+  {
+   "n": 126,
+   "titulo": "Twilight",
+   "filler": false
+  },
+  {
+   "n": 127,
+   "titulo": "Tales of a Gutsy Ninja ~Jiraiya Ninja Scroll~ Part 1",
+   "filler": false
+  },
+  {
+   "n": 128,
+   "titulo": "Tales of a Gutsy Ninja ~Jiraiya Ninja Scroll~ Part 2",
+   "filler": false
+  },
+  {
+   "n": 129,
+   "titulo": "Infiltrate! The Village Hidden in the Rain",
+   "filler": false
+  },
+  {
+   "n": 130,
+   "titulo": "The Man Who Became God",
+   "filler": false
+  },
+  {
+   "n": 131,
+   "titulo": "Honored Sage Mode!",
+   "filler": false
+  },
+  {
+   "n": 132,
+   "titulo": "In Attendance, the Six Paths of Pain",
+   "filler": false
+  },
+  {
+   "n": 133,
+   "titulo": "The Tale of Jiraiya the Gallant",
+   "filler": false
+  },
+  {
+   "n": 134,
+   "titulo": "Banquet Invitation",
+   "filler": false
+  },
+  {
+   "n": 135,
+   "titulo": "The Longest Moment...",
+   "filler": false
+  },
+  {
+   "n": 136,
+   "titulo": "The Light & Dark of the Mangekyo Sharingan",
+   "filler": false
+  },
+  {
+   "n": 137,
+   "titulo": "Amaterasu!",
+   "filler": false
+  },
+  {
+   "n": 138,
+   "titulo": "The End",
+   "filler": false
+  },
+  {
+   "n": 139,
+   "titulo": "The Mystery of Tobi",
+   "filler": false
+  },
+  {
+   "n": 140,
+   "titulo": "Fate",
+   "filler": false
+  },
+  {
+   "n": 141,
+   "titulo": "Truth",
+   "filler": false
+  },
+  {
+   "n": 142,
+   "titulo": "Battle of Unraikyo",
+   "filler": false
+  },
+  {
+   "n": 143,
+   "titulo": "The Eight Tails Vs. Sasuke",
+   "filler": false
+  },
+  {
+   "n": 144,
+   "titulo": "Wanderer",
+   "filler": true
+  },
+  {
+   "n": 145,
+   "titulo": "Successor of the Forbidden Jutsu",
+   "filler": true
+  },
+  {
+   "n": 146,
+   "titulo": "The Successor's Wish",
+   "filler": true
+  },
+  {
+   "n": 147,
+   "titulo": "Rogue Ninja's Past",
+   "filler": true
+  },
+  {
+   "n": 148,
+   "titulo": "Heir to Darkness",
+   "filler": true
+  },
+  {
+   "n": 149,
+   "titulo": "Separation",
+   "filler": true
+  },
+  {
+   "n": 150,
+   "titulo": "The Forbidden Jutsu Released",
+   "filler": true
+  },
+  {
+   "n": 151,
+   "titulo": "Master and Student",
+   "filler": true
+  },
+  {
+   "n": 152,
+   "titulo": "Somber News",
+   "filler": false
+  },
+  {
+   "n": 153,
+   "titulo": "Following the Master's Shadow",
+   "filler": false
+  },
+  {
+   "n": 154,
+   "titulo": "Decryption",
+   "filler": false
+  },
+  {
+   "n": 155,
+   "titulo": "The First Challenge",
+   "filler": false
+  },
+  {
+   "n": 156,
+   "titulo": "Surpassing the Master",
+   "filler": false
+  },
+  {
+   "n": 157,
+   "titulo": "Assault On the Leaf Village!",
+   "filler": false
+  },
+  {
+   "n": 158,
+   "titulo": "Power to Believe",
+   "filler": false
+  },
+  {
+   "n": 159,
+   "titulo": "Pain Vs. Kakashi",
+   "filler": false
+  },
+  {
+   "n": 160,
+   "titulo": "Mystery of Pain",
+   "filler": false
+  },
+  {
+   "n": 161,
+   "titulo": "Surname Is Sarutobi! Given Name, Konohamaru!",
+   "filler": false
+  },
+  {
+   "n": 162,
+   "titulo": "Pain to the World",
+   "filler": false
+  },
+  {
+   "n": 163,
+   "titulo": "Explosion! Sage Mode",
+   "filler": false
+  },
+  {
+   "n": 164,
+   "titulo": "Danger! Sage Mode Limit Reached",
+   "filler": false
+  },
+  {
+   "n": 165,
+   "titulo": "Nine Tails, Captured!",
+   "filler": false
+  },
+  {
+   "n": 166,
+   "titulo": "Confessions",
+   "filler": false
+  },
+  {
+   "n": 167,
+   "titulo": "Planetary Devastation",
+   "filler": false
+  },
+  {
+   "n": 168,
+   "titulo": "Fourth Hokage",
+   "filler": false
+  },
+  {
+   "n": 169,
+   "titulo": "The Two Students",
+   "filler": false
+  },
+  {
+   "n": 170,
+   "titulo": "Big Adventure! The Quest for the Fourth Hokage's Legacy, Part 1",
+   "filler": true
+  },
+  {
+   "n": 171,
+   "titulo": "Big Adventure! The Quest for the Fourth Hokage's Legacy, Part 2",
+   "filler": true
+  },
+  {
+   "n": 172,
+   "titulo": "Meeting",
+   "filler": false
+  },
+  {
+   "n": 173,
+   "titulo": "Origin of Pain",
+   "filler": false
+  },
+  {
+   "n": 174,
+   "titulo": "Tale of Naruto Uzumaki",
+   "filler": false
+  },
+  {
+   "n": 175,
+   "titulo": "Hero of the Hidden Leaf",
+   "filler": false
+  },
+  {
+   "n": 176,
+   "titulo": "Rookie Instructor Iruka",
+   "filler": true
+  },
+  {
+   "n": 177,
+   "titulo": "Iruka's Ordeal",
+   "filler": true
+  },
+  {
+   "n": 178,
+   "titulo": "Iruka's Decision",
+   "filler": true
+  },
+  {
+   "n": 179,
+   "titulo": "Kakashi Hatake, the Jonin in Charge",
+   "filler": true
+  },
+  {
+   "n": 180,
+   "titulo": "Inari's Courage Put to the Test",
+   "filler": true
+  },
+  {
+   "n": 181,
+   "titulo": "Naruto's School of Revenge",
+   "filler": true
+  },
+  {
+   "n": 182,
+   "titulo": "Gaara's Bond",
+   "filler": true
+  },
+  {
+   "n": 183,
+   "titulo": "Naruto: Outbreak",
+   "filler": true
+  },
+  {
+   "n": 184,
+   "titulo": "Deploy! Team Tenten",
+   "filler": true
+  },
+  {
+   "n": 185,
+   "titulo": "Animal District",
+   "filler": true
+  },
+  {
+   "n": 186,
+   "titulo": "Ah, the Medicine of Youth",
+   "filler": true
+  },
+  {
+   "n": 187,
+   "titulo": "Gutsy Master and Student: The Training",
+   "filler": true
+  },
+  {
+   "n": 188,
+   "titulo": "Record of the Gutsy Ninja Master and Student",
+   "filler": true
+  },
+  {
+   "n": 189,
+   "titulo": "Sasuke's Paw Encyclopedia",
+   "filler": true
+  },
+  {
+   "n": 190,
+   "titulo": "Naruto and the Old Soldier",
+   "filler": true
+  },
+  {
+   "n": 191,
+   "titulo": "Kakashi Love Song",
+   "filler": true
+  },
+  {
+   "n": 192,
+   "titulo": "Neji Chronicles",
+   "filler": true
+  },
+  {
+   "n": 193,
+   "titulo": "The Man Who Died Twice",
+   "filler": true
+  },
+  {
+   "n": 194,
+   "titulo": "The Worst Three-Legged Race",
+   "filler": true
+  },
+  {
+   "n": 195,
+   "titulo": "Team 10's Teamwork",
+   "filler": true
+  },
+  {
+   "n": 196,
+   "titulo": "Drive Towards Darkness",
+   "filler": true
+  },
+  {
+   "n": 197,
+   "titulo": "The Sixth Hokage Danzo",
+   "filler": false
+  },
+  {
+   "n": 198,
+   "titulo": "Five Kage Summit's Eve",
+   "filler": false
+  },
+  {
+   "n": 199,
+   "titulo": "Enter the Five Kage!",
+   "filler": false
+  },
+  {
+   "n": 200,
+   "titulo": "Naruto's Plea",
+   "filler": false
+  },
+  {
+   "n": 201,
+   "titulo": "Painful Decision",
+   "filler": false
+  },
+  {
+   "n": 202,
+   "titulo": "Racing Lightning",
+   "filler": false
+  },
+  {
+   "n": 203,
+   "titulo": "Sasuke's Ninja Way",
+   "filler": false
+  },
+  {
+   "n": 204,
+   "titulo": "Power of the Five Kage",
+   "filler": false
+  },
+  {
+   "n": 205,
+   "titulo": "Declaration of War",
+   "filler": false
+  },
+  {
+   "n": 206,
+   "titulo": "Sakura's Feelings",
+   "filler": false
+  },
+  {
+   "n": 207,
+   "titulo": "The Tailed Beast vs. The Tailless Tailed Beast",
+   "filler": false
+  },
+  {
+   "n": 208,
+   "titulo": "As One's Friend",
+   "filler": false
+  },
+  {
+   "n": 209,
+   "titulo": "Danzo's Right Arm",
+   "filler": false
+  },
+  {
+   "n": 210,
+   "titulo": "The Forbidden Visual Jutsu",
+   "filler": false
+  },
+  {
+   "n": 211,
+   "titulo": "Danzo Shimura",
+   "filler": false
+  },
+  {
+   "n": 212,
+   "titulo": "Sakura's Resolve",
+   "filler": false
+  },
+  {
+   "n": 213,
+   "titulo": "Lost Bonds",
+   "filler": false
+  },
+  {
+   "n": 214,
+   "titulo": "The Burden",
+   "filler": false
+  },
+  {
+   "n": 215,
+   "titulo": "Two Fates",
+   "filler": false
+  },
+  {
+   "n": 216,
+   "titulo": "High-Level Shinobi",
+   "filler": false
+  },
+  {
+   "n": 217,
+   "titulo": "The Infiltrator",
+   "filler": false
+  },
+  {
+   "n": 218,
+   "titulo": "The Five Great Nations Mobilize",
+   "filler": false
+  },
+  {
+   "n": 219,
+   "titulo": "Kakashi Hatake, The Hokage",
+   "filler": false
+  },
+  {
+   "n": 220,
+   "titulo": "Prophecy of the Great Lord Elder",
+   "filler": false
+  },
+  {
+   "n": 221,
+   "titulo": "Storage",
+   "filler": false
+  },
+  {
+   "n": 222,
+   "titulo": "The Five Kage's Decision",
+   "filler": false
+  },
+  {
+   "n": 223,
+   "titulo": "The Young Man and the Sea",
+   "filler": true
+  },
+  {
+   "n": 224,
+   "titulo": "The Ninja of Benisu",
+   "filler": true
+  },
+  {
+   "n": 225,
+   "titulo": "The Cursed Ghost Ship",
+   "filler": true
+  },
+  {
+   "n": 226,
+   "titulo": "Battleship Island",
+   "filler": true
+  },
+  {
+   "n": 227,
+   "titulo": "The Forgotten Island",
+   "filler": true
+  },
+  {
+   "n": 228,
+   "titulo": "Fight! Rock Lee!",
+   "filler": true
+  },
+  {
+   "n": 229,
+   "titulo": "Eat or Die! Mushrooms from Hell",
+   "filler": true
+  },
+  {
+   "n": 230,
+   "titulo": "Revenge of the Shadow Clones",
+   "filler": true
+  },
+  {
+   "n": 231,
+   "titulo": "The Closed Route",
+   "filler": true
+  },
+  {
+   "n": 232,
+   "titulo": "The Girls Get-Together",
+   "filler": true
+  },
+  {
+   "n": 233,
+   "titulo": "Naruto's Imposter",
+   "filler": true
+  },
+  {
+   "n": 234,
+   "titulo": "Naruto's Favorite Student",
+   "filler": true
+  },
+  {
+   "n": 235,
+   "titulo": "The Kunoichi of Nadeshiko Village",
+   "filler": true
+  },
+  {
+   "n": 236,
+   "titulo": "Friends You Can Count On",
+   "filler": true
+  },
+  {
+   "n": 237,
+   "titulo": "Ah, My Hero Lady Tsunade!",
+   "filler": true
+  },
+  {
+   "n": 238,
+   "titulo": "Sai's Day Off",
+   "filler": true
+  },
+  {
+   "n": 239,
+   "titulo": "The Legendary Ino-Shika-Cho Trio",
+   "filler": true
+  },
+  {
+   "n": 240,
+   "titulo": "Kiba's Determination",
+   "filler": true
+  },
+  {
+   "n": 241,
+   "titulo": "Kakashi, My Eternal Rival!",
+   "filler": true
+  },
+  {
+   "n": 242,
+   "titulo": "Naruto's Vow",
+   "filler": true
+  },
+  {
+   "n": 243,
+   "titulo": "Land Ahoy! Is This the Island of Paradise?",
+   "filler": false
+  },
+  {
+   "n": 244,
+   "titulo": "Killer Bee and Motoi",
+   "filler": false
+  },
+  {
+   "n": 245,
+   "titulo": "The Next Challenge! Naruto vs. The Nine Tails!!",
+   "filler": false
+  },
+  {
+   "n": 246,
+   "titulo": "The Orange Spark",
+   "filler": false
+  },
+  {
+   "n": 247,
+   "titulo": "Target: Nine Tails",
+   "filler": false
+  },
+  {
+   "n": 248,
+   "titulo": "The Fourth Hokage's Death Match",
+   "filler": false
+  },
+  {
+   "n": 249,
+   "titulo": "Thank You",
+   "filler": false
+  },
+  {
+   "n": 250,
+   "titulo": "Battle in Paradise! the Odd Beast vs. the Monster!",
+   "filler": false
+  },
+  {
+   "n": 251,
+   "titulo": "The Man Named Kisame",
+   "filler": false
+  },
+  {
+   "n": 252,
+   "titulo": "The Angelic Herald of Death",
+   "filler": false
+  },
+  {
+   "n": 253,
+   "titulo": "The Bridge to Peace",
+   "filler": false
+  },
+  {
+   "n": 254,
+   "titulo": "The Super Secret S-Rank Mission",
+   "filler": false
+  },
+  {
+   "n": 255,
+   "titulo": "The Artist Returns",
+   "filler": false
+  },
+  {
+   "n": 256,
+   "titulo": "Assemble! Allied Shinobi Forces!",
+   "filler": false
+  },
+  {
+   "n": 257,
+   "titulo": "Meeting",
+   "filler": true
+  },
+  {
+   "n": 258,
+   "titulo": "Rivals",
+   "filler": true
+  },
+  {
+   "n": 259,
+   "titulo": "Rift",
+   "filler": true
+  },
+  {
+   "n": 260,
+   "titulo": "Parting",
+   "filler": true
+  },
+  {
+   "n": 261,
+   "titulo": "For My Friend",
+   "filler": false
+  },
+  {
+   "n": 262,
+   "titulo": "War Begins!",
+   "filler": false
+  },
+  {
+   "n": 263,
+   "titulo": "Sai and Shin",
+   "filler": false
+  },
+  {
+   "n": 264,
+   "titulo": "Secrets of the Reanimation Jutsu",
+   "filler": false
+  },
+  {
+   "n": 265,
+   "titulo": "An Old Nemesis Returns",
+   "filler": false
+  },
+  {
+   "n": 266,
+   "titulo": "The First and Last Opponent",
+   "filler": false
+  },
+  {
+   "n": 267,
+   "titulo": "The Brilliant Military Advisor of the Hidden Leaf",
+   "filler": false
+  },
+  {
+   "n": 268,
+   "titulo": "Battleground!",
+   "filler": false
+  },
+  {
+   "n": 269,
+   "titulo": "Forbidden Words",
+   "filler": false
+  },
+  {
+   "n": 270,
+   "titulo": "Golden Bonds",
+   "filler": false
+  },
+  {
+   "n": 271,
+   "titulo": "Road to Sakura",
+   "filler": true
+  },
+  {
+   "n": 272,
+   "titulo": "Mifune vs. Hanzo",
+   "filler": false
+  },
+  {
+   "n": 273,
+   "titulo": "True Kindness",
+   "filler": false
+  },
+  {
+   "n": 274,
+   "titulo": "The Complete Ino-Shika-Cho Formation!",
+   "filler": false
+  },
+  {
+   "n": 275,
+   "titulo": "A Message from the Heart",
+   "filler": false
+  },
+  {
+   "n": 276,
+   "titulo": "Attack of the Gedo Statue",
+   "filler": false
+  },
+  {
+   "n": 277,
+   "titulo": "Unison Sign",
+   "filler": false
+  },
+  {
+   "n": 278,
+   "titulo": "Medic Ninja in Danger",
+   "filler": false
+  },
+  {
+   "n": 279,
+   "titulo": "White Zetsu's Trap",
+   "filler": true
+  },
+  {
+   "n": 280,
+   "titulo": "Aesthetics of an Artist",
+   "filler": true
+  },
+  {
+   "n": 281,
+   "titulo": "The Allied Mom Force!",
+   "filler": true
+  },
+  {
+   "n": 282,
+   "titulo": "The Secret Origin of the Ultimate Tag Team!",
+   "filler": false
+  },
+  {
+   "n": 283,
+   "titulo": "Two Suns",
+   "filler": false
+  },
+  {
+   "n": 284,
+   "titulo": "Helmet Splitter: Jinin Akebino!",
+   "filler": true
+  },
+  {
+   "n": 285,
+   "titulo": "User of the Scorch Style: Pakura of the Sand!",
+   "filler": true
+  },
+  {
+   "n": 286,
+   "titulo": "Things You Can't Get Back",
+   "filler": true
+  },
+  {
+   "n": 287,
+   "titulo": "One Worth Betting On",
+   "filler": true
+  },
+  {
+   "n": 288,
+   "titulo": "Danger: Jinpachi and Kushimaru!",
+   "filler": true
+  },
+  {
+   "n": 289,
+   "titulo": "The Lightning Blade: Ameyuri Ringo!",
+   "filler": true
+  },
+  {
+   "n": 290,
+   "titulo": "Power: Episode 1",
+   "filler": true
+  },
+  {
+   "n": 291,
+   "titulo": "Power: Episode 2",
+   "filler": true
+  },
+  {
+   "n": 292,
+   "titulo": "Power: Episode 3",
+   "filler": true
+  },
+  {
+   "n": 293,
+   "titulo": "Power: Episode 4",
+   "filler": true
+  },
+  {
+   "n": 294,
+   "titulo": "Power: Episode 5",
+   "filler": true
+  },
+  {
+   "n": 295,
+   "titulo": "Power: Episode Final",
+   "filler": true
+  },
+  {
+   "n": 296,
+   "titulo": "Naruto Enters the Battle",
+   "filler": false
+  },
+  {
+   "n": 297,
+   "titulo": "A Father's Hope, a Mother's Love",
+   "filler": false
+  },
+  {
+   "n": 298,
+   "titulo": "Contact! Naruto vs. Itachi",
+   "filler": false
+  },
+  {
+   "n": 299,
+   "titulo": "The Acknowledged One",
+   "filler": false
+  },
+  {
+   "n": 300,
+   "titulo": "The Mizukage, the Giant Clam, and the Mirage",
+   "filler": false
+  },
+  {
+   "n": 301,
+   "titulo": "Paradox",
+   "filler": false
+  },
+  {
+   "n": 302,
+   "titulo": "Terror! the Steam Imp",
+   "filler": false
+  },
+  {
+   "n": 303,
+   "titulo": "Ghosts from the Past",
+   "filler": true
+  },
+  {
+   "n": 304,
+   "titulo": "The Underworld Transfer Jutsu",
+   "filler": true
+  },
+  {
+   "n": 305,
+   "titulo": "The Vengeful",
+   "filler": true
+  },
+  {
+   "n": 306,
+   "titulo": "The Heart's Eye",
+   "filler": true
+  },
+  {
+   "n": 307,
+   "titulo": "Fade Into the Moonlight",
+   "filler": true
+  },
+  {
+   "n": 308,
+   "titulo": "Crescent Moon Night",
+   "filler": true
+  },
+  {
+   "n": 309,
+   "titulo": "The A-Rank Mission: Food Fight!",
+   "filler": true
+  },
+  {
+   "n": 310,
+   "titulo": "The Fallen Castle",
+   "filler": true
+  },
+  {
+   "n": 311,
+   "titulo": "Prologue of Road to Ninja",
+   "filler": true
+  },
+  {
+   "n": 312,
+   "titulo": "The Old Master and the Dragon's Eye",
+   "filler": true
+  },
+  {
+   "n": 313,
+   "titulo": "Rain Followed by Snow, with Some Lightning",
+   "filler": true
+  },
+  {
+   "n": 314,
+   "titulo": "The Sad Sun Shower",
+   "filler": true
+  },
+  {
+   "n": 315,
+   "titulo": "Lingering Snow",
+   "filler": true
+  },
+  {
+   "n": 316,
+   "titulo": "The Reanimated Allied Forces",
+   "filler": true
+  },
+  {
+   "n": 317,
+   "titulo": "Shino vs. Torune",
+   "filler": true
+  },
+  {
+   "n": 318,
+   "titulo": "A Hole in the Heart: the Other Jinchuriki",
+   "filler": true
+  },
+  {
+   "n": 319,
+   "titulo": "The Soul Living Inside the Puppet",
+   "filler": true
+  },
+  {
+   "n": 320,
+   "titulo": "Run, Omoi!",
+   "filler": true
+  },
+  {
+   "n": 321,
+   "titulo": "Reinforcements Arrive",
+   "filler": false
+  },
+  {
+   "n": 322,
+   "titulo": "Madara Uchiha",
+   "filler": false
+  },
+  {
+   "n": 323,
+   "titulo": "The Five Kage Assemble",
+   "filler": false
+  },
+  {
+   "n": 324,
+   "titulo": "The Unbreakable Mask and the Shattered Bubble",
+   "filler": false
+  },
+  {
+   "n": 325,
+   "titulo": "Jinchuriki vs. Jinchuriki!",
+   "filler": false
+  },
+  {
+   "n": 326,
+   "titulo": "Four Tails, the King of Sage Monkeys",
+   "filler": false
+  },
+  {
+   "n": 327,
+   "titulo": "Nine Tails",
+   "filler": false
+  },
+  {
+   "n": 328,
+   "titulo": "Kurama",
+   "filler": false
+  },
+  {
+   "n": 329,
+   "titulo": "Two-Man Team",
+   "filler": false
+  },
+  {
+   "n": 330,
+   "titulo": "Promise of Victory",
+   "filler": false
+  },
+  {
+   "n": 331,
+   "titulo": "Eyes That See in the Dark",
+   "filler": false
+  },
+  {
+   "n": 332,
+   "titulo": "The Will of Stone",
+   "filler": false
+  },
+  {
+   "n": 333,
+   "titulo": "The Risks of the Reanimation Jutsu",
+   "filler": false
+  },
+  {
+   "n": 334,
+   "titulo": "Sibling Tag Team",
+   "filler": false
+  },
+  {
+   "n": 335,
+   "titulo": "To Each Their Own Leaf",
+   "filler": false
+  },
+  {
+   "n": 336,
+   "titulo": "Kabuto Yakushi",
+   "filler": false
+  },
+  {
+   "n": 337,
+   "titulo": "The Izanami Activated",
+   "filler": false
+  },
+  {
+   "n": 338,
+   "titulo": "Izanagi and Izanami",
+   "filler": false
+  },
+  {
+   "n": 339,
+   "titulo": "I Will Love You Always",
+   "filler": false
+  },
+  {
+   "n": 340,
+   "titulo": "Reanimation Jutsu, Release!",
+   "filler": false
+  },
+  {
+   "n": 341,
+   "titulo": "Orochimaru's Return",
+   "filler": false
+  },
+  {
+   "n": 342,
+   "titulo": "Secret of the Transportation Technique",
+   "filler": false
+  },
+  {
+   "n": 343,
+   "titulo": "Who Are You?",
+   "filler": false
+  },
+  {
+   "n": 344,
+   "titulo": "Obito and Madara",
+   "filler": false
+  },
+  {
+   "n": 345,
+   "titulo": "I'm in Hell",
+   "filler": false
+  },
+  {
+   "n": 346,
+   "titulo": "World of Dreams",
+   "filler": false
+  },
+  {
+   "n": 347,
+   "titulo": "Creeping Shadow",
+   "filler": true
+  },
+  {
+   "n": 348,
+   "titulo": "The New Akatsuki",
+   "filler": true
+  },
+  {
+   "n": 349,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – A Mask That Hides the Heart",
+   "filler": true
+  },
+  {
+   "n": 350,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Minato's Death",
+   "filler": true
+  },
+  {
+   "n": 351,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Hashirama's Cells",
+   "filler": true
+  },
+  {
+   "n": 352,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – The Rogue Ninja Orochimaru",
+   "filler": true
+  },
+  {
+   "n": 353,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Orochimaru's Test Subjects",
+   "filler": true
+  },
+  {
+   "n": 354,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Their Own Paths",
+   "filler": true
+  },
+  {
+   "n": 355,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – The Targeted Sharingan",
+   "filler": true
+  },
+  {
+   "n": 356,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – A Shinobi of the Leaf",
+   "filler": true
+  },
+  {
+   "n": 357,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – An Uchiha ANBU",
+   "filler": true
+  },
+  {
+   "n": 358,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Coup D'État",
+   "filler": true
+  },
+  {
+   "n": 359,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – The Night of the Tragedy",
+   "filler": true
+  },
+  {
+   "n": 360,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Jonin Leader",
+   "filler": true
+  },
+  {
+   "n": 361,
+   "titulo": "Kakashi: Shadow of the ANBU Black Ops – Squad Seven",
+   "filler": true
+  },
+  {
+   "n": 362,
+   "titulo": "Kakashi's Resolve",
+   "filler": false
+  },
+  {
+   "n": 363,
+   "titulo": "The Allied Shinobi Forces Jutsu",
+   "filler": false
+  },
+  {
+   "n": 364,
+   "titulo": "The Ties That Bind",
+   "filler": false
+  },
+  {
+   "n": 365,
+   "titulo": "Those Who Dance in the Shadows",
+   "filler": false
+  },
+  {
+   "n": 366,
+   "titulo": "The All-Knowing",
+   "filler": false
+  },
+  {
+   "n": 367,
+   "titulo": "Hashirama and Madara",
+   "filler": false
+  },
+  {
+   "n": 368,
+   "titulo": "Era of Warring States",
+   "filler": false
+  },
+  {
+   "n": 369,
+   "titulo": "My True Dream",
+   "filler": false
+  },
+  {
+   "n": 370,
+   "titulo": "Sasuke's Answer",
+   "filler": false
+  },
+  {
+   "n": 371,
+   "titulo": "Hole",
+   "filler": false
+  },
+  {
+   "n": 372,
+   "titulo": "Something to Fill the Hole",
+   "filler": false
+  },
+  {
+   "n": 373,
+   "titulo": "Team 7, Assemble!",
+   "filler": false
+  },
+  {
+   "n": 374,
+   "titulo": "The New Three-Way Deadlock",
+   "filler": false
+  },
+  {
+   "n": 375,
+   "titulo": "Kakashi vs. Obito",
+   "filler": false
+  },
+  {
+   "n": 376,
+   "titulo": "The Directive to Take the Nine Tails",
+   "filler": true
+  },
+  {
+   "n": 377,
+   "titulo": "Naruto vs. Mecha Naruto",
+   "filler": true
+  },
+  {
+   "n": 378,
+   "titulo": "The Ten Tails' Jinchuriki",
+   "filler": false
+  },
+  {
+   "n": 379,
+   "titulo": "An Opening",
+   "filler": false
+  },
+  {
+   "n": 380,
+   "titulo": "The Day Naruto Was Born",
+   "filler": false
+  },
+  {
+   "n": 381,
+   "titulo": "The Divine Tree",
+   "filler": false
+  },
+  {
+   "n": 382,
+   "titulo": "A Shinobi's Dream",
+   "filler": false
+  },
+  {
+   "n": 383,
+   "titulo": "Pursuing Hope",
+   "filler": false
+  },
+  {
+   "n": 384,
+   "titulo": "A Heart Filled With Comrades",
+   "filler": false
+  },
+  {
+   "n": 385,
+   "titulo": "Obito Uchiha",
+   "filler": false
+  },
+  {
+   "n": 386,
+   "titulo": "I'm Always Watching",
+   "filler": false
+  },
+  {
+   "n": 387,
+   "titulo": "The Promise That Was Kept",
+   "filler": false
+  },
+  {
+   "n": 388,
+   "titulo": "My First Friend",
+   "filler": true
+  },
+  {
+   "n": 389,
+   "titulo": "The Adored Elder Sister",
+   "filler": true
+  },
+  {
+   "n": 390,
+   "titulo": "Hanabi's Decision",
+   "filler": true
+  },
+  {
+   "n": 391,
+   "titulo": "Madara Uchiha Arises",
+   "filler": false
+  },
+  {
+   "n": 392,
+   "titulo": "The Hidden Heart",
+   "filler": false
+  },
+  {
+   "n": 393,
+   "titulo": "A True Ending",
+   "filler": false
+  },
+  {
+   "n": 394,
+   "titulo": "The New Chunin Exams",
+   "filler": true
+  },
+  {
+   "n": 395,
+   "titulo": "The Chunin Exams Begin!",
+   "filler": true
+  },
+  {
+   "n": 396,
+   "titulo": "The Three Questions",
+   "filler": true
+  },
+  {
+   "n": 397,
+   "titulo": "One Worthy As A Leader",
+   "filler": true
+  },
+  {
+   "n": 398,
+   "titulo": "The Night Before the Second Exam",
+   "filler": true
+  },
+  {
+   "n": 399,
+   "titulo": "Demon Desert Survival",
+   "filler": true
+  },
+  {
+   "n": 400,
+   "titulo": "As a Taijutsu User",
+   "filler": true
+  },
+  {
+   "n": 401,
+   "titulo": "The Ultimate",
+   "filler": true
+  },
+  {
+   "n": 402,
+   "titulo": "Escape vs. Pursuit",
+   "filler": true
+  },
+  {
+   "n": 403,
+   "titulo": "Unwavering Gutsiness",
+   "filler": true
+  },
+  {
+   "n": 404,
+   "titulo": "Tenten's Troubles",
+   "filler": true
+  },
+  {
+   "n": 405,
+   "titulo": "The Imprisoned Pair",
+   "filler": true
+  },
+  {
+   "n": 406,
+   "titulo": "The Place Where I Belong",
+   "filler": true
+  },
+  {
+   "n": 407,
+   "titulo": "The Yamanaka Clan: Secret Ninjutsu",
+   "filler": true
+  },
+  {
+   "n": 408,
+   "titulo": "The Cursed Puppet",
+   "filler": true
+  },
+  {
+   "n": 409,
+   "titulo": "Their Backs",
+   "filler": true
+  },
+  {
+   "n": 410,
+   "titulo": "The Hidden Plot Set Into Motion",
+   "filler": true
+  },
+  {
+   "n": 411,
+   "titulo": "The Targeted Tailed Beast",
+   "filler": true
+  },
+  {
+   "n": 412,
+   "titulo": "Neji’s Judgement",
+   "filler": true
+  },
+  {
+   "n": 413,
+   "titulo": "Hopes Entrusted to the Future",
+   "filler": true
+  },
+  {
+   "n": 414,
+   "titulo": "On the Brink of Death",
+   "filler": false
+  },
+  {
+   "n": 415,
+   "titulo": "The Two Mangekyo",
+   "filler": false
+  },
+  {
+   "n": 416,
+   "titulo": "The Formation of Team Minato",
+   "filler": true
+  },
+  {
+   "n": 417,
+   "titulo": "You’ll Be My Backup",
+   "filler": true
+  },
+  {
+   "n": 418,
+   "titulo": "The Blue Beast vs Six Paths Madara",
+   "filler": false
+  },
+  {
+   "n": 419,
+   "titulo": "Papa's Youth",
+   "filler": false
+  },
+  {
+   "n": 420,
+   "titulo": "The Eight Inner Gates Formation",
+   "filler": false
+  },
+  {
+   "n": 421,
+   "titulo": "The Sage of the Six Paths",
+   "filler": false
+  },
+  {
+   "n": 422,
+   "titulo": "The One Who Will Inherit",
+   "filler": true
+  },
+  {
+   "n": 423,
+   "titulo": "Naruto's Rival",
+   "filler": true
+  },
+  {
+   "n": 424,
+   "titulo": "To Rise Up",
+   "filler": false
+  },
+  {
+   "n": 425,
+   "titulo": "The Infinite Dream",
+   "filler": false
+  },
+  {
+   "n": 426,
+   "titulo": "The Infinite Tsukuyomi",
+   "filler": false
+  },
+  {
+   "n": 427,
+   "titulo": "To the Dream World",
+   "filler": true
+  },
+  {
+   "n": 428,
+   "titulo": "Where Tenten Belongs",
+   "filler": true
+  },
+  {
+   "n": 429,
+   "titulo": "Killer Bee Rappuden, Part 1",
+   "filler": true
+  },
+  {
+   "n": 430,
+   "titulo": "Killer Bee Rappuden, Part 2",
+   "filler": true
+  },
+  {
+   "n": 431,
+   "titulo": "To See That Smile, Just One More Time",
+   "filler": true
+  },
+  {
+   "n": 432,
+   "titulo": "The Loser Ninja",
+   "filler": true
+  },
+  {
+   "n": 433,
+   "titulo": "The Search Mission",
+   "filler": true
+  },
+  {
+   "n": 434,
+   "titulo": "Team Jiraiya",
+   "filler": true
+  },
+  {
+   "n": 435,
+   "titulo": "Order of Priority",
+   "filler": true
+  },
+  {
+   "n": 436,
+   "titulo": "The Masked Man",
+   "filler": true
+  },
+  {
+   "n": 437,
+   "titulo": "The Sealed Power",
+   "filler": true
+  },
+  {
+   "n": 438,
+   "titulo": "The Rules or a Comrade",
+   "filler": true
+  },
+  {
+   "n": 439,
+   "titulo": "The Child of Prophecy",
+   "filler": true
+  },
+  {
+   "n": 440,
+   "titulo": "The Caged Bird",
+   "filler": true
+  },
+  {
+   "n": 441,
+   "titulo": "Returning Home",
+   "filler": true
+  },
+  {
+   "n": 442,
+   "titulo": "The Mutual Path",
+   "filler": true
+  },
+  {
+   "n": 443,
+   "titulo": "The Difference in Power",
+   "filler": true
+  },
+  {
+   "n": 444,
+   "titulo": "Leaving the Village",
+   "filler": true
+  },
+  {
+   "n": 445,
+   "titulo": "Pursuers",
+   "filler": true
+  },
+  {
+   "n": 446,
+   "titulo": "Collision",
+   "filler": true
+  },
+  {
+   "n": 447,
+   "titulo": "Another Moon",
+   "filler": true
+  },
+  {
+   "n": 448,
+   "titulo": "Comrade",
+   "filler": true
+  },
+  {
+   "n": 449,
+   "titulo": "The Shinobi Unite",
+   "filler": true
+  },
+  {
+   "n": 450,
+   "titulo": "Rival",
+   "filler": true
+  },
+  {
+   "n": 451,
+   "titulo": "Itachi's Story - Light and Darkness: Birth and Death",
+   "filler": false
+  },
+  {
+   "n": 452,
+   "titulo": "Itachi's Story - Light and Darkness: The Genius",
+   "filler": false
+  },
+  {
+   "n": 453,
+   "titulo": "Itachi's Story - Light and Darkness: The Pain of Living",
+   "filler": false
+  },
+  {
+   "n": 454,
+   "titulo": "Itachi's Story - Light and Darkness: Shisui's Request",
+   "filler": false
+  },
+  {
+   "n": 455,
+   "titulo": "Itachi's Story - Light and Darkness: Moonlit Night",
+   "filler": false
+  },
+  {
+   "n": 456,
+   "titulo": "Itachi's Story - Light and Darkness: The Darkness of the Akatsuki",
+   "filler": false
+  },
+  {
+   "n": 457,
+   "titulo": "Itachi's Story - Light and Darkness: Partner",
+   "filler": false
+  },
+  {
+   "n": 458,
+   "titulo": "Itachi's Story - Light and Darkness: Truth",
+   "filler": false
+  },
+  {
+   "n": 459,
+   "titulo": "She of the Beginning",
+   "filler": false
+  },
+  {
+   "n": 460,
+   "titulo": "Kaguya Otsutsuki",
+   "filler": false
+  },
+  {
+   "n": 461,
+   "titulo": "Hagoromo and Hamura",
+   "filler": false
+  },
+  {
+   "n": 462,
+   "titulo": "A Fabricated Past",
+   "filler": false
+  },
+  {
+   "n": 463,
+   "titulo": "The No. 1 Most Unpredictable Ninja",
+   "filler": false
+  },
+  {
+   "n": 464,
+   "titulo": "Ninshū: The Ninja Creed",
+   "filler": true
+  },
+  {
+   "n": 465,
+   "titulo": "Ashura and Indra",
+   "filler": true
+  },
+  {
+   "n": 466,
+   "titulo": "The Tumultuous Journey",
+   "filler": true
+  },
+  {
+   "n": 467,
+   "titulo": "Ashura's Decision",
+   "filler": true
+  },
+  {
+   "n": 468,
+   "titulo": "The Successor",
+   "filler": true
+  },
+  {
+   "n": 469,
+   "titulo": "A Special Mission",
+   "filler": false
+  },
+  {
+   "n": 470,
+   "titulo": "Connecting Thoughts",
+   "filler": false
+  },
+  {
+   "n": 471,
+   "titulo": "The Two of Them...Always",
+   "filler": false
+  },
+  {
+   "n": 472,
+   "titulo": "You Better...",
+   "filler": false
+  },
+  {
+   "n": 473,
+   "titulo": "The Sharingan Revived",
+   "filler": false
+  },
+  {
+   "n": 474,
+   "titulo": "Congratulations",
+   "filler": false
+  },
+  {
+   "n": 475,
+   "titulo": "The Final Valley",
+   "filler": false
+  },
+  {
+   "n": 476,
+   "titulo": "The Final Battle",
+   "filler": false
+  },
+  {
+   "n": 477,
+   "titulo": "Naruto and Sasuke",
+   "filler": false
+  },
+  {
+   "n": 478,
+   "titulo": "The Unison Sign",
+   "filler": false
+  },
+  {
+   "n": 479,
+   "titulo": "Naruto Uzumaki!!",
+   "filler": false
+  },
+  {
+   "n": 480,
+   "titulo": "Naruto and Hinata",
+   "filler": true
+  },
+  {
+   "n": 481,
+   "titulo": "Sasuke and Sakura",
+   "filler": true
+  },
+  {
+   "n": 482,
+   "titulo": "Gaara and Shikamaru",
+   "filler": true
+  },
+  {
+   "n": 483,
+   "titulo": "Jiraiya and Kakashi",
+   "filler": true
+  },
+  {
+   "n": 484,
+   "titulo": "Sasuke’s Story: Sunrise, Part 1: The Exploding Human",
+   "filler": false
+  },
+  {
+   "n": 485,
+   "titulo": "Sasuke’s Story: Sunrise, Part 2: Coliseum",
+   "filler": false
+  },
+  {
+   "n": 486,
+   "titulo": "Sasuke’s Story: Sunrise, Part 3: Fuushin",
+   "filler": false
+  },
+  {
+   "n": 487,
+   "titulo": "Sasuke’s Story: Sunrise, Part 4: The Ketsuryugan",
+   "filler": false
+  },
+  {
+   "n": 488,
+   "titulo": "Sasuke’s Story: Sunrise, Part 5: The Last One",
+   "filler": false
+  },
+  {
+   "n": 489,
+   "titulo": "Shikamaru’s Story, A Cloud Drifting in the Silent Dark, Part 1: The State of Affairs",
+   "filler": false
+  },
+  {
+   "n": 490,
+   "titulo": "Shikamaru’s Story, A Cloud Drifting in the Silent Dark, Part 2: Dark Clouds",
+   "filler": false
+  },
+  {
+   "n": 491,
+   "titulo": "Shikamaru’s Story, A Cloud Drifting in the Silent Dark, Part 3: Recklessness",
+   "filler": false
+  },
+  {
+   "n": 492,
+   "titulo": "Shikamaru’s Story, A Cloud Drifting in the Silent Dark, Part 4: Cloud of Suspicion",
+   "filler": false
+  },
+  {
+   "n": 493,
+   "titulo": "Shikamaru’s Story, A Cloud Drifting in the Silent Dark, Part 5: Dawn",
+   "filler": false
+  },
+  {
+   "n": 494,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 1: Naruto’s Wedding",
+   "filler": false
+  },
+  {
+   "n": 495,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 2: A Full-Powered Wedding Gift",
+   "filler": false
+  },
+  {
+   "n": 496,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 3: Steam and Food Pills",
+   "filler": false
+  },
+  {
+   "n": 497,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 4: The Kazekage’s Wedding Gift",
+   "filler": false
+  },
+  {
+   "n": 498,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 5: The Last Mission",
+   "filler": false
+  },
+  {
+   "n": 499,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 6: The Outcome of the Secret Mission",
+   "filler": false
+  },
+  {
+   "n": 500,
+   "titulo": "Hidden Leaf Story, The Perfect Day for a Wedding, Part 7: The Message",
+   "filler": false
+  }
+ ],
+ "boruto": [
+  {
+   "n": 1,
+   "titulo": "Boruto Uzumaki!",
+   "filler": false
+  },
+  {
+   "n": 2,
+   "titulo": "The Hokage's Son!",
+   "filler": false
+  },
+  {
+   "n": 3,
+   "titulo": "Metal Lee Goes Wild!",
+   "filler": false
+  },
+  {
+   "n": 4,
+   "titulo": "A Ninjutsu Battle of the Sexes!",
+   "filler": false
+  },
+  {
+   "n": 5,
+   "titulo": "The Mysterious Transfer Student!",
+   "filler": false
+  },
+  {
+   "n": 6,
+   "titulo": "The Final Lesson!",
+   "filler": false
+  },
+  {
+   "n": 7,
+   "titulo": "Love and Potato Chips!",
+   "filler": false
+  },
+  {
+   "n": 8,
+   "titulo": "The Dream's Revelation",
+   "filler": false
+  },
+  {
+   "n": 9,
+   "titulo": "Proof of Oneself",
+   "filler": false
+  },
+  {
+   "n": 10,
+   "titulo": "The Ghost Incident: The Investigation Begins!",
+   "filler": false
+  },
+  {
+   "n": 11,
+   "titulo": "The Shadow of the Mastermind",
+   "filler": false
+  },
+  {
+   "n": 12,
+   "titulo": "Boruto and Mitsuki",
+   "filler": false
+  },
+  {
+   "n": 13,
+   "titulo": "The Demon Beast Appears!",
+   "filler": false
+  },
+  {
+   "n": 14,
+   "titulo": "The Path That Boruto Can See",
+   "filler": false
+  },
+  {
+   "n": 15,
+   "titulo": "A New Path",
+   "filler": false
+  },
+  {
+   "n": 16,
+   "titulo": "Crisis: The Threat of Failing!",
+   "filler": true
+  },
+  {
+   "n": 17,
+   "titulo": "Run, Sarada!",
+   "filler": true
+  },
+  {
+   "n": 18,
+   "titulo": "A Day in the Life of the Uzumaki Family",
+   "filler": false
+  },
+  {
+   "n": 19,
+   "titulo": "Sarada Uchiha",
+   "filler": false
+  },
+  {
+   "n": 20,
+   "titulo": "The Boy With the Sharingan",
+   "filler": false
+  },
+  {
+   "n": 21,
+   "titulo": "Sasuke and Sarada",
+   "filler": false
+  },
+  {
+   "n": 22,
+   "titulo": "Connected Feelings",
+   "filler": false
+  },
+  {
+   "n": 23,
+   "titulo": "Bonds Come in All Shapes",
+   "filler": false
+  },
+  {
+   "n": 24,
+   "titulo": "Boruto and Sarada",
+   "filler": false
+  },
+  {
+   "n": 25,
+   "titulo": "The Turbulent Field Trip",
+   "filler": false
+  },
+  {
+   "n": 26,
+   "titulo": "The Mizukage's Successor",
+   "filler": false
+  },
+  {
+   "n": 27,
+   "titulo": "A Shinobi Bout of Friendship",
+   "filler": false
+  },
+  {
+   "n": 28,
+   "titulo": "Declaration of War",
+   "filler": false
+  },
+  {
+   "n": 29,
+   "titulo": "The New Seven Ninja Swordsmen!",
+   "filler": false
+  },
+  {
+   "n": 30,
+   "titulo": "The Sharingan vs. the Lightning Blade, Kiba the Fang!",
+   "filler": false
+  },
+  {
+   "n": 31,
+   "titulo": "Boruto and Kagura",
+   "filler": false
+  },
+  {
+   "n": 32,
+   "titulo": "The Quest for Souvenirs",
+   "filler": false
+  },
+  {
+   "n": 33,
+   "titulo": "The Super Beast Scroll Slump!",
+   "filler": false
+  },
+  {
+   "n": 34,
+   "titulo": "The Night of the Shooting Stars",
+   "filler": false
+  },
+  {
+   "n": 35,
+   "titulo": "The Parent Teacher Conference!",
+   "filler": false
+  },
+  {
+   "n": 36,
+   "titulo": "The Graduation Exam Begins!",
+   "filler": false
+  },
+  {
+   "n": 37,
+   "titulo": "A Shinobi's Resolve",
+   "filler": false
+  },
+  {
+   "n": 38,
+   "titulo": "Formation of the Three-Man Squad?",
+   "filler": false
+  },
+  {
+   "n": 39,
+   "titulo": "The Path Lit by the Full Moon",
+   "filler": false
+  },
+  {
+   "n": 40,
+   "titulo": "Team 7: The First Mission!",
+   "filler": true
+  },
+  {
+   "n": 41,
+   "titulo": "Strength in Unity",
+   "filler": true
+  },
+  {
+   "n": 42,
+   "titulo": "A Ninja's Job",
+   "filler": false
+  },
+  {
+   "n": 43,
+   "titulo": "The Byakuya Gang Surfaces!",
+   "filler": false
+  },
+  {
+   "n": 44,
+   "titulo": "Shikadai’s Doubts",
+   "filler": false
+  },
+  {
+   "n": 45,
+   "titulo": "Memories From the Day of Snow",
+   "filler": false
+  },
+  {
+   "n": 46,
+   "titulo": "Go! The Crest of Night Strategy",
+   "filler": false
+  },
+  {
+   "n": 47,
+   "titulo": "The Figure I Want To Be",
+   "filler": false
+  },
+  {
+   "n": 48,
+   "titulo": "The Genin Documentary!",
+   "filler": true
+  },
+  {
+   "n": 49,
+   "titulo": "Wasabi and Namida",
+   "filler": true
+  },
+  {
+   "n": 50,
+   "titulo": "The Chunin Exams: The Recommendation Meeting",
+   "filler": true
+  },
+  {
+   "n": 51,
+   "titulo": "Boruto's Birthday",
+   "filler": false
+  },
+  {
+   "n": 52,
+   "titulo": "Sasuke's Shadow",
+   "filler": false
+  },
+  {
+   "n": 53,
+   "titulo": "Himawari's Birthday",
+   "filler": false
+  },
+  {
+   "n": 54,
+   "titulo": "Sasuke and Boruto",
+   "filler": false
+  },
+  {
+   "n": 55,
+   "titulo": "The Scientific Ninja Tool",
+   "filler": false
+  },
+  {
+   "n": 56,
+   "titulo": "Rivals, Gather!",
+   "filler": false
+  },
+  {
+   "n": 57,
+   "titulo": "The Reason I Can't Lose",
+   "filler": false
+  },
+  {
+   "n": 58,
+   "titulo": "The Tournament Begins!",
+   "filler": false
+  },
+  {
+   "n": 59,
+   "titulo": "Boruto vs. Shikadai",
+   "filler": false
+  },
+  {
+   "n": 60,
+   "titulo": "The Hidden Leaf vs. the Hidden Sand",
+   "filler": false
+  },
+  {
+   "n": 61,
+   "titulo": "The Iron Sand User: Shinki",
+   "filler": false
+  },
+  {
+   "n": 62,
+   "titulo": "The Otsutsuki Invasion",
+   "filler": false
+  },
+  {
+   "n": 63,
+   "titulo": "Sasuke's Secret Weapon",
+   "filler": false
+  },
+  {
+   "n": 64,
+   "titulo": "Rescuing Naruto!",
+   "filler": false
+  },
+  {
+   "n": 65,
+   "titulo": "Father and Child",
+   "filler": false
+  },
+  {
+   "n": 66,
+   "titulo": "My Story!",
+   "filler": false
+  },
+  {
+   "n": 67,
+   "titulo": "Super Cho-Cho Butterfly Mode!",
+   "filler": true
+  },
+  {
+   "n": 68,
+   "titulo": "Super Cho-Cho Kiss Mode!",
+   "filler": true
+  },
+  {
+   "n": 69,
+   "titulo": "Super Cho-Cho Love Upheaval!",
+   "filler": true
+  },
+  {
+   "n": 70,
+   "titulo": "The Other Side of Anxiety",
+   "filler": false
+  },
+  {
+   "n": 71,
+   "titulo": "The Hardest Rock in the World",
+   "filler": false
+  },
+  {
+   "n": 72,
+   "titulo": "Mitsuki’s Will",
+   "filler": false
+  },
+  {
+   "n": 73,
+   "titulo": "The Other Side of the Moon",
+   "filler": false
+  },
+  {
+   "n": 74,
+   "titulo": "The Enemy, Ino-Shika-Cho!",
+   "filler": false
+  },
+  {
+   "n": 75,
+   "titulo": "The Trials of Ryuchi Cave",
+   "filler": false
+  },
+  {
+   "n": 76,
+   "titulo": "Incurring Wrath",
+   "filler": false
+  },
+  {
+   "n": 77,
+   "titulo": "A Fierce Enemy: Garaga’s Ferocious Attack!",
+   "filler": false
+  },
+  {
+   "n": 78,
+   "titulo": "Everyone’s Motives",
+   "filler": false
+  },
+  {
+   "n": 79,
+   "titulo": "Reunion With Mitsuki",
+   "filler": false
+  },
+  {
+   "n": 80,
+   "titulo": "Mitsuki’s Friend",
+   "filler": false
+  },
+  {
+   "n": 81,
+   "titulo": "Boruto's Wish",
+   "filler": false
+  },
+  {
+   "n": 82,
+   "titulo": "Infiltrating the Hidden Stone Village",
+   "filler": false
+  },
+  {
+   "n": 83,
+   "titulo": "Ohnoki’s Justice",
+   "filler": false
+  },
+  {
+   "n": 84,
+   "titulo": "Ohnoki's Thoughts, Ku's Thoughts",
+   "filler": false
+  },
+  {
+   "n": 85,
+   "titulo": "The Heart Stone",
+   "filler": false
+  },
+  {
+   "n": 86,
+   "titulo": "Kozuchi's Will",
+   "filler": false
+  },
+  {
+   "n": 87,
+   "titulo": "The Sensation of Living",
+   "filler": false
+  },
+  {
+   "n": 88,
+   "titulo": "Clash: Kokuyou!",
+   "filler": false
+  },
+  {
+   "n": 89,
+   "titulo": "A Piercing Heart",
+   "filler": false
+  },
+  {
+   "n": 90,
+   "titulo": "Mitsuki and Sekiei",
+   "filler": false
+  },
+  {
+   "n": 91,
+   "titulo": "Ohnoki's Will",
+   "filler": false
+  },
+  {
+   "n": 92,
+   "titulo": "A New Ordinary",
+   "filler": false
+  },
+  {
+   "n": 93,
+   "titulo": "Family Day",
+   "filler": false
+  },
+  {
+   "n": 94,
+   "titulo": "A Heaping Helping! The Eating Contest!",
+   "filler": false
+  },
+  {
+   "n": 95,
+   "titulo": "Tactics for Getting Along With Your Daughter",
+   "filler": false
+  },
+  {
+   "n": 96,
+   "titulo": "Blood, Sweat and Namida",
+   "filler": true
+  },
+  {
+   "n": 97,
+   "titulo": "Shikadai's Decision",
+   "filler": true
+  },
+  {
+   "n": 98,
+   "titulo": "The Cursed Forest",
+   "filler": false
+  },
+  {
+   "n": 99,
+   "titulo": "Jugo and the Curse Mark",
+   "filler": false
+  },
+  {
+   "n": 100,
+   "titulo": "The Predestined Path",
+   "filler": false
+  },
+  {
+   "n": 101,
+   "titulo": "Jugo’s Reinforcements",
+   "filler": false
+  },
+  {
+   "n": 102,
+   "titulo": "Melee!",
+   "filler": false
+  },
+  {
+   "n": 103,
+   "titulo": "Migration Season",
+   "filler": false
+  },
+  {
+   "n": 104,
+   "titulo": "The Little Roommate",
+   "filler": false
+  },
+  {
+   "n": 105,
+   "titulo": "A Wound on the Heart",
+   "filler": false
+  },
+  {
+   "n": 106,
+   "titulo": "The Steam Ninja Scrolls: The S-Rank Mission!",
+   "filler": false
+  },
+  {
+   "n": 107,
+   "titulo": "The Steam Ninja Scrolls: The Dog and Cat War!",
+   "filler": false
+  },
+  {
+   "n": 108,
+   "titulo": "The Steam Ninja Scrolls: The Haunted Inn!",
+   "filler": false
+  },
+  {
+   "n": 109,
+   "titulo": "The Steam Ninja Scrolls: Potato Chips and the Giant Boulder!",
+   "filler": false
+  },
+  {
+   "n": 110,
+   "titulo": "The Steam Ninja Scrolls: The Resurrection Hot Springs!",
+   "filler": false
+  },
+  {
+   "n": 111,
+   "titulo": "The Steam Ninja Scrolls: Mirai's King!",
+   "filler": false
+  },
+  {
+   "n": 112,
+   "titulo": "The Chunin Selection Conference",
+   "filler": true
+  },
+  {
+   "n": 113,
+   "titulo": "The Qualities of a Captain",
+   "filler": true
+  },
+  {
+   "n": 114,
+   "titulo": "X Cards Proxy War!",
+   "filler": true
+  },
+  {
+   "n": 115,
+   "titulo": "Team 25",
+   "filler": true
+  },
+  {
+   "n": 116,
+   "titulo": "Konohamaru and Remon",
+   "filler": true
+  },
+  {
+   "n": 117,
+   "titulo": "Remon’s Secret",
+   "filler": true
+  },
+  {
+   "n": 118,
+   "titulo": "Something That Steals Memories",
+   "filler": true
+  },
+  {
+   "n": 119,
+   "titulo": "Konohamaru’s Ninja Way",
+   "filler": true
+  },
+  {
+   "n": 120,
+   "titulo": "With Sasuke as the Goal",
+   "filler": false
+  },
+  {
+   "n": 121,
+   "titulo": "The Entrusted Mission: Protect the One Tails!",
+   "filler": false
+  },
+  {
+   "n": 122,
+   "titulo": "The Puppet Battle!",
+   "filler": false
+  },
+  {
+   "n": 123,
+   "titulo": "Urashiki Returns",
+   "filler": false
+  },
+  {
+   "n": 124,
+   "titulo": "Decision Time",
+   "filler": false
+  },
+  {
+   "n": 125,
+   "titulo": "Boruto and Shinki",
+   "filler": false
+  },
+  {
+   "n": 126,
+   "titulo": "Shukaku's Trick",
+   "filler": false
+  },
+  {
+   "n": 127,
+   "titulo": "Make-Out Tactics",
+   "filler": false
+  },
+  {
+   "n": 128,
+   "titulo": "Urashiki’s Target",
+   "filler": false
+  },
+  {
+   "n": 129,
+   "titulo": "The Village Hidden in the Leaves",
+   "filler": false
+  },
+  {
+   "n": 130,
+   "titulo": "Genin, Assemble!",
+   "filler": false
+  },
+  {
+   "n": 131,
+   "titulo": "The Power of the Nine Tails",
+   "filler": false
+  },
+  {
+   "n": 132,
+   "titulo": "Jiraiya's Assignment",
+   "filler": false
+  },
+  {
+   "n": 133,
+   "titulo": "A Village Without Sasuke",
+   "filler": false
+  },
+  {
+   "n": 134,
+   "titulo": "The Power To See the Future",
+   "filler": false
+  },
+  {
+   "n": 135,
+   "titulo": "The Last Battle, Urashiki",
+   "filler": false
+  },
+  {
+   "n": 136,
+   "titulo": "Crossing Time!",
+   "filler": false
+  },
+  {
+   "n": 137,
+   "titulo": "The Samurai Exchange Student",
+   "filler": false
+  },
+  {
+   "n": 138,
+   "titulo": "Hiashi's Birthday",
+   "filler": true
+  },
+  {
+   "n": 139,
+   "titulo": "The Terror! Enko Onikuma",
+   "filler": true
+  },
+  {
+   "n": 140,
+   "titulo": "The Mind Transfer Jutsu That Lost to Potato Chips",
+   "filler": true
+  },
+  {
+   "n": 141,
+   "titulo": "The Shinobi Prison: Hozuki Castle",
+   "filler": false
+  },
+  {
+   "n": 142,
+   "titulo": "A Test of Willpower",
+   "filler": false
+  },
+  {
+   "n": 143,
+   "titulo": "The Criminal Targeting Kokuri",
+   "filler": false
+  },
+  {
+   "n": 144,
+   "titulo": "Kokuri's Secret",
+   "filler": false
+  },
+  {
+   "n": 145,
+   "titulo": "Breaking Out of Hozuki Castle",
+   "filler": false
+  },
+  {
+   "n": 146,
+   "titulo": "Executing the Prison Break!",
+   "filler": false
+  },
+  {
+   "n": 147,
+   "titulo": "The Fateful Moonlit Battle",
+   "filler": false
+  },
+  {
+   "n": 148,
+   "titulo": "A New Mission!!",
+   "filler": false
+  },
+  {
+   "n": 149,
+   "titulo": "Friends!!",
+   "filler": false
+  },
+  {
+   "n": 150,
+   "titulo": "The Value of a Hidden Ace",
+   "filler": false
+  },
+  {
+   "n": 151,
+   "titulo": "Boruto and Tento",
+   "filler": false
+  },
+  {
+   "n": 152,
+   "titulo": "Developing One's Medical Ninjutsu",
+   "filler": true
+  },
+  {
+   "n": 153,
+   "titulo": "Harmony in Gold",
+   "filler": true
+  },
+  {
+   "n": 154,
+   "titulo": "Himawari's Ninja Trial Session",
+   "filler": true
+  },
+  {
+   "n": 155,
+   "titulo": "Mitsuki's Rainy Day",
+   "filler": false
+  },
+  {
+   "n": 156,
+   "titulo": "I Can't Stay in My Slim Form",
+   "filler": true
+  },
+  {
+   "n": 157,
+   "titulo": "Kara's Footprints",
+   "filler": false
+  },
+  {
+   "n": 158,
+   "titulo": "The Man Who Disappeared",
+   "filler": false
+  },
+  {
+   "n": 159,
+   "titulo": "The Hashirama Cell",
+   "filler": false
+  },
+  {
+   "n": 160,
+   "titulo": "To the Land of Silence",
+   "filler": false
+  },
+  {
+   "n": 161,
+   "titulo": "The Castle of Nightmares",
+   "filler": false
+  },
+  {
+   "n": 162,
+   "titulo": "Escaping the Tightening Net",
+   "filler": false
+  },
+  {
+   "n": 163,
+   "titulo": "The Pursuers",
+   "filler": false
+  },
+  {
+   "n": 164,
+   "titulo": "The Forbidden Jutsu of Death",
+   "filler": false
+  },
+  {
+   "n": 165,
+   "titulo": "The Quadruplets' Duty",
+   "filler": false
+  },
+  {
+   "n": 166,
+   "titulo": "Death Match",
+   "filler": false
+  },
+  {
+   "n": 167,
+   "titulo": "Their Decision",
+   "filler": false
+  },
+  {
+   "n": 168,
+   "titulo": "Training Begins!",
+   "filler": false
+  },
+  {
+   "n": 169,
+   "titulo": "A Joint Mission With the Sand",
+   "filler": false
+  },
+  {
+   "n": 170,
+   "titulo": "A New Rasengan",
+   "filler": false
+  },
+  {
+   "n": 171,
+   "titulo": "The Results of Training",
+   "filler": false
+  },
+  {
+   "n": 172,
+   "titulo": "A Signature of Fear",
+   "filler": false
+  },
+  {
+   "n": 173,
+   "titulo": "The Secret Behind the Underground Room",
+   "filler": false
+  },
+  {
+   "n": 174,
+   "titulo": "The Revival of the Divine Tree",
+   "filler": false
+  },
+  {
+   "n": 175,
+   "titulo": "Beyond the Limits!",
+   "filler": false
+  },
+  {
+   "n": 176,
+   "titulo": "Blockade the A-Un Gate!",
+   "filler": false
+  },
+  {
+   "n": 177,
+   "titulo": "The Iron Wall's Sensing System",
+   "filler": false
+  },
+  {
+   "n": 178,
+   "titulo": "Our Fathers' Example",
+   "filler": false
+  },
+  {
+   "n": 179,
+   "titulo": "Victor's Scheme",
+   "filler": false
+  },
+  {
+   "n": 180,
+   "titulo": "The Assassin, Mugino",
+   "filler": false
+  },
+  {
+   "n": 181,
+   "titulo": "The Vessel",
+   "filler": false
+  },
+  {
+   "n": 182,
+   "titulo": "Ao",
+   "filler": false
+  },
+  {
+   "n": 183,
+   "titulo": "The Hand",
+   "filler": false
+  },
+  {
+   "n": 184,
+   "titulo": "Puppets",
+   "filler": false
+  },
+  {
+   "n": 185,
+   "titulo": "Tools",
+   "filler": false
+  },
+  {
+   "n": 186,
+   "titulo": "How You Use It",
+   "filler": false
+  },
+  {
+   "n": 187,
+   "titulo": "Karma",
+   "filler": false
+  },
+  {
+   "n": 188,
+   "titulo": "Awakening",
+   "filler": false
+  },
+  {
+   "n": 189,
+   "titulo": "Resonance",
+   "filler": false
+  },
+  {
+   "n": 190,
+   "titulo": "Escape",
+   "filler": false
+  },
+  {
+   "n": 191,
+   "titulo": "Stray Dog",
+   "filler": false
+  },
+  {
+   "n": 192,
+   "titulo": "The Past",
+   "filler": false
+  },
+  {
+   "n": 193,
+   "titulo": "Coexistence",
+   "filler": false
+  },
+  {
+   "n": 194,
+   "titulo": "The Uzumaki Household",
+   "filler": false
+  },
+  {
+   "n": 195,
+   "titulo": "A Vase",
+   "filler": false
+  },
+  {
+   "n": 196,
+   "titulo": "A Binding Force",
+   "filler": false
+  },
+  {
+   "n": 197,
+   "titulo": "Delta",
+   "filler": false
+  },
+  {
+   "n": 198,
+   "titulo": "Monsters",
+   "filler": false
+  },
+  {
+   "n": 199,
+   "titulo": "Overload",
+   "filler": false
+  },
+  {
+   "n": 200,
+   "titulo": "Becoming a Student",
+   "filler": false
+  },
+  {
+   "n": 201,
+   "titulo": "Empty Tears",
+   "filler": false
+  },
+  {
+   "n": 202,
+   "titulo": "The Cult",
+   "filler": false
+  },
+  {
+   "n": 203,
+   "titulo": "Suprise Attack!",
+   "filler": false
+  },
+  {
+   "n": 204,
+   "titulo": "He's Bad News",
+   "filler": false
+  },
+  {
+   "n": 205,
+   "titulo": "Proof",
+   "filler": false
+  },
+  {
+   "n": 206,
+   "titulo": "The New Team Seven",
+   "filler": false
+  },
+  {
+   "n": 207,
+   "titulo": "Regeneration",
+   "filler": false
+  },
+  {
+   "n": 208,
+   "titulo": "Momoshiki's Manifestation",
+   "filler": false
+  },
+  {
+   "n": 209,
+   "titulo": "The Outcast",
+   "filler": false
+  },
+  {
+   "n": 210,
+   "titulo": "Clues to Kara",
+   "filler": false
+  },
+  {
+   "n": 211,
+   "titulo": "The Chase",
+   "filler": false
+  },
+  {
+   "n": 212,
+   "titulo": "Amado's Defection",
+   "filler": false
+  },
+  {
+   "n": 213,
+   "titulo": "True Identity",
+   "filler": false
+  },
+  {
+   "n": 214,
+   "titulo": "Predestined Fate",
+   "filler": false
+  },
+  {
+   "n": 215,
+   "titulo": "Prepared",
+   "filler": false
+  },
+  {
+   "n": 216,
+   "titulo": "Sacrifice",
+   "filler": false
+  },
+  {
+   "n": 217,
+   "titulo": "Decision",
+   "filler": false
+  },
+  {
+   "n": 218,
+   "titulo": "Partner",
+   "filler": false
+  },
+  {
+   "n": 219,
+   "titulo": "Return",
+   "filler": false
+  },
+  {
+   "n": 220,
+   "titulo": "Remaining Time",
+   "filler": false
+  },
+  {
+   "n": 221,
+   "titulo": "The Chunin Exams Resume",
+   "filler": false
+  },
+  {
+   "n": 222,
+   "titulo": "The Night Before the Final Round",
+   "filler": false
+  },
+  {
+   "n": 223,
+   "titulo": "Inojin vs. Houki",
+   "filler": false
+  },
+  {
+   "n": 224,
+   "titulo": "The Legend of the Monster Cat",
+   "filler": false
+  },
+  {
+   "n": 225,
+   "titulo": "Showdown Between Best Friends",
+   "filler": false
+  },
+  {
+   "n": 226,
+   "titulo": "Samurai vs. Science",
+   "filler": false
+  },
+  {
+   "n": 227,
+   "titulo": "Team 7's Last Mission?!",
+   "filler": false
+  },
+  {
+   "n": 228,
+   "titulo": "Kawaki's Path To Becoming a Ninja",
+   "filler": false
+  },
+  {
+   "n": 229,
+   "titulo": "Breach of Orders",
+   "filler": false
+  },
+  {
+   "n": 230,
+   "titulo": "A Wish",
+   "filler": false
+  },
+  {
+   "n": 231,
+   "titulo": "The Rusty Sword",
+   "filler": false
+  },
+  {
+   "n": 232,
+   "titulo": "Captain Denki's First Mission",
+   "filler": false
+  },
+  {
+   "n": 233,
+   "titulo": "The New Team 7 Jumps Into Action",
+   "filler": false
+  },
+  {
+   "n": 234,
+   "titulo": "The Unleashed Villian",
+   "filler": false
+  },
+  {
+   "n": 235,
+   "titulo": "Infiltrating Dotou Island",
+   "filler": false
+  },
+  {
+   "n": 236,
+   "titulo": "Cut and Run",
+   "filler": false
+  },
+  {
+   "n": 237,
+   "titulo": "The Mobile Fortress",
+   "filler": false
+  },
+  {
+   "n": 238,
+   "titulo": "A Killer on the Ship",
+   "filler": false
+  },
+  {
+   "n": 239,
+   "titulo": "The Boy From the Isle of Shipbuilders",
+   "filler": false
+  },
+  {
+   "n": 240,
+   "titulo": "Ikada's Dream",
+   "filler": false
+  },
+  {
+   "n": 241,
+   "titulo": "Ikada's Secret",
+   "filler": false
+  },
+  {
+   "n": 242,
+   "titulo": "Seiren",
+   "filler": false
+  },
+  {
+   "n": 243,
+   "titulo": "Where I Belong",
+   "filler": false
+  },
+  {
+   "n": 244,
+   "titulo": "Rift",
+   "filler": false
+  },
+  {
+   "n": 245,
+   "titulo": "Funamushi's Tenacity",
+   "filler": false
+  },
+  {
+   "n": 246,
+   "titulo": "A Heavy Loss",
+   "filler": false
+  },
+  {
+   "n": 247,
+   "titulo": "For Kagura",
+   "filler": false
+  },
+  {
+   "n": 248,
+   "titulo": "Another Fierce Battle",
+   "filler": false
+  },
+  {
+   "n": 249,
+   "titulo": "Burgeoning Hatred",
+   "filler": false
+  },
+  {
+   "n": 250,
+   "titulo": "The Blood of the Funato",
+   "filler": false
+  },
+  {
+   "n": 251,
+   "titulo": "Their Resolve",
+   "filler": false
+  },
+  {
+   "n": 252,
+   "titulo": "The Desire to Believe",
+   "filler": false
+  },
+  {
+   "n": 253,
+   "titulo": "Conflicting Feelings",
+   "filler": false
+  },
+  {
+   "n": 254,
+   "titulo": "The Spiral of Revenge",
+   "filler": false
+  },
+  {
+   "n": 255,
+   "titulo": "A Tricky Assignment",
+   "filler": false
+  },
+  {
+   "n": 256,
+   "titulo": "The Ultimate Recipe",
+   "filler": true
+  },
+  {
+   "n": 257,
+   "titulo": "Konohamaru Becomes the Hokage?!",
+   "filler": false
+  },
+  {
+   "n": 258,
+   "titulo": "The Uzumaki Family's Hot Springs Vacation",
+   "filler": false
+  },
+  {
+   "n": 259,
+   "titulo": "A Wound That Never Heals",
+   "filler": false
+  },
+  {
+   "n": 260,
+   "titulo": "Fireworks of Love",
+   "filler": false
+  },
+  {
+   "n": 261,
+   "titulo": "Kawaki Enters the Ninja Academy!",
+   "filler": false
+  },
+  {
+   "n": 262,
+   "titulo": "The Princess’ Tea Party",
+   "filler": false
+  },
+  {
+   "n": 263,
+   "titulo": "Bloom, Hana! The Teacher's Gifts",
+   "filler": false
+  },
+  {
+   "n": 264,
+   "titulo": "The Seven Mysteries Investigative Team Forms!",
+   "filler": false
+  },
+  {
+   "n": 265,
+   "titulo": "Team Rivalry: Practical Skills Training!",
+   "filler": false
+  },
+  {
+   "n": 266,
+   "titulo": "Himawari Kidnapped!",
+   "filler": false
+  },
+  {
+   "n": 267,
+   "titulo": "Kawaki's Cover Blown?!",
+   "filler": false
+  },
+  {
+   "n": 268,
+   "titulo": "Target: The School Festival",
+   "filler": false
+  },
+  {
+   "n": 269,
+   "titulo": "The Sneaking Shadow",
+   "filler": false
+  },
+  {
+   "n": 270,
+   "titulo": "Two Sides of the Same Coin",
+   "filler": false
+  },
+  {
+   "n": 271,
+   "titulo": "The Island of Treachery",
+   "filler": false
+  },
+  {
+   "n": 272,
+   "titulo": "Students Unite!",
+   "filler": false
+  },
+  {
+   "n": 273,
+   "titulo": "Farewell, Academy!",
+   "filler": false
+  },
+  {
+   "n": 274,
+   "titulo": "A Flightless Hawk",
+   "filler": false
+  },
+  {
+   "n": 275,
+   "titulo": "Into the Sky Again",
+   "filler": false
+  },
+  {
+   "n": 276,
+   "titulo": "Welcome to the Maze",
+   "filler": false
+  },
+  {
+   "n": 277,
+   "titulo": "Disappearing Lives",
+   "filler": false
+  },
+  {
+   "n": 278,
+   "titulo": "Musical Chairs",
+   "filler": false
+  },
+  {
+   "n": 279,
+   "titulo": "The Obstacle: Seven",
+   "filler": false
+  },
+  {
+   "n": 280,
+   "titulo": "Breakthrough",
+   "filler": false
+  },
+  {
+   "n": 281,
+   "titulo": "The Eighth Truth",
+   "filler": false
+  },
+  {
+   "n": 282,
+   "titulo": "Sasuke's Story: Infiltration",
+   "filler": false
+  },
+  {
+   "n": 283,
+   "titulo": "Sasuke's Story: Star Lines",
+   "filler": false
+  },
+  {
+   "n": 284,
+   "titulo": "Sasuke's Story: The Secret in the Cellar",
+   "filler": false
+  },
+  {
+   "n": 285,
+   "titulo": "Sasuke's Story: The Sky That Fell to the Earth",
+   "filler": false
+  },
+  {
+   "n": 286,
+   "titulo": "Sasuke's Story: The Ring",
+   "filler": false
+  },
+  {
+   "n": 287,
+   "titulo": "Claw Marks",
+   "filler": false
+  },
+  {
+   "n": 288,
+   "titulo": "Captives",
+   "filler": false
+  },
+  {
+   "n": 289,
+   "titulo": "Qualification",
+   "filler": false
+  },
+  {
+   "n": 290,
+   "titulo": "Presence",
+   "filler": false
+  },
+  {
+   "n": 291,
+   "titulo": "Control",
+   "filler": false
+  },
+  {
+   "n": 292,
+   "titulo": "Hunger",
+   "filler": false
+  },
+  {
+   "n": 293,
+   "titulo": "Farewell",
+   "filler": false
+  }
+ ]
+}
