@@ -37,6 +37,16 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   var selecao = [];          // cartões escolhidos nesse modo
   var ocupado = false;       // evita dois pedidos ao mesmo tempo
 
+  // Frase por baixo dos avatares (igual à da view serie/ver.php)
+  var nomePar = pista.dataset.parNome || '';
+  function rotulo(tu, par) {
+    if (!nomePar) return tu ? 'visto' : 'por ver';
+    if (tu && par) return 'os dois viram';
+    if (tu) return 'falta ' + nomePar;
+    if (par) return nomePar + ' já viu';
+    return 'por ver';
+  }
+
   // ----- Painel do episódio ao centro -----
   function atualizarDetalhe(c) {
     document.getElementById('detalhe-titulo').textContent = 'Episódio ' + c.dataset.n;
@@ -44,12 +54,12 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
     document.getElementById('detalhe-nome').textContent = c.dataset.titulo || '';
     var tu = c.dataset.tu === '1';
     document.getElementById('detalhe-tu').textContent = tu ? 'visto' : 'por ver';
-    document.getElementById('detalhe-ponto-tu').classList.toggle('v', tu);
+    document.getElementById('detalhe-av-tu').classList.toggle('v', tu);
     var par = document.getElementById('detalhe-par');
     if (par) {
       var viu = c.dataset.par === '1';
       par.textContent = viu ? 'visto' : 'por ver';
-      document.getElementById('detalhe-ponto-par').classList.toggle('v', viu);
+      document.getElementById('detalhe-av-par').classList.toggle('v', viu);
     }
   }
 
@@ -154,9 +164,9 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
       var c = porNumero[n];
       if (!c) return;
       c.dataset.tu = resposta.visto ? '1' : '0';
-      c.classList.toggle('visto', resposta.visto);          // fundo sálvia + selo "visto"
-      c.querySelector('.ponto-tu').classList.toggle('v', resposta.visto);
-      c.querySelector('.ep-estado-tu span').textContent = 'tu · ' + (resposta.visto ? 'visto' : 'por ver');
+      c.classList.toggle('visto', resposta.visto);          // cor do cartão (sálvia / degradê se o par também viu)
+      c.querySelector('.ep-av-tu').classList.toggle('v', resposta.visto);   // o teu avatar acende ou esbate
+      c.querySelector('.ep-rotulo').textContent = rotulo(resposta.visto, c.dataset.par === '1');
       var risco = riscosTu.children[n - 1];
       if (risco) risco.classList.toggle('v', resposta.visto);
     });

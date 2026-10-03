@@ -2,6 +2,25 @@
 /* Página da série.
    Variáveis: $serie, $user, $parceiro (ou null), $fillers, $meu, $dele, $episodios, $inicial, $flash */
 $nomePar   = $parceiro ? $parceiro->nome : null;
+
+// Avatares (foto ou inicial) gerados uma vez e repetidos em todos os cartões
+$avatarHtml = function ($pessoa, string $cor): string {
+    ob_start();
+    $avatarUser = $pessoa; $avatarCor = $cor; $avatarExtra = 'avatar-mini';
+    require __DIR__ . '/../layout/avatar.php';
+    return ob_get_clean();
+};
+$avTu  = $avatarHtml($user, 'tu');
+$avPar = $parceiro ? $avatarHtml($parceiro, 'par') : '';
+
+// Frase curta por baixo dos avatares (o js/app.js tem a mesma lógica)
+$rotulo = function (bool $tu, bool $par) use ($nomePar): string {
+    if ($nomePar === null) return $tu ? 'visto' : 'por ver';
+    if ($tu && $par)       return 'os dois viram';
+    if ($tu)               return 'falta ' . $nomePar;
+    if ($par)              return $nomePar . ' já viu';
+    return 'por ver';
+};
 $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do painel e do botão (funciona sem JS)
 ?>
 <div class="topo">
@@ -42,10 +61,10 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 
 <!-- Pista: desliza para os lados; o cartão do centro é o selecionado
      (em "Selecionar vários", tocar num cartão junta-o à seleção) -->
-<div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>">
+<div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>" data-par-nome="<?= e($nomePar ?? '') ?>">
   <?php foreach ($episodios as $ep): ?>
     <button type="button"
-            class="ep vidro<?= $ep['tu'] ? ' visto' : '' ?><?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
+            class="ep vidro<?= $ep['tu'] ? ' visto' : '' ?><?= $ep['par'] ? ' par-viu' : '' ?><?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
             data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>"
             data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-par="<?= $ep['par'] ? '1' : '0' ?>"
             data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
@@ -57,11 +76,13 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
         <span class="ep-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
       </span>
       <span class="ep-num"><?= $ep['numero'] ?></span>
-      <span class="ep-estados">
-        <span class="ep-estado ep-estado-tu"><i class="ponto ponto-tu<?= $ep['tu'] ? ' v' : '' ?>"></i><span>tu · <?= $ep['tu'] ? 'visto' : 'por ver' ?></span></span>
-        <?php if ($parceiro): ?>
-          <span class="ep-estado"><i class="ponto ponto-par<?= $ep['par'] ? ' v' : '' ?>"></i><?= e(mb_strtolower($nomePar)) ?> · <?= $ep['par'] ? 'visto' : 'por ver' ?></span>
-        <?php endif; ?>
+      <!-- Quem viu: avatares a cores = viu, esbatidos = ainda não -->
+      <span class="ep-quem">
+        <span class="ep-avs">
+          <span class="ep-av ep-av-tu<?= $ep['tu'] ? ' v' : '' ?>"><?= $avTu ?></span>
+          <?php if ($parceiro): ?><span class="ep-av ep-av-par<?= $ep['par'] ? ' v' : '' ?>"><?= $avPar ?></span><?php endif; ?>
+        </span>
+        <span class="ep-rotulo"><?= e($rotulo($ep['tu'], $ep['par'])) ?></span>
       </span>
     </button>
   <?php endforeach; ?>
@@ -75,9 +96,15 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
   </div>
   <p class="detalhe-nome" id="detalhe-nome"><?= e($epInicial['titulo'] ?? '') ?></p>
   <div class="detalhe-estados">
-    <span><i class="ponto ponto-tu<?= $epInicial['tu'] ? ' v' : '' ?>" id="detalhe-ponto-tu"></i><span>Tu · <b id="detalhe-tu"><?= $epInicial['tu'] ? 'visto' : 'por ver' ?></b></span></span>
+    <span class="detalhe-pessoa">
+      <span class="ep-av<?= $epInicial['tu'] ? ' v' : '' ?>" id="detalhe-av-tu"><?= $avTu ?></span>
+      <span>Tu<br><b id="detalhe-tu"><?= $epInicial['tu'] ? 'visto' : 'por ver' ?></b></span>
+    </span>
     <?php if ($parceiro): ?>
-      <span><i class="ponto ponto-par<?= $epInicial['par'] ? ' v' : '' ?>" id="detalhe-ponto-par"></i><span><?= e($nomePar) ?> · <b id="detalhe-par"><?= $epInicial['par'] ? 'visto' : 'por ver' ?></b></span></span>
+      <span class="detalhe-pessoa">
+        <span class="ep-av<?= $epInicial['par'] ? ' v' : '' ?>" id="detalhe-av-par"><?= $avPar ?></span>
+        <span><?= e($nomePar) ?><br><b id="detalhe-par"><?= $epInicial['par'] ? 'visto' : 'por ver' ?></b></span>
+      </span>
     <?php endif; ?>
   </div>
 </section>
