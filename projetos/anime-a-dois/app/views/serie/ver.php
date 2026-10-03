@@ -45,7 +45,7 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 <div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>">
   <?php foreach ($episodios as $ep): ?>
     <button type="button"
-            class="ep vidro<?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
+            class="ep vidro<?= $ep['tu'] ? ' visto' : '' ?><?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
             data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>"
             data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-par="<?= $ep['par'] ? '1' : '0' ?>"
             data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"

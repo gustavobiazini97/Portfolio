@@ -154,6 +154,7 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
       var c = porNumero[n];
       if (!c) return;
       c.dataset.tu = resposta.visto ? '1' : '0';
+      c.classList.toggle('visto', resposta.visto);          // fundo sálvia + selo "visto"
       c.querySelector('.ponto-tu').classList.toggle('v', resposta.visto);
       c.querySelector('.ep-estado-tu span').textContent = 'tu · ' + (resposta.visto ? 'visto' : 'por ver');
       var risco = riscosTu.children[n - 1];
