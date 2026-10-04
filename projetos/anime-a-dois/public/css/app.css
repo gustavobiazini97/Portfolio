@@ -584,6 +584,16 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .resultado-acoes { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
 .resultado-ja { font-size: 12.5px; color: var(--tu-txt); }
 
+/* ---------- Popup "O que há de novo" (Início) ---------- */
+.novidades-lista { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 2px; }
+.novidade { border-radius: 20px; padding: 14px 16px; background: var(--campo); border: 1px solid var(--linha); }
+.novidade-cima { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.novidade-cima h3 { font-size: 14.5px; font-weight: 500; }
+.novidade ul { margin-top: 6px; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--suave); }
+.novidade li::marker { color: var(--tu-txt); }
+.folha-novidades .btn { flex-shrink: 0; }
+.novidades-lista:focus, .novidades-lista:focus-visible { outline: none; }   /* o dialog foca a lista ao abrir: sem contorno verde */
+
 /* Etiqueta "filler": escura e sólida, salta à vista em qualquer cor de cartão e tema */
 .etiqueta-filler {
   display: inline-flex; align-items: center; gap: 5px;

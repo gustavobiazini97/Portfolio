@@ -46,6 +46,7 @@ $colunas = [
     ['episodios', 'recap',        'TINYINT(1) NOT NULL DEFAULT 0'],
     ['preferencias', 'serie_push',  'TINYINT(1) NOT NULL DEFAULT 1'],
     ['preferencias', 'serie_email', 'TINYINT(1) NOT NULL DEFAULT 0'],
+    ['users', 'novidades_vistas',  'SMALLINT UNSIGNED NOT NULL DEFAULT 0'],
 ];
 
 $schema = Capsule::schema();

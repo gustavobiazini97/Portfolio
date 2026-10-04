@@ -8,7 +8,7 @@ class User extends Model
     protected $table = 'users';
     public $timestamps = false;
 
-    protected $fillable = ['nome', 'username', 'password_hash'];
+    protected $fillable = ['nome', 'username', 'password_hash', 'novidades_vistas'];
 
     // Nunca expor o hash se o Model for convertido em array/JSON
     protected $hidden = ['password_hash'];
@@ -115,6 +115,13 @@ class User extends Model
         $this->save();
     }
 
+    // Fecha o popup das novidades: fica tudo visto até à próxima atualização
+    public function marcarNovidadesVistas(): void
+    {
+        $this->novidades_vistas = Novidade::ultima();
+        $this->save();
+    }
+
     // Indica se este episódio já está marcado como visto
     public function viu(Episodio $episodio): bool
     {
@@ -197,6 +204,7 @@ class User extends Model
             'nome'          => $nome,
             'username'      => $username,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'novidades_vistas' => Novidade::ultima(),   // conta nova: começa sem novidades por ver
         ]);
     }
 

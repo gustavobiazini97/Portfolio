@@ -1,0 +1,59 @@
+{
+  "_como": "Novidades mostradas no popup do Início. Ao publicar algo novo, acrescenta uma entrada no FIM com o id seguinte (nunca mudes os ids antigos). Cada pessoa vê só as entradas com id maior do que o último que já viu (users.novidades_vistas).",
+  "novidades": [
+    {
+      "id": 1,
+      "data": "2026-10-04",
+      "titulo": "Notificações",
+      "itens": [
+        "Recebes um aviso quando o teu par marca episódios ou comenta.",
+        "No perfil escolhes o que queres receber e por onde: telemóvel, email ou os dois."
+      ]
+    },
+    {
+      "id": 2,
+      "data": "2026-10-04",
+      "titulo": "Estatísticas",
+      "itens": [
+        "Botão das barras no topo: episódios e horas de cada um, ritmo por semana e quando acabam a série.",
+        "Arcos do Naruto e do Shippuden com um selo para quem já os acabou."
+      ]
+    },
+    {
+      "id": 3,
+      "data": "2026-10-04",
+      "titulo": "Biblioteca",
+      "itens": [
+        "O Início tem agora uma fila de capas com o progresso dos dois por baixo.",
+        "Cada série pode estar a ver, em pausa ou acabada; as acabadas vão para o fim.",
+        "Botão + para adicionar qualquer anime do MyAnimeList, com títulos, fillers e recaps."
+      ]
+    },
+    {
+      "id": 4,
+      "data": "2026-10-04",
+      "titulo": "Quero ver contigo",
+      "itens": [
+        "Ao adicionar, podes propor a série ao teu par em vez de a pôr logo na biblioteca.",
+        "O par aceita com \"Bora ver\" e ela passa para \"a ver\"."
+      ]
+    },
+    {
+      "id": 5,
+      "data": "2026-10-04",
+      "titulo": "Pesquisa mais rápida",
+      "itens": [
+        "A pesquisa de séries vai diretamente ao MyAnimeList e já não dá erro.",
+        "As séries em emissão avisam quando saem episódios novos."
+      ]
+    },
+    {
+      "id": 6,
+      "data": "2026-10-04",
+      "titulo": "Este popup",
+      "itens": [
+        "Sempre que houver novidades, aparecem aqui da próxima vez que abrires a app."
+      ]
+    }
+  ]
+}

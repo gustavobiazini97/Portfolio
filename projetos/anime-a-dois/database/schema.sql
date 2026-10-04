@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   nome          VARCHAR(40)  NOT NULL,             -- nome que aparece na app (personalizado)
   username      VARCHAR(30)  NOT NULL UNIQUE,      -- usado para entrar
   password_hash VARCHAR(255) NOT NULL,             -- password_hash() do PHP, nunca a palavra-passe
+  novidades_vistas SMALLINT UNSIGNED NOT NULL DEFAULT 0,  -- id da última novidade que já viu (database/novidades.json)
   criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

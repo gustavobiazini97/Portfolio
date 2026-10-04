@@ -83,6 +83,11 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 **Quero ver contigo**
 - Lista de séries propostas por um ao outro. "Bora ver" passa-a para "a ver"; "Agora não" ou "Cancelar" retira-a.
 
+**O que há de novo** (popup)
+- Ao abrir o Início, cada um vê as novidades que ainda não viu; ao fechar, ficam vistas até à próxima.
+- A lista está em `database/novidades.json` (`users.novidades_vistas` guarda a última vista). Contas novas começam sem nada por ver.
+- **A cada atualização da app, acrescentar uma entrada nova no fim desse ficheiro.**
+
 **Comentários**
 - Cada episódio tem os seus comentários. Os dois veem tudo e cada um apaga os seus.
 
@@ -160,6 +165,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Cartão do Anime a Dois no portfólio e este changelog |
 | 04/10 | Biblioteca, adicionar série pelo MyAnimeList e "Quero ver contigo" |
 | 04/10 | Jikan chamado pelo telemóvel (o alwaysdata não chega lá): pesquisa rápida e sem erro |
+| 04/10 | Popup "O que há de novo" |
 
 ---
 

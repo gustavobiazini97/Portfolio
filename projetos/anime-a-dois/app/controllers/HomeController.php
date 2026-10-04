@@ -1,6 +1,6 @@
 <?php
-// Início: o último episódio do par, a biblioteca (fila de capas), as propostas "Quero ver contigo"
-// e o Vs da série escolhida, com o estado dela (a ver, em pausa, acabado).
+// Início: o último episódio do par, a biblioteca (fila de capas), as propostas "Quero ver contigo",
+// o Vs da série escolhida, com o estado dela (a ver, em pausa, acabado), e o popup das novidades.
 
 class HomeController extends Controller
 {
@@ -47,7 +47,21 @@ class HomeController extends Controller
             'jaCa'        => Serie::whereNotNull('mal_id')->pluck('estado', 'mal_id')
                                 ->map(fn ($e) => $e === Serie::PROPOSTA ? 'proposta' : 'biblioteca')->all(),
             'jikanUrl'    => Database::config()['jikan_url'] ?? 'https://api.jikan.moe/v4',
+            'novidades'   => Novidade::porVer($user),   // o que mudou na app desde a última vez que viste
         ]);
+    }
+
+    // POST: fechou o popup das novidades → não volta a aparecer até à próxima atualização
+    public function novidadesVistas(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+        $user->marcarNovidadesVistas();
+
+        if ($this->querJson()) {
+            $this->json(['ok' => true]);
+        }
+        $this->redirect('home');
     }
 
     // Frase por baixo das barras: quem vai à frente e por quantos episódios

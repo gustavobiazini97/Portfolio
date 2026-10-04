@@ -23,6 +23,7 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Biblioteca: fila de capas com progresso dos dois e estados (a ver, em pausa, acabado)
 - [x] Adicionar série pela pesquisa no MyAnimeList (Jikan): episódios, títulos, capa, filler e recap
 - [x] "Quero ver contigo": propostas que o par aceita ou recusa
+- [x] Popup "O que há de novo" — a cada atualização, acrescentar uma entrada a `database/novidades.json`
 
 ## Online (alwaysdata)
 

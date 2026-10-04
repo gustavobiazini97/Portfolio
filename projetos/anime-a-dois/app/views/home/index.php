@@ -2,7 +2,8 @@
 /* Início.
    Variáveis: $user, $parceiro (ou null), $biblioteca (lista de ['serie','tu','par']), $propostas,
               $serie (aberta, ou null se a biblioteca estiver vazia), $ultimoPar (Episodio ou null),
-              $meu, $dele, $resumo, $podeRemover, $jaCa (mal_id → biblioteca|proposta), $jikanUrl, $flash */
+              $meu, $dele, $resumo, $podeRemover, $jaCa (mal_id → biblioteca|proposta), $jikanUrl,
+              $novidades (as que ainda não viste), $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
 
@@ -243,6 +244,35 @@ $capa = function (Serie $s, string $classe): string {
   <!-- Resultados: o texto entra sempre com textContent, nunca como HTML -->
   <ul class="resultados" id="resultados"></ul>
 </dialog>
+
+<?php if ($novidades !== []): ?>
+  <!-- Novidades desde a última vez: abre sozinho (js/app.js) e, ao fechar, ficam vistas -->
+  <dialog class="folha vidro folha-novidades" id="folha-novidades" aria-labelledby="novidades-titulo">
+    <div class="folha-cima">
+      <h2 id="novidades-titulo">O que há de novo ✨</h2>
+    </div>
+    <div class="novidades-lista">
+      <?php foreach ($novidades as $n): ?>
+        <section class="novidade">
+          <div class="novidade-cima">
+            <h3><?= e($n['titulo']) ?></h3>
+            <span class="chip"><?= e(Novidade::dataCurta($n['data'] ?? null)) ?></span>
+          </div>
+          <ul>
+            <?php foreach ($n['itens'] ?? [] as $item): ?>
+              <li><?= e($item) ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </section>
+      <?php endforeach; ?>
+    </div>
+    <!-- Sem JavaScript: formulário normal; com JavaScript fecha logo e grava em segundo plano -->
+    <form method="post" action="<?= e(url('home', 'novidadesVistas')) ?>" id="form-novidades">
+      <?= csrf_campo() ?>
+      <button type="submit" class="btn">Fixe, bora!</button>
+    </form>
+  </dialog>
+<?php endif; ?>
 
 <!-- Aviso curto (adicionar, mudar estado) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>

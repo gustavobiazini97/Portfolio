@@ -835,6 +835,31 @@ function enviarAoServidor(url, campos, ms) {
     .catch(function () { /* tenta outra vez na próxima visita */ });
 })();
 
+// ---------- Popup "O que há de novo" (Início) ----------
+// Abre sozinho quando há novidades por ver; fechar de qualquer forma (botão, tocar fora,
+// "voltar" do Android) marca-as como vistas no servidor, para não voltarem a aparecer.
+(function () {
+  var folha = document.getElementById('folha-novidades');
+  var form = document.getElementById('form-novidades');
+  if (!folha || !form || !folha.showModal) return;
+
+  var gravado = false;
+  function marcarVistas() {
+    if (gravado) return;
+    gravado = true;
+    var dados = new FormData(form);
+    fetch(form.action, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+      .catch(function () { gravado = false; });   // sem rede: volta a aparecer na próxima vez
+  }
+
+  form.addEventListener('submit', function (ev) { ev.preventDefault(); folha.close(); });
+  folha.addEventListener('click', function (ev) { if (ev.target === folha) folha.close(); });   // tocar fora fecha
+  folha.addEventListener('close', marcarVistas);
+
+  // Um bocadinho depois de a página aparecer, para não abrir "aos saltos"
+  setTimeout(function () { folha.showModal(); }, 400);
+})();
+
 // ---------- App instalável: regista o service worker ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
