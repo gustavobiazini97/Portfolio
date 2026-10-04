@@ -34,6 +34,9 @@ class AuthController extends Controller
             // Novo ID de sessão ao entrar (evita fixação de sessão)
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
+            if (!empty($_POST['lembrar'])) {
+                SessaoLonga::criar($user);   // "manter sessão iniciada": fica 90 dias neste telemóvel
+            }
             $this->redirect('home');
         } catch (PDOException $e) {
             $this->flash('erro', 'Não foi possível ligar à base de dados.');
@@ -85,6 +88,7 @@ class AuthController extends Controller
 
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
+            SessaoLonga::criar($user);   // conta nova: já fica com a sessão mantida
             $this->flash('sucesso', 'Conta criada. Bem-vindo(a), ' . $user->nome . '!');
             $this->redirect('home');
         } catch (InvalidArgumentException $e) {
@@ -106,6 +110,7 @@ class AuthController extends Controller
     {
         $this->exigirPost();
 
+        SessaoLonga::terminar();
         $_SESSION = [];
         session_regenerate_id(true);
         $this->flash('info', 'Sessão terminada.');

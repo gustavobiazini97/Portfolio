@@ -911,3 +911,6 @@ html { scroll-behavior: smooth; }
 /* Privacidade: texto à esquerda (com explicação por baixo) e interruptor à direita */
 .linha-interruptor { display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; font-size: 14.5px; }
 .linha-interruptor small { display: block; margin-top: 4px; font-size: 12px; color: var(--suave); }
+
+/* Login: o interruptor de manter sessão fica compacto, encostado ao botão */
+.lembrar { font-size: 13.5px; color: var(--suave); padding: 2px 4px; }

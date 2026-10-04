@@ -141,6 +141,14 @@
         "No Início, o botão \"Continuar · episódio N\" leva direto ao episódio seguinte ao teu mais avançado.",
         "Recebes um aviso quando alguém te pede amizade ou aceita o teu pedido; podes ligar ou desligar em Notificações."
       ]
+    },
+    {
+      "id": 17,
+      "data": "2026-10-04",
+      "titulo": "Sessão mantida",
+      "itens": [
+        "Já não tens de entrar de cada vez que a app fica fechada muito tempo: o ecrã de entrar tem \"Manter sessão iniciada\" (ligado por defeito) e a sessão dura 90 dias neste telemóvel. \"Terminar sessão\" apaga-a."
+      ]
     }
   ]
 }

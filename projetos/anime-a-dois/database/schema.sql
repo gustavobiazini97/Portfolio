@@ -186,3 +186,16 @@ CREATE TABLE IF NOT EXISTS series_juntos (
   CONSTRAINT fk_sj_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
   CONSTRAINT fk_sj_com   FOREIGN KEY (com_id)   REFERENCES users(id)  ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- "Manter sessão iniciada": um cookie com seletor + validador (só o hash do validador fica aqui).
+-- Quando a sessão do PHP expira (o servidor apaga-a ao fim de pouco tempo), o cookie volta a iniciá-la.
+CREATE TABLE IF NOT EXISTS sessoes_longas (
+  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id       INT UNSIGNED NOT NULL,
+  seletor       CHAR(24)     NOT NULL UNIQUE,      -- identifica a linha (vai no cookie)
+  validador_hash CHAR(64)    NOT NULL,             -- sha256 do segredo que vai no cookie
+  expira_em     DATETIME     NOT NULL,
+  criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_sl_user (user_id),
+  CONSTRAINT fk_sl_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

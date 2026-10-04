@@ -14,6 +14,9 @@ session_start();
 
 require __DIR__ . '/../app/bootstrap.php';
 
+// Sessão expirada mas com "manter sessão iniciada": reabre-a pelo cookie
+SessaoLonga::restaurar();
+
 // Token CSRF da sessão, criado uma vez e usado em todos os formulários
 $_SESSION['_csrf'] ??= bin2hex(random_bytes(32));
 

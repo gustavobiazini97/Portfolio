@@ -144,6 +144,8 @@ class PerfilController extends Controller
         try {
             $user->alterarPassword($_POST['atual'] ?? '', $_POST['nova'] ?? '', $_POST['confirmar'] ?? '');
             session_regenerate_id(true);   // credenciais novas, sessão nova
+            SessaoLonga::terminarTodas($user);   // os outros telemóveis têm de entrar outra vez...
+            SessaoLonga::criar($user);           // ...e este mantém-se
             $this->responder(true, 'Palavra-passe alterada.');
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
@@ -197,6 +199,7 @@ class PerfilController extends Controller
         }
 
         // Conta apagada: sessão nova e vazia
+        SessaoLonga::terminar();
         $_SESSION = [];
         session_regenerate_id(true);
         $this->flash('info', 'A tua conta foi apagada.');

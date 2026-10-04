@@ -30,6 +30,12 @@
       <input type="password" name="password" autocomplete="current-password" required>
     </label>
 
+    <!-- Manter sessão iniciada (90 dias neste telemóvel); ligado por defeito -->
+    <label class="linha-interruptor lembrar">
+      <span>Manter sessão iniciada</span>
+      <span class="interruptor"><input type="checkbox" name="lembrar" value="1" checked><i></i></span>
+    </label>
+
     <button class="btn" type="submit">Entrar</button>
   </form>
 
