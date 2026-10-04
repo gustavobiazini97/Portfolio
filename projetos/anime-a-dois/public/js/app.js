@@ -453,7 +453,41 @@ document.querySelectorAll('[data-convidar]').forEach(function (botao) {
     dados.append('_csrf', csrf);
     Object.keys(campos).forEach(function (k) { dados.append(k, campos[k]); });
     return fetch(url, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); });
+      .then(function (r) {
+        // Página de erro em vez de JSON: diz o código, para se perceber se foi o servidor
+        if ((r.headers.get('Content-Type') || '').indexOf('json') === -1) {
+          var e = new Error('o servidor respondeu com erro ' + r.status); e.name = 'Servidor'; throw e;
+        }
+        return r.json();
+      });
+  }
+
+  // Subscreve o push. Se o telemóvel tiver uma subscrição antiga (outra chave, outra instalação),
+  // o browser recusa com InvalidStateError: apaga-se a antiga e tenta-se outra vez.
+  function subscrever(reg) {
+    var opcoes = { userVisibleOnly: true, applicationServerKey: chaveEmBytes(caixa.dataset.vapid) };
+    return reg.pushManager.subscribe(opcoes).catch(function (e) {
+      if (e.name !== 'InvalidStateError') throw e;
+      return reg.pushManager.getSubscription()
+        .then(function (antiga) { return antiga ? antiga.unsubscribe() : null; })
+        .then(function () { return reg.pushManager.subscribe(opcoes); });
+    });
+  }
+
+  // O motivo real da falha, em vez de um "tenta outra vez" que não diz nada
+  function explicarErro(e) {
+    var nome = (e && e.name) || '';
+    var msg = (e && e.message) || '';
+    if (nome === 'NotAllowedError') {
+      return 'As notificações estão bloqueadas para esta app. Ativa-as em Definições → Apps → Chrome → Notificações (e no site, no Chrome: ⋮ → Definições → Notificações).';
+    }
+    if (nome === 'AbortError' || /push service/i.test(msg)) {
+      return 'O serviço de notificações do telemóvel não respondeu. Confirma que estás no Chrome (não noutro browser), com a Google Play Store/Serviços Google a funcionar e sem poupança de bateria/dados para o Chrome. Erro: ' + (msg || nome);
+    }
+    if (nome === 'NotSupportedError') {
+      return 'Este browser não suporta notificações. Abre a app no Chrome. Erro: ' + (msg || nome);
+    }
+    return 'Não foi possível ativar' + (nome || msg ? ' (' + [nome, msg].filter(Boolean).join(': ') + ')' : '') + '. Tenta outra vez.';
   }
 
   var subAtual = null;
@@ -485,14 +519,14 @@ document.querySelectorAll('[data-convidar]').forEach(function (botao) {
       // Pede a permissão do Android e subscreve
       return Notification.requestPermission().then(function (perm) {
         if (perm !== 'granted') { mostrar(null); return; }
-        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveEmBytes(caixa.dataset.vapid) })
+        return subscrever(reg)
           .then(function (sub) {
             return post(caixa.dataset.urlSubscrever, { subscricao: JSON.stringify(sub) })
-              .then(function (r) { mostrar(sub); estado.textContent = r.mensagem; });
+              .then(function (r) { mostrar(r.ok ? sub : null); estado.textContent = r.mensagem; });
           });
       });
     })
-      .catch(function () { estado.textContent = 'Não foi possível ativar. Tenta outra vez.'; })
+      .catch(function (e) { estado.textContent = explicarErro(e); })
       .then(function () { btnAtivar.disabled = false; });
   });
 
