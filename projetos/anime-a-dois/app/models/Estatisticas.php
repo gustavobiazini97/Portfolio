@@ -5,7 +5,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 class Estatisticas
 {
-    // Duração média de um episódio, em minutos (abertura e encerramento incluídos)
+    // Duração de um episódio, em minutos, quando a série não a tem (as do Naruto)
     const MINUTOS_EP = 23;
 
     // Quantas semanas mostra o gráfico do ritmo
@@ -53,7 +53,7 @@ class Estatisticas
     private function resumo(User $u, $vistos, string $cor): array
     {
         $n = $vistos->count();
-        $horas = $n * self::MINUTOS_EP / 60;
+        $horas = $n * ($this->serie->minutos_ep ?: self::MINUTOS_EP) / 60;   // a duração vem do MyAnimeList nas séries novas
         $f = $vistos->where('filler', 1)->count();
         return [
             'user'    => $u,

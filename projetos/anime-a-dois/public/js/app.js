@@ -1,4 +1,5 @@
-// Comportamento da app: botão de tema, pista de episódios (com seleção múltipla) e service worker.
+// Comportamento da app: botão de tema, pista de episódios (com seleção múltipla), biblioteca
+// (pesquisa e adicionar séries) e service worker.
 // A app funciona sem JavaScript (formulários normais); isto só torna tudo mais suave.
 
 // ---------- Tema claro / escuro ----------
@@ -51,8 +52,9 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   function atualizarDetalhe(c) {
     document.getElementById('detalhe-titulo').textContent = 'Episódio ' + c.dataset.n;
     var tipo = document.getElementById('detalhe-tipo');
-    tipo.textContent = c.dataset.filler === '1' ? 'filler' : 'canónico';
-    tipo.classList.toggle('etiqueta-filler', c.dataset.filler === '1');   // etiqueta escura e sólida
+    var especial = c.dataset.filler === '1' ? 'filler' : (c.dataset.recap === '1' ? 'recap' : '');
+    tipo.textContent = especial || 'canónico';
+    tipo.classList.toggle('etiqueta-filler', especial !== '');   // filler e recap: etiqueta escura e sólida
     document.getElementById('detalhe-nome').textContent = c.dataset.titulo || '';
     var tu = c.dataset.tu === '1';
     document.getElementById('detalhe-tu').textContent = tu ? 'visto' : 'por ver';
@@ -501,6 +503,157 @@ document.querySelectorAll('[data-convidar]').forEach(function (botao) {
       .catch(function () { estado.textContent = 'Sem ligação. Tenta outra vez.'; })
       .then(function () { btnTestar.disabled = false; });
   });
+})();
+
+// ---------- Filas que deslizam (capas do Início, separadores das Estatísticas) ----------
+// A série aberta fica à vista, mesmo que esteja lá para o fim da fila
+document.querySelectorAll('#fila, .separadores').forEach(function (fila) {
+  var atual = fila.querySelector('[aria-current="page"]');
+  if (atual) fila.scrollLeft = atual.offsetLeft - fila.offsetLeft - (fila.clientWidth - atual.offsetWidth) / 2;
+});
+
+// ---------- Formulários que pedem confirmação (tirar série, recusar proposta) ----------
+document.querySelectorAll('form[data-confirmar]').forEach(function (form) {
+  form.addEventListener('submit', function (ev) {
+    if (!window.confirm(form.dataset.confirmar)) ev.preventDefault();
+  });
+});
+
+// ---------- Folha "Adicionar série": pesquisa no MyAnimeList ----------
+(function () {
+  var folha = document.getElementById('folha-adicionar');
+  var abrir = document.getElementById('btn-adicionar');
+  if (!folha || !abrir || !window.fetch) return;
+
+  var input = document.getElementById('pesquisa-texto');
+  var estado = document.getElementById('pesquisa-estado');
+  var lista = document.getElementById('resultados');
+  var csrf = folha.querySelector('input[name="_csrf"]').value;
+  var nomePar = folha.dataset.parNome || '';
+  var textoInicial = estado.textContent;
+
+  var espera = null;      // temporizador do "parou de escrever"
+  var pedido = 0;         // número do último pedido: respostas antigas são ignoradas
+  var ocupado = false;    // a adicionar: bloqueia os outros botões
+
+  function mostrarEstado(texto, erro) {
+    estado.textContent = texto;
+    estado.classList.toggle('erro', !!erro);
+  }
+
+  abrir.addEventListener('click', function () {
+    folha.showModal();
+    input.focus();
+  });
+  document.getElementById('adicionar-fechar').addEventListener('click', function () { folha.close(); });
+  folha.addEventListener('click', function (ev) { if (ev.target === folha && !ocupado) folha.close(); });   // tocar fora fecha
+
+  // Pesquisa 450 ms depois de parar de escrever (o Jikan só aceita 3 pedidos por segundo)
+  input.addEventListener('input', function () {
+    clearTimeout(espera);
+    var q = input.value.trim();
+    if (q.length < 2) { lista.innerHTML = ''; mostrarEstado(textoInicial); return; }
+    espera = setTimeout(function () { pesquisar(q); }, 450);
+  });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') { ev.preventDefault(); clearTimeout(espera); if (input.value.trim().length >= 2) pesquisar(input.value.trim()); }
+  });
+
+  function pesquisar(q) {
+    var meu = ++pedido;
+    mostrarEstado('A procurar…');
+    fetch(folha.dataset.urlPesquisar + '&q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resposta) {
+        if (meu !== pedido) return;               // entretanto escreveu outra coisa
+        if (!resposta.ok) { mostrarEstado(resposta.mensagem || 'A pesquisa falhou.', true); return; }
+        desenhar(resposta.resultados);
+        mostrarEstado(resposta.resultados.length ? '' : 'Nada encontrado. Experimenta o nome em inglês ou japonês.');
+      })
+      .catch(function () { if (meu === pedido) mostrarEstado('Sem ligação. Tenta outra vez.', true); });
+  }
+
+  // "Sousou no Frieren · TV · 2023 · 28 ep."
+  function info(r) {
+    var partes = [];
+    if (r.original) partes.push(r.original);
+    if (r.tipo) partes.push(r.tipo);
+    if (r.ano) partes.push(r.ano);
+    if (r.episodios) partes.push(r.episodios + ' ep.');
+    if (r.em_emissao) partes.push('em emissão');
+    return partes.join(' · ');
+  }
+
+  // Cada resultado: capa, nome, info e os botões (o texto entra sempre com textContent)
+  function desenhar(resultados) {
+    lista.innerHTML = '';
+    resultados.forEach(function (r) {
+      var li = document.createElement('li'); li.className = 'resultado';
+
+      var capa = document.createElement(r.capa ? 'img' : 'span');
+      capa.className = 'resultado-capa';
+      if (r.capa) { capa.src = r.capa; capa.alt = ''; capa.loading = 'lazy'; capa.referrerPolicy = 'no-referrer'; }
+
+      var texto = document.createElement('div'); texto.className = 'resultado-texto';
+      var nome = document.createElement('p'); nome.className = 'resultado-nome'; nome.textContent = r.nome;
+      var detalhes = document.createElement('p'); detalhes.className = 'resultado-info'; detalhes.textContent = info(r);
+      var acoes = document.createElement('div'); acoes.className = 'resultado-acoes';
+
+      if (r.ja) {
+        var ja = document.createElement('span'); ja.className = 'resultado-ja';
+        ja.textContent = r.ja === 'proposta' ? 'Já está em "Quero ver contigo"' : '✓ Já está na biblioteca';
+        acoes.appendChild(ja);
+      } else {
+        acoes.appendChild(botao('Adicionar', '', function () { adicionar(r, 'ver'); }));
+        if (nomePar) acoes.appendChild(botao('Quero ver com ' + nomePar, 'secundario', function () { adicionar(r, 'propor'); }));
+      }
+
+      texto.appendChild(nome); texto.appendChild(detalhes); texto.appendChild(acoes);
+      li.appendChild(capa); li.appendChild(texto);
+      lista.appendChild(li);
+    });
+  }
+
+  function botao(texto, extra, acao) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn-pequeno ' + extra; b.textContent = texto;
+    b.addEventListener('click', acao);
+    return b;
+  }
+
+  // Adiciona (ou propõe): o servidor vai buscar todos os episódios ao MyAnimeList, por isso pode demorar
+  function adicionar(r, modo) {
+    if (ocupado) return;
+    ocupado = true;
+    lista.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    input.disabled = true;
+    mostrarEstado('A buscar os episódios de ' + r.nome + '… (as séries longas demoram uns segundos)');
+
+    var dados = new FormData();
+    dados.append('_csrf', csrf);
+    dados.append('mal_id', r.mal_id);
+    dados.append('modo', modo);
+
+    fetch(folha.dataset.urlAdicionar, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+      .then(function (resposta) { return resposta.json(); })
+      .then(function (resposta) {
+        if (!resposta.ok) throw new Error(resposta.mensagem || 'Não foi possível adicionar.');
+        // Vai para a série nova (ou para as propostas). Se só mudar o "#", recarrega para a ver.
+        var destino = new URL(resposta.url, location.href);
+        if (destino.pathname + destino.search === location.pathname + location.search) {
+          location.hash = destino.hash;
+          location.reload();
+        } else {
+          location.href = destino.href;
+        }
+      })
+      .catch(function (erro) {
+        ocupado = false;
+        input.disabled = false;
+        lista.querySelectorAll('button').forEach(function (b) { b.disabled = false; });
+        mostrarEstado(erro && erro.message && erro.message !== 'Failed to fetch' ? erro.message : 'Sem ligação. Tenta outra vez.', true);
+      });
+  }
 })();
 
 // ---------- App instalável: regista o service worker ----------

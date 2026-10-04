@@ -3,7 +3,7 @@
 // porque têm dados pessoais e tokens de sessão; sem rede mostra-se a página offline.html.
 
 // Mudar a versão força a atualização da cache nas apps instaladas
-const CACHE = 'anime-a-dois-v6';
+const CACHE = 'anime-a-dois-v7';
 
 const ESTATICOS = [
   './css/app.css',
@@ -73,6 +73,7 @@ self.addEventListener('push', (e) => {
     body: msg.corpo,
     icon: './icons/icon-192.png',
     badge: './icons/icon-192.png',
+    image: msg.imagem || undefined,   // capa da série (séries novas e propostas), em grande no Android
     tag: msg.tag,          // a mesma tag substitui a anterior em vez de empilhar
     renotify: true,        // mas volta a vibrar/tocar
     data: { url: msg.url }

@@ -12,23 +12,35 @@ CREATE TABLE IF NOT EXISTS users (
   criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Séries (Naruto, Shippuden, Boruto)
+-- Séries da biblioteca (as três do Naruto vêm do seed; as outras chegam pela pesquisa no MyAnimeList).
+-- As colunas novas também estão em database/migrate.php, que as junta a bases de dados antigas.
 CREATE TABLE IF NOT EXISTS series (
   id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  slug            VARCHAR(60)  NOT NULL UNIQUE,    -- usado no URL e no filtro
+  slug            VARCHAR(60)  NOT NULL UNIQUE,    -- usado no URL
   nome            VARCHAR(80)  NOT NULL,
   anos            VARCHAR(20)  NULL,
   total_episodios SMALLINT UNSIGNED NOT NULL,
-  ordem           TINYINT UNSIGNED NOT NULL DEFAULT 0  -- ordem no filtro
+  ordem           TINYINT UNSIGNED NOT NULL DEFAULT 0,  -- desempate na fila da biblioteca
+  mal_id          INT UNSIGNED NULL UNIQUE,         -- id no MyAnimeList (evita adicionar a mesma série duas vezes)
+  capa            VARCHAR(255) NULL,                -- URL da capa (CDN do MyAnimeList)
+  tipo            VARCHAR(20)  NULL,                -- TV, Movie, OVA, ONA...
+  minutos_ep      TINYINT UNSIGNED NULL,            -- duração de um episódio (as Estatísticas usam 23 se faltar)
+  em_emissao      TINYINT(1)   NOT NULL DEFAULT 0,  -- ainda a sair: os episódios novos são buscados de vez em quando
+  estado          VARCHAR(10)  NOT NULL DEFAULT 'a_ver',   -- proposta | a_ver | pausa | acabado
+  acento          TINYINT UNSIGNED NULL,            -- cor da série (1–8, ver [data-acento] no CSS)
+  adicionada_por  INT UNSIGNED NULL,                -- quem adicionou (ou propôs)
+  adicionada_em   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  sincronizada_em DATETIME     NULL                 -- última vez que os episódios vieram do MyAnimeList
 ) ENGINE=InnoDB;
 
--- Um registo por episódio; os fillers vêm marcados do Naruto Fillers
+-- Um registo por episódio; fillers do Naruto Fillers (Naruto) ou do MyAnimeList (as outras)
 CREATE TABLE IF NOT EXISTS episodios (
   id       INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   serie_id INT UNSIGNED NOT NULL,
   numero   SMALLINT UNSIGNED NOT NULL,
-  titulo   VARCHAR(200) NULL,                      -- só os fillers têm título nos dados atuais
+  titulo   VARCHAR(200) NULL,
   filler   TINYINT(1)   NOT NULL DEFAULT 0,
+  recap    TINYINT(1)   NOT NULL DEFAULT 0,         -- episódio de resumo (só vem do MyAnimeList)
   UNIQUE KEY uq_serie_numero (serie_id, numero),
   CONSTRAINT fk_episodio_serie FOREIGN KEY (serie_id) REFERENCES series(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -80,6 +92,8 @@ CREATE TABLE IF NOT EXISTS preferencias (
   ep_email   TINYINT(1)   NOT NULL DEFAULT 0,      -- episódios marcados → email
   com_push   TINYINT(1)   NOT NULL DEFAULT 1,      -- comentários → telemóvel
   com_email  TINYINT(1)   NOT NULL DEFAULT 0,      -- comentários → email
+  serie_push  TINYINT(1)  NOT NULL DEFAULT 1,      -- séries adicionadas/propostas → telemóvel
+  serie_email TINYINT(1)  NOT NULL DEFAULT 0,      -- séries adicionadas/propostas → email
   CONSTRAINT fk_pref_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

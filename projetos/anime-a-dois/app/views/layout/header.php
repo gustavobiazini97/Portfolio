@@ -1,4 +1,4 @@
-<?php /* Cabeçalho comum. Variáveis: $titulo, $appNome, $flash e, opcional, $serieSlug (acento da série) */ ?>
+<?php /* Cabeçalho comum. Variáveis: $titulo, $appNome, $flash e, opcionais, $serieSlug e $serieAcento (cor da série) */ ?>
 <!DOCTYPE html>
 <html lang="pt" data-tema="claro">
 <head>
@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </head>
-<body class="<?= e($classeBody ?? '') ?>" data-serie="<?= e($serieSlug ?? '') ?>">
+<body class="<?= e($classeBody ?? '') ?>" data-serie="<?= e($serieSlug ?? '') ?>" data-acento="<?= e((string) ($serieAcento ?? '')) ?>">
 
 <!-- Manchas difusas por trás do vidro; a terceira tem a cor da série aberta -->
 <div class="fundo" aria-hidden="true">

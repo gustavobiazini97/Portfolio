@@ -7,12 +7,27 @@ class SerieController extends Controller
     public function ver(): void
     {
         $user  = $this->exigirLogin();
-        $serie = Serie::porSlug($_GET['serie'] ?? 'naruto');
+        $serie = Serie::porSlug($_GET['serie'] ?? null);
 
         // Null guard: slug desconhecido volta ao início
         if ($serie === null) {
             $this->flash('erro', 'Essa série não existe.');
             $this->redirect('home');
+        }
+
+        // Propostas ainda não estão na biblioteca: primeiro o par tem de aceitar
+        if ($serie->estado === Serie::PROPOSTA) {
+            $this->flash('info', $serie->nomeCurto() . ' ainda é uma proposta.');
+            $this->redirect('home', 'index', [], 'propostas');
+        }
+
+        // Série em emissão: depois de a página chegar, vai buscar os episódios novos ao MyAnimeList
+        // (aparecem na próxima visita)
+        if ($serie->precisaSincronizar()) {
+            depois(function () use ($serie) {
+                set_time_limit(120);
+                $serie->sincronizar();
+            });
         }
 
         $parceiro = $user->parceiro();
@@ -27,6 +42,7 @@ class SerieController extends Controller
         $this->render('serie/ver', [
             'titulo'     => $serie->nome,
             'serieSlug'  => $serie->slug,
+            'serieAcento' => $serie->acento,      // cor das séries novas ([data-acento] no CSS)
             'classeBody' => 'pagina-serie',   // ecrã de altura fixa: a pista ocupa o que sobra
             'user'      => $user,
             'parceiro'  => $parceiro,

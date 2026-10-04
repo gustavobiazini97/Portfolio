@@ -60,3 +60,20 @@ function csrf_campo(): string
 {
     return '<input type="hidden" name="_csrf" value="' . e($_SESSION['_csrf'] ?? '') . '">';
 }
+
+// Corre uma tarefa DEPOIS de a resposta chegar ao telemóvel (notificações, buscar episódios novos).
+// No alojamento (PHP-FPM) o fastcgi_finish_request() entrega a página primeiro; uma falha aqui
+// fica só no log e nunca estraga o pedido.
+function depois(callable $tarefa): void
+{
+    register_shutdown_function(function () use ($tarefa) {
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+        try {
+            $tarefa();
+        } catch (Throwable $e) {
+            error_log('Tarefa em segundo plano: ' . $e->getMessage());
+        }
+    });
+}

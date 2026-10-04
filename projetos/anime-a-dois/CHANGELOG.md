@@ -19,7 +19,7 @@ Já está tudo no `main` (PRs #11, #12 e #13).
 
 ## 2. Anime a Dois
 
-Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e a Andreia já viram, lado a lado.
+Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Começou com Naruto, Shippuden e Boruto; agora aceita qualquer anime do MyAnimeList.
 
 - **Onde está:** `projetos/anime-a-dois`, no ramo `feat/anime-a-dois`. Juntado ao `main` no PR #14.
 - **Online:** alojada no alwaysdata, com o site a apontar para `anime-a-dois/public/`.
@@ -36,8 +36,8 @@ Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e 
 | Tabela | Para quê |
 |---|---|
 | `users` | as duas contas (nome, username, palavra-passe) |
-| `series` | Naruto, Shippuden e Boruto |
-| `episodios` | 1013 episódios, com título e indicação de filler |
+| `series` | a biblioteca e as propostas: Naruto, Shippuden e Boruto do seed, mais as que vêm do MyAnimeList (capa, estado, cor, quem adicionou) |
+| `episodios` | os episódios de cada série, com título, filler e recap |
 | `vistos` | quem viu cada episódio e quando |
 | `fotos` | fotos de perfil (webp de 320 px, guardadas na BD) |
 | `comentarios` | comentários por episódio |
@@ -52,7 +52,9 @@ Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e 
 - Login e logout com sessões, `password_hash` e CSRF.
 
 **Início**
-- Separadores por série.
+- Biblioteca: fila de capas que desliza na horizontal, com as duas barrinhas de progresso por baixo de cada uma.
+- Estados por série (a ver, em pausa, acabado). Os acabados vão para o fim da fila; dentro de cada estado, a série mais mexida vem primeiro.
+- Tirar da biblioteca uma série que ainda ninguém começou.
 - Último episódio que o par viu, num cartão que abre a série nesse episódio.
 - Vs da série: uma barra por pessoa e quem vai à frente.
 - Botão de convite enquanto o par ainda não tem conta.
@@ -69,6 +71,16 @@ Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e 
 - Marcar sem recarregar a página, e seleção múltipla para marcar vários de uma vez.
 - Cabe sempre no ecrã, sem scroll, também na app instalada (o botão fica acima da barra do Android).
 
+**Adicionar série** (botão + no Início)
+- Pesquisa no MyAnimeList pelo Jikan (`app/models/Jikan.php`), com capa, tipo, ano e episódios.
+- "Adicionar" põe a série logo na biblioteca; "Quero ver com Andreia" fica como proposta.
+- Vêm todos os episódios com título e as marcas de filler e recap, por isso as etiquetas funcionam em qualquer anime.
+- Séries em emissão: de 12 em 12 horas, ao abrir a série, os episódios novos são buscados em segundo plano.
+- A mesma série não entra duas vezes (o `mal_id` é único; as do Naruto já têm o seu).
+
+**Quero ver contigo**
+- Lista de séries propostas por um ao outro. "Bora ver" passa-a para "a ver"; "Agora não" ou "Cancelar" retira-a.
+
 **Comentários**
 - Cada episódio tem os seus comentários. Os dois veem tudo e cada um apaga os seus.
 
@@ -78,12 +90,13 @@ Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e 
 - Terminar sessão.
 
 **Notificações**
-- O par recebe uma notificação quando marcas episódios ou comentas.
+- O par recebe uma notificação quando marcas episódios, comentas, adicionas ou propões uma série (com a capa) e quando aceitas uma proposta.
 - No perfil, cada um escolhe que tipos quer receber e por onde: telemóvel (Web Push), email, ou os dois.
 - Há um botão para testar.
 
 **Estatísticas** (o ecrã mais recente)
-- Cartões tu vs Andreia com episódios, horas (23 min por episódio) e fillers vistos.
+- Cartões tu vs Andreia com episódios, horas (duração do MyAnimeList, ou 23 min nas do Naruto) e fillers vistos.
+- Os separadores deslizam quando há muitas séries.
 - Ritmo: episódios por semana nas últimas 6 semanas e a previsão de quando acabas a série.
 - Arcos:
   - os canónicos estão em `database/arcos.json`;
@@ -94,7 +107,7 @@ Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e 
 
 **Visual**
 - Vidro (glassmorphism), letra pequena e arredondada (M PLUS Rounded 1c).
-- Sálvia para ti (`#B9D3B0`), alperce para a Andreia (`#F5C89A`) e uma cor de destaque por série.
+- Sálvia para ti (`#B9D3B0`), alperce para a Andreia (`#F5C89A`) e uma cor de destaque por série (as novas recebem uma de 8 cores pastel).
 - Tema claro/escuro com botão, guardado no telemóvel.
 - Logótipo com dois ecrãs empilhados.
 
@@ -107,6 +120,7 @@ Serve para registar os episódios de Naruto, Naruto Shippuden e Boruto que tu e 
 - **Fillers:** vêm de `../naruto-fillers/data/fillers.json`, o projeto irmão no portfólio.
 - **Títulos dos 1013 episódios:** estão em `database/episodios.json`. São gerados por `database/titulos.py`, que o workflow "Títulos Anime a Dois" corre no GitHub.
 - **Arcos:** estão em `database/arcos.json`.
+- **Séries novas:** tudo vem do Jikan (`jikan_url` no config). Colunas novas em bases de dados antigas são acrescentadas pelo `migrate.php`.
 
 ### Deploy
 
@@ -142,6 +156,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Ecrã de Estatísticas |
 | 04/10 | Ícone e ecrã de arranque sem quadrado |
 | 04/10 | Cartão do Anime a Dois no portfólio e este changelog |
+| 04/10 | Biblioteca, adicionar série pelo MyAnimeList e "Quero ver contigo" |
 
 ---
 
@@ -149,4 +164,5 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 
 - Confirmar no telemóvel o arranque sem quadrado. Para ver já, desinstala e volta a instalar a app.
 - Confirmar no telemóvel a entrega real das notificações. Só foi testada com um servidor falso, e o email depende do `mail()` do alwaysdata.
+- Confirmar no telemóvel a pesquisa e o adicionar com o Jikan verdadeiro (aqui só foi testado com um Jikan falso).
 - Novas ideias que ainda tens para a app.

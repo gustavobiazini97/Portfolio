@@ -1,6 +1,6 @@
 # Anime a Dois
 
-Registo dos episódios vistos por duas pessoas, lado a lado: Naruto, Naruto Shippuden e Boruto.
+Registo dos episódios vistos por duas pessoas, lado a lado: Naruto, Shippuden e Boruto, e qualquer anime do MyAnimeList.
 
 PHP + MySQL, com um mini-MVC e o Eloquent (`illuminate/database`) a correr sem o resto do Laravel.
 O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamento com PHP.
@@ -20,6 +20,9 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Notificações ao par (episódios e comentários) por telemóvel (Web Push) e/ou email, escolhidas no perfil
 - [x] Estatísticas por série: números dos dois, ritmo semanal com previsão, arcos (`database/arcos.json`) e curiosidades
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
+- [x] Biblioteca: fila de capas com progresso dos dois e estados (a ver, em pausa, acabado)
+- [x] Adicionar série pela pesquisa no MyAnimeList (Jikan): episódios, títulos, capa, filler e recap
+- [x] "Quero ver contigo": propostas que o par aceita ou recusa
 
 ## Online (alwaysdata)
 
@@ -61,8 +64,8 @@ A primeira pessoa a abrir cria a conta 1, e a segunda cria a conta 2. A partir d
 app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
-  controllers/      AuthController, HomeController, SerieController, PerfilController, EstatisticasController
-  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas (a lógica vive aqui)
+  controllers/      AuthController, HomeController, SerieController, BibliotecaController, PerfilController, EstatisticasController
+  models/           User, Serie, Episodio, Jikan, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php
@@ -73,5 +76,6 @@ Rotas no formato `index.php?c=<controller>&a=<ação>`; só as que estão listad
 
 ## Dados
 
-Os episódios vêm de `../naruto-fillers/data/fillers.json` (o projeto irmão neste portfólio).
+Os episódios do Naruto vêm de `../naruto-fillers/data/fillers.json` (o projeto irmão neste portfólio).
+As outras séries vêm do [Jikan](https://jikan.moe), que lê o MyAnimeList (máximo 3 pedidos por segundo; a app espera entre pedidos).
 O `seed.php` pode correr-se outra vez sempre que esse ficheiro for atualizado: atualiza sem duplicar e não mexe nos episódios vistos.

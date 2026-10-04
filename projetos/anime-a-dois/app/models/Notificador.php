@@ -1,6 +1,6 @@
 <?php
-// Envia ao par as notificações de "marcou episódios" e "comentou", por telemóvel (Web Push)
-// e/ou email, conforme as preferências DELE. Uma falha aqui nunca estraga o marcar/comentar.
+// Envia ao par as notificações de "marcou episódios", "comentou" e "adicionou/propôs uma série",
+// por telemóvel (Web Push) e/ou email, conforme as preferências DELE. Uma falha aqui nunca estraga o marcar/comentar.
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Minishlink\WebPush\Subscription;
@@ -76,9 +76,28 @@ class Notificador
         ]);
     }
 
+    // Séries: $evento = 'adicionada' (já está na biblioteca), 'proposta' (Quero ver contigo) ou 'aceite'
+    public static function serie(User $autor, Serie $serie, string $evento): void
+    {
+        $episodios = plural((int) $serie->total_episodios, 'episódio', 'episódios');
+        [$titulo, $corpo, $url] = match ($evento) {
+            'proposta' => [$autor->nome . ' quer ver ' . $serie->nome . ' contigo', $episodios . ' · abre a app para aceitar', url('home') . '#propostas'],
+            'aceite'   => [$autor->nome . ' aceitou ' . $serie->nome, 'Já está na biblioteca, em "a ver"', url('home', 'index', ['serie' => $serie->slug])],
+            default    => [$autor->nome . ' adicionou ' . $serie->nome, 'Já está na biblioteca · ' . $episodios, url('home', 'index', ['serie' => $serie->slug])],
+        };
+
+        self::paraPar($autor, 'serie', [
+            'titulo' => $titulo,
+            'corpo'  => $corpo,
+            'url'    => $url,
+            'tag'    => 'serie-' . $serie->id,
+            'imagem' => $serie->capa,   // no Android aparece a capa em grande na notificação
+        ]);
+    }
+
     // ---------- Envio ----------
 
-    // Envia ao par pelos canais que ele escolheu; $tipo: 'ep' ou 'com'
+    // Envia ao par pelos canais que ele escolheu; $tipo: 'ep', 'com' ou 'serie'
     private static function paraPar(User $autor, string $tipo, array $msg): void
     {
         $par = $autor->parceiro();
@@ -91,27 +110,12 @@ class Notificador
         $msg['url'] = url_absoluto() . $msg['url'];
 
         // Depois de a resposta chegar ao telemóvel de quem marcou (não atrasa o botão)
-        self::depois(function () use ($par, $pref, $tipo, $msg) {
+        depois(function () use ($par, $pref, $tipo, $msg) {
             if ($pref->{$tipo . '_push'}) {
                 self::push($par, $msg);
             }
             if ($pref->{$tipo . '_email'} && $pref->email) {
                 self::email($pref->email, $msg);
-            }
-        });
-    }
-
-    // Corre a função quando o pedido acabar; no alojamento (PHP-FPM) a resposta já foi entregue
-    private static function depois(callable $tarefa): void
-    {
-        register_shutdown_function(function () use ($tarefa) {
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
-            }
-            try {
-                $tarefa();
-            } catch (Throwable $e) {
-                error_log('Notificador: ' . $e->getMessage());   // nunca rebenta com o pedido
             }
         });
     }

@@ -22,6 +22,7 @@ $rotulo = function (bool $tu, bool $par) use ($nomePar): string {
     return 'por ver';
 };
 $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do painel e do botão (funciona sem JS)
+$temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a legenda só fala em recap se houver
 ?>
 <div class="topo">
   <a class="btn-redondo vidro" href="<?= e(url('home', 'index', ['serie' => $serie->slug])) ?>" aria-label="Voltar ao início">
@@ -39,20 +40,20 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 <section class="mapa vidro" aria-label="Episódios vistos por cada um">
   <div class="mapa-info">
     <span><?= e($serie->total_episodios . ' episódios') ?></span>
-    <span class="mapa-legenda"><i class="leg-visto"></i>visto <i class="leg-filler"></i>filler</span>
+    <span class="mapa-legenda"><i class="leg-visto"></i>visto <i class="leg-filler"></i>filler<?= $temRecaps ? '/recap' : '' ?></span>
   </div>
 
   <div class="mapa-grade">
     <span class="mapa-quem"><?= $avTu ?><span class="mapa-nome">Tu</span></span>
     <div class="riscos riscos-tu" id="riscos-tu" aria-hidden="true">
-      <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['tu'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
+      <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['tu'] ? 'v' : '') . ($ep['filler'] || $ep['recap'] ? ' f' : '') ?>"></i><?php endforeach; ?>
     </div>
     <span class="mapa-pct pct-tu" id="pct-tu"><?= $meu['pct'] ?>%</span>
 
     <?php if ($parceiro): ?>
       <span class="mapa-quem"><?= $avPar ?><span class="mapa-nome"><?= e($nomePar) ?></span></span>
       <div class="riscos riscos-par" aria-hidden="true">
-        <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['par'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
+        <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['par'] ? 'v' : '') . ($ep['filler'] || $ep['recap'] ? ' f' : '') ?>"></i><?php endforeach; ?>
       </div>
       <span class="mapa-pct pct-par"><?= $dele['pct'] ?>%</span>
     <?php endif; ?>
@@ -72,13 +73,15 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
             class="ep vidro<?= $ep['tu'] ? ' visto' : '' ?><?= $ep['par'] ? ' par-viu' : '' ?><?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
             data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>"
             data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-par="<?= $ep['par'] ? '1' : '0' ?>"
-            data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
+            data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-recap="<?= $ep['recap'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
             data-coment="<?= $ep['coment'] ?>"
             <?= $ep['numero'] === $inicial ? 'data-inicial' : '' ?>
             aria-label="Episódio <?= $ep['numero'] ?>">
       <span class="ep-cima">
         <?php if ($ep['filler']): ?>
           <span class="etiqueta-filler">filler</span>
+        <?php elseif ($ep['recap']): ?>
+          <span class="etiqueta-filler">recap</span>
         <?php else: ?>
           <span>episódio</span>
         <?php endif; ?>
@@ -107,7 +110,8 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 <section class="detalhe vidro" id="detalhe" aria-live="polite">
   <div class="detalhe-cima">
     <h2 id="detalhe-titulo">Episódio <?= $epInicial['numero'] ?></h2>
-    <span class="chip<?= $epInicial['filler'] ? ' etiqueta-filler' : '' ?>" id="detalhe-tipo"><?= $epInicial['filler'] ? 'filler' : 'canónico' ?></span>
+    <?php $tipoInicial = $epInicial['filler'] ? 'filler' : ($epInicial['recap'] ? 'recap' : 'canónico'); ?>
+    <span class="chip<?= $tipoInicial !== 'canónico' ? ' etiqueta-filler' : '' ?>" id="detalhe-tipo"><?= $tipoInicial ?></span>
   </div>
   <p class="detalhe-nome" id="detalhe-nome"><?= e($epInicial['titulo'] ?? '') ?></p>
   <div class="detalhe-estados">

@@ -57,7 +57,7 @@
 <form class="form vidro notif" method="post" action="<?= e(url('perfil', 'guardarNotificacoes')) ?>">
   <?= csrf_campo() ?>
   <h2 class="notif-titulo">Notificações</h2>
-  <p class="notif-sub">Quando o teu par marca episódios ou comenta.</p>
+  <p class="notif-sub">Quando o teu par marca episódios, comenta ou traz uma série nova.</p>
 
   <div class="notif-grade" role="group" aria-label="O que receber e por onde">
     <span></span><span class="notif-col">Telemóvel</span><span class="notif-col">Email</span>
@@ -69,6 +69,10 @@
     <span>Comentários</span>
     <label class="interruptor"><input type="checkbox" name="com_push" value="1" <?= $pref->com_push ? 'checked' : '' ?>><i></i><span class="escondido">Comentários no telemóvel</span></label>
     <label class="interruptor"><input type="checkbox" name="com_email" value="1" <?= $pref->com_email ? 'checked' : '' ?>><i></i><span class="escondido">Comentários por email</span></label>
+
+    <span>Séries novas e propostas</span>
+    <label class="interruptor"><input type="checkbox" name="serie_push" value="1" <?= $pref->serie_push ? 'checked' : '' ?>><i></i><span class="escondido">Séries no telemóvel</span></label>
+    <label class="interruptor"><input type="checkbox" name="serie_email" value="1" <?= $pref->serie_email ? 'checked' : '' ?>><i></i><span class="escondido">Séries por email</span></label>
   </div>
 
   <label class="campo">

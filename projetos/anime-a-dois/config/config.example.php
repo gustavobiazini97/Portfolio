@@ -23,4 +23,7 @@ return [
 
     // Remetente dos emails de notificação (no alwaysdata, o email da conta)
     'email_de' => 'animeadois@alwaysdata.net',
+
+    // API do Jikan (lê o MyAnimeList): pesquisa de séries, capas, episódios, fillers e recaps
+    'jikan_url' => 'https://api.jikan.moe/v4',
 ];

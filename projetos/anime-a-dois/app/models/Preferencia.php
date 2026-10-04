@@ -1,5 +1,5 @@
 <?php
-// O que cada pessoa quer receber (episódios / comentários) e por onde (telemóvel / email).
+// O que cada pessoa quer receber (episódios / comentários / séries) e por onde (telemóvel / email).
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,15 +10,17 @@ class Preferencia extends Model
     public $incrementing = false;
     public $timestamps = false;
 
-    protected $fillable = ['user_id', 'email', 'ep_push', 'ep_email', 'com_push', 'com_email'];
+    protected $fillable = ['user_id', 'email', 'ep_push', 'ep_email', 'com_push', 'com_email', 'serie_push', 'serie_email'];
 
-    protected $casts = ['ep_push' => 'boolean', 'ep_email' => 'boolean', 'com_push' => 'boolean', 'com_email' => 'boolean'];
+    protected $casts = ['ep_push' => 'boolean', 'ep_email' => 'boolean', 'com_push' => 'boolean', 'com_email' => 'boolean',
+                        'serie_push' => 'boolean', 'serie_email' => 'boolean'];
 
     // Preferências de uma pessoa; sem linha na tabela devolve os valores por defeito (só telemóvel)
     public static function de(User $user): Preferencia
     {
         return static::find($user->id)
-            ?? new static(['user_id' => $user->id, 'email' => null, 'ep_push' => true, 'ep_email' => false, 'com_push' => true, 'com_email' => false]);
+            ?? new static(['user_id' => $user->id, 'email' => null, 'ep_push' => true, 'ep_email' => false, 'com_push' => true, 'com_email' => false,
+                           'serie_push' => true, 'serie_email' => false]);
     }
 
     // Guarda o formulário do perfil; lança InvalidArgumentException com a mensagem para o utilizador
@@ -29,7 +31,7 @@ class Preferencia extends Model
             throw new InvalidArgumentException('Esse email não parece válido.');
         }
 
-        $querEmail = !empty($dados['ep_email']) || !empty($dados['com_email']);
+        $querEmail = !empty($dados['ep_email']) || !empty($dados['com_email']) || !empty($dados['serie_email']);
         if ($querEmail && $email === '') {
             throw new InvalidArgumentException('Para receber por email, escreve o teu email.');
         }
@@ -40,6 +42,8 @@ class Preferencia extends Model
             'ep_email'  => !empty($dados['ep_email']),
             'com_push'  => !empty($dados['com_push']),
             'com_email' => !empty($dados['com_email']),
+            'serie_push'  => !empty($dados['serie_push']),
+            'serie_email' => !empty($dados['serie_email']),
         ]);
     }
 }
