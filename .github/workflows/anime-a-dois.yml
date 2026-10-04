@@ -98,17 +98,3 @@ jobs:
             "cd $AD_PASTA && php database/migrate.php && php database/seed.php"
 
 
-      # TEMPORÁRIO: que APIs de anime estão vivas (resultado nos avisos da execução)
-      - name: Sonda de APIs
-        if: always()
-        continue-on-error: true
-        working-directory: .
-        run: |
-          t(){ : > /tmp/r; r=$(curl -s -m 15 -o /tmp/r -w '%{http_code} %{time_total}s' "$@" || echo "falhou($?)"); echo "::notice::$r $(head -c 160 /tmp/r | tr '\n' ' ')"; }
-          t https://api.jikan.moe/v4/anime/52991
-          t -X POST -H 'Content-Type: application/json' -H 'Accept: application/json' https://graphql.anilist.co -d '{"query":"{Page(perPage:2){media(search:\"frieren\",type:ANIME,isAdult:false){id idMal episodes status format title{english romaji} coverImage{large}}}}"}'
-          t -H 'Accept: application/vnd.api+json' 'https://kitsu.app/api/edge/mappings?filter%5BexternalSite%5D=myanimelist/anime&filter%5BexternalId%5D=52991&include=item'
-          t -H 'Accept: application/vnd.api+json' 'https://kitsu.app/api/edge/anime/46474/episodes?page%5Blimit%5D=2'
-          t -I -H 'Origin: https://animeadois.alwaysdata.net' https://graphql.anilist.co
-          set +e; echo "::notice::CORS anilist: $(curl -s -m 10 -X OPTIONS -H 'Origin: https://animeadois.alwaysdata.net' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type' -D - -o /dev/null https://graphql.anilist.co | grep -i '^access-control' | tr '\r\n' '  ')"
-          set +e; echo "::notice::CORS kitsu: $(curl -s -m 10 -H 'Origin: https://animeadois.alwaysdata.net' -D - -o /dev/null 'https://kitsu.app/api/edge/anime/46474' | grep -i '^access-control-allow-origin' | tr '\r\n' '  ')"

@@ -46,7 +46,6 @@ class HomeController extends Controller
             // Para a pesquisa marcar logo o que já cá está: mal_id → 'biblioteca' | 'proposta'
             'jaCa'        => Serie::whereNotNull('mal_id')->pluck('estado', 'mal_id')
                                 ->map(fn ($e) => $e === Serie::PROPOSTA ? 'proposta' : 'biblioteca')->all(),
-            'jikanUrl'    => Database::config()['jikan_url'] ?? 'https://api.jikan.moe/v4',
             'novidades'   => Novidade::porVer($user),   // o que mudou na app desde a última vez que viste
         ]);
     }

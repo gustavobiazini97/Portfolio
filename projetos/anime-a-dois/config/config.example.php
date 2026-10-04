@@ -24,6 +24,12 @@ return [
     // Remetente dos emails de notificação (no alwaysdata, o email da conta)
     'email_de' => 'animeadois@alwaysdata.net',
 
-    // API do Jikan (lê o MyAnimeList): pesquisa de séries, capas, episódios, fillers e recaps
-    'jikan_url' => 'https://api.jikan.moe/v4',
+    // APIs de anime, chamadas pelo browser (o servidor não as usa):
+    //   anilist → pesquisa, capas e número de episódios; kitsu → títulos dos episódios;
+    //   jikan   → fillers e recaps (lê o MyAnimeList; quando está em baixo, a app tenta mais tarde)
+    'apis' => [
+        'anilist' => 'https://graphql.anilist.co',
+        'kitsu'   => 'https://kitsu.app/api/edge',
+        'jikan'   => 'https://api.jikan.moe/v4',
+    ],
 ];

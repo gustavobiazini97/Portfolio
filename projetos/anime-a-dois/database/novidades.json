@@ -43,7 +43,7 @@
       "data": "2026-10-04",
       "titulo": "Pesquisa mais rápida",
       "itens": [
-        "A pesquisa de séries vai diretamente ao MyAnimeList e já não dá erro.",
+        "A pesquisa de séries é feita diretamente pelo telemóvel, sem passar pelo servidor.",
         "As séries em emissão avisam quando saem episódios novos."
       ]
     },
@@ -53,6 +53,15 @@
       "titulo": "Este popup",
       "itens": [
         "Sempre que houver novidades, aparecem aqui da próxima vez que abrires a app."
+      ]
+    },
+    {
+      "id": 7,
+      "data": "2026-10-04",
+      "titulo": "Pesquisa a funcionar de vez",
+      "itens": [
+        "A pesquisa e as capas passaram a vir do AniList, e os títulos dos episódios do Kitsu.",
+        "As etiquetas de filler das séries novas aparecem sozinhas quando o MyAnimeList (Jikan) voltar a funcionar; as do Naruto não mudam."
       ]
     }
   ]

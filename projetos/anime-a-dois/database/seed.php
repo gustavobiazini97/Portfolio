@@ -91,6 +91,6 @@ Capsule::connection()->transaction(function () use ($dados, $mapa, $todos, $malI
 });
 
 // As capas destas três são preenchidas pelo browser na primeira visita ao Início
-// (o servidor não consegue ligar ao Jikan; ver app/models/Jikan.php).
+// (o servidor não fala com as APIs de anime; ver app/models/DadosAnime.php).
 
 echo "Feito.\n";

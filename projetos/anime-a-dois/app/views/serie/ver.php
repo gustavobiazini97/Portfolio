@@ -1,7 +1,7 @@
 <?php
 /* Página da série.
    Variáveis: $serie, $user, $parceiro (ou null), $fillers, $meu, $dele, $episodios, $inicial,
-              $sincronizar (ir buscar episódios novos ao Jikan), $jikanUrl, $flash */
+              $sincronizar (o browser vai buscar fillers ou episódios novos), $flash */
 $nomePar   = $parceiro ? $parceiro->nome : null;
 
 // Avatares (foto ou inicial) gerados uma vez e repetidos em todos os cartões
@@ -152,9 +152,9 @@ $temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a leg
 </form>
 
 <?php if ($sincronizar): ?>
-  <!-- Série em emissão: o js/app.js vai buscar os episódios novos ao Jikan e manda-os ao servidor -->
+  <!-- Faltam fillers ou há episódios novos: o js/app.js vai buscá-los às APIs e manda-os ao servidor -->
   <span hidden id="sincronizar" data-serie="<?= e($serie->slug) ?>" data-mal="<?= (int) $serie->mal_id ?>"
-        data-jikan="<?= e($jikanUrl) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>"></span>
+        data-em-emissao="<?= $serie->em_emissao ? '1' : '0' ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>"></span>
 <?php endif; ?>
 
 <!-- Aviso curto depois de marcar (substitui o recarregar da página) -->

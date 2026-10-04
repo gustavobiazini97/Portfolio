@@ -2,7 +2,7 @@
 /* Início.
    Variáveis: $user, $parceiro (ou null), $biblioteca (lista de ['serie','tu','par']), $propostas,
               $serie (aberta, ou null se a biblioteca estiver vazia), $ultimoPar (Episodio ou null),
-              $meu, $dele, $resumo, $podeRemover, $jaCa (mal_id → biblioteca|proposta), $jikanUrl,
+              $meu, $dele, $resumo, $podeRemover, $jaCa (mal_id → biblioteca|proposta),
               $novidades (as que ainda não viste), $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
@@ -89,8 +89,7 @@ $capa = function (Serie $s, string $classe): string {
         }
     }
     ?>
-    <div class="fila" id="fila" data-sem-capa="<?= e(json_encode($semCapa)) ?>"
-         data-jikan="<?= e($jikanUrl) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>">
+    <div class="fila" id="fila" data-sem-capa="<?= e(json_encode($semCapa)) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>">
       <?php foreach ($biblioteca as $item): $s = $item['serie']; ?>
         <!-- data-serie/data-acento dão a cor da série só a este cartão (aro da capa e fundo sem imagem) -->
         <a class="capa-item capa-<?= e($s->estado) ?>" href="<?= e(url('home', 'index', ['serie' => $s->slug])) ?>"
@@ -221,9 +220,8 @@ $capa = function (Serie $s, string $classe): string {
 <?php endif; ?>
 
 <!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).
-     O telemóvel fala diretamente com o Jikan (o servidor não consegue) e manda os dados ao adicionar. -->
+     O telemóvel fala diretamente com as APIs de anime (AniList, Kitsu, Jikan) e manda os dados ao adicionar. -->
 <dialog class="folha vidro folha-adicionar" id="folha-adicionar" aria-labelledby="adicionar-titulo"
-        data-jikan="<?= e($jikanUrl) ?>"
         data-ja-ca="<?= e(json_encode((object) $jaCa)) ?>"
         data-url-adicionar="<?= e(url('biblioteca', 'adicionar')) ?>"
         data-par-nome="<?= e($nomePar ?? '') ?>">
@@ -239,7 +237,7 @@ $capa = function (Serie $s, string $classe): string {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
     <input type="search" id="pesquisa-texto" placeholder="Procura um anime (ex.: Frieren)" autocomplete="off" enterkeyhint="search" maxlength="80">
   </label>
-  <p class="pesquisa-estado" id="pesquisa-estado" aria-live="polite">Os dados (episódios, fillers e capas) vêm do MyAnimeList.</p>
+  <p class="pesquisa-estado" id="pesquisa-estado" aria-live="polite">Os dados vêm do AniList e do Kitsu.</p>
 
   <!-- Resultados: o texto entra sempre com textContent, nunca como HTML -->
   <ul class="resultados" id="resultados"></ul>

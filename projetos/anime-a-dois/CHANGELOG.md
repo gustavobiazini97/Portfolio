@@ -72,11 +72,12 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Cabe sempre no ecrã, sem scroll, também na app instalada (o botão fica acima da barra do Android).
 
 **Adicionar série** (botão + no Início)
-- Pesquisa no MyAnimeList pelo Jikan, com capa, tipo, ano e episódios.
-- **Quem fala com o Jikan é o telemóvel**, não o servidor: o alwaysdata não consegue ligar ao api.jikan.moe (a ligação fica pendurada; outros sites funcionam). O browser vai buscar a pesquisa, os episódios e as capas e manda-os ao servidor, que valida tudo em `app/models/Jikan.php`.
+- Pesquisa e capas pelo **AniList**; títulos dos episódios pelo **Kitsu**; fillers e recaps pelo **Jikan** (MyAnimeList).
+- O Jikan público está em baixo desde 28/08/2026 (504/timeouts; issue #612 do jikan-rest). A app tenta-o 6 s e, se falhar, fica 30 min sem tentar; as séries ficam com `sincronizada_em` a null e a página da série volta a tentar (no máximo 1×/hora) até os fillers chegarem.
+- **Quem fala com as APIs é o telemóvel**, não o servidor (o alwaysdata não chegava ao Jikan). O servidor valida tudo em `app/models/DadosAnime.php` (capas só de anilist.co, myanimelist.net ou kitsu). Endereços em `apis` no config.
 - "Adicionar" põe a série logo na biblioteca; "Quero ver com Andreia" fica como proposta.
-- Vêm todos os episódios com título e as marcas de filler e recap, por isso as etiquetas funcionam em qualquer anime.
-- Séries em emissão: de 12 em 12 horas, ao abrir a série, o telemóvel vai buscar os episódios novos e avisa ("Saíram 3 episódios novos · toca para ver").
+- Vêm todos os episódios com título; filler e recap quando o Jikan responde (os do Kitsu nunca apagam os do Jikan).
+- Séries em emissão: ao abrir a série (no máximo 1×/hora; 12 h depois de dados completos), o telemóvel vai buscar os episódios novos e avisa ("Saíram 3 episódios novos · toca para ver").
 - As capas que faltam (as do Naruto, na primeira visita) também são buscadas pelo telemóvel.
 - A mesma série não entra duas vezes (o `mal_id` é único; as do Naruto já têm o seu).
 
@@ -166,6 +167,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Biblioteca, adicionar série pelo MyAnimeList e "Quero ver contigo" |
 | 04/10 | Jikan chamado pelo telemóvel (o alwaysdata não chega lá): pesquisa rápida e sem erro |
 | 04/10 | Popup "O que há de novo" |
+| 04/10 | AniList + Kitsu no lugar do Jikan (em baixo); fillers chegam quando o Jikan voltar |
 
 ---
 

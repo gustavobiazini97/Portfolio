@@ -1,6 +1,6 @@
 <?php
 // Uma série da biblioteca (ou uma proposta), os seus episódios e o progresso de cada pessoa.
-// As três do Naruto vêm do seed; as outras são adicionadas pela pesquisa no MyAnimeList (Jikan, pelo browser).
+// As três do Naruto vêm do seed; as outras são adicionadas pela pesquisa (AniList/Kitsu/Jikan, pelo browser).
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -121,12 +121,13 @@ class Serie extends Model
         return self::ESTADOS[$this->estado] ?? 'Proposta';
     }
 
-    // ---------- Adicionar / propor (a partir do MyAnimeList) ----------
-    // Os dados chegam do browser, que os foi buscar ao Jikan (ver app/models/Jikan.php).
+    // ---------- Adicionar / propor ----------
+    // Os dados chegam do browser, que os foi buscar às APIs de anime (ver app/models/DadosAnime.php).
 
     // Cria a série com todos os episódios. $proposta = true → fica em "Quero ver contigo".
-    // $info e $episodios já validados por Jikan::info() e Jikan::episodios().
-    public static function adicionarDoMal(User $autor, array $info, array $episodios, bool $proposta): Serie
+    // $info e $episodios já validados por DadosAnime::info() e DadosAnime::episodios().
+    // $comFillers = os episódios vieram do Jikan (com filler/recap); senão o browser tenta mais tarde.
+    public static function adicionarDoMal(User $autor, array $info, array $episodios, bool $proposta, bool $comFillers = false): Serie
     {
         // Já existe? (o mal_id é único)
         $existe = static::where('mal_id', $info['mal_id'])->first();
@@ -141,7 +142,7 @@ class Serie extends Model
             throw new InvalidArgumentException('Ainda não se sabe quantos episódios tem ' . $info['nome'] . '.');
         }
 
-        return Capsule::connection()->transaction(function () use ($autor, $info, $episodios, $total, $proposta) {
+        return Capsule::connection()->transaction(function () use ($autor, $info, $episodios, $total, $proposta, $comFillers) {
             $agora = date('Y-m-d H:i:s');
             $serie = static::create([
                 'slug'            => self::slugLivre($info['nome']),
@@ -158,9 +159,9 @@ class Serie extends Model
                 'acento'          => $info['mal_id'] % self::ACENTOS + 1,   // cor fixa por série, "ao calhas"
                 'adicionada_por'  => $autor->id,
                 'adicionada_em'   => $agora,
-                'sincronizada_em' => $agora,
+                'sincronizada_em' => $comFillers ? $agora : null,   // null = fillers ainda por buscar
             ]);
-            $serie->guardarEpisodios($episodios, $total);
+            $serie->guardarEpisodios($episodios, $total, $comFillers);
             return $serie;
         });
     }
@@ -171,10 +172,10 @@ class Serie extends Model
         return $this->adicionada_por === null;
     }
 
-    // Atualiza com dados novos do MyAnimeList (o browser manda-os quando a capa falta ou a série
-    // em emissão está desatualizada). Devolve quantos episódios novos apareceram.
+    // Atualiza com dados novos (o browser manda-os quando a capa falta, quando os fillers ainda não
+    // vieram ou quando a série em emissão está desatualizada). Devolve quantos episódios novos apareceram.
     // O total nunca diminui, para não apagar episódios já marcados.
-    public function atualizarDoMal(array $info, ?array $episodios): int
+    public function atualizarDoMal(array $info, ?array $episodios, bool $comFillers = false): int
     {
         $antes = (int) $this->total_episodios;
         $this->capa = $info['capa'] ?? $this->capa;
@@ -186,29 +187,36 @@ class Serie extends Model
         }
 
         $total = max($antes, self::totalDe($info, $episodios));
-        Capsule::connection()->transaction(function () use ($info, $episodios, $total) {
+        Capsule::connection()->transaction(function () use ($info, $episodios, $total, $comFillers) {
             $this->total_episodios = $total;
             $this->em_emissao = $info['em_emissao'];
             $this->minutos_ep = $info['minutos'] ?? $this->minutos_ep;
-            $this->sincronizada_em = date('Y-m-d H:i:s');
+            if ($comFillers) {
+                $this->sincronizada_em = date('Y-m-d H:i:s');   // dados completos: só volta daqui a 12 h (se em emissão)
+            }
             $this->save();
-            $this->guardarEpisodios($episodios, $total);
+            $this->guardarEpisodios($episodios, $total, $comFillers);
         });
         return $total - $antes;
     }
 
-    // Está na hora de ir buscar episódios novos? (só séries do MyAnimeList ainda em emissão)
+    // O browser deve ir buscar dados? Sim se ainda faltam os fillers (sincronizada_em null)
+    // ou se a série está em emissão e a última atualização completa tem mais de 12 h
     public function precisaSincronizar(): bool
     {
-        if ($this->mal_id === null || $this->doSeed() || !$this->em_emissao) {
+        if ($this->mal_id === null || $this->doSeed()) {
             return false;
         }
-        return $this->sincronizada_em === null
-            || strtotime($this->sincronizada_em) < time() - self::SINCRONIZAR_HORAS * 3600;
+        if ($this->sincronizada_em === null) {
+            return true;
+        }
+        return $this->em_emissao && strtotime($this->sincronizada_em) < time() - self::SINCRONIZAR_HORAS * 3600;
     }
 
-    // Episódios de 1 ao total (upsert: atualiza títulos/filler/recap sem duplicar nem mexer nos vistos)
-    private function guardarEpisodios(array $episodios, int $total): void
+    // Episódios de 1 ao total (upsert: atualiza sem duplicar nem mexer nos vistos).
+    // Um título em falta nunca apaga o que já lá estava; filler/recap só mudam com dados do Jikan
+    // (o Kitsu não os tem, e não pode apagar os que o Jikan já deu).
+    private function guardarEpisodios(array $episodios, int $total, bool $comFillers): void
     {
         $linhas = [];
         for ($n = 1; $n <= $total; $n++) {
@@ -220,8 +228,13 @@ class Serie extends Model
                 'recap'    => !empty($episodios[$n]['recap']) ? 1 : 0,
             ];
         }
+        $atualizar = ['titulo' => Capsule::raw('COALESCE(VALUES(`titulo`), `titulo`)')];
+        if ($comFillers) {
+            $atualizar[] = 'filler';
+            $atualizar[] = 'recap';
+        }
         foreach (array_chunk($linhas, 500) as $bloco) {   // blocos para não fazer uma consulta gigante
-            Episodio::upsert($bloco, ['serie_id', 'numero'], ['titulo', 'filler', 'recap']);
+            Episodio::upsert($bloco, ['serie_id', 'numero'], $atualizar);
         }
     }
 
@@ -229,7 +242,7 @@ class Serie extends Model
     private static function totalDe(array $info, array $episodios): int
     {
         $ultimo = $episodios === [] ? 0 : (int) array_key_last($episodios);
-        return min(Jikan::MAX_EPISODIOS, max((int) ($info['episodios'] ?? 0), $ultimo));
+        return min(DadosAnime::MAX_EPISODIOS, max((int) ($info['episodios'] ?? 0), $ultimo));
     }
 
     // Slug a partir do nome ("Frieren: Beyond Journey's End" → "frieren-beyond-journeys-end"), sem repetir

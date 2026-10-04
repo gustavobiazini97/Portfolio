@@ -44,9 +44,8 @@ class SerieController extends Controller
             'dele'      => $serie->progressoDe($parceiro),
             'episodios' => $serie->episodiosPara($user, $parceiro),
             'inicial'   => $inicial,
-            // Série em emissão desatualizada: o browser vai buscar os episódios novos ao Jikan
+            // Faltam fillers ou a série em emissão está desatualizada: o browser vai buscar dados novos
             'sincronizar' => $serie->precisaSincronizar(),
-            'jikanUrl'  => Database::config()['jikan_url'] ?? 'https://api.jikan.moe/v4',
         ]);
     }
 

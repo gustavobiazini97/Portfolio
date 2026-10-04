@@ -1,12 +1,12 @@
 <?php
-// Biblioteca: adicionar séries do MyAnimeList (ou propor ao par), atualizá-las, mudar o estado,
-// aceitar propostas e tirar séries. A pesquisa e os pedidos ao Jikan são feitos no browser
-// (js/app.js); aqui chegam os dados já recebidos. A lógica vive no Model Serie.
+// Biblioteca: adicionar séries (ou propor ao par), atualizá-las, mudar o estado, aceitar propostas
+// e tirar séries. A pesquisa e os pedidos às APIs de anime (AniList, Kitsu, Jikan) são feitos no
+// browser (js/app.js); aqui chegam os dados já recebidos. A lógica vive no Model Serie.
 
 class BibliotecaController extends Controller
 {
     // POST: mal_id + modo ("ver" = já na biblioteca, "propor" = Quero ver contigo)
-    //       + info (JSON) e episodios (JSON), que o browser foi buscar ao Jikan
+    //       + info (JSON), episodios (JSON) e fonte ("jikan" = com fillers), que o browser foi buscar
     public function adicionar(): void
     {
         $this->exigirPost();
@@ -14,12 +14,12 @@ class BibliotecaController extends Controller
 
         try {
             $malId     = (int) ($_POST['mal_id'] ?? 0);
-            $info      = Jikan::info($this->lerJson('info'), $malId);
-            $episodios = Jikan::episodios($this->lerJson('episodios'));
+            $info      = DadosAnime::info($this->lerJson('info'), $malId);
+            $episodios = DadosAnime::episodios($this->lerJson('episodios'));
 
             // Sem par ainda não há a quem propor: entra logo na biblioteca
             $proposta = ($_POST['modo'] ?? 'ver') === 'propor' && $user->parceiro() !== null;
-            $serie = Serie::adicionarDoMal($user, $info, $episodios, $proposta);
+            $serie = Serie::adicionarDoMal($user, $info, $episodios, $proposta, ($_POST['fonte'] ?? '') === 'jikan');
 
             Notificador::serie($user, $serie, $proposta ? 'proposta' : 'adicionada');
 
@@ -33,7 +33,8 @@ class BibliotecaController extends Controller
         }
     }
 
-    // POST (só JSON): serie + info [+ episodios] → capa que faltava ou episódios novos de uma série em emissão.
+    // POST (só JSON): serie + info [+ episodios + fonte] → capa que faltava, fillers que ainda não
+    // tinham vindo ou episódios novos de uma série em emissão.
     // Corre em segundo plano no browser; responde quantos episódios novos chegaram.
     public function atualizar(): void
     {
@@ -46,9 +47,9 @@ class BibliotecaController extends Controller
         }
 
         try {
-            $info = Jikan::info($this->lerJson('info'), (int) $serie->mal_id);
-            $episodios = isset($_POST['episodios']) ? Jikan::episodios($this->lerJson('episodios')) : null;
-            $novos = $serie->atualizarDoMal($info, $episodios);
+            $info = DadosAnime::info($this->lerJson('info'), (int) $serie->mal_id);
+            $episodios = isset($_POST['episodios']) ? DadosAnime::episodios($this->lerJson('episodios')) : null;
+            $novos = $serie->atualizarDoMal($info, $episodios, ($_POST['fonte'] ?? '') === 'jikan');
             $this->json(['ok' => true, 'novos' => $novos, 'capa' => $serie->capa]);
         } catch (InvalidArgumentException $e) {
             $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);

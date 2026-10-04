@@ -519,12 +519,18 @@ document.querySelectorAll('form[data-confirmar]').forEach(function (form) {
   });
 });
 
-// ---------- Jikan (MyAnimeList), chamado diretamente do browser ----------
-// O servidor (alwaysdata) não consegue ligar ao api.jikan.moe, por isso é o telemóvel que vai
-// buscar a pesquisa, os episódios e as capas e depois entrega os dados ao servidor.
-// Limite do Jikan: 3 pedidos por segundo → um pedido de cada vez, com 400 ms de intervalo.
-var Jikan = (function () {
-  var ultimo = 0;   // hora do último pedido
+// ---------- APIs de anime, chamadas diretamente do browser ----------
+// O servidor (alwaysdata) não consegue ligar a estas APIs, por isso é o telemóvel que vai buscar
+// os dados e depois os entrega ao servidor (que os valida em app/models/DadosAnime.php).
+//   AniList → pesquisa, capa, episódios, em emissão (GraphQL, rápido)
+//   Kitsu   → títulos dos episódios
+//   Jikan   → fillers e recaps (MyAnimeList). Em baixo desde ago/2026: tenta-se depressa e,
+//             se falhar, fica 30 min sem tentar; a página da série volta a tentar mais tarde.
+var Anime = (function () {
+  var apis = {};
+  try { apis = JSON.parse(document.body.dataset.apis || '{}'); } catch (e) { /* sem APIs configuradas */ }
+
+  var ultimo = {};   // hora do último pedido a cada API (para não passar os limites de cada uma)
 
   function esperar(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -536,89 +542,150 @@ var Jikan = (function () {
     return fetch(url, opcoes).then(function (r) { clearTimeout(t); return r; }, function (e) { clearTimeout(t); throw e; });
   }
 
-  // GET com até 3 tentativas: 429 (muitos pedidos), 5xx ou sem resposta voltam a tentar
-  function get(url, tentativa) {
+  // Pedido a uma API com intervalo mínimo entre pedidos e novas tentativas (429, 5xx, sem resposta)
+  //   qual: 'anilist' | 'kitsu' | 'jikan'; cfg: { intervalo, ms, tentativas }
+  function pedir(qual, url, opcoes, cfg, tentativa) {
     tentativa = tentativa || 1;
-    return esperar(Math.max(0, ultimo + 400 - Date.now()))
+    return esperar(Math.max(0, (ultimo[qual] || 0) + cfg.intervalo - Date.now()))
       .then(function () {
-        ultimo = Date.now();
-        return comLimite(url, { headers: { 'Accept': 'application/json' } }, 12000);
+        ultimo[qual] = Date.now();
+        return comLimite(url, Object.assign({}, opcoes), cfg.ms);
       })
       .then(function (r) {
-        if (r.status === 429 || r.status >= 500) { var e = new Error('Jikan ' + r.status); e.repetir = true; throw e; }
-        if (r.status === 404) throw new Error('Não encontrei esse anime no MyAnimeList.');
-        if (!r.ok) throw new Error('O MyAnimeList respondeu com erro ' + r.status + '.');
+        if (r.status === 429 || r.status >= 500) { var e = new Error(qual + ' ' + r.status); e.repetir = true; throw e; }
+        if (!r.ok) throw new Error('O serviço de anime respondeu com erro ' + r.status + '.');
         return r.json();
       })
       .catch(function (e) {
         var repetir = e.repetir || e.name === 'AbortError' || e instanceof TypeError;   // TypeError = sem rede
-        if (repetir && tentativa < 3) return esperar(1000 * tentativa).then(function () { return get(url, tentativa + 1); });
-        if (repetir) throw new Error('O MyAnimeList não está a responder. Tenta daqui a um bocadinho.');
+        if (repetir && tentativa < cfg.tentativas) {
+          return esperar(800 * tentativa).then(function () { return pedir(qual, url, opcoes, cfg, tentativa + 1); });
+        }
+        if (repetir) throw new Error('O serviço de anime não está a responder. Tenta daqui a um bocadinho.');
         throw e;
       });
   }
 
-  // "24 min per ep" → 24; "1 hr 50 min" → 110
-  function minutos(duracao) {
-    if (!duracao) return null;
-    var h = /(\d+)\s*hr/.exec(duracao), m = /(\d+)\s*min/.exec(duracao);
-    var total = (h ? +h[1] * 60 : 0) + (m ? +m[1] : 0);
-    return total > 0 ? total : null;
+  // ----- AniList (GraphQL) -----
+  var CAMPOS = 'idMal title { english romaji } coverImage { extraLarge large } episodes status format ' +
+               'seasonYear startDate { year } duration nextAiringEpisode { episode }';
+  var TIPOS = { TV: 'TV', TV_SHORT: 'TV', MOVIE: 'Movie', OVA: 'OVA', ONA: 'ONA', SPECIAL: 'Special', MUSIC: 'Music' };
+
+  function anilist(query, variaveis, tentativas) {
+    return pedir('anilist', apis.anilist, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ query: query, variables: variaveis })
+    }, { intervalo: 350, ms: 10000, tentativas: tentativas || 3 }).then(function (json) {
+      if (json.errors && !json.data) throw new Error('A pesquisa falhou.');
+      return json.data;
+    });
   }
 
-  // Um anime do Jikan → os campos que a app usa (o servidor volta a validar em app/models/Jikan.php)
-  function resumo(a) {
-    var ingles = null, original = null;
-    (a.titles || []).forEach(function (t) {
-      if (t.type === 'English' && !ingles) ingles = t.title;
-      if (t.type === 'Default' && !original) original = t.title;
-    });
-    original = original || a.title || '';
-    var nome = ingles || a.title_english || original;
-    var img = a.images || {};
+  // Uma série do AniList → os campos que a app usa (o servidor volta a validar)
+  function resumo(m) {
+    var nome = (m.title && (m.title.english || m.title.romaji)) || '';
+    var original = m.title && m.title.romaji;
+    var emissao = m.status === 'RELEASING' || m.status === 'NOT_YET_RELEASED';
+    // Em emissão sem total anunciado: os que já saíram (o próximo a sair menos um)
+    var eps = m.episodes || (m.nextAiringEpisode ? m.nextAiringEpisode.episode - 1 : null);
     return {
-      mal_id: a.mal_id,
+      mal_id: m.idMal,
       nome: nome,
-      original: original !== nome ? original : null,
-      capa: (img.webp && img.webp.large_image_url) || (img.jpg && (img.jpg.large_image_url || img.jpg.image_url)) || null,
-      tipo: a.type || null,
-      episodios: a.episodes || null,
-      ano: a.year || (a.aired && a.aired.prop && a.aired.prop.from && a.aired.prop.from.year) || null,
-      em_emissao: !!a.airing || a.status === 'Not yet aired',
-      minutos: minutos(a.duration)
+      original: original && original !== nome ? original : null,
+      capa: (m.coverImage && (m.coverImage.extraLarge || m.coverImage.large)) || null,
+      tipo: TIPOS[m.format] || m.format || null,
+      episodios: eps || null,
+      ano: m.seasonYear || (m.startDate && m.startDate.year) || null,
+      em_emissao: emissao,
+      minutos: m.duration || null
     };
   }
 
-  return {
-    // Pesquisa: até 12 resultados, sem conteúdo adulto e sem repetidos
-    pesquisar: function (base, q) {
-      return get(base + '/anime?limit=12&sfw=true&q=' + encodeURIComponent(q), 3).then(function (json) {
-        var vistos = {};
-        return (json.data || []).map(resumo).filter(function (r) {
-          if (!r.mal_id || vistos[r.mal_id]) return false;
-          vistos[r.mal_id] = true;
-          return true;
-        });
+  // ----- Kitsu: títulos dos episódios (páginas de 20) -----
+  function kitsu(url) {
+    return pedir('kitsu', url, { headers: { 'Accept': 'application/vnd.api+json' } }, { intervalo: 150, ms: 10000, tentativas: 3 });
+  }
+  function episodiosKitsu(malId, aoAvancar) {
+    var base = apis.kitsu;
+    return kitsu(base + '/mappings?filter[externalSite]=myanimelist/anime&filter[externalId]=' + malId + '&include=item')
+      .then(function (json) {
+        var item = (json.included || []).filter(function (x) { return x.type === 'anime'; })[0];
+        if (!item) throw new Error('Sem episódios no Kitsu.');
+        var lista = [];
+        function pagina(url, n) {
+          return kitsu(url).then(function (json) {
+            (json.data || []).forEach(function (ep) {
+              var a = ep.attributes || {};
+              if (a.number) lista.push({ n: a.number, titulo: a.canonicalTitle || null, filler: false, recap: false });
+            });
+            if (aoAvancar) aoAvancar(lista.length);
+            var seguinte = json.links && json.links.next;
+            return seguinte && n < 200 ? pagina(seguinte, n + 1) : lista;
+          });
+        }
+        return pagina(base + '/anime/' + item.id + '/episodes?page[limit]=20&page[offset]=0&sort=number&fields[episodes]=number,canonicalTitle', 1);
       });
-    },
-    // Um anime pelo id
-    anime: function (base, id) {
-      return get(base + '/anime/' + id).then(function (json) { return resumo(json.data || {}); });
-    },
-    // Todos os episódios (páginas de 100): [{n, titulo, filler, recap}]; aoAvancar(quantos) mostra o progresso
-    episodios: function (base, id, aoAvancar) {
-      var lista = [];
-      function pagina(p) {
-        return get(base + '/anime/' + id + '/episodes?page=' + p).then(function (json) {
+  }
+
+  // ----- Jikan: títulos + filler + recap (páginas de 100) -----
+  var CHAVE_JIKAN = 'jikan-em-baixo-ate';
+  function jikanEmBaixo() {
+    try { return Date.now() < +(localStorage.getItem(CHAVE_JIKAN) || 0); } catch (e) { return false; }
+  }
+  function episodiosJikan(malId, aoAvancar) {
+    if (!apis.jikan || jikanEmBaixo()) return Promise.reject(new Error('Jikan em baixo'));
+    var lista = [];
+    function pagina(p) {
+      return pedir('jikan', apis.jikan + '/anime/' + malId + '/episodes?page=' + p, { headers: { 'Accept': 'application/json' } },
+                   { intervalo: 400, ms: p === 1 ? 6000 : 12000, tentativas: p === 1 ? 1 : 3 })
+        .then(function (json) {
           (json.data || []).forEach(function (ep) {
             lista.push({ n: ep.mal_id, titulo: ep.title || null, filler: !!ep.filler, recap: !!ep.recap });
           });
           if (aoAvancar) aoAvancar(lista.length);
-          var mais = json.pagination && json.pagination.has_next_page;
-          return mais && p < 30 ? pagina(p + 1) : lista;
+          return json.pagination && json.pagination.has_next_page && p < 30 ? pagina(p + 1) : lista;
         });
-      }
-      return pagina(1);
+    }
+    return pagina(1).catch(function (e) {
+      // Não respondeu: durante 30 min nem se tenta (poupa 6 s a cada adicionar)
+      try { localStorage.setItem(CHAVE_JIKAN, String(Date.now() + 30 * 60000)); } catch (x) { /* só nesta página */ }
+      throw e;
+    });
+  }
+
+  return {
+    // Pesquisa: até 12 séries com id do MyAnimeList, sem conteúdo adulto
+    pesquisar: function (q) {
+      return anilist('query ($q: String) { Page(perPage: 15) { media(search: $q, type: ANIME, isAdult: false, sort: SEARCH_MATCH) { ' + CAMPOS + ' } } }', { q: q }, 2)
+        .then(function (data) {
+          var vistos = {};
+          return ((data.Page && data.Page.media) || []).map(resumo).filter(function (r) {
+            if (!r.mal_id || vistos[r.mal_id]) return false;   // sem id do MyAnimeList não dá para guardar
+            vistos[r.mal_id] = true;
+            return true;
+          }).slice(0, 12);
+        });
+    },
+    // Uma série pelo id do MyAnimeList
+    anime: function (malId) {
+      return anilist('query ($id: Int) { Media(idMal: $id, type: ANIME) { ' + CAMPOS + ' } }', { id: +malId })
+        .then(function (data) {
+          if (!data.Media) throw new Error('Não encontrei essa série.');
+          return resumo(data.Media);
+        });
+    },
+    // Episódios: Jikan (com fillers) → Kitsu (só títulos) → nenhum. Devolve { fonte, lista }.
+    // soComFillers: só interessa o Jikan (a série já tem títulos; faltam os fillers)
+    episodios: function (malId, aoAvancar, soComFillers) {
+      return episodiosJikan(malId, aoAvancar)
+        .then(function (lista) { return { fonte: 'jikan', lista: lista }; })
+        .catch(function (e) {
+          if (soComFillers) throw e;
+          return episodiosKitsu(malId, aoAvancar)
+            .then(function (lista) { return { fonte: 'kitsu', lista: lista }; })
+            .catch(function () { return { fonte: 'nenhuma', lista: [] }; });   // fica com o número de episódios, sem títulos
+        });
     },
     comLimite: comLimite
   };
@@ -630,7 +697,7 @@ function enviarAoServidor(url, campos, ms) {
   var csrf = document.querySelector('input[name="_csrf"]');
   if (csrf) dados.append('_csrf', csrf.value);
   Object.keys(campos).forEach(function (k) { dados.append(k, campos[k]); });
-  return Jikan.comLimite(url, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }, ms || 60000)
+  return Anime.comLimite(url, { method: 'POST', body: dados, headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }, ms || 60000)
     .then(function (r) {
       if ((r.headers.get('Content-Type') || '').indexOf('json') === -1) throw new Error('O servidor respondeu com erro ' + r.status + '.');
       return r.json();
@@ -650,7 +717,6 @@ function enviarAoServidor(url, campos, ms) {
   var input = document.getElementById('pesquisa-texto');
   var estado = document.getElementById('pesquisa-estado');
   var lista = document.getElementById('resultados');
-  var base = folha.dataset.jikan;
   var nomePar = folha.dataset.parNome || '';
   var textoInicial = estado.textContent;
   var jaCa = {};          // mal_id → 'biblioteca' | 'proposta' (vem do servidor na página)
@@ -687,7 +753,7 @@ function enviarAoServidor(url, campos, ms) {
   function pesquisar(q) {
     var meu = ++pedido;
     mostrarEstado('A procurar…');
-    Jikan.pesquisar(base, q)
+    Anime.pesquisar(q)
       .then(function (resultados) {
         if (meu !== pedido) return;               // entretanto escreveu outra coisa
         desenhar(resultados);
@@ -753,19 +819,19 @@ function enviarAoServidor(url, campos, ms) {
     lista.querySelectorAll('button').forEach(function (b) { b.disabled = sim; });
   }
 
-  // Adiciona (ou propõe): busca os episódios ao Jikan (páginas de 100) e manda tudo ao servidor
+  // Adiciona (ou propõe): busca os episódios (Jikan ou Kitsu) e manda tudo ao servidor
   function adicionar(r, modo) {
     if (ocupado) return;
     bloquear(true);
     mostrarEstado('A buscar os episódios de ' + r.nome + '…');
 
-    Jikan.episodios(base, r.mal_id, function (n) {
+    Anime.episodios(r.mal_id, function (n) {
       mostrarEstado('A buscar os episódios de ' + r.nome + '… ' + n + (r.episodios ? ' de ' + r.episodios : ''));
     })
-      .then(function (episodios) {
+      .then(function (eps) {
         mostrarEstado('A guardar ' + r.nome + '…');
         return enviarAoServidor(folha.dataset.urlAdicionar, {
-          mal_id: r.mal_id, modo: modo, info: JSON.stringify(r), episodios: JSON.stringify(episodios)
+          mal_id: r.mal_id, modo: modo, info: JSON.stringify(r), episodios: JSON.stringify(eps.lista), fonte: eps.fonte
         });
       })
       .then(function (resposta) {
@@ -785,7 +851,7 @@ function enviarAoServidor(url, campos, ms) {
   }
 })();
 
-// ---------- Capas em falta (Início): o browser vai buscá-las ao Jikan e guarda-as ----------
+// ---------- Capas em falta (Início): o browser vai buscá-las ao AniList e guarda-as ----------
 (function () {
   var fila = document.getElementById('fila');
   if (!fila || !window.fetch || !window.Promise) return;
@@ -795,7 +861,7 @@ function enviarAoServidor(url, campos, ms) {
   // Uma de cada vez (o Jikan só aceita 3 pedidos por segundo); uma falha não pára as outras
   semCapa.reduce(function (cadeia, s) {
     return cadeia.then(function () {
-      return Jikan.anime(fila.dataset.jikan, s.mal)
+      return Anime.anime(s.mal)
         .then(function (info) { return enviarAoServidor(fila.dataset.url, { serie: s.serie, info: JSON.stringify(info) }); })
         .then(function (resposta) {
           // Troca as iniciais pela capa, sem recarregar
@@ -811,16 +877,26 @@ function enviarAoServidor(url, campos, ms) {
   }, Promise.resolve());
 })();
 
-// ---------- Série em emissão: episódios novos (página da série) ----------
+// ---------- Página da série: fillers que faltam / episódios novos de séries em emissão ----------
+// O servidor pede (id="sincronizar"); o browser vai buscar os dados e manda-os em segundo plano.
+// No máximo uma vez por hora por série, para não gastar dados quando o Jikan está em baixo.
 (function () {
   var marca = document.getElementById('sincronizar');
   if (!marca || !window.fetch || !window.Promise) return;
-  var base = marca.dataset.jikan, id = marca.dataset.mal;
+  var id = marca.dataset.mal, chave = 'sinc-' + marca.dataset.serie;
+  try {
+    if (Date.now() - +(localStorage.getItem(chave) || 0) < 3600000) return;
+    localStorage.setItem(chave, String(Date.now()));
+  } catch (e) { /* sem armazenamento: tenta na mesma */ }
 
-  Jikan.anime(base, id)
+  var emEmissao = marca.dataset.emEmissao === '1';
+  Anime.anime(id)
     .then(function (info) {
-      return Jikan.episodios(base, id).then(function (episodios) {
-        return enviarAoServidor(marca.dataset.url, { serie: marca.dataset.serie, info: JSON.stringify(info), episodios: JSON.stringify(episodios) });
+      // Acabada: só faltam os fillers (Jikan). Em emissão: também episódios novos (Jikan ou Kitsu).
+      return Anime.episodios(id, null, !emEmissao).then(function (eps) {
+        return enviarAoServidor(marca.dataset.url, {
+          serie: marca.dataset.serie, info: JSON.stringify(info), episodios: JSON.stringify(eps.lista), fonte: eps.fonte
+        });
       });
     })
     .then(function (resposta) {
@@ -832,7 +908,7 @@ function enviarAoServidor(url, campos, ms) {
       aviso.addEventListener('click', function () { location.reload(); });
       requestAnimationFrame(function () { aviso.classList.add('mostrar'); });
     })
-    .catch(function () { /* tenta outra vez na próxima visita */ });
+    .catch(function () { /* tenta outra vez mais tarde */ });
 })();
 
 // ---------- Popup "O que há de novo" (Início) ----------

@@ -1,11 +1,13 @@
 <?php
-// Dados do Jikan (https://jikan.moe), a API gratuita que lê o MyAnimeList.
-//
-// Quem fala com o Jikan é o TELEMÓVEL (js/app.js), não o servidor: o alojamento (alwaysdata)
-// não consegue ligar ao api.jikan.moe (a ligação fica pendurada), mas o browser consegue.
+// Dados de séries vindos de APIs públicas de anime, pedidos pelo TELEMÓVEL (js/app.js):
+//   AniList  → pesquisa, capa, número de episódios, em emissão (rápido e estável)
+//   Kitsu    → títulos dos episódios
+//   Jikan    → fillers e recaps (lê o MyAnimeList; está em baixo desde ago/2026, por isso é opcional
+//              e a app volta a tentar sozinha em segundo plano até conseguir)
 // O browser envia para cá o que recebeu e esta classe limpa e valida tudo antes de ir para a base de dados.
+// A chave de cada série continua a ser o id do MyAnimeList (mal_id), que o AniList também dá.
 
-class Jikan
+class DadosAnime
 {
     // Limites das colunas (series/episodios)
     const MAX_EPISODIOS = 3000;     // One Piece anda pelos 1100: chega e sobra
@@ -59,7 +61,10 @@ class Jikan
         return $episodios;
     }
 
-    // Só aceita capas do MyAnimeList por HTTPS (nunca um endereço qualquer vindo do browser)
+    // Domínios de onde se aceitam capas (nunca um endereço qualquer vindo do browser)
+    const DOMINIOS_CAPA = ['anilist.co', 'myanimelist.net', 'kitsu.app', 'kitsu.io'];
+
+    // Capa só por HTTPS e só de um desses domínios (ou subdomínios: s4.anilist.co, cdn.myanimelist.net...)
     public static function capa(mixed $url): ?string
     {
         if (!is_string($url) || strlen($url) > 255) {
@@ -67,8 +72,12 @@ class Jikan
         }
         $partes = parse_url($url);
         $host = strtolower($partes['host'] ?? '');
-        $doMal = $host === 'myanimelist.net' || str_ends_with($host, '.myanimelist.net');
-        return (($partes['scheme'] ?? '') === 'https' && $doMal) ? $url : null;
+        foreach (self::DOMINIOS_CAPA as $dominio) {
+            if (($partes['scheme'] ?? '') === 'https' && ($host === $dominio || str_ends_with($host, '.' . $dominio))) {
+                return $url;
+            }
+        }
+        return null;
     }
 
     // Texto limpo: sem espaços a mais nem caracteres de controlo, cortado ao tamanho da coluna
