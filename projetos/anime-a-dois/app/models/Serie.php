@@ -1,6 +1,6 @@
 <?php
 // Uma série da biblioteca (ou uma proposta), os seus episódios e o progresso de cada pessoa.
-// As três do Naruto vêm do seed; as outras são adicionadas pela pesquisa no MyAnimeList (Jikan).
+// As três do Naruto vêm do seed; as outras são adicionadas pela pesquisa no MyAnimeList (Jikan, pelo browser).
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -24,7 +24,7 @@ class Serie extends Model
     // Número de cores de destaque para séries novas ([data-acento="1"] a "8" no CSS)
     const ACENTOS = 8;
 
-    // Séries em emissão: de quanto em quanto tempo se vão buscar episódios novos
+    // Séries em emissão: de quanto em quanto tempo o browser vai buscar episódios novos
     const SINCRONIZAR_HORAS = 12;
 
     // Episódios desta série, sempre por ordem de número
@@ -122,27 +122,21 @@ class Serie extends Model
     }
 
     // ---------- Adicionar / propor (a partir do MyAnimeList) ----------
+    // Os dados chegam do browser, que os foi buscar ao Jikan (ver app/models/Jikan.php).
 
     // Cria a série com todos os episódios. $proposta = true → fica em "Quero ver contigo".
-    // Lança InvalidArgumentException (repetida, sem episódios) ou RuntimeException (Jikan em baixo).
-    public static function adicionarDoMal(User $autor, int $malId, bool $proposta): Serie
+    // $info e $episodios já validados por Jikan::info() e Jikan::episodios().
+    public static function adicionarDoMal(User $autor, array $info, array $episodios, bool $proposta): Serie
     {
-        if ($malId < 1) {
-            throw new InvalidArgumentException('Escolhe uma série da lista.');
-        }
-
         // Já existe? (o mal_id é único)
-        $existe = static::where('mal_id', $malId)->first();
+        $existe = static::where('mal_id', $info['mal_id'])->first();
         if ($existe !== null) {
             throw new InvalidArgumentException($existe->estado === self::PROPOSTA
                 ? $existe->nome . ' já está em "Quero ver contigo".'
                 : $existe->nome . ' já está na biblioteca.');
         }
 
-        // Os pedidos ao Jikan ficam FORA da transação (podem demorar uns segundos)
-        $info      = Jikan::anime($malId);
-        $episodios = Jikan::episodios($malId);
-        $total     = self::totalDe($info, $episodios);
+        $total = self::totalDe($info, $episodios);
         if ($total < 1) {
             throw new InvalidArgumentException('Ainda não se sabe quantos episódios tem ' . $info['nome'] . '.');
         }
@@ -171,35 +165,42 @@ class Serie extends Model
         });
     }
 
-    // Busca outra vez os episódios no MyAnimeList (séries em emissão: aparecem os novos).
-    // O total nunca diminui, para não apagar episódios já marcados.
-    public function sincronizar(): void
+    // As do seed (Naruto, Shippuden, Boruto) têm os episódios do Naruto Fillers: do MyAnimeList só a capa
+    public function doSeed(): bool
     {
-        if ($this->mal_id === null) {
-            return;   // as do Naruto têm os dados do Naruto Fillers
+        return $this->adicionada_por === null;
+    }
+
+    // Atualiza com dados novos do MyAnimeList (o browser manda-os quando a capa falta ou a série
+    // em emissão está desatualizada). Devolve quantos episódios novos apareceram.
+    // O total nunca diminui, para não apagar episódios já marcados.
+    public function atualizarDoMal(array $info, ?array $episodios): int
+    {
+        $antes = (int) $this->total_episodios;
+        $this->capa = $info['capa'] ?? $this->capa;
+
+        // Série do seed: só a capa (os episódios vêm do Naruto Fillers)
+        if ($this->doSeed() || $episodios === null) {
+            $this->save();
+            return 0;
         }
 
-        // Marca já a hora: se outro pedido chegar entretanto, não repete o trabalho
-        $this->sincronizada_em = date('Y-m-d H:i:s');
-        $this->save();
-
-        $info      = Jikan::anime((int) $this->mal_id);
-        $episodios = Jikan::episodios((int) $this->mal_id);
-        $total     = max((int) $this->total_episodios, self::totalDe($info, $episodios));
-
+        $total = max($antes, self::totalDe($info, $episodios));
         Capsule::connection()->transaction(function () use ($info, $episodios, $total) {
             $this->total_episodios = $total;
             $this->em_emissao = $info['em_emissao'];
-            $this->capa = $info['capa'] ?? $this->capa;
+            $this->minutos_ep = $info['minutos'] ?? $this->minutos_ep;
+            $this->sincronizada_em = date('Y-m-d H:i:s');
             $this->save();
             $this->guardarEpisodios($episodios, $total);
         });
+        return $total - $antes;
     }
 
     // Está na hora de ir buscar episódios novos? (só séries do MyAnimeList ainda em emissão)
     public function precisaSincronizar(): bool
     {
-        if ($this->mal_id === null || !$this->em_emissao) {
+        if ($this->mal_id === null || $this->doSeed() || !$this->em_emissao) {
             return false;
         }
         return $this->sincronizada_em === null
@@ -228,7 +229,7 @@ class Serie extends Model
     private static function totalDe(array $info, array $episodios): int
     {
         $ultimo = $episodios === [] ? 0 : (int) array_key_last($episodios);
-        return min(65000, max((int) ($info['episodios'] ?? 0), $ultimo));
+        return min(Jikan::MAX_EPISODIOS, max((int) ($info['episodios'] ?? 0), $ultimo));
     }
 
     // Slug a partir do nome ("Frieren: Beyond Journey's End" → "frieren-beyond-journeys-end"), sem repetir

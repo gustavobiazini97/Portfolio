@@ -43,7 +43,7 @@ $mapa = [
     'boruto-naruto-next-generations' => 'boruto',
 ];
 
-// Id de cada uma no MyAnimeList: impede que a pesquisa as adicione outra vez e dá a capa
+// Id de cada uma no MyAnimeList: impede que a pesquisa as adicione outra vez e permite ir buscar a capa
 $malIds = ['naruto' => 20, 'shippuden' => 1735, 'boruto' => 34566];
 
 Capsule::connection()->transaction(function () use ($dados, $mapa, $todos, $malIds) {
@@ -90,16 +90,7 @@ Capsule::connection()->transaction(function () use ($dados, $mapa, $todos, $malI
     }
 });
 
-// Capas das séries do seed (uma vez só): vêm do MyAnimeList pelo Jikan.
-// Fora da transação, e uma falha só deixa a capa para o próximo deploy.
-foreach (Serie::whereIn('slug', array_values($mapa))->whereNull('capa')->whereNotNull('mal_id')->get() as $serie) {
-    try {
-        $serie->capa = Jikan::anime((int) $serie->mal_id)['capa'];
-        $serie->save();
-        echo "Capa ok: {$serie->nome}\n";
-    } catch (Throwable $e) {
-        echo "Sem capa para {$serie->nome} (fica para a próxima): {$e->getMessage()}\n";
-    }
-}
+// As capas destas três são preenchidas pelo browser na primeira visita ao Início
+// (o servidor não consegue ligar ao Jikan; ver app/models/Jikan.php).
 
 echo "Feito.\n";

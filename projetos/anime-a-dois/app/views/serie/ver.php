@@ -1,6 +1,7 @@
 <?php
 /* Página da série.
-   Variáveis: $serie, $user, $parceiro (ou null), $fillers, $meu, $dele, $episodios, $inicial, $flash */
+   Variáveis: $serie, $user, $parceiro (ou null), $fillers, $meu, $dele, $episodios, $inicial,
+              $sincronizar (ir buscar episódios novos ao Jikan), $jikanUrl, $flash */
 $nomePar   = $parceiro ? $parceiro->nome : null;
 
 // Avatares (foto ou inicial) gerados uma vez e repetidos em todos os cartões
@@ -149,6 +150,12 @@ $temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a leg
     <?= $epInicial['tu'] ? 'Desmarcar episódio ' . $epInicial['numero'] : 'Marcar episódio ' . $epInicial['numero'] . ' como visto' ?>
   </button>
 </form>
+
+<?php if ($sincronizar): ?>
+  <!-- Série em emissão: o js/app.js vai buscar os episódios novos ao Jikan e manda-os ao servidor -->
+  <span hidden id="sincronizar" data-serie="<?= e($serie->slug) ?>" data-mal="<?= (int) $serie->mal_id ?>"
+        data-jikan="<?= e($jikanUrl) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>"></span>
+<?php endif; ?>
 
 <!-- Aviso curto depois de marcar (substitui o recarregar da página) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>

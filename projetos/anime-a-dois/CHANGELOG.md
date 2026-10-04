@@ -72,10 +72,12 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Cabe sempre no ecrã, sem scroll, também na app instalada (o botão fica acima da barra do Android).
 
 **Adicionar série** (botão + no Início)
-- Pesquisa no MyAnimeList pelo Jikan (`app/models/Jikan.php`), com capa, tipo, ano e episódios.
+- Pesquisa no MyAnimeList pelo Jikan, com capa, tipo, ano e episódios.
+- **Quem fala com o Jikan é o telemóvel**, não o servidor: o alwaysdata não consegue ligar ao api.jikan.moe (a ligação fica pendurada; outros sites funcionam). O browser vai buscar a pesquisa, os episódios e as capas e manda-os ao servidor, que valida tudo em `app/models/Jikan.php`.
 - "Adicionar" põe a série logo na biblioteca; "Quero ver com Andreia" fica como proposta.
 - Vêm todos os episódios com título e as marcas de filler e recap, por isso as etiquetas funcionam em qualquer anime.
-- Séries em emissão: de 12 em 12 horas, ao abrir a série, os episódios novos são buscados em segundo plano.
+- Séries em emissão: de 12 em 12 horas, ao abrir a série, o telemóvel vai buscar os episódios novos e avisa ("Saíram 3 episódios novos · toca para ver").
+- As capas que faltam (as do Naruto, na primeira visita) também são buscadas pelo telemóvel.
 - A mesma série não entra duas vezes (o `mal_id` é único; as do Naruto já têm o seu).
 
 **Quero ver contigo**
@@ -120,7 +122,7 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - **Fillers:** vêm de `../naruto-fillers/data/fillers.json`, o projeto irmão no portfólio.
 - **Títulos dos 1013 episódios:** estão em `database/episodios.json`. São gerados por `database/titulos.py`, que o workflow "Títulos Anime a Dois" corre no GitHub.
 - **Arcos:** estão em `database/arcos.json`.
-- **Séries novas:** tudo vem do Jikan (`jikan_url` no config). Colunas novas em bases de dados antigas são acrescentadas pelo `migrate.php`.
+- **Séries novas:** tudo vem do Jikan (`jikan_url` no config), pedido pelo browser. Colunas novas em bases de dados antigas são acrescentadas pelo `migrate.php`.
 
 ### Deploy
 
@@ -157,6 +159,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Ícone e ecrã de arranque sem quadrado |
 | 04/10 | Cartão do Anime a Dois no portfólio e este changelog |
 | 04/10 | Biblioteca, adicionar série pelo MyAnimeList e "Quero ver contigo" |
+| 04/10 | Jikan chamado pelo telemóvel (o alwaysdata não chega lá): pesquisa rápida e sem erro |
 
 ---
 
@@ -164,5 +167,4 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 
 - Confirmar no telemóvel o arranque sem quadrado. Para ver já, desinstala e volta a instalar a app.
 - Confirmar no telemóvel a entrega real das notificações. Só foi testada com um servidor falso, e o email depende do `mail()` do alwaysdata.
-- Confirmar no telemóvel a pesquisa e o adicionar com o Jikan verdadeiro (aqui só foi testado com um Jikan falso).
 - Novas ideias que ainda tens para a app.

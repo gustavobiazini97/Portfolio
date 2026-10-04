@@ -1,54 +1,67 @@
 <?php
-// Biblioteca: pesquisar séries no MyAnimeList, adicionar (ou propor ao par), mudar o estado,
-// aceitar propostas e tirar séries. A lógica vive no Model Serie; aqui só há pedidos e respostas.
+// Biblioteca: adicionar séries do MyAnimeList (ou propor ao par), atualizá-las, mudar o estado,
+// aceitar propostas e tirar séries. A pesquisa e os pedidos ao Jikan são feitos no browser
+// (js/app.js); aqui chegam os dados já recebidos. A lógica vive no Model Serie.
 
 class BibliotecaController extends Controller
 {
-    // GET ?c=biblioteca&a=pesquisar&q=<texto> → JSON com os resultados (folha "Adicionar série")
-    public function pesquisar(): void
-    {
-        $this->exigirLogin();
-
-        try {
-            $resultados = Jikan::pesquisar((string) ($_GET['q'] ?? ''));
-        } catch (RuntimeException $e) {
-            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 502);
-        }
-
-        // Marca as que já cá estão, para o botão dizer "já está na biblioteca"
-        $ids = array_column($resultados, 'mal_id');
-        $jaCa = $ids === [] ? [] : Serie::whereIn('mal_id', $ids)->pluck('estado', 'mal_id')->all();
-        foreach ($resultados as &$r) {
-            $estado = $jaCa[$r['mal_id']] ?? null;
-            $r['ja'] = $estado === null ? null : ($estado === Serie::PROPOSTA ? 'proposta' : 'biblioteca');
-        }
-        unset($r);
-
-        $this->json(['ok' => true, 'resultados' => $resultados]);
-    }
-
     // POST: mal_id + modo ("ver" = já na biblioteca, "propor" = Quero ver contigo)
+    //       + info (JSON) e episodios (JSON), que o browser foi buscar ao Jikan
     public function adicionar(): void
     {
         $this->exigirPost();
         $user = $this->exigirLogin();
-        set_time_limit(120);   // séries muito longas vêm em várias páginas do Jikan
 
         try {
+            $malId     = (int) ($_POST['mal_id'] ?? 0);
+            $info      = Jikan::info($this->lerJson('info'), $malId);
+            $episodios = Jikan::episodios($this->lerJson('episodios'));
+
             // Sem par ainda não há a quem propor: entra logo na biblioteca
             $proposta = ($_POST['modo'] ?? 'ver') === 'propor' && $user->parceiro() !== null;
-            $serie = Serie::adicionarDoMal($user, (int) ($_POST['mal_id'] ?? 0), $proposta);
+            $serie = Serie::adicionarDoMal($user, $info, $episodios, $proposta);
 
             Notificador::serie($user, $serie, $proposta ? 'proposta' : 'adicionada');
 
             $this->responder(true,
                 $proposta ? 'Proposta enviada: ' . $serie->nomeCurto() . '.' : $serie->nomeCurto() . ' entrou na biblioteca.',
                 $proposta ? url('home') . '#propostas' : url('home', 'index', ['serie' => $serie->slug]));
-        } catch (InvalidArgumentException | RuntimeException $e) {
+        } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         } catch (PDOException $e) {
             $this->responder(false, 'Não foi possível guardar a série.');
         }
+    }
+
+    // POST (só JSON): serie + info [+ episodios] → capa que faltava ou episódios novos de uma série em emissão.
+    // Corre em segundo plano no browser; responde quantos episódios novos chegaram.
+    public function atualizar(): void
+    {
+        $this->exigirPost();
+        $this->exigirLogin();
+
+        $serie = Serie::porSlug($_POST['serie'] ?? null);
+        if ($serie === null || $serie->mal_id === null) {
+            $this->json(['ok' => false, 'mensagem' => 'Essa série já não existe.'], 404);
+        }
+
+        try {
+            $info = Jikan::info($this->lerJson('info'), (int) $serie->mal_id);
+            $episodios = isset($_POST['episodios']) ? Jikan::episodios($this->lerJson('episodios')) : null;
+            $novos = $serie->atualizarDoMal($info, $episodios);
+            $this->json(['ok' => true, 'novos' => $novos, 'capa' => $serie->capa]);
+        } catch (InvalidArgumentException $e) {
+            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);
+        } catch (PDOException $e) {
+            $this->json(['ok' => false, 'mensagem' => 'Não foi possível guardar.'], 500);
+        }
+    }
+
+    // Campo do formulário com JSON (vindo do browser) → array; vazio ou inválido → []
+    private function lerJson(string $campo): array
+    {
+        $dados = json_decode((string) ($_POST[$campo] ?? ''), true);
+        return is_array($dados) ? $dados : [];
     }
 
     // POST: serie (slug) + estado (a_ver | pausa | acabado)

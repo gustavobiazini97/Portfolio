@@ -2,7 +2,7 @@
 /* Início.
    Variáveis: $user, $parceiro (ou null), $biblioteca (lista de ['serie','tu','par']), $propostas,
               $serie (aberta, ou null se a biblioteca estiver vazia), $ultimoPar (Episodio ou null),
-              $meu, $dele, $resumo, $podeRemover, $flash */
+              $meu, $dele, $resumo, $podeRemover, $jaCa (mal_id → biblioteca|proposta), $jikanUrl, $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
 
@@ -79,7 +79,17 @@ $capa = function (Serie $s, string $classe): string {
       <p>Toca no + e procura o próximo anime.</p>
     </div>
   <?php else: ?>
-    <div class="fila" id="fila">
+    <?php
+    // Séries do MyAnimeList ainda sem capa (as do seed, na primeira visita): o browser vai buscá-las
+    $semCapa = [];
+    foreach ($biblioteca as $item) {
+        if ($item['serie']->capa === null && $item['serie']->mal_id !== null) {
+            $semCapa[] = ['serie' => $item['serie']->slug, 'mal' => (int) $item['serie']->mal_id];
+        }
+    }
+    ?>
+    <div class="fila" id="fila" data-sem-capa="<?= e(json_encode($semCapa)) ?>"
+         data-jikan="<?= e($jikanUrl) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>">
       <?php foreach ($biblioteca as $item): $s = $item['serie']; ?>
         <!-- data-serie/data-acento dão a cor da série só a este cartão (aro da capa e fundo sem imagem) -->
         <a class="capa-item capa-<?= e($s->estado) ?>" href="<?= e(url('home', 'index', ['serie' => $s->slug])) ?>"
@@ -209,9 +219,11 @@ $capa = function (Serie $s, string $classe): string {
   </a>
 <?php endif; ?>
 
-<!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados) -->
+<!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).
+     O telemóvel fala diretamente com o Jikan (o servidor não consegue) e manda os dados ao adicionar. -->
 <dialog class="folha vidro folha-adicionar" id="folha-adicionar" aria-labelledby="adicionar-titulo"
-        data-url-pesquisar="<?= e(url('biblioteca', 'pesquisar')) ?>"
+        data-jikan="<?= e($jikanUrl) ?>"
+        data-ja-ca="<?= e(json_encode((object) $jaCa)) ?>"
         data-url-adicionar="<?= e(url('biblioteca', 'adicionar')) ?>"
         data-par-nome="<?= e($nomePar ?? '') ?>">
   <div class="folha-cima">

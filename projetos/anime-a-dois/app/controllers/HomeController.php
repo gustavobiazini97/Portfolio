@@ -43,6 +43,10 @@ class HomeController extends Controller
             'dele'        => $dele,
             'resumo'      => $serie ? $this->resumoVs($meu, $dele, $parceiro) : '',
             'podeRemover' => $serie ? $serie->podeSerRemovida() : false,
+            // Para a pesquisa marcar logo o que já cá está: mal_id → 'biblioteca' | 'proposta'
+            'jaCa'        => Serie::whereNotNull('mal_id')->pluck('estado', 'mal_id')
+                                ->map(fn ($e) => $e === Serie::PROPOSTA ? 'proposta' : 'biblioteca')->all(),
+            'jikanUrl'    => Database::config()['jikan_url'] ?? 'https://api.jikan.moe/v4',
         ]);
     }
 

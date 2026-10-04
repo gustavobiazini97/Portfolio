@@ -21,14 +21,6 @@ class SerieController extends Controller
             $this->redirect('home', 'index', [], 'propostas');
         }
 
-        // Série em emissão: depois de a página chegar, vai buscar os episódios novos ao MyAnimeList
-        // (aparecem na próxima visita)
-        if ($serie->precisaSincronizar()) {
-            depois(function () use ($serie) {
-                set_time_limit(120);
-                $serie->sincronizar();
-            });
-        }
 
         $parceiro = $user->parceiro();
         $meu      = $serie->progressoDe($user);
@@ -52,6 +44,9 @@ class SerieController extends Controller
             'dele'      => $serie->progressoDe($parceiro),
             'episodios' => $serie->episodiosPara($user, $parceiro),
             'inicial'   => $inicial,
+            // Série em emissão desatualizada: o browser vai buscar os episódios novos ao Jikan
+            'sincronizar' => $serie->precisaSincronizar(),
+            'jikanUrl'  => Database::config()['jikan_url'] ?? 'https://api.jikan.moe/v4',
         ]);
     }
 

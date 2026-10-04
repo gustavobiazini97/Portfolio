@@ -97,10 +97,3 @@ jobs:
           sshpass -e ssh -o StrictHostKeyChecking=accept-new "$AD_CONTA@$AD_SSH" \
             "cd $AD_PASTA && php database/migrate.php && php database/seed.php"
 
-      # Testa a ligação do servidor ao Jikan (MyAnimeList); o resultado aparece como aviso na execução
-      - name: Diagnóstico do Jikan
-        if: steps.secret.outputs.ok == 'true'
-        continue-on-error: true
-        run: |
-          sshpass -e ssh -o StrictHostKeyChecking=accept-new "$AD_CONTA@$AD_SSH" \
-            "cd $AD_PASTA && php database/diagnostico.php" | while IFS= read -r linha; do echo "::notice::$linha"; done

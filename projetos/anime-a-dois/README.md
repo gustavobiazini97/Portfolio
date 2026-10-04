@@ -77,5 +77,5 @@ Rotas no formato `index.php?c=<controller>&a=<ação>`; só as que estão listad
 ## Dados
 
 Os episódios do Naruto vêm de `../naruto-fillers/data/fillers.json` (o projeto irmão neste portfólio).
-As outras séries vêm do [Jikan](https://jikan.moe), que lê o MyAnimeList (máximo 3 pedidos por segundo; a app espera entre pedidos).
+As outras séries vêm do [Jikan](https://jikan.moe), que lê o MyAnimeList. Os pedidos ao Jikan são feitos pelo browser (o alwaysdata não consegue ligar-lhe), no máximo 3 por segundo; o servidor só recebe e valida os dados.
 O `seed.php` pode correr-se outra vez sempre que esse ficheiro for atualizado: atualiza sem duplicar e não mexe nos episódios vistos.
