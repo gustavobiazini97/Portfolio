@@ -191,11 +191,15 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 
 /* ---------- Entrar / criar conta ---------- */
 .auth { flex: 1; display: flex; flex-direction: column; }
-.auth-cabeca { margin: 12vh 0 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.auth-cabeca { margin: clamp(0px, 3vh, 28px) 0 clamp(14px, 3vh, 28px); display: flex; flex-direction: column; align-items: center; text-align: center; }
 .auth-titulo { margin-top: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
 .auth-sub { margin-top: 6px; font-size: 13.5px; color: var(--suave); }
 .auth-sub strong { color: var(--par-txt); font-weight: 500; }
 .auth .form { margin-top: auto; }
+/* Ecrã de entrar/criar conta: logo mais pequeno e formulário mais compacto, para caber sem scroll */
+.auth .logo-grande { width: 72px; height: 72px; }
+.auth .auth-titulo { margin-top: 12px; }
+.auth .form { gap: 8px; padding: 18px 16px 16px; }
 
 /* Botão "Instalar app" no hero: só aparece quando o Chrome deixa instalar */
 .btn-instalar {
@@ -806,3 +810,18 @@ button.pessoa-serie { width: 100%; font: inherit; text-align: left; background: 
 
 .pessoa-capa { background: var(--trilho); }   /* espaço da capa enquanto carrega */
 button.pessoa-serie { display: flex; }
+
+/* Placeholders do ecrã de criar conta (as dicas ficam dentro do campo) */
+.auth .campo input::placeholder { color: var(--suave); opacity: .7; }
+/* Ecrãs baixos (Chrome com a barra de endereço): campos e cabeçalho mais compactos */
+@media (max-height: 780px) {
+  .ecra:has(.auth) { padding-bottom: calc(14px + env(safe-area-inset-bottom)); gap: 8px; }   /* menos folga em baixo e entre blocos */
+  .auth .logo-grande { width: 52px; height: 52px; }
+  .auth .auth-titulo { margin-top: 8px; font-size: 20px; }
+  .auth .auth-cabeca { margin-bottom: 12px; }
+  .auth .auth-rodape { margin-top: 10px; }
+  .auth .campo { gap: 4px; }
+  .auth .campo input { height: 44px; }
+  .auth .form { gap: 6px; padding: 14px 14px 14px; }
+  .auth .form .btn { margin-top: 4px; }
+}

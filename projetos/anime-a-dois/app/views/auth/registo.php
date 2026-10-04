@@ -30,22 +30,19 @@
 
     <label class="campo">
       <span>nome</span>
-      <input type="text" name="nome" value="<?= e($antigo['nome'] ?? '') ?>" maxlength="40" autocomplete="nickname" required>
-      <small>é assim que vais aparecer na app</small>
+      <input type="text" name="nome" value="<?= e($antigo['nome'] ?? '') ?>" maxlength="40" autocomplete="nickname" placeholder="como vais aparecer na app" required>
     </label>
 
     <label class="campo">
       <span>utilizador</span>
       <input type="text" name="username" value="<?= e($antigo['username'] ?? '') ?>"
              maxlength="30" pattern="[A-Za-z0-9._\-]{3,30}" autocomplete="username"
-             autocapitalize="none" spellcheck="false" required>
-      <small>para entrar · letras, números, ponto, hífen ou _</small>
+             autocapitalize="none" spellcheck="false" placeholder="para entrar: letras, números, . - _" required>
     </label>
 
     <label class="campo">
       <span>palavra-passe</span>
-      <input type="password" name="password" minlength="8" autocomplete="new-password" required>
-      <small>pelo menos 8 caracteres</small>
+      <input type="password" name="password" minlength="8" autocomplete="new-password" placeholder="pelo menos 8 caracteres" required>
     </label>
 
     <label class="campo">
