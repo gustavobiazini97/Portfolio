@@ -112,8 +112,7 @@ CREATE TABLE IF NOT EXISTS subscricoes (
 ) ENGINE=InnoDB;
 
 -- Biblioteca de cada pessoa: que séries tem e em que estado (cada um tem o seu).
--- com_id = a pessoa com quem vê esta série (par ou amigo). A série é CONJUNTA quando as duas linhas
--- (a de cada um) apontam uma para a outra. Cada pessoa tem no máximo um companheiro por série.
+-- (com_id: ANTIGO, já não se usa; quem vê a série com quem está em series_juntos.)
 CREATE TABLE IF NOT EXISTS bibliotecas (
   user_id  INT UNSIGNED NOT NULL,
   serie_id INT UNSIGNED NOT NULL,
@@ -167,4 +166,17 @@ CREATE TABLE IF NOT EXISTS convites_serie (
   CONSTRAINT fk_cs_serie FOREIGN KEY (serie_id) REFERENCES series(id) ON DELETE CASCADE,
   CONSTRAINT fk_cs_de    FOREIGN KEY (de_id)    REFERENCES users(id)  ON DELETE CASCADE,
   CONSTRAINT fk_cs_para  FOREIGN KEY (para_id)  REFERENCES users(id)  ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Quem vê cada série com quem (par ou amigos). Uma linha por sentido (A→B e B→A); a mesma série pode ser
+-- vista com várias pessoas, e cada ligação é de duas pessoas.
+CREATE TABLE IF NOT EXISTS series_juntos (
+  serie_id INT UNSIGNED NOT NULL,
+  user_id  INT UNSIGNED NOT NULL,
+  com_id   INT UNSIGNED NOT NULL,
+  PRIMARY KEY (serie_id, user_id, com_id),
+  KEY idx_juntos_user (user_id),
+  CONSTRAINT fk_sj_serie FOREIGN KEY (serie_id) REFERENCES series(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sj_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_sj_com   FOREIGN KEY (com_id)   REFERENCES users(id)  ON DELETE CASCADE
 ) ENGINE=InnoDB;

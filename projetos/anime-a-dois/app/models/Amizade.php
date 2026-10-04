@@ -86,13 +86,13 @@ class Amizade
             ->delete();
     }
 
-    // Desfaz a amizade nos dois sentidos; as séries que viam juntos ficam com cada um (sem companheiro)
+    // Desfaz a amizade nos dois sentidos; as séries que viam juntos ficam com cada um
     public static function remover(User $a, User $b): void
     {
-        Capsule::table('bibliotecas')
+        Capsule::table('series_juntos')
             ->where(fn ($q) => $q->where('user_id', $a->id)->where('com_id', $b->id))
             ->orWhere(fn ($q) => $q->where('user_id', $b->id)->where('com_id', $a->id))
-            ->update(['com_id' => null]);
+            ->delete();
         Capsule::table('convites_serie')
             ->where(fn ($q) => $q->where('de_id', $a->id)->where('para_id', $b->id))
             ->orWhere(fn ($q) => $q->where('de_id', $b->id)->where('para_id', $a->id))

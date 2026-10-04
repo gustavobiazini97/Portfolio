@@ -123,4 +123,14 @@ if (!Capsule::table('config_app')->where('chave', 'com_id_migrado')->exists()) {
     Capsule::table('config_app')->insert(['chave' => 'com_id_migrado', 'valor' => '1']);
 }
 
+// Várias pessoas por série: o que estava em bibliotecas.com_id passa para series_juntos. Uma vez só.
+if (!Capsule::table('config_app')->where('chave', 'juntos_migrado')->exists()) {
+    $n = 0;
+    foreach (Capsule::table('bibliotecas')->whereNotNull('com_id')->get(['serie_id', 'user_id', 'com_id']) as $l) {
+        $n += Capsule::table('series_juntos')->insertOrIgnore(['serie_id' => $l->serie_id, 'user_id' => $l->user_id, 'com_id' => $l->com_id]);
+    }
+    Capsule::table('config_app')->insert(['chave' => 'juntos_migrado', 'valor' => '1']);
+    echo "Ligações entre pessoas: $n.\n";
+}
+
 echo "Estrutura atualizada.\n";

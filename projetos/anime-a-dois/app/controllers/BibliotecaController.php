@@ -158,7 +158,7 @@ class BibliotecaController extends Controller
         }
     }
 
-    // POST: serie: deixas de ver esta série com o teu companheiro (cada um fica com a sua)
+    // POST: serie + com (id): deixas de ver esta série com essa pessoa (cada um fica com a sua)
     public function separar(): void
     {
         $this->exigirPost();
@@ -166,8 +166,9 @@ class BibliotecaController extends Controller
         $serie = $this->serieDoPost();
 
         try {
-            $serie->deixarDeVerJuntos($user);
-            $this->responder(true, $serie->nomeCurto() . ': agora cada um vê a sua.', url('home', 'index', ['serie' => $serie->slug]));
+            $com = $this->ligado((int) ($_POST['com'] ?? 0), $user);
+            $serie->deixarDeVerJuntos($user, $com);
+            $this->responder(true, $serie->nomeCurto() . ': tu e ' . $com->nome . ' passam a ver cada um a sua.', url('home', 'index', ['serie' => $serie->slug]));
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         }

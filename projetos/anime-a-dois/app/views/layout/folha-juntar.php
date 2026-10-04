@@ -28,8 +28,7 @@ $prog = $s->progressoDe($dono);
     <input type="hidden" name="serie" value="<?= e($s->slug) ?>">
     <button type="submit" class="btn">Adicionar só para mim</button>
   </form>
-  <?php if (!$item['conjunta']): ?>
-    <!-- Ver com ele: vêem a série juntos (o Vs, os comentários e os avisos); ele é avisado. Só se ele ainda não a vê com outra pessoa. -->
+  <!-- Ver com ele: vêem a série juntos (o Vs, os comentários e os avisos); ele é avisado. Uma série pode ser vista com várias pessoas. -->
     <form method="post" action="<?= e(url('biblioteca', 'juntar')) ?>">
       <?= csrf_campo() ?>
       <input type="hidden" name="serie" value="<?= e($s->slug) ?>">
@@ -37,7 +36,4 @@ $prog = $s->progressoDe($dono);
       <button type="submit" class="btn btn-secundario">Ver com <?= e($dono->nome) ?></button>
     </form>
     <p class="pessoa-legenda par-nota">Vêem juntos: o teu progresso começa do zero e <?= e($dono->nome) ?> recebe um aviso.</p>
-  <?php else: ?>
-    <p class="pessoa-legenda par-nota"><?= e($dono->nome) ?> já vê esta série com outra pessoa.</p>
-  <?php endif; ?>
 </dialog>

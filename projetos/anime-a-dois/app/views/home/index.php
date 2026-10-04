@@ -1,11 +1,11 @@
 <?php
 /* Início.
-   Variáveis: $user, $parceiro (o par, ou null), $parVs (o par só se a série aberta for dos dois),
-              $biblioteca (a tua: ['serie','estado','conjunta','tu','par']), $doPar (só do par, mesmo formato),
+   Variáveis: $user, $parceiro (o par, ou null), $companheiros (quem vê a série aberta contigo), $deles (o progresso de cada um),
+              $biblioteca (a tua: ['serie','estado','conjunta','companheiros'=>[['user','pct']],'tu']), $doPar (só do par, mesmo formato),
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
-              $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $dele, $resumo,
+              $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $resumo,
               $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar, $flash */
-$comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);   // $dele já vem a zeros se a série for só tua
+$comecou = $serie && ($meu['vistos'] > 0 || array_sum(array_column($deles, 'vistos')) > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
 
 // Capa de uma série: a imagem do MyAnimeList ou, sem ela, as iniciais sobre a cor da série
@@ -124,11 +124,12 @@ $selo = fn (array $item) => match ($item['estado']) {
            <?= $serie && $s->id === $serie->id ? 'aria-current="page"' : '' ?>>
           <span class="capa-moldura">
             <?= $capa($s, 'capa') ?>
-            <?php if ($item['conjunta'] && $item['companheiro']): ?>
-              <!-- Vista com alguém: os dois avatares pequenos no canto -->
-              <span class="capa-dois" title="Vês esta série com <?= e($item['companheiro']->nome) ?>">
+            <?php if ($item['companheiros'] !== []): ?>
+              <!-- Vista com alguém: o teu avatar e o do primeiro companheiro (e +N se houver mais) no canto -->
+              <span class="capa-dois" title="Vês esta série com <?= e(implode(', ', array_map(fn ($c) => $c['user']->nome, $item['companheiros']))) ?>">
                 <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
-                <?php $avatarUser = $item['companheiro']; $avatarCor = 'par'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
+                <?php $avatarUser = $item['companheiros'][0]['user']; $avatarCor = 'par'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
+                <?php if (count($item['companheiros']) > 1): ?><span class="capa-mais">+<?= count($item['companheiros']) - 1 ?></span><?php endif; ?>
               </span>
             <?php endif; ?>
             <?php if ($selo($item) !== ''): ?>
@@ -138,9 +139,9 @@ $selo = fn (array $item) => match ($item['estado']) {
           <span class="capa-nome"><?= e($s->nomeCurto()) ?></span>
           <span class="capa-barras">
             <progress class="barra barra-fina vs-tu-cor" max="100" value="<?= $item['tu'] ?>" aria-label="Tu: <?= $item['tu'] ?>%"></progress>
-            <?php if ($item['conjunta'] && $item['companheiro']): ?>
-              <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['par'] ?>" aria-label="<?= e($item['companheiro']->nome) ?>: <?= $item['par'] ?>%"></progress>
-            <?php endif; ?>
+            <?php foreach ($item['companheiros'] as $c): ?>
+              <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $c['pct'] ?>" aria-label="<?= e($c['user']->nome) ?>: <?= $c['pct'] ?>%"></progress>
+            <?php endforeach; ?>
           </span>
         </a>
       <?php endforeach; ?>
@@ -205,7 +206,7 @@ $selo = fn (array $item) => match ($item['estado']) {
     <!-- Vs da série aberta (ou só o teu progresso, se a série for só tua); o cartão todo abre a série -->
     <a class="painel vidro painel-link" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
       <div class="painel-titulo">
-        <h2><?= $parVs ? e('Tu e ' . $parVs->nome . ' em ' . $serie->nomeCurto()) : e('O teu progresso em ' . $serie->nomeCurto()) ?></h2>
+        <h2><?= $conjunta ? e('Tu e ' . ($companheiros->count() === 1 ? $companheiros[0]->nome : $companheiros->count() . ' pessoas') . ' em ' . $serie->nomeCurto()) : e('O teu progresso em ' . $serie->nomeCurto()) ?></h2>
         <span><?= $serie->total_episodios ?> ep. <svg class="painel-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
       </div>
 
@@ -214,19 +215,19 @@ $selo = fn (array $item) => match ($item['estado']) {
           <div class="vs-rotulo"><span>Tu</span><span><b><?= $meu['posicao'] ?></b> · <?= $meu['pct'] ?>%</span></div>
           <progress class="barra" max="100" value="<?= $meu['pct'] ?>" aria-label="Progresso: <?= $meu['pct'] ?>%"></progress>
         </div>
-        <?php if ($parVs): ?>
+        <?php foreach ($companheiros as $i => $c): ?>
           <div class="vs-linha vs-par">
-            <div class="vs-rotulo"><span><?= e($parVs->nome) ?></span><span><b><?= $dele['posicao'] ?></b> · <?= $dele['pct'] ?>%</span></div>
-            <progress class="barra" max="100" value="<?= $dele['pct'] ?>" aria-label="Progresso: <?= $dele['pct'] ?>%"></progress>
+            <div class="vs-rotulo"><span><?= e($c->nome) ?></span><span><b><?= $deles[$i]['posicao'] ?></b> · <?= $deles[$i]['pct'] ?>%</span></div>
+            <progress class="barra" max="100" value="<?= $deles[$i]['pct'] ?>" aria-label="<?= e($c->nome) ?>: <?= $deles[$i]['pct'] ?>%"></progress>
           </div>
-        <?php endif; ?>
+        <?php endforeach; ?>
       </div>
 
       <p class="vs-resumo"><?= e($resumo) ?></p>
     </a>
   <?php else: ?>
     <section class="painel vidro vazio">
-      <p><?= $parVs ? 'Ainda nenhum dos dois começou ' : 'Ainda não começaste ' ?><?= e($serie->nomeCurto()) ?></p>
+      <p><?= $conjunta ? 'Ainda ninguém começou ' : 'Ainda não começaste ' ?><?= e($serie->nomeCurto()) ?></p>
       <p>Marca o primeiro episódio e o placar aparece aqui.</p>
     </section>
   <?php endif; ?>
@@ -241,31 +242,37 @@ $selo = fn (array $item) => match ($item['estado']) {
     <?php endforeach; ?>
   </form>
 
+  <?php
+    // Quem ainda pode ser convidado: ligados que ainda não vêem a série contigo nem têm convite pendente
+    $jaLigados = array_merge($companheiros->pluck('id')->all(), array_map(fn ($e) => $e['para']->id, $enviadosSerie instanceof \Illuminate\Support\Collection ? $enviadosSerie->all() : $enviadosSerie));
+    $convidaveis = $ligados->reject(fn ($l) => in_array($l->id, $jaLigados, true))->values();
+  ?>
   <?php if ($ligados->isNotEmpty() || $conjunta || $podeRemover): ?>
     <!-- Ações da série: ver com alguém (par ou amigo), deixar de ver juntos e tirar (se ainda não marcaste episódios) -->
     <div class="serie-acoes">
-      <?php if ($conjunta): ?>
-        <span class="pessoa-legenda">Vês com <?= e($parVs->nome) ?></span>
-        <form method="post" action="<?= e(url('biblioteca', 'separar')) ?>" data-confirmar="Deixar de ver <?= e($serie->nomeCurto()) ?> com <?= e($parVs->nome) ?>? Cada um fica com o seu progresso.">
+      <?php foreach ($companheiros as $c): ?>
+        <!-- Uma linha por companheiro: dá para deixar de ver juntos só com essa pessoa -->
+        <span class="pessoa-legenda">Vês com <?= e($c->nome) ?></span>
+        <form method="post" action="<?= e(url('biblioteca', 'separar')) ?>" data-confirmar="Deixar de ver <?= e($serie->nomeCurto()) ?> com <?= e($c->nome) ?>? Cada um fica com o seu progresso.">
           <?= csrf_campo() ?>
           <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+          <input type="hidden" name="com" value="<?= (int) $c->id ?>">
           <button type="submit" class="link-suave">Deixar de ver juntos</button>
         </form>
-      <?php elseif ($ligados->isNotEmpty()): ?>
-        <?php foreach ($enviadosSerie as $env): ?>
-          <span class="proposta-espera">Convite enviado · à espera de <?= e($env['para']->nome) ?></span>
-        <?php endforeach; ?>
-        <?php if ($ligados->count() === 1): ?>
-          <!-- Só há uma pessoa a quem convidar: botão direto -->
-          <form method="post" action="<?= e(url('biblioteca', 'convidar')) ?>">
-            <?= csrf_campo() ?>
-            <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
-            <input type="hidden" name="com" value="<?= (int) $ligados->first()->id ?>">
-            <button type="submit" class="btn-pequeno secundario">Ver com <?= e($ligados->first()->nome) ?></button>
-          </form>
-        <?php else: ?>
-          <button type="button" class="btn-pequeno secundario" data-abrir="folha-convidar">Ver com…</button>
-        <?php endif; ?>
+      <?php endforeach; ?>
+      <?php foreach ($enviadosSerie as $env): ?>
+        <span class="proposta-espera">Convite enviado · à espera de <?= e($env['para']->nome) ?></span>
+      <?php endforeach; ?>
+      <?php if ($convidaveis->count() === 1): ?>
+        <!-- Só há uma pessoa a quem convidar: botão direto -->
+        <form method="post" action="<?= e(url('biblioteca', 'convidar')) ?>">
+          <?= csrf_campo() ?>
+          <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+          <input type="hidden" name="com" value="<?= (int) $convidaveis->first()->id ?>">
+          <button type="submit" class="btn-pequeno secundario">Ver com <?= e($convidaveis->first()->nome) ?></button>
+        </form>
+      <?php elseif ($convidaveis->count() > 1): ?>
+        <button type="button" class="btn-pequeno secundario" data-abrir="folha-convidar">Ver com…</button>
       <?php endif; ?>
       <?php if ($podeRemover): ?>
         <form method="post" action="<?= e(url('biblioteca', 'remover')) ?>" data-confirmar="Tirar <?= e($serie->nomeCurto()) ?> da tua biblioteca?">
@@ -276,8 +283,8 @@ $selo = fn (array $item) => match ($item['estado']) {
       <?php endif; ?>
     </div>
 
-    <?php if (!$conjunta && $ligados->count() > 1): ?>
-      <!-- Escolher com quem ver esta série: uma linha por pessoa (o par primeiro, depois os amigos) -->
+    <?php if ($convidaveis->count() > 1): ?>
+      <!-- Escolher com quem ver esta série: uma linha por pessoa que ainda não a vê contigo -->
       <dialog class="folha vidro folha-par" id="folha-convidar" aria-label="Ver <?= e($serie->nomeCurto()) ?> com…">
         <div class="folha-cima">
           <h2>Ver <?= e($serie->nomeCurto()) ?> com…</h2>
@@ -286,7 +293,7 @@ $selo = fn (array $item) => match ($item['estado']) {
           </button>
         </div>
         <ul class="pessoa-lista">
-          <?php foreach ($ligados as $l): ?>
+          <?php foreach ($convidaveis as $l): ?>
             <li>
               <form class="amigo-linha" method="post" action="<?= e(url('biblioteca', 'convidar')) ?>">
                 <?= csrf_campo() ?>

@@ -21,7 +21,7 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Estatísticas por série: números dos dois, ritmo semanal com previsão, arcos (`database/arcos.json`) e curiosidades
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
 - [x] Biblioteca individual: fila de capas com progresso e estados (a ver, em pausa, acabado) por pessoa
-- [x] Amigos (link de convite de uso único, pedido por utilizador) e séries vistas com o par ou com um amigo (um companheiro por série)
+- [x] Amigos (link de convite de uso único, pedido por utilizador) e séries vistas com o par ou com um amigo (várias pessoas por série)
 - [x] Adicionar série pela pesquisa no MyAnimeList (Jikan): episódios, títulos, capa, filler e recap
 - [x] "Quero ver contigo": propostas que o par aceita ou recusa
 - [x] Popup "O que há de novo" — a cada atualização, acrescentar uma entrada a `database/novidades.json`

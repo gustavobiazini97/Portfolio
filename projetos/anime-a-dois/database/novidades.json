@@ -105,6 +105,16 @@
         "Ao pesquisar, \"Só para mim\" ou convida logo alguém.",
         "\"Deixar de ver juntos\" separa uma série quando quiseres; cada um fica com o seu progresso."
       ]
+    },
+    {
+      "id": 12,
+      "data": "2026-10-04",
+      "titulo": "Várias pessoas na mesma série",
+      "itens": [
+        "Já podes ver a mesma série com várias pessoas: por exemplo o Naruto com o teu par e com um amigo, ao mesmo tempo.",
+        "O placar, os episódios e as estatísticas mostram cada pessoa; os comentários e avisos só chegam a quem vê a série contigo.",
+        "\"Deixar de ver juntos\" é por pessoa: separas só com quem quiseres."
+      ]
     }
   ]
 }

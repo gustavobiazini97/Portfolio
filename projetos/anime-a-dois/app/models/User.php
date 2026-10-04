@@ -253,8 +253,12 @@ class User extends Model
 
         // As do seed passam a ser vistas pelo casal juntos
         if ($primeiro !== null) {
-            Capsule::table('bibliotecas')->whereIn('serie_id', $linhas === [] ? [0] : array_column($linhas, 'serie_id'))->where('user_id', $user->id)->update(['com_id' => $primeiro->id]);
-            Capsule::table('bibliotecas')->whereIn('serie_id', $linhas === [] ? [0] : array_column($linhas, 'serie_id'))->where('user_id', $primeiro->id)->update(['com_id' => $user->id]);
+            foreach (array_column($linhas, 'serie_id') as $serieId) {
+                Capsule::table('series_juntos')->insertOrIgnore([
+                    ['serie_id' => $serieId, 'user_id' => $user->id,     'com_id' => $primeiro->id],
+                    ['serie_id' => $serieId, 'user_id' => $primeiro->id, 'com_id' => $user->id],
+                ]);
+            }
         }
 
         return $user;

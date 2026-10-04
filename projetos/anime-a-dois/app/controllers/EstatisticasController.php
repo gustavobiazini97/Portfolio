@@ -25,18 +25,18 @@ class EstatisticasController extends Controller
             $this->redirect('home');
         }
 
-        // Série só tua: as estatísticas mostram só os teus números; com companheiro, os dos dois
-        $parceiro = $serie->companheiroDe($user);
+        // Série só tua: as estatísticas mostram só os teus números; com companheiros, os de todos
+        $companheiros = $serie->companheirosDe($user);
 
         $this->render('estatisticas/index', [
             'titulo'    => 'Estatísticas',
             'serieSlug' => $serie->slug,
             'serieAcento' => $serie->acento,
             'user'      => $user,
-            'parceiro'  => $parceiro,
+            'companheiros' => $companheiros,
             'series'    => $series,
             'serie'     => $serie,
-            'est'       => (new Estatisticas($serie, $user, $parceiro))->calcular(),
+            'est'       => (new Estatisticas($serie, $user, $companheiros))->calcular(),
         ]);
     }
 }

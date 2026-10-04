@@ -61,19 +61,22 @@ class Serie extends Model
         return $this->estadoDe($u) !== null;
     }
 
-    // Com quem esta pessoa vê esta série (o companheiro): só conta se os dois a marcaram um ao outro
-    // (bibliotecas.com_id nas duas linhas). Null = vê sozinha.
-    public function companheiroDe(?User $u): ?User
+    // Com quem esta pessoa vê esta série: os companheiros (par e/ou amigos), por ordem de entrada.
+    // Cada ligação é de duas pessoas (tabela series_juntos, uma linha por sentido); podes ver a mesma
+    // série com várias pessoas, e cada uma delas com outras. Coleção vazia = vê sozinha.
+    public function companheirosDe(?User $u)
     {
         if ($u === null) {
-            return null;
+            return collect();
         }
-        $comId = Capsule::table('bibliotecas')->where('user_id', $u->id)->where('serie_id', $this->id)->value('com_id');
-        if ($comId === null) {
-            return null;
-        }
-        $volta = Capsule::table('bibliotecas')->where('user_id', $comId)->where('serie_id', $this->id)->value('com_id');
-        return (int) $volta === $u->id ? User::find($comId) : null;
+        $ids = Capsule::table('series_juntos')->where('serie_id', $this->id)->where('user_id', $u->id)->orderBy('com_id')->pluck('com_id')->all();
+        return $ids === [] ? collect() : User::whereIn('id', $ids)->orderBy('id')->get();
+    }
+
+    // Estas duas pessoas vêem esta série juntas?
+    public function verCom(User $a, User $b): bool
+    {
+        return Capsule::table('series_juntos')->where('serie_id', $this->id)->where('user_id', $a->id)->where('com_id', $b->id)->exists();
     }
 
     // Séries da biblioteca de uma pessoa, pela ordem simples: estado e ordem de entrada.
@@ -88,11 +91,11 @@ class Serie extends Model
             ->get();
     }
 
-    // Fila de capas: as séries da biblioteca de $dono, cada uma com a percentagem dele, o companheiro
-    // (se a vê com alguém) e a percentagem desse companheiro, o estado e a última atividade.
+    // Fila de capas: as séries da biblioteca de $dono, cada uma com a percentagem dele, os companheiros
+    // (quem a vê com ele) e a percentagem de cada um, o estado e a última atividade.
     // Ordem: a ver → em pausa → acabado; dentro de cada estado, a mais mexida (ou a mais recente) primeiro.
     //   $excluirDe = não mostrar as que esta pessoa também tem (fila "A Andreia está a ver")
-    // Cada item: serie, estado, conjunta (bool), companheiro (User|null), tu (%), par (% do companheiro), atividade
+    // Cada item: serie, estado, conjunta (bool), companheiros ([user, pct]), tu (%), atividade
     public static function biblioteca(User $dono, ?User $excluirDe = null): array
     {
         $linhas = Capsule::table('bibliotecas')->where('user_id', $dono->id)->get()->keyBy('serie_id');
@@ -105,16 +108,11 @@ class Serie extends Model
         }
         $series = static::whereIn('id', $linhas->keys()->all())->get();
 
-        // Companheiros: a linha do dono aponta para ele (com_id) e a dele aponta de volta
-        $voltas = Capsule::table('bibliotecas')->whereIn('serie_id', $linhas->keys()->all())->where('com_id', $dono->id)
-            ->get()->keyBy('serie_id');
-        $companheiros = [];
-        foreach ($linhas as $serieId => $l) {
-            if ($l->com_id !== null && isset($voltas[$serieId]) && (int) $voltas[$serieId]->user_id === (int) $l->com_id) {
-                $companheiros[$serieId] = (int) $l->com_id;
-            }
-        }
-        $pessoas = $companheiros === [] ? collect() : User::whereIn('id', array_unique($companheiros))->get()->keyBy('id');
+        // Companheiros de cada série (quem a vê com o dono)
+        $juntos = Capsule::table('series_juntos')->where('user_id', $dono->id)->whereIn('serie_id', $linhas->keys()->all())
+            ->orderBy('com_id')->get()->groupBy('serie_id');
+        $pessoasIds = $juntos->flatten()->pluck('com_id')->unique()->all();
+        $pessoas = $pessoasIds === [] ? collect() : User::whereIn('id', $pessoasIds)->get()->keyBy('id');
 
         // Vistos de cada pessoa em cada série, numa só consulta
         $contagens = Capsule::table('vistos')
@@ -135,22 +133,27 @@ class Serie extends Model
         $itens = [];
         foreach ($series as $s) {
             $linha = $linhas[$s->id];
-            $comId = $companheiros[$s->id] ?? null;
-            // Atividade: o último episódio marcado pelo dono (ou pelo companheiro), ou quando entrou
+            $comIds = ($juntos[$s->id] ?? collect())->pluck('com_id')->all();
+            // Atividade: o último episódio marcado pelo dono (ou pelos companheiros), ou quando entrou
             $atividade = (string) $linha->desde;
             foreach ($porSerie[$s->id] ?? [] as $pessoa => $c) {
-                if ($pessoa == $dono->id || $pessoa == $comId) {
+                if ($pessoa == $dono->id || in_array($pessoa, $comIds)) {
                     $atividade = max($atividade, (string) $c->ultimo);
                 }
             }
+            $companheiros = [];
+            foreach ($comIds as $cid) {
+                if (isset($pessoas[$cid])) {
+                    $companheiros[] = ['user' => $pessoas[$cid], 'pct' => $pct($s, $cid)];
+                }
+            }
             $itens[] = [
-                'serie'       => $s,
-                'estado'      => $linha->estado,
-                'conjunta'    => $comId !== null,
-                'companheiro' => $comId !== null ? ($pessoas[$comId] ?? null) : null,
-                'tu'          => $pct($s, $dono->id),
-                'par'         => $comId !== null ? $pct($s, $comId) : null,
-                'atividade'   => $atividade,
+                'serie'        => $s,
+                'estado'       => $linha->estado,
+                'conjunta'     => $companheiros !== [],
+                'companheiros' => $companheiros,       // [['user' => User, 'pct' => int], ...]
+                'tu'           => $pct($s, $dono->id),
+                'atividade'    => $atividade,
             ];
         }
 
@@ -378,27 +381,30 @@ class Serie extends Model
     }
 
     // ---------- Estado, companheiro, convites e tirar ----------
-    // Cada pessoa tem a sua biblioteca. Uma série pode ser vista COM uma pessoa (par ou amigo):
-    // o companheiro desta série. Fica assim quando os dois se marcam um ao outro (bibliotecas.com_id),
-    // por convite aceite ou por alguém se juntar à série de quem a tem.
+    // Cada pessoa tem a sua biblioteca. Uma série pode ser vista COM outras pessoas (par e/ou amigos):
+    // os companheiros. Duas pessoas ficam ligadas (series_juntos) por convite aceite ou quando uma se
+    // junta à série da outra. Pode haver vários companheiros por série.
 
     // Põe a série na biblioteca de uma pessoa (sem companheiro)
     private function juntarA(User $u, string $estado): void
     {
         Capsule::table('bibliotecas')->updateOrInsert(
             ['user_id' => $u->id, 'serie_id' => $this->id],
-            ['estado' => $estado, 'desde' => date('Y-m-d H:i:s'), 'com_id' => null]
+            ['estado' => $estado, 'desde' => date('Y-m-d H:i:s')]
         );
     }
 
-    // Liga duas bibliotecas: passam a ver esta série juntos
+    // Liga duas pessoas: passam a ver esta série juntas (uma linha por sentido)
     private function ligar(User $a, User $b): void
     {
-        Capsule::table('bibliotecas')->where('serie_id', $this->id)->where('user_id', $a->id)->update(['com_id' => $b->id]);
-        Capsule::table('bibliotecas')->where('serie_id', $this->id)->where('user_id', $b->id)->update(['com_id' => $a->id]);
-        // Convites que já não fazem sentido (qualquer um dos dois a convidar ou a ser convidado)
+        Capsule::table('series_juntos')->insertOrIgnore([
+            ['serie_id' => $this->id, 'user_id' => $a->id, 'com_id' => $b->id],
+            ['serie_id' => $this->id, 'user_id' => $b->id, 'com_id' => $a->id],
+        ]);
+        // Convites entre estas duas pessoas já não fazem sentido
         Capsule::table('convites_serie')->where('serie_id', $this->id)
-            ->where(fn ($q) => $q->whereIn('de_id', [$a->id, $b->id])->orWhereIn('para_id', [$a->id, $b->id]))->delete();
+            ->where(fn ($q) => $q->where(fn ($w) => $w->where('de_id', $a->id)->where('para_id', $b->id))
+                                 ->orWhere(fn ($w) => $w->where('de_id', $b->id)->where('para_id', $a->id)))->delete();
     }
 
     // Muda o estado na TUA biblioteca (o do companheiro fica como está)
@@ -413,7 +419,7 @@ class Serie extends Model
         Capsule::table('bibliotecas')->where('user_id', $u->id)->where('serie_id', $this->id)->update(['estado' => $estado]);
     }
 
-    // Convida $para (o par ou um amigo) a ver esta série contigo. Tu tens de a ter, sem companheiro.
+    // Convida $para (o par ou um amigo) a ver esta série contigo. Tu tens de a ter.
     // Se $para já a tem sozinho, aceitar liga-vos sem perder o progresso dele.
     public function convidar(User $de, User $para): void
     {
@@ -423,11 +429,8 @@ class Serie extends Model
         if (!$this->naBibliotecaDe($de)) {
             throw new InvalidArgumentException('Primeiro adiciona ' . $this->nomeCurto() . ' à tua biblioteca.');
         }
-        if ($this->companheiroDe($de) !== null) {
-            throw new InvalidArgumentException('Já vês ' . $this->nomeCurto() . ' com ' . $this->companheiroDe($de)->nome . '.');
-        }
-        if ($this->companheiroDe($para) !== null) {
-            throw new InvalidArgumentException($para->nome . ' já vê ' . $this->nomeCurto() . ' com outra pessoa.');
+        if ($this->verCom($de, $para)) {
+            throw new InvalidArgumentException('Já vês ' . $this->nomeCurto() . ' com ' . $para->nome . '.');
         }
         if (Capsule::table('convites_serie')->where('serie_id', $this->id)->where('de_id', $de->id)->where('para_id', $para->id)->exists()) {
             throw new InvalidArgumentException('Já convidaste ' . $para->nome . ' para ' . $this->nomeCurto() . '.');
@@ -442,8 +445,8 @@ class Serie extends Model
         if (!$existe) {
             throw new InvalidArgumentException('Esse convite já não existe.');
         }
-        if ($this->companheiroDe($de) !== null || $this->companheiroDe($quem) !== null) {
-            throw new InvalidArgumentException('Já não dá: uma das duas pessoas já vê ' . $this->nomeCurto() . ' com outra.');
+        if ($this->verCom($quem, $de)) {
+            throw new InvalidArgumentException('Já vêem ' . $this->nomeCurto() . ' juntos.');
         }
         Capsule::connection()->transaction(function () use ($quem, $de) {
             if (!$this->naBibliotecaDe($quem)) {
@@ -467,7 +470,7 @@ class Serie extends Model
 
     // Entras numa série que o teu par ou um amigo já tem (fila "está a ver", perfil de um amigo).
     //   $com = null → entra na tua biblioteca, cada um vê a sua (sem partilhar nada);
-    //   $com = ele  → passam a vê-la juntos (ele fica sem companheiro nesta série e é avisado)
+    //   $com = ele  → passam a vê-la juntos (ele é avisado)
     public function juntarSe(User $u, ?User $com): void
     {
         if ($this->naBibliotecaDe($u)) {
@@ -476,9 +479,6 @@ class Serie extends Model
         if ($com !== null) {
             if (!$u->ligadoA($com) || !$this->naBibliotecaDe($com)) {
                 throw new InvalidArgumentException($this->nomeCurto() . ' não está na biblioteca dessa pessoa.');
-            }
-            if ($this->companheiroDe($com) !== null) {
-                throw new InvalidArgumentException($com->nome . ' já vê ' . $this->nomeCurto() . ' com outra pessoa.');
             }
         }
         Capsule::connection()->transaction(function () use ($u, $com) {
@@ -489,14 +489,15 @@ class Serie extends Model
         });
     }
 
-    // Deixam de ver a série juntos (cada um fica com a sua biblioteca e o seu progresso)
-    public function deixarDeVerJuntos(User $u): void
+    // Tu e $com deixam de ver a série juntos (cada um fica com a sua biblioteca e o seu progresso)
+    public function deixarDeVerJuntos(User $u, User $com): void
     {
-        $com = $this->companheiroDe($u);
-        if ($com === null) {
-            throw new InvalidArgumentException('Não vês ' . $this->nomeCurto() . ' com ninguém.');
+        $apagados = Capsule::table('series_juntos')->where('serie_id', $this->id)
+            ->where(fn ($q) => $q->where(fn ($w) => $w->where('user_id', $u->id)->where('com_id', $com->id))
+                                 ->orWhere(fn ($w) => $w->where('user_id', $com->id)->where('com_id', $u->id)))->delete();
+        if ($apagados === 0) {
+            throw new InvalidArgumentException('Não vês ' . $this->nomeCurto() . ' com ' . $com->nome . '.');
         }
-        Capsule::table('bibliotecas')->where('serie_id', $this->id)->whereIn('user_id', [$u->id, $com->id])->update(['com_id' => null]);
     }
 
     // Só podes tirar da TUA biblioteca uma série em que ainda não marcaste episódios (não perdes nada)
@@ -510,7 +511,7 @@ class Serie extends Model
                 ->exists();
     }
 
-    // Tira da tua biblioteca (a dos outros fica igual). O companheiro fica sem companheiro e os convites vão-se.
+    // Tira da tua biblioteca (a dos outros fica igual). As ligações e os convites desta série vão-se.
     public function removerDe(User $u): void
     {
         if (!$this->podeSerRemovidaPor($u)) {
@@ -518,7 +519,8 @@ class Serie extends Model
         }
         Capsule::connection()->transaction(function () use ($u) {
             Capsule::table('bibliotecas')->where('user_id', $u->id)->where('serie_id', $this->id)->delete();
-            Capsule::table('bibliotecas')->where('serie_id', $this->id)->where('com_id', $u->id)->update(['com_id' => null]);
+            Capsule::table('series_juntos')->where('serie_id', $this->id)
+                ->where(fn ($q) => $q->where('user_id', $u->id)->orWhere('com_id', $u->id))->delete();
             Capsule::table('convites_serie')->where('serie_id', $this->id)
                 ->where(fn ($q) => $q->where('de_id', $u->id)->orWhere('para_id', $u->id))->delete();
             $this->apagarSeOrfa();
@@ -614,9 +616,10 @@ class Serie extends Model
     }
 
     // Episódios para a página da série, já com quem viu cada um:
-    // cada item tem id, numero, titulo, filler, recap, tu (bool), par (bool) e coment
-    public function episodiosPara(User $tu, ?User $par): array   // $par = o companheiro desta série (ou null)
+    // cada item tem id, numero, titulo, filler, recap, tu (bool), com (bool por companheiro, na ordem de $companheiros) e coment
+    public function episodiosPara(User $tu, $companheiros): array   // $companheiros = Users que vêem esta série contigo
     {
+        $companheiros = collect($companheiros)->values();
         // IDs dos episódios desta série que cada um já viu (consulta única por pessoa)
         $vistosDe = function (?User $u): array {
             if ($u === null) {
@@ -631,13 +634,13 @@ class Serie extends Model
                 ->all();
         };
         $doTu  = $vistosDe($tu);
-        $doPar = $vistosDe($par);
+        $doCom = $companheiros->map(fn ($c) => $vistosDe($c))->all();
 
         // Quantos comentários tem cada episódio desta série (uma só consulta)
         $comentarios = Capsule::table('comentarios')
             ->join('episodios', 'episodios.id', '=', 'comentarios.episodio_id')
             ->where('episodios.serie_id', $this->id)
-            ->whereIn('comentarios.user_id', array_filter([$tu->id, $par?->id]))   // só os teus e os do companheiro
+            ->whereIn('comentarios.user_id', array_merge([$tu->id], $companheiros->pluck('id')->all()))   // só os teus e os dos companheiros
             ->groupBy('comentarios.episodio_id')
             ->selectRaw('comentarios.episodio_id AS id, COUNT(*) AS n')
             ->pluck('n', 'id')
@@ -652,7 +655,7 @@ class Serie extends Model
                 'filler' => $ep->filler,
                 'recap'  => $ep->recap,
                 'tu'     => isset($doTu[$ep->id]),
-                'par'    => isset($doPar[$ep->id]),
+                'com'    => array_map(fn ($v) => isset($v[$ep->id]), $doCom),
                 'coment' => (int) ($comentarios[$ep->id] ?? 0),
             ];
         }

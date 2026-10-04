@@ -37,8 +37,8 @@ class Notificador
     public static function episodios(User $autor, Serie $serie, array $numeros, array $titulos): void
     {
         // Séries só tuas não incomodam ninguém: só avisa quem vê esta série contigo
-        $companheiro = $serie->companheiroDe($autor);
-        if ($companheiro === null) {
+        $companheiros = $serie->companheirosDe($autor);
+        if ($companheiros->isEmpty()) {
             return;
         }
         sort($numeros);
@@ -56,30 +56,34 @@ class Notificador
             $corpo  = $serie->nome . ' · ' . $numeros[0] . '–' . $numeros[$n - 1];
         }
 
-        self::paraPessoa($companheiro, 'ep', [
-            'titulo' => $titulo,
-            'corpo'  => $corpo,
-            'url'    => url('serie', 'ver', ['serie' => $serie->slug, 'ep' => $numeros[$n - 1]]),
-            'tag'    => 'ep-' . $serie->slug,          // várias marcações seguidas substituem-se em vez de empilhar
-        ]);
+        foreach ($companheiros as $c) {
+            self::paraPessoa($c, 'ep', [
+                'titulo' => $titulo,
+                'corpo'  => $corpo,
+                'url'    => url('serie', 'ver', ['serie' => $serie->slug, 'ep' => $numeros[$n - 1]]),
+                'tag'    => 'ep-' . $serie->slug,          // várias marcações seguidas substituem-se em vez de empilhar
+            ]);
+        }
     }
 
     // Escreveste um comentário
     public static function comentario(User $autor, Comentario $comentario): void
     {
         $episodio = $comentario->episodio()->with('serie')->first();
-        $companheiro = $episodio?->serie->companheiroDe($autor);
-        if ($companheiro === null) {
+        $companheiros = $episodio ? $episodio->serie->companheirosDe($autor) : collect();
+        if ($companheiros->isEmpty()) {
             return;   // só nas séries vistas com alguém
         }
         $texto = mb_strlen($comentario->texto) > 140 ? mb_substr($comentario->texto, 0, 139) . '…' : $comentario->texto;
 
-        self::paraPessoa($companheiro, 'com', [
-            'titulo' => $autor->nome . ' comentou o episódio ' . $episodio->numero,
-            'corpo'  => $texto,
-            'url'    => url('serie', 'ver', ['serie' => $episodio->serie->slug, 'ep' => $episodio->numero]),
-            'tag'    => 'com-' . $episodio->id,
-        ]);
+        foreach ($companheiros as $c) {
+            self::paraPessoa($c, 'com', [
+                'titulo' => $autor->nome . ' comentou o episódio ' . $episodio->numero,
+                'corpo'  => $texto,
+                'url'    => url('serie', 'ver', ['serie' => $episodio->serie->slug, 'ep' => $episodio->numero]),
+                'tag'    => 'com-' . $episodio->id,
+            ]);
+        }
     }
 
     // Séries: $evento = 'convite' (Quero ver contigo), 'aceite' (o convite foi aceite) ou 'juntou' (juntou-se a uma série tua).

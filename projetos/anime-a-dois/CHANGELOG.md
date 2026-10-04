@@ -101,10 +101,10 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Os amigos veem o perfil e a biblioteca uns dos outros (`?c=perfil&a=pessoa`); não partilham séries. O par é só um: `users.par_id` (o `migrate.php` liga as duas contas existentes).
 - Tabelas novas: `amizades` (duas linhas por amizade), `pedidos_amizade`, `convites_amigo`.
 
-**Séries com amigos** (companheiro por série)
-- Cada série pode ser vista com UMA pessoa (o par ou um amigo): `bibliotecas.com_id` nas duas linhas (cada um aponta para o outro). O Vs, os episódios dele, os comentários, as estatísticas e as notificações dessa série são só com esse companheiro.
+**Séries com amigos** (várias pessoas por série)
+- Cada série pode ser vista com VÁRIAS pessoas (o par e amigos ao mesmo tempo); cada ligação é entre duas pessoas e vive na tabela `series_juntos` (duas linhas por ligação; `bibliotecas.com_id` ficou como legado e é migrado, marcador `juntos_migrado`). O Vs, os episódios, os comentários, as estatísticas e as notificações mostram só quem vê a série contigo.
 - Convites "Quero ver contigo" passam a ser da tabela `convites_serie` (de → para). "Ver com…" (série aberta) e "Só para mim / Ver com…" (pesquisa) escolhem a pessoa; aceitar liga as bibliotecas (e mantém o progresso de quem já tinha a série).
-- Fila "está a ver" do par e perfil de um amigo: tocar numa série abre uma folha com "Adicionar só para mim" ou "Ver com …" (aviso ao outro; só se ele ainda não a vê com outra pessoa).
+- Fila "está a ver" do par e perfil de um amigo: tocar numa série abre uma folha com "Adicionar só para mim" ou "Ver com …" (aviso ao outro; pode ver a mesma série com várias pessoas).
 - "Deixar de ver juntos" separa (cada um fica com o seu progresso); terminar a amizade também separa.
 - Comentários: só os teus e os do companheiro da série (antes eram de qualquer conta).
 - O `migrate.php` liga as séries que o casal já tinha as duas e converte os convites antigos (marcador `com_id_migrado` em `config_app`).
@@ -199,7 +199,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Bibliotecas individuais, séries conjuntas por convite |
 | 04/10 | Perfil do par, adicionar séries da fila do par, botão de atualizações |
 | 04/10 | Amigos: link de convite, pedidos, perfil do amigo, `par_id` |
-| 04/10 | Séries com amigos: companheiro por série (`com_id`), convites por pessoa, comentários isolados |
+| 04/10 | Séries com amigos: várias pessoas por série (`series_juntos`), convites por pessoa, comentários isolados |
 
 ---
 

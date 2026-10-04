@@ -39,12 +39,17 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
   var ocupado = false;       // evita dois pedidos ao mesmo tempo
 
   // Frase por baixo dos avatares (igual à da view serie/ver.php)
-  var nomePar = pista.dataset.parNome || '';
-  function rotulo(tu, par) {
-    if (!nomePar) return tu ? 'visto' : 'por ver';
-    if (tu && par) return 'os dois viram';
-    if (tu) return 'falta ' + nomePar;
-    if (par) return nomePar + ' já viu';
+  var nomes = [];            // nomes de quem vê a série contigo, na ordem de data-com
+  try { nomes = JSON.parse(pista.dataset.companheiros || '[]'); } catch (e) { /* sem companheiros */ }
+  function juntar(lista) { return lista.length === 1 ? lista[0] : (lista.length === 2 ? lista[0] + ' e ' + lista[1] : lista.length + ' pessoas'); }
+  function flagsDe(c) { return nomes.length ? (c.dataset.com || '').split(',').map(function (x) { return x === '1'; }) : []; }
+  function rotulo(tu, com) {
+    if (!nomes.length) return tu ? 'visto' : 'por ver';
+    var viram = [], faltam = [];
+    com.forEach(function (viu, i) { (viu ? viram : faltam).push(nomes[i]); });
+    if (tu && !faltam.length) return nomes.length === 1 ? 'os dois viram' : 'todos viram';
+    if (tu) return 'falta ' + juntar(faltam);
+    if (viram.length) return juntar(viram) + (viram.length === 1 ? ' já viu' : ' já viram');
     return 'por ver';
   }
 
@@ -59,12 +64,10 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
     var tu = c.dataset.tu === '1';
     document.getElementById('detalhe-tu').textContent = tu ? 'visto' : 'por ver';
     document.getElementById('detalhe-av-tu').classList.toggle('v', tu);
-    var par = document.getElementById('detalhe-par');
-    if (par) {
-      var viu = c.dataset.par === '1';
-      par.textContent = viu ? 'visto' : 'por ver';
-      document.getElementById('detalhe-av-par').classList.toggle('v', viu);
-    }
+    flagsDe(c).forEach(function (viu, i) {
+      document.getElementById('detalhe-c' + i).textContent = viu ? 'visto' : 'por ver';
+      document.getElementById('detalhe-av-c' + i).classList.toggle('v', viu);
+    });
   }
 
   // ----- Texto e estado do botão principal -----
@@ -171,7 +174,7 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
       c.dataset.tu = resposta.visto ? '1' : '0';
       c.classList.toggle('visto', resposta.visto);          // cor do cartão (sálvia / degradê se o par também viu)
       c.querySelector('.ep-av-tu').classList.toggle('v', resposta.visto);   // o teu avatar acende ou esbate
-      c.querySelector('.ep-rotulo').textContent = rotulo(resposta.visto, c.dataset.par === '1');
+      c.querySelector('.ep-rotulo').textContent = rotulo(resposta.visto, flagsDe(c));
       var risco = riscosTu.children[n - 1];
       if (risco) risco.classList.toggle('v', resposta.visto);
     });

@@ -52,7 +52,11 @@ $capaMini = function (Serie $s): string {
             <?= $capaMini($s) ?>
             <span class="pessoa-serie-texto">
               <span class="pessoa-serie-nome"><?= e($s->nomeCurto()) ?></span>
-              <span class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= $item['tu'] ?>%<?= $item['conjunta'] && $item['companheiro'] ? ' · vê com ' . ($item['companheiro']->id === $user->id ? 'ti' : 'outra pessoa') : '' ?><?= $abre ? '' : ' · toca para adicionar' ?></span>
+              <span class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= $item['tu'] ?>%<?php
+                $comTi = array_filter($item['companheiros'], fn ($c) => $c['user']->id === $user->id);
+                $outros = count($item['companheiros']) - count($comTi);
+                echo $comTi ? ' · vê contigo' . ($outros ? ' e +' . $outros : '') : ($outros ? ' · vê com ' . plural($outros, 'pessoa', 'pessoas') : '');
+              ?><?= $abre ? '' : ' · toca para adicionar' ?></span>
               <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['tu'] ?>" aria-label="<?= e($pessoa->nome) ?>: <?= $item['tu'] ?>%"></progress>
             </span>
           </<?= $abre ? 'a' : 'button' ?>>

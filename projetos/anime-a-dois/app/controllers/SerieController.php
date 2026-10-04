@@ -21,8 +21,8 @@ class SerieController extends Controller
             $this->redirect('home', 'index', [], 'convites');
         }
 
-        // O companheiro só aparece (mapa, avatares, comentários dele) se vês esta série com alguém
-        $parceiro = $serie->companheiroDe($user);
+        // Os companheiros só aparecem (mapa, avatares, comentários) se vês esta série com alguém
+        $companheiros = $serie->companheirosDe($user);
         $meu      = $serie->progressoDe($user);
 
         // Cartão que abre ao centro: o pedido no URL ou o seguinte ao teu
@@ -37,12 +37,12 @@ class SerieController extends Controller
             'serieAcento' => $serie->acento,      // cor das séries novas ([data-acento] no CSS)
             'classeBody' => 'pagina-serie',   // ecrã de altura fixa: a pista ocupa o que sobra
             'user'      => $user,
-            'parceiro'  => $parceiro,
+            'companheiros' => $companheiros,
             'serie'     => $serie,
             'fillers'   => $serie->totalFillers(),
             'meu'       => $meu,
-            'dele'      => $serie->progressoDe($parceiro),
-            'episodios' => $serie->episodiosPara($user, $parceiro),
+            'deles'     => $companheiros->map(fn ($c) => $serie->progressoDe($c))->all(),   // na ordem dos companheiros
+            'episodios' => $serie->episodiosPara($user, $companheiros),
             'inicial'   => $inicial,
             // Faltam fillers ou a série em emissão está desatualizada: o browser vai buscar dados novos
             'sincronizar' => $serie->precisaSincronizar(),
@@ -133,7 +133,7 @@ class SerieController extends Controller
         if ($serie === null || !$serie->naBibliotecaDe($user)) {
             $this->json(['ok' => false, 'mensagem' => 'Essa série não está na tua biblioteca.'], 403);
         }
-        $autores = array_filter([$user->id, $serie->companheiroDe($user)?->id]);
+        $autores = array_merge([$user->id], $serie->companheirosDe($user)->pluck('id')->all());
         $lista = Comentario::with('autor')->where('episodio_id', $episodio->id)->whereIn('user_id', $autores)->orderBy('criado_em')->orderBy('id')->get();
         $this->json([
             'ok'          => true,

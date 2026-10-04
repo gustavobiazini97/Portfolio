@@ -31,10 +31,10 @@ class HomeController extends Controller
         // Da série aberta: com quem a vês? (só esse companheiro aparece no Vs)
         $ligados  = $user->ligados();
         $convites = Serie::convites($user);
-        $parVs    = $serie ? $serie->companheiroDe($user) : null;
-        $conjunta = $parVs !== null;
+        $companheiros = $serie ? $serie->companheirosDe($user) : collect();
+        $conjunta = $companheiros->isNotEmpty();
         $meu      = $serie ? $serie->progressoDe($user) : null;
-        $dele     = $serie ? $serie->progressoDe($parVs) : null;
+        $deles    = $companheiros->map(fn ($c) => $serie->progressoDe($c))->all();   // na ordem dos companheiros
 
         $this->render('home/index', [
             'titulo'      => 'Início',
@@ -42,7 +42,7 @@ class HomeController extends Controller
             'serieAcento' => $serie?->acento,
             'user'        => $user,
             'parceiro'    => $par,
-            'parVs'       => $parVs,
+            'companheiros' => $companheiros,
             'biblioteca'  => $biblioteca,
             'doPar'       => $doPar,
             'convites'    => $convites,
@@ -54,8 +54,8 @@ class HomeController extends Controller
             'conjunta'    => $conjunta,
             'ultimoPar'   => $ultimoPar,
             'meu'         => $meu,
-            'dele'        => $dele,
-            'resumo'      => $serie ? $this->resumoVs($meu, $dele, $parVs, $ligados->isNotEmpty()) : '',
+            'deles'       => $deles,
+            'resumo'      => $serie ? $this->resumoVs($meu, $companheiros, $deles, $ligados->isNotEmpty()) : '',
             'podeRemover' => $serie ? $serie->podeSerRemovidaPor($user) : false,
             // Para a pesquisa marcar o que já cá está: mal_id → biblioteca | convite | par
             'jaCa'        => Serie::situacaoNaPesquisa($user),
@@ -78,20 +78,28 @@ class HomeController extends Controller
         $this->redirect('home');
     }
 
-    // Frase por baixo das barras: quem vai à frente e por quantos episódios
-    private function resumoVs(array $meu, array $dele, ?User $parceiro, bool $temLigados): string
+    // Frase por baixo das barras: quem vai à frente e por quantos episódios (com vários companheiros,
+    // compara-te com o que vai mais avançado)
+    private function resumoVs(array $meu, $companheiros, array $deles, bool $temLigados): string
     {
-        if ($parceiro === null) {
+        if ($companheiros->isEmpty()) {
             return $temLigados ? 'Vês esta série sozinho. Convida o teu par ou um amigo para verem juntos.' : 'Série só tua por agora.';
         }
 
-        $dif = $meu['posicao'] - $dele['posicao'];
+        // O companheiro mais avançado
+        $lider = 0;
+        foreach ($deles as $i => $d) {
+            if ($d['posicao'] > $deles[$lider]['posicao']) {
+                $lider = $i;
+            }
+        }
+        $dif = $meu['posicao'] - $deles[$lider]['posicao'];
         if ($dif > 0) {
             return 'Vais ' . plural($dif, 'episódio', 'episódios') . ' à frente.';
         }
         if ($dif < 0) {
-            return $parceiro->nome . ' vai ' . plural(-$dif, 'episódio', 'episódios') . ' à frente.';
+            return $companheiros[$lider]->nome . ' vai ' . plural(-$dif, 'episódio', 'episódios') . ' à frente.';
         }
-        return 'Estão os dois no mesmo episódio.';
+        return $companheiros->count() === 1 ? 'Estão os dois no mesmo episódio.' : 'Estão todos no mesmo episódio.';
     }
 }
