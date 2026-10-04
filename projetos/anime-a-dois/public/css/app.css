@@ -195,7 +195,9 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .auth-titulo { margin-top: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
 .auth-sub { margin-top: 6px; font-size: 13.5px; color: var(--suave); }
 .auth-sub strong { color: var(--par-txt); font-weight: 500; }
-.auth .form { margin-top: auto; }
+/* Cabeçalho e formulário juntos, no meio do ecrã (sem um buraco entre o nome da app e o formulário) */
+.auth { justify-content: center; padding-bottom: 6vh; }
+.auth .form { margin-top: 0; }
 /* Ecrã de entrar/criar conta: logo mais pequeno e formulário mais compacto, para caber sem scroll */
 .auth .logo-grande { width: 72px; height: 72px; }
 .auth .auth-titulo { margin-top: 12px; }
@@ -816,6 +818,7 @@ button.pessoa-serie { display: flex; }
 /* Ecrãs baixos (Chrome com a barra de endereço): campos e cabeçalho mais compactos */
 @media (max-height: 780px) {
   .ecra:has(.auth) { padding-bottom: calc(14px + env(safe-area-inset-bottom)); gap: 8px; }   /* menos folga em baixo e entre blocos */
+  .auth { padding-bottom: 0; }
   .auth .logo-grande { width: 52px; height: 52px; }
   .auth .auth-titulo { margin-top: 8px; font-size: 20px; }
   .auth .auth-cabeca { margin-bottom: 12px; }
