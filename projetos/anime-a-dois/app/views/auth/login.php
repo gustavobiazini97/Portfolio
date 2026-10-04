@@ -71,15 +71,15 @@
   </ul>
 </section>
 
-<!-- Criar conta: só com o código (ou o link inteiro) do convite que um amigo enviou -->
+<!-- Criar conta: só com o link do convite que um amigo enviou (o código sozinho também serve) -->
 <section class="convite-caixa" id="convite">
   <form class="form vidro" method="get" action="<?= e(url('auth', 'registo')) ?>">
     <input type="hidden" name="c" value="auth">
     <input type="hidden" name="a" value="registo">
     <h2 class="convite-titulo">Tenho um convite</h2>
     <label class="campo">
-      <span>código ou link do convite</span>
-      <input type="text" name="convite" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="cola aqui o que te enviaram" required>
+      <span>link do convite</span>
+      <input type="text" name="convite" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="cola aqui o link que te enviaram" required>
       <small>o convite é de uso único e dura 7 dias · pede um novo a quem te convidou</small>
     </label>
     <button class="btn" type="submit">Criar conta</button>
