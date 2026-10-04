@@ -3,7 +3,7 @@
 // porque têm dados pessoais e tokens de sessão; sem rede mostra-se a página offline.html.
 
 // Mudar a versão força a atualização da cache nas apps instaladas
-const CACHE = 'anime-a-dois-v4';
+const CACHE = 'anime-a-dois-v5';
 
 const ESTATICOS = [
   './css/app.css',
