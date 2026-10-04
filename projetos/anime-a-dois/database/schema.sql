@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255) NOT NULL,             -- password_hash() do PHP, nunca a palavra-passe
   novidades_vistas SMALLINT UNSIGNED NOT NULL DEFAULT 0,  -- id da última novidade que já viu (database/novidades.json)
   par_id        INT UNSIGNED NULL,                 -- o par (a pessoa com quem partilha séries); null = sem par
+  admin         TINYINT(1)   NOT NULL DEFAULT 0,   -- 1 = tem acesso ao backoffice (?c=admin)
+  ultimo_acesso DATETIME     NULL,                 -- última vez que abriu a app (atualizado no máximo de 5 em 5 min)
   criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

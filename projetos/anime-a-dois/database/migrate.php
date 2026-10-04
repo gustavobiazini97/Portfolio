@@ -49,6 +49,8 @@ $colunas = [
     ['users', 'novidades_vistas',  'SMALLINT UNSIGNED NOT NULL DEFAULT 0'],
     ['users', 'par_id',            'INT UNSIGNED NULL'],
     ['bibliotecas', 'com_id',      'INT UNSIGNED NULL'],
+    ['users', 'admin',             'TINYINT(1) NOT NULL DEFAULT 0'],
+    ['users', 'ultimo_acesso',     'DATETIME NULL'],
 ];
 
 $schema = Capsule::schema();
@@ -57,6 +59,14 @@ foreach ($colunas as [$tabela, $coluna, $definicao]) {
         Capsule::connection()->statement("ALTER TABLE `$tabela` ADD COLUMN `$coluna` $definicao");
         echo "Coluna nova: $tabela.$coluna\n";
     }
+}
+
+// Backoffice: se ainda não há nenhum admin, a conta mais antiga (a do dono da app) passa a admin.
+// Depois disto só se muda no backoffice.
+if (Capsule::table('users')->where('admin', 1)->count() === 0 && Capsule::table('users')->count() > 0) {
+    $primeiro = Capsule::table('users')->orderBy('id')->value('id');
+    Capsule::table('users')->where('id', $primeiro)->update(['admin' => 1]);
+    echo "Admin: utilizador $primeiro.\n";
 }
 
 // Passagem para bibliotecas individuais (uma vez só: quando a tabela ainda está vazia).

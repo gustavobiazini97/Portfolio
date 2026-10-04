@@ -132,6 +132,10 @@
   <button type="submit" class="btn">Terminar sessão</button>
 </form>
 
+<?php if ($user->ehAdmin()): ?>
+  <a class="btn btn-secundario" href="<?= e(url('admin')) ?>">Backoffice</a>
+<?php endif; ?>
+
 <!-- Apagar conta (fechado por defeito): pede a palavra-passe e apaga tudo da base de dados -->
 <details class="form vidro dobravel zona-perigo">
   <summary>Apagar conta</summary>

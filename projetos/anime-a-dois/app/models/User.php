@@ -123,10 +123,29 @@ class User extends Model
         if (!password_verify($password, $this->password_hash)) {
             throw new InvalidArgumentException('A palavra-passe não está certa.');
         }
+        $this->eliminar();
+    }
+
+    // Apaga a conta sem pedir palavra-passe (o backoffice usa isto depois de confirmar quem é admin)
+    public function eliminar(): void
+    {
         \Illuminate\Database\Capsule\Manager::connection()->transaction(function () {
             static::where('par_id', $this->id)->update(['par_id' => null]);   // quem tinha esta conta como par fica sem par
             $this->delete();
         });
+    }
+
+    // Regista que a pessoa abriu a app (no máximo de 5 em 5 minutos, para não escrever na base de dados a cada pedido)
+    public function tocar(): void
+    {
+        if ($this->ultimo_acesso === null || strtotime($this->ultimo_acesso) < time() - 300) {
+            static::where('id', $this->id)->update(['ultimo_acesso' => date('Y-m-d H:i:s')]);
+        }
+    }
+
+    public function ehAdmin(): bool
+    {
+        return (int) $this->admin === 1;
     }
 
     // Fecha o popup das novidades: fica tudo visto até à próxima atualização
@@ -205,14 +224,9 @@ class User extends Model
         return static::count() < (Database::config()['max_contas'] ?? 2);
     }
 
-    // Cria uma conta nova; lança InvalidArgumentException com a mensagem para o utilizador
-    // $convite = link de convite válido (Amizade::convite): abre o registo e liga a conta ao amigo que convidou
-    public static function registar(array $dados, ?object $convite = null): User
+    // Valida nome, utilizador e palavra-passe de uma conta nova (registo ou backoffice); devolve os valores limpos
+    public static function validarNovos(array $dados): array
     {
-        if ($convite === null && !static::registoAberto()) {
-            throw new InvalidArgumentException('O registo está fechado: já existem as duas contas.');
-        }
-
         // Limpeza: espaços a mais fora; username sempre em minúsculas
         $nome      = trim($dados['nome'] ?? '');
         $username  = strtolower(trim($dados['username'] ?? ''));
@@ -236,6 +250,19 @@ class User extends Model
         if ($password !== $confirmar) {
             throw new InvalidArgumentException('As palavras-passe não coincidem.');
         }
+
+        return ['nome' => $nome, 'username' => $username, 'password' => $password];
+    }
+
+    // Cria uma conta nova; lança InvalidArgumentException com a mensagem para o utilizador
+    // $convite = link de convite válido (Amizade::convite): abre o registo e liga a conta ao amigo que convidou
+    public static function registar(array $dados, ?object $convite = null): User
+    {
+        if ($convite === null && !static::registoAberto()) {
+            throw new InvalidArgumentException('O registo está fechado: já existem as duas contas.');
+        }
+
+        ['nome' => $nome, 'username' => $username, 'password' => $password] = static::validarNovos($dados);
 
         $user = static::create([
             'nome'          => $nome,
