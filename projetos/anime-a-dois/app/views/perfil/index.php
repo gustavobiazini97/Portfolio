@@ -53,6 +53,24 @@
   <button type="submit" class="btn btn-secundario">Guardar</button>
 </form>
 
+<!-- Cores: cada pessoa escolhe as suas (só mudam para ti). Tocar numa amostra pré-visualiza logo; "Guardar" grava -->
+<form class="form vidro" method="post" action="<?= e(url('perfil', 'guardarPaleta')) ?>" id="form-paleta">
+  <?= csrf_campo() ?>
+  <div class="painel-titulo"><h2>Cores</h2></div>
+  <p class="atualizacao-texto">As cores de "tu" e de quem vê contigo. Só mudam para ti.</p>
+  <div class="paletas">
+    <?php foreach (User::PALETAS as $i => $nome): ?>
+      <label class="paleta">
+        <input type="radio" name="paleta" value="<?= (int) $i ?>" <?= (int) $user->paleta === $i ? 'checked' : '' ?>>
+        <!-- data-paleta dá a esta amostra as cores dessa paleta (ver app.css) -->
+        <span class="amostra" data-paleta="<?= (int) $i ?>"><i></i><i></i></span>
+        <small><?= e($nome) ?></small>
+      </label>
+    <?php endforeach; ?>
+  </div>
+  <button type="submit" class="btn btn-secundario">Guardar cores</button>
+</form>
+
 <!-- Notificações: o que receber (linhas) e por onde (colunas) -->
 <form class="form vidro notif" method="post" action="<?= e(url('perfil', 'guardarNotificacoes')) ?>">
   <?= csrf_campo() ?>

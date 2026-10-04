@@ -101,6 +101,9 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Os amigos veem o perfil e a biblioteca uns dos outros (`?c=perfil&a=pessoa`); não partilham séries. O par é só um: `users.par_id` (o `migrate.php` liga as duas contas existentes).
 - Tabelas novas: `amizades` (duas linhas por amizade), `pedidos_amizade`, `convites_amigo`.
 
+**Cores à escolha**
+- `users.paleta` (índice em `User::PALETAS`, 6 paletas); `paleta_atual()` põe `data-paleta` no `<html>` (sem piscar) e o `app.css` redefine `--tu/--par/--tu-txt/--par-txt/--orbe-*` por paleta, nos dois temas. Perfil → "Cores" com pré-visualização imediata (`#form-paleta` em `app.js`). Só muda para quem escolhe.
+
 **Página da série em ecrãs baixos**
 - No browser (com a barra de endereço) os cartões de episódio ficavam cortados por baixo do mapa. Agora o painel "Episódio N" sai a partir de 820px de altura (900px com 2+ companheiros, classe `com-N` no body) e o cartão nunca é maior do que a pista (`height: min(236px, 100%)`).
 

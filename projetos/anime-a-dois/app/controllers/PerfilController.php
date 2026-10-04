@@ -145,6 +145,22 @@ class PerfilController extends Controller
         }
     }
 
+    // POST: escolhe as cores da app
+    public function guardarPaleta(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $user->alterarPaleta((int) ($_POST['paleta'] ?? 0));
+            $this->responder(true, 'Cores guardadas.');
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível guardar as cores.');
+        }
+    }
+
     // POST: apaga a conta e tudo o que lhe pertence (pede a palavra-passe) e termina a sessão
     public function apagarConta(): void
     {

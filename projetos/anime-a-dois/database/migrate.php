@@ -49,6 +49,7 @@ $colunas = [
     ['users', 'novidades_vistas',  'SMALLINT UNSIGNED NOT NULL DEFAULT 0'],
     ['users', 'par_id',            'INT UNSIGNED NULL'],
     ['bibliotecas', 'com_id',      'INT UNSIGNED NULL'],
+    ['users', 'paleta',            'TINYINT UNSIGNED NOT NULL DEFAULT 0'],
     ['users', 'admin',             'TINYINT(1) NOT NULL DEFAULT 0'],
     ['users', 'ultimo_acesso',     'DATETIME NULL'],
 ];

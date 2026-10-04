@@ -14,6 +14,16 @@ class User extends Model
     // Nunca expor o hash se o Model for convertido em array/JSON
     protected $hidden = ['password_hash'];
 
+    // Paletas de cores (índice = users.paleta; 0 = a original). As cores em si estão em public/css/app.css ([data-paleta]).
+    public const PALETAS = [
+        0 => 'Sálvia e alperce',
+        1 => 'Azul e rosa',
+        2 => 'Roxo e amarelo',
+        3 => 'Turquesa e coral',
+        4 => 'Rosa e verde',
+        5 => 'Azul e laranja',
+    ];
+
     // Episódios que este utilizador marcou como vistos (tabela vistos)
     public function vistos()
     {
@@ -141,6 +151,16 @@ class User extends Model
         if ($this->ultimo_acesso === null || strtotime($this->ultimo_acesso) < time() - 300) {
             static::where('id', $this->id)->update(['ultimo_acesso' => date('Y-m-d H:i:s')]);
         }
+    }
+
+    // Escolhe as cores da app (só vale para quem escolhe)
+    public function alterarPaleta(int $paleta): void
+    {
+        if (!array_key_exists($paleta, self::PALETAS)) {
+            throw new InvalidArgumentException('Essa paleta não existe.');
+        }
+        $this->paleta = $paleta;
+        $this->save();
     }
 
     public function ehAdmin(): bool

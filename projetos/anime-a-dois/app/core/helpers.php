@@ -11,6 +11,21 @@ if (!function_exists('e')) {
 }
 
 // URL interno no formato do mini-MVC: index.php?c=controller&a=acao&...
+// Paleta de cores da pessoa com sessão (0 = original); usada no <html data-paleta> para as cores aparecerem sem piscar
+function paleta_atual(): int
+{
+    static $paleta = null;
+    if ($paleta === null) {
+        $id = $_SESSION['user_id'] ?? null;
+        try {
+            $paleta = $id === null ? 0 : (int) User::where('id', $id)->value('paleta');
+        } catch (Throwable $e) {
+            $paleta = 0;   // base de dados ainda sem a coluna (antes do migrate): cores originais
+        }
+    }
+    return $paleta;
+}
+
 function url(string $c, string $a = 'index', array $params = []): string
 {
     return 'index.php?' . http_build_query(['c' => $c, 'a' => $a] + $params);

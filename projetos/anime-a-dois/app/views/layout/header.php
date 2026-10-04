@@ -1,6 +1,6 @@
 <?php /* Cabeçalho comum. Variáveis: $titulo, $appNome, $flash e, opcionais, $serieSlug e $serieAcento (cor da série) */ ?>
 <!DOCTYPE html>
-<html lang="pt" data-tema="claro">
+<html lang="pt" data-tema="claro" data-paleta="<?= paleta_atual() ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">

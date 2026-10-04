@@ -1035,3 +1035,8 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function () { /* sem SW a app funciona na mesma */ });
   });
 }
+
+// ---------- Cores: tocar numa amostra do perfil mostra logo a paleta (só grava com "Guardar cores") ----------
+document.querySelectorAll('#form-paleta input[name="paleta"]').forEach(function (r) {
+  r.addEventListener('change', function () { document.documentElement.setAttribute('data-paleta', r.value); });
+});

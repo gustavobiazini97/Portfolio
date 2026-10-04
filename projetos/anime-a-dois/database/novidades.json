@@ -123,6 +123,14 @@
       "itens": [
         "No Perfil, em \"Apagar conta\", podes eliminar a tua conta de vez: pede a palavra-passe e apaga tudo da base de dados (progresso, comentários, foto e ligações)."
       ]
+    },
+    {
+      "id": 15,
+      "data": "2026-10-04",
+      "titulo": "Escolhe as tuas cores",
+      "itens": [
+        "No Perfil, em \"Cores\", escolhes entre 6 paletas para \"tu\" e para quem vê contigo. Só mudam para ti e ficam guardadas na conta, por isso seguem-te entre telemóveis."
+      ]
     }
   ]
 }

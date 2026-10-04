@@ -880,3 +880,30 @@ button.pessoa-serie { display: flex; }
 .convite-caixa { margin: 28px 0 24px; }
 .convite-titulo { font-size: 17px; font-weight: 700; }
 html { scroll-behavior: smooth; }
+
+/* ---------- Paletas de cores (cada pessoa escolhe a sua; ver User::PALETAS) ----------
+   [data-paleta] está no <html> e nas amostras do perfil, por isso o mesmo bloco serve as duas. */
+[data-paleta="0"] { --tu: #B9D3B0; --par: #F5C89A; --tu-txt: #4E7A43; --par-txt: #A0581C; --orbe-tu: rgba(185, 211, 176, .55); --orbe-par: rgba(245, 200, 154, .55); }
+[data-paleta="1"] { --tu: #A9C4EE; --par: #F4B6CF; --tu-txt: #2F5C9E; --par-txt: #A63D6E; --orbe-tu: rgba(169, 196, 238, .55); --orbe-par: rgba(244, 182, 207, .55); }
+[data-paleta="2"] { --tu: #C9B6F2; --par: #F2D98C; --tu-txt: #5B3FA0; --par-txt: #8A6A0A; --orbe-tu: rgba(201, 182, 242, .55); --orbe-par: rgba(242, 217, 140, .55); }
+[data-paleta="3"] { --tu: #9FD8D2; --par: #F5A9A0; --tu-txt: #1F7A72; --par-txt: #B24238; --orbe-tu: rgba(159, 216, 210, .55); --orbe-par: rgba(245, 169, 160, .55); }
+[data-paleta="4"] { --tu: #F4B6CF; --par: #C7DFA0; --tu-txt: #A63D6E; --par-txt: #4E7A43; --orbe-tu: rgba(244, 182, 207, .55); --orbe-par: rgba(199, 223, 160, .55); }
+[data-paleta="5"] { --tu: #A7D3F2; --par: #F3B58F; --tu-txt: #2A6B9E; --par-txt: #A0581C; --orbe-tu: rgba(167, 211, 242, .55); --orbe-par: rgba(243, 181, 143, .55); }
+[data-tema="escuro"][data-paleta="0"], [data-tema="escuro"] [data-paleta="0"] { --tu-txt: #CDE0C6; --par-txt: #F8D7B4; --orbe-tu: rgba(185, 211, 176, .22); --orbe-par: rgba(245, 200, 154, .22); }
+[data-tema="escuro"][data-paleta="1"], [data-tema="escuro"] [data-paleta="1"] { --tu-txt: #C6D8F5; --par-txt: #F8CDE0; --orbe-tu: rgba(169, 196, 238, .22); --orbe-par: rgba(244, 182, 207, .22); }
+[data-tema="escuro"][data-paleta="2"], [data-tema="escuro"] [data-paleta="2"] { --tu-txt: #DCD0F7; --par-txt: #F6E4A8; --orbe-tu: rgba(201, 182, 242, .22); --orbe-par: rgba(242, 217, 140, .22); }
+[data-tema="escuro"][data-paleta="3"], [data-tema="escuro"] [data-paleta="3"] { --tu-txt: #BFE8E3; --par-txt: #F8C6C0; --orbe-tu: rgba(159, 216, 210, .22); --orbe-par: rgba(245, 169, 160, .22); }
+[data-tema="escuro"][data-paleta="4"], [data-tema="escuro"] [data-paleta="4"] { --tu-txt: #F8CDE0; --par-txt: #DCEBC0; --orbe-tu: rgba(244, 182, 207, .22); --orbe-par: rgba(199, 223, 160, .22); }
+[data-tema="escuro"][data-paleta="5"], [data-tema="escuro"] [data-paleta="5"] { --tu-txt: #C4E2F7; --par-txt: #F8D0B4; --orbe-tu: rgba(167, 211, 242, .22); --orbe-par: rgba(243, 181, 143, .22); }
+
+/* Escolha de cores no perfil: amostra de dois círculos + nome; o círculo escolhido leva aro */
+.paletas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.paleta { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-align: center; }
+.paleta input { position: absolute; opacity: 0; pointer-events: none; }
+.paleta small { font-size: 11.5px; color: var(--suave); }
+.amostra { display: flex; padding: 6px; border-radius: 999px; border: 2px solid var(--linha); transition: border-color .2s; }
+.amostra i { width: 26px; height: 26px; border-radius: 50%; }
+.amostra i:first-child { background: var(--tu); }
+.amostra i:last-child { background: var(--par); margin-left: -8px; }
+.paleta input:checked + .amostra { border-color: var(--tu-txt); }
+.paleta input:focus-visible + .amostra { outline: 2px solid var(--tu-txt); outline-offset: 2px; }
