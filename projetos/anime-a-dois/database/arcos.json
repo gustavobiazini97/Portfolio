@@ -1,0 +1,29 @@
+{
+ "_fonte": "Arcos canónicos (nomes oficiais em inglês). Os intervalos entre arcos são preenchidos pela app com os dados de filler (Serie::arcos). Boruto sem dados fiáveis: a secção não aparece.",
+ "naruto": [
+  {"nome": "Land of Waves", "de": 1, "ate": 19},
+  {"nome": "Chūnin Exams", "de": 20, "ate": 67},
+  {"nome": "Konoha Crush", "de": 68, "ate": 80},
+  {"nome": "Search for Tsunade", "de": 81, "ate": 100},
+  {"nome": "Sasuke Recovery Mission", "de": 107, "ate": 135}
+ ],
+ "shippuden": [
+  {"nome": "Kazekage Rescue Mission", "de": 1, "ate": 32},
+  {"nome": "Tenchi Bridge Reconnaissance", "de": 33, "ate": 56},
+  {"nome": "Akatsuki Suppression Mission", "de": 72, "ate": 89},
+  {"nome": "Itachi Pursuit Mission", "de": 113, "ate": 126},
+  {"nome": "Tale of Jiraiya the Gallant", "de": 127, "ate": 133},
+  {"nome": "Fated Battle Between Brothers", "de": 134, "ate": 143},
+  {"nome": "Pain's Assault", "de": 152, "ate": 175},
+  {"nome": "Five Kage Summit", "de": 197, "ate": 214},
+  {"nome": "Fourth Shinobi World War: Countdown", "de": 215, "ate": 256},
+  {"nome": "Fourth Shinobi World War: Confrontation", "de": 261, "ate": 302},
+  {"nome": "Fourth Shinobi World War: Climax", "de": 321, "ate": 375},
+  {"nome": "Birth of the Ten-Tails' Jinchūriki", "de": 378, "ate": 431},
+  {"nome": "Itachi Shinden: Light and Darkness", "de": 451, "ate": 458},
+  {"nome": "Kaguya Ōtsutsuki Strikes", "de": 459, "ate": 479},
+  {"nome": "Sasuke Shinden: Book of Sunrise", "de": 484, "ate": 488},
+  {"nome": "Shikamaru Hiden", "de": 489, "ate": 493},
+  {"nome": "Konoha Hiden: The Perfect Day for a Wedding", "de": 494, "ate": 500}
+ ]
+}

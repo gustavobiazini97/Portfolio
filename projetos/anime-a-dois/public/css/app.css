@@ -539,3 +539,63 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 @media (prefers-reduced-motion: reduce) {
   *, .pista { transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- Estatísticas ---------- */
+
+/* Grelha de dois cartões (pessoas e curiosidades) */
+.est-pessoas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.est-pessoa { border-radius: 22px; padding: 14px 16px; min-width: 0; }
+.est-quem { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; min-width: 0; }
+.est-quem span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* nomes longos não partem o cartão */
+.avatar-mini { width: 24px; height: 24px; font-size: 11px; flex-shrink: 0; }
+.est-numero { margin-top: 10px; font-size: 30px; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+.est-tu  .est-numero { color: var(--tu-txt); }
+.est-par .est-numero { color: var(--par-txt); }
+.est-legenda { margin-top: 3px; font-size: 12px; color: var(--suave); }
+.est-bloco { padding: 14px 16px; }
+.est-nota { margin-top: 10px; font-size: 12.5px; color: var(--suave); }
+
+/* Ritmo: 6 colunas, duas barras por coluna, alinhadas em baixo */
+.ritmo { margin-top: 12px; height: 92px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.ritmo-semana { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.ritmo-barras { flex: 1; display: flex; gap: 3px; align-items: flex-end; }
+.ritmo-barra { flex: 1; min-height: 2px; border-radius: 4px 4px 2px 2px; }
+.ritmo-tu  { background: var(--tu); }
+.ritmo-par { background: var(--par); }
+.ritmo-rotulo { font-size: 10.5px; color: var(--suave); text-align: center; line-height: 1.2; }
+/* Alturas das barras em degraus de 10% (nivel-0 fica com o mínimo de 2px) */
+.nivel-0 { height: 0; }   .nivel-1 { height: 10%; } .nivel-2 { height: 20%; } .nivel-3 { height: 30%; }
+.nivel-4 { height: 40%; } .nivel-5 { height: 50%; } .nivel-6 { height: 60%; } .nivel-7 { height: 70%; }
+.nivel-8 { height: 80%; } .nivel-9 { height: 90%; } .nivel-10 { height: 100%; }
+
+/* Legenda com pontos coloridos */
+.legenda-pontos { display: inline-flex; gap: 10px; font-size: 11.5px; }
+.legenda-pontos > span { display: inline-flex; align-items: center; gap: 4px; max-width: 90px; overflow: hidden; white-space: nowrap; }
+.ponto { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ponto-tu  { background: var(--tu); }
+.ponto-par { background: var(--par); }
+
+/* Arcos: nome + episódios | duas barras | selo */
+.arcos { list-style: none; margin-top: 6px; }
+.arco { display: grid; grid-template-columns: minmax(0, 1fr) 96px 22px; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--linha); }
+.arco-texto { min-width: 0; }
+.arco-nome { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arco-filler .arco-nome { color: var(--suave); }   /* intervalos de filler mais apagados */
+.arco-eps { display: block; font-size: 11.5px; color: var(--suave); }
+.arco-barras { display: flex; flex-direction: column; gap: 4px; }
+.barra-fina { height: 5px; }
+.vs-tu-cor::-webkit-progress-value  { background: var(--tu); }
+.vs-par-cor::-webkit-progress-value { background: var(--par); }
+.vs-tu-cor::-moz-progress-bar  { background: var(--tu); border-radius: 6px; }
+.vs-par-cor::-moz-progress-bar { background: var(--par); border-radius: 6px; }
+
+/* Selo do arco: ✓ os dois, ½ na cor de quem acabou, vazio se ninguém */
+.selo { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: var(--no-pastel); }
+.selo-nada    { background: var(--trilho); }
+.selo-tu      { background: var(--tu); }
+.selo-par     { background: var(--par); }
+.selo-os-dois { background: linear-gradient(135deg, var(--tu), var(--par)); }
+
+/* Curiosidades */
+.est-curio { border-radius: 20px; padding: 12px 14px; }
+.est-curio-num { font-size: 22px; font-weight: 700; }

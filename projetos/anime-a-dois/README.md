@@ -18,6 +18,7 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Perfil: foto (guardada na base de dados), nome, utilizador, palavra-passe, terminar sessão
 - [x] Comentários por episódio (os dois veem; cada um apaga os seus)
 - [x] Notificações ao par (episódios e comentários) por telemóvel (Web Push) e/ou email, escolhidas no perfil
+- [x] Estatísticas por série: números dos dois, ritmo semanal com previsão, arcos (`database/arcos.json`) e curiosidades
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
 
 ## Online (alwaysdata)
@@ -60,8 +61,8 @@ A primeira pessoa a abrir cria a conta 1, e a segunda cria a conta 2. A partir d
 app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
-  controllers/      AuthController, HomeController, SerieController, PerfilController
-  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador (a lógica vive aqui)
+  controllers/      AuthController, HomeController, SerieController, PerfilController, EstatisticasController
+  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php

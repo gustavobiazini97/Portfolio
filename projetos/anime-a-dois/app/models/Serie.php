@@ -35,6 +35,46 @@ class Serie extends Model
         return $this->slug === 'shippuden' ? 'Shippuden' : $this->nome;
     }
 
+    // Arcos da série, de 1 ao último episódio, sem buracos: os canónicos vêm de database/arcos.json
+    // e os intervalos entre eles viram "Filler" (se a maioria for filler) ou "Episódios avulsos".
+    // Devolve [] se a série não tiver arcos no ficheiro (ex.: Boruto).
+    public function arcos(): array
+    {
+        static $todos = null;
+        $todos ??= json_decode((string) @file_get_contents(__DIR__ . '/../../database/arcos.json'), true) ?: [];
+        $canon = $todos[$this->slug] ?? [];
+        if ($canon === []) {
+            return [];
+        }
+        usort($canon, fn ($a, $b) => $a['de'] <=> $b['de']);
+
+        // Números dos episódios filler desta série, para classificar os intervalos
+        $fillers = array_flip($this->episodios()->where('filler', 1)->pluck('numero')->map(fn ($n) => (int) $n)->all());
+        $intervalo = function (int $de, int $ate) use ($fillers): array {
+            $n = $ate - $de + 1;
+            $f = 0;
+            for ($i = $de; $i <= $ate; $i++) {
+                $f += isset($fillers[$i]) ? 1 : 0;
+            }
+            $quaseTodos = $f * 2 > $n;
+            return ['nome' => $quaseTodos ? 'Filler' : 'Episódios avulsos', 'de' => $de, 'ate' => $ate, 'filler' => $quaseTodos];
+        };
+
+        $arcos = [];
+        $seguinte = 1;
+        foreach ($canon as $a) {
+            if ($a['de'] > $seguinte) {
+                $arcos[] = $intervalo($seguinte, $a['de'] - 1);
+            }
+            $arcos[] = ['nome' => $a['nome'], 'de' => (int) $a['de'], 'ate' => (int) $a['ate'], 'filler' => false];
+            $seguinte = (int) $a['ate'] + 1;
+        }
+        if ($seguinte <= $this->total_episodios) {
+            $arcos[] = $intervalo($seguinte, (int) $this->total_episodios);
+        }
+        return $arcos;
+    }
+
     // Quantos episódios filler a série tem
     public function totalFillers(): int
     {

@@ -21,6 +21,7 @@ $_SESSION['_csrf'] ??= bin2hex(random_bytes(32));
 $rotas = [
     'auth'  => ['login', 'entrar', 'registo', 'registar', 'sair'],
     'home'  => ['index'],
+    'estatisticas' => ['index'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],
     'perfil' => ['index', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword',
                  'guardarNotificacoes', 'subscrever', 'desubscrever', 'testarNotificacao'],

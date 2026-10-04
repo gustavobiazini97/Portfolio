@@ -9,6 +9,10 @@ $comecou = $meu['vistos'] > 0 || $dele['vistos'] > 0;
     anime a dois
   </a>
   <div class="topo-acoes">
+    <!-- Estatísticas da série aberta -->
+    <a class="btn-redondo vidro" href="<?= e(url('estatisticas', 'index', ['serie' => $serie->slug])) ?>" aria-label="Ver estatísticas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-5"/></svg>
+    </a>
     <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
     <!-- O teu avatar abre o perfil (foto, nome, palavra-passe, sair) -->
     <a class="avatar-link" href="<?= e(url('perfil')) ?>" aria-label="Abrir o teu perfil">
