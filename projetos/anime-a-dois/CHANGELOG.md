@@ -85,10 +85,15 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Cada um tem a sua biblioteca e o seu estado em cada série (a ver, em pausa, acabado).
 - Série **conjunta** = está nas duas bibliotecas; só passa a conjunta por convite aceite. Capas das conjuntas têm os dois avatares.
 - Ao adicionar: "Só para mim" ou "Quero ver com…" (fica na tua + convite). Numa série só tua, "Ver com…" envia o convite.
-- Fila "A … está a ver" com as séries só do par (só para espreitar; não abrem).
+- Fila "A … está a ver" com as séries só do par: tocar abre uma folha com o progresso dele e "Adicionar à minha biblioteca" (passa a conjunta e o par é avisado).
 - Tirar da biblioteca: só da tua e só se ainda não marcaste episódios dela; a do par fica igual.
 - Notificações de episódios e comentários só nas séries conjuntas; séries só tuas não avisam o par.
 - O `migrate.php` criou as bibliotecas a partir das séries antigas (as do seed para os dois, as adicionadas só para quem as adicionou).
+
+**Perfil do par e atualizações**
+- Tocar na foto do par (Início) abre o perfil dele: último episódio visto e a biblioteca (`?c=perfil&a=pessoa&id=`; só o par).
+- Perfil → "Atualizações": mostra a versão (id da última novidade) e o botão "Procurar atualizações" (apaga as caches e recarrega).
+- Service worker v8: CSS/JS com rede primeiro (a app atualiza ao abrir; offline usa a cache).
 
 **Quero ver contigo**
 - Convites recebidos ("Bora ver" / "Agora não") e enviados ("à espera de…" / "Cancelar").
@@ -178,6 +183,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Popup "O que há de novo" |
 | 04/10 | AniList + Kitsu no lugar do Jikan (em baixo); fillers chegam quando o Jikan voltar |
 | 04/10 | Bibliotecas individuais, séries conjuntas por convite |
+| 04/10 | Perfil do par, adicionar séries da fila do par, botão de atualizações |
 
 ---
 

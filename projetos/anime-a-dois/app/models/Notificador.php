@@ -80,11 +80,12 @@ class Notificador
         ]);
     }
 
-    // Séries: $evento = 'convite' (Quero ver contigo) ou 'aceite' (o convite foi aceite)
+    // Séries: $evento = 'convite' (Quero ver contigo), 'aceite' (o convite foi aceite) ou 'juntou' (juntou-se a uma série do par)
     public static function serie(User $autor, Serie $serie, string $evento): void
     {
         $episodios = plural((int) $serie->total_episodios, 'episódio', 'episódios');
         [$titulo, $corpo, $url] = match ($evento) {
+            'juntou' => [$autor->nome . ' juntou-se a ti em ' . $serie->nome, 'Agora é dos dois', url('home', 'index', ['serie' => $serie->slug])],
             'aceite' => [$autor->nome . ' aceitou ver ' . $serie->nome . ' contigo', 'Agora é dos dois', url('home', 'index', ['serie' => $serie->slug])],
             default  => [$autor->nome . ' quer ver ' . $serie->nome . ' contigo', $episodios . ' · abre a app para aceitar', url('home') . '#convites'],
         };

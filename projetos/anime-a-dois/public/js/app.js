@@ -829,7 +829,7 @@ function enviarAoServidor(url, campos, ms) {
       if (ja) {
         var aviso = document.createElement('span'); aviso.className = 'resultado-ja';
         aviso.textContent = ja === 'convite' ? 'Tens um convite para esta: aceita-o no Início'
-          : ja === 'par' ? 'Está na biblioteca de ' + nomePar + ': pede-lhe para te convidar'
+          : ja === 'par' ? 'Está na fila de ' + nomePar + ' no Início: toca nela para adicionar'
           : '✓ Já está na tua biblioteca';
         acoes.appendChild(aviso);
       } else {
@@ -971,6 +971,44 @@ function enviarAoServidor(url, campos, ms) {
 
   // Um bocadinho depois de a página aparecer, para não abrir "aos saltos"
   setTimeout(function () { folha.showModal(); }, 400);
+})();
+
+// ---------- Folhas simples: [data-abrir="id"] abre o <dialog>; [data-fechar] ou tocar fora fecha ----------
+(function () {
+  document.querySelectorAll('[data-abrir]').forEach(function (b) {
+    var d = document.getElementById(b.dataset.abrir);
+    if (!d || !d.showModal) return;
+    b.addEventListener('click', function () { d.showModal(); });
+    d.addEventListener('click', function (ev) { if (ev.target === d) d.close(); });
+    d.querySelectorAll('[data-fechar]').forEach(function (f) { f.addEventListener('click', function () { d.close(); }); });
+  });
+})();
+
+// ---------- Perfil: procurar atualizações ----------
+// As páginas vêm sempre do servidor; o que pode ficar velho são o CSS/JS em cache. O botão pede ao
+// service worker que procure uma versão nova, apaga as caches e recarrega; depois confirma.
+(function () {
+  var btn = document.getElementById('btn-atualizar');
+  var estado = document.getElementById('atualizacao-estado');
+  if (!btn || !estado) return;
+
+  // Depois do recarregamento: confirma
+  try {
+    if (sessionStorage.getItem('ad-atualizado')) {
+      sessionStorage.removeItem('ad-atualizado');
+      estado.textContent = 'Tudo atualizado ✓ Estás na versão mais recente.';
+    }
+  } catch (e) { /* sem sessionStorage: sem confirmação */ }
+
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+    estado.textContent = 'A procurar…';
+    var sw = 'serviceWorker' in navigator ? navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update(); }) : Promise.resolve();
+    var limpar = 'caches' in window ? caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }) : Promise.resolve();
+    Promise.all([sw, limpar])
+      .then(function () { try { sessionStorage.setItem('ad-atualizado', '1'); } catch (e) { /* ignora */ } location.reload(); })
+      .catch(function () { estado.textContent = 'Não foi possível procurar agora. Verifica a ligação.'; btn.disabled = false; });
+  });
 })();
 
 // ---------- App instalável: regista o service worker ----------

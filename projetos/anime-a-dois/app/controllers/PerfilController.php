@@ -11,9 +11,36 @@ class PerfilController extends Controller
         $this->render('perfil/index', [
             'titulo'      => 'Perfil',
             'user'        => $user,
+            'versao'      => Novidade::ultima(),   // "nível de atualização" mostrado no botão de procurar atualizações
             'pref'        => Preferencia::de($user),
             'vapidPublica' => Notificador::vapid()['publicKey'],   // o browser precisa dela para subscrever
             'telemoveis'  => Subscricao::where('user_id', $user->id)->count(),
+        ]);
+    }
+
+    // GET ?id=<user>: perfil do teu par (foto, último episódio e as séries dele). Só o teu e o do teu par.
+    public function pessoa(): void
+    {
+        $user = $this->exigirLogin();
+        $par  = $user->parceiro();
+        $id   = (int) ($_GET['id'] ?? 0);
+
+        // O teu próprio perfil é a página de definições
+        if ($id === $user->id) {
+            $this->redirect('perfil');
+        }
+        // Null guard: só se vê o perfil do par
+        if ($par === null || $par->id !== $id) {
+            http_response_code(404);
+            exit('Página não encontrada.');
+        }
+
+        $this->render('perfil/pessoa', [
+            'titulo'     => $par->nome,
+            'user'       => $user,
+            'pessoa'     => $par,
+            'ultimo'     => $par->ultimoVisto(),
+            'biblioteca' => Serie::biblioteca($par, $user),   // a dele; 'par' = a tua % nas conjuntas
         ]);
     }
 

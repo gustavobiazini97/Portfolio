@@ -120,6 +120,13 @@
   </form>
 </details>
 
+<!-- Atualizações: a app atualiza sozinha; o botão força a procura e recarrega com os ficheiros mais recentes -->
+<section class="form vidro atualizacao" id="atualizacao">
+  <div class="painel-titulo"><h2>Atualizações</h2><span>versão <?= (int) $versao ?></span></div>
+  <p class="atualizacao-texto" id="atualizacao-estado">A app atualiza sozinha ao abrir. Se algo parecer desatualizado, toca aqui.</p>
+  <button type="button" class="btn-texto vidro" id="btn-atualizar">Procurar atualizações</button>
+</section>
+
 <form class="acao-fundo" method="post" action="<?= e(url('auth', 'sair')) ?>">
   <?= csrf_campo() ?>
   <button type="submit" class="btn">Terminar sessão</button>

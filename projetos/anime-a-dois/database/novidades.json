@@ -75,6 +75,16 @@
         "Por baixo aparece o que o teu par está a ver sozinho, para espreitares.",
         "Notificações só das séries dos dois."
       ]
+    },
+    {
+      "id": 9,
+      "data": "2026-10-04",
+      "titulo": "Perfil do par e séries dele",
+      "itens": [
+        "Toca na foto do teu par no Início para ver o perfil: último episódio visto e a biblioteca dele.",
+        "Toca numa série da fila \"está a ver\" para a adicionar à tua biblioteca; passa a ser dos dois e ele é avisado.",
+        "No teu perfil há um botão \"Procurar atualizações\". A app também atualiza sozinha ao abrir."
+      ]
     }
   ]
 }

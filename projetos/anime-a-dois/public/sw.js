@@ -3,7 +3,7 @@
 // porque têm dados pessoais e tokens de sessão; sem rede mostra-se a página offline.html.
 
 // Mudar a versão força a atualização da cache nas apps instaladas
-const CACHE = 'anime-a-dois-v7';
+const CACHE = 'anime-a-dois-v8';
 
 const ESTATICOS = [
   './css/app.css',
@@ -42,7 +42,21 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Estáticos do próprio site e fontes do Google: cache primeiro, atualizada em segundo plano
+  // CSS/JS/ícones do próprio site: rede primeiro (assim a app atualiza logo ao abrir);
+  // sem ligação, serve o que está guardado
+  if (url.origin === self.location.origin && /\.(css|js|png|json|html)$/.test(url.pathname)) {
+    e.respondWith(
+      fetch(pedido)
+        .then((r) => {
+          if (r.ok) caches.open(CACHE).then((c) => c.put(pedido, r.clone()));
+          return r;
+        })
+        .catch(() => caches.match(pedido))
+    );
+    return;
+  }
+
+  // Fontes do Google: cache primeiro, atualizada em segundo plano
   const fonte = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   const estatico = url.origin === self.location.origin && /\.(css|js|png|json|html)$/.test(url.pathname);
   if (!fonte && !estatico) return;

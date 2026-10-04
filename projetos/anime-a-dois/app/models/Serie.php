@@ -409,6 +409,20 @@ class Serie extends Model
         $this->juntarA($par, self::CONVITE);
     }
 
+    // Juntas-te a uma série que o teu par já tem (tocaste nela na fila "A <par> está a ver"):
+    // entra na tua biblioteca em "a ver" e passa a ser dos dois. O teu progresso começa do zero.
+    public function juntarSe(User $u): void
+    {
+        if ($this->naBibliotecaDe($u)) {
+            throw new InvalidArgumentException($this->nomeCurto() . ' já está na tua biblioteca.');
+        }
+        $par = $u->parceiro();
+        if ($par === null || !$this->naBibliotecaDe($par)) {
+            throw new InvalidArgumentException($this->nomeCurto() . ' não está na biblioteca do teu par.');
+        }
+        $this->juntarA($u, 'a_ver');
+    }
+
     // Aceitas o convite: a série entra na tua biblioteca, em "a ver" (passa a conjunta)
     public function aceitar(User $quem): void
     {

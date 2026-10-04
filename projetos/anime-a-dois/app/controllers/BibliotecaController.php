@@ -101,6 +101,22 @@ class BibliotecaController extends Controller
         }
     }
 
+    // POST: juntas-te a uma série do teu par (fila "A <par> está a ver"): entra na tua biblioteca e o par é avisado
+    public function juntar(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+        $serie = $this->serieDoPost();
+
+        try {
+            $serie->juntarSe($user);
+            Notificador::serie($user, $serie, 'juntou');
+            $this->responder(true, $serie->nomeCurto() . ' entrou na tua biblioteca e agora é dos dois.', url('home', 'index', ['serie' => $serie->slug]));
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        }
+    }
+
     // POST: aceitas o convite → a série entra na tua biblioteca e passa a ser dos dois
     public function aceitar(): void
     {

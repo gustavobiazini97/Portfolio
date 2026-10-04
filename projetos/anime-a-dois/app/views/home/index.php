@@ -50,14 +50,20 @@ $selo = fn (array $item) => match ($item['estado']) {
   <!-- Último episódio que o par viu (em qualquer série). Se a série também está na tua biblioteca,
        o cartão abre-a nesse episódio; se é só dele, é só para espreitar. -->
   <?php $abre = $ultimoPar->serie->naBibliotecaDe($user); ?>
-  <<?= $abre ? 'a' : 'div' ?> class="painel vidro ultimo<?= $abre ? ' painel-link' : '' ?>"<?= $abre ? ' href="' . e(url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero])) . '"' : '' ?>>
-    <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = ''; require __DIR__ . '/../layout/avatar.php'; ?>
-    <div class="ultimo-texto">
-      <p><?= e($parceiro->nome . ' viu ' . tempo_relativo($ultimoPar->pivot->visto_em)) ?></p>
-      <p><?= e($ultimoPar->serie->nomeCurto() . ' · episódio ' . $ultimoPar->numero) ?></p>
-    </div>
-    <span class="ultimo-num"><?= $ultimoPar->numero ?></span>
-  </<?= $abre ? 'a' : 'div' ?>>
+  <div class="painel vidro ultimo<?= $abre ? ' painel-link' : '' ?>">
+    <!-- A foto abre o perfil do par -->
+    <a class="avatar-link" href="<?= e(url('perfil', 'pessoa', ['id' => $parceiro->id])) ?>" aria-label="Ver o perfil de <?= e($parceiro->nome) ?>">
+      <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = ''; require __DIR__ . '/../layout/avatar.php'; ?>
+    </a>
+    <!-- O resto do cartão abre o episódio (se a série for tua); display: contents mantém o layout -->
+    <<?= $abre ? 'a' : 'div' ?> class="ultimo-link"<?= $abre ? ' href="' . e(url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero])) . '"' : '' ?>>
+      <div class="ultimo-texto">
+        <p><?= e($parceiro->nome . ' viu ' . tempo_relativo($ultimoPar->pivot->visto_em)) ?></p>
+        <p><?= e($ultimoPar->serie->nomeCurto() . ' · episódio ' . $ultimoPar->numero) ?></p>
+      </div>
+      <span class="ultimo-num"><?= $ultimoPar->numero ?></span>
+    </<?= $abre ? 'a' : 'div' ?>>
+  </div>
 <?php elseif ($parceiro): ?>
   <section class="painel vidro vazio">
     <p><?= e($parceiro->nome) ?> ainda não marcou nenhum episódio</p>
@@ -252,14 +258,14 @@ $selo = fn (array $item) => match ($item['estado']) {
 <?php endif; ?>
 
 <?php if ($doPar !== []): ?>
-  <!-- A <par> está a ver: as séries só dele, para espreitar o progresso (não abrem) -->
+  <!-- A <par> está a ver: as séries só dele. Tocar abre uma folha com o progresso e o botão de adicionar à tua biblioteca -->
   <section class="biblioteca biblioteca-par" aria-labelledby="par-titulo">
     <div class="secao-cima">
       <h2 id="par-titulo"><?= e($nomePar) ?> está a ver</h2>
     </div>
     <div class="fila fila-par">
       <?php foreach ($doPar as $item): $s = $item['serie']; ?>
-        <div class="capa-item capa-<?= e($item['estado']) ?>" data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>">
+        <button type="button" class="capa-item capa-<?= e($item['estado']) ?>" data-abrir="par-<?= e($s->slug) ?>" data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>">
           <span class="capa-moldura">
             <?= $capa($s, 'capa') ?>
             <?php if ($selo($item) !== ''): ?>
@@ -270,10 +276,36 @@ $selo = fn (array $item) => match ($item['estado']) {
           <span class="capa-barras">
             <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['tu'] ?>" aria-label="<?= e($nomePar) ?>: <?= $item['tu'] ?>%"></progress>
           </span>
-        </div>
+        </button>
       <?php endforeach; ?>
     </div>
   </section>
+
+  <?php foreach ($doPar as $item): $s = $item['serie']; $prog = $s->progressoDe($parceiro); ?>
+    <!-- Folha da série do par: o que ele já viu + adicionar à tua biblioteca (passa a ser dos dois e ele é avisado) -->
+    <dialog class="folha vidro folha-par" id="par-<?= e($s->slug) ?>" aria-label="<?= e($s->nomeCurto()) ?>">
+      <div class="folha-cima">
+        <h2><?= e($s->nomeCurto()) ?></h2>
+        <button type="button" class="btn-redondo vidro" data-fechar aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="par-detalhe">
+        <span class="capa-moldura par-detalhe-capa"><?= $capa($s, 'capa') ?></span>
+        <div class="par-detalhe-texto">
+          <p class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= e(plural((int) $s->total_episodios, 'episódio', 'episódios')) ?></p>
+          <p><?= e($nomePar) ?>: <?= $prog['vistos'] > 0 ? 'vai no episódio ' . $prog['posicao'] . ' (' . $prog['pct'] . '%)' : 'ainda não começou' ?></p>
+          <progress class="barra vs-par-cor" max="100" value="<?= $prog['pct'] ?>" aria-label="<?= e($nomePar) ?>: <?= $prog['pct'] ?>%"></progress>
+        </div>
+      </div>
+      <form method="post" action="<?= e(url('biblioteca', 'juntar')) ?>">
+        <?= csrf_campo() ?>
+        <input type="hidden" name="serie" value="<?= e($s->slug) ?>">
+        <button type="submit" class="btn">Adicionar à minha biblioteca</button>
+      </form>
+      <p class="pessoa-legenda par-nota">Passa a ser dos dois e <?= e($nomePar) ?> recebe um aviso. O teu progresso começa do zero.</p>
+    </dialog>
+  <?php endforeach; ?>
 <?php endif; ?>
 
 <!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).

@@ -23,8 +23,8 @@ $rotas = [
     'home'  => ['index', 'novidadesVistas'],
     'estatisticas' => ['index'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],
-    'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'aceitar', 'recusar', 'remover'],
-    'perfil' => ['index', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword',
+    'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'juntar', 'aceitar', 'recusar', 'remover'],
+    'perfil' => ['index', 'pessoa', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword',
                  'guardarNotificacoes', 'subscrever', 'desubscrever', 'testarNotificacao'],
 ];
 
