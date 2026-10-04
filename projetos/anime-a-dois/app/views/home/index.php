@@ -4,7 +4,7 @@
               $biblioteca (a tua: ['serie','estado','conjunta','tu','par']), $doPar (só do par, mesmo formato),
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
               $meuEstado, $conjunta, $estadoPar, $ultimoPar (Episodio ou null), $meu, $dele, $resumo,
-              $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $flash */
+              $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar, $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);   // $dele já vem a zeros se a série for só tua
 $nomePar = $parceiro ? $parceiro->nome : null;
 
@@ -36,6 +36,11 @@ $selo = fn (array $item) => match ($item['estado']) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-5"/></svg>
       </a>
     <?php endif; ?>
+    <!-- Amigos (bolinha se há pedidos por responder) -->
+    <a class="btn-redondo vidro" href="<?= e(url('amigos')) ?>" aria-label="Amigos<?= $pedidosAmigos ? ' (' . $pedidosAmigos . ' pedidos)' : '' ?>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.4-3 2.6-4.7 5.5-4.7s5.1 1.7 5.5 4.7"/><path d="M16 5.3a3 3 0 0 1 0 5.4M17.5 14.6c1.8.5 2.8 2 3 4.4"/></svg>
+      <?php if ($pedidosAmigos): ?><span class="ponto-aviso" aria-hidden="true"></span><?php endif; ?>
+    </a>
     <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
     <!-- O teu avatar abre o perfil (foto, nome, palavra-passe, sair) -->
     <a class="avatar-link" href="<?= e(url('perfil')) ?>" aria-label="Abrir o teu perfil">
@@ -68,6 +73,12 @@ $selo = fn (array $item) => match ($item['estado']) {
   <section class="painel vidro vazio">
     <p><?= e($parceiro->nome) ?> ainda não marcou nenhum episódio</p>
     <p>O último que marcar aparece aqui.</p>
+  </section>
+<?php elseif (!$esperaPar): ?>
+  <!-- Conta de amigo: não tem par; os amigos estão na página Amigos -->
+  <section class="painel vidro vazio">
+    <p>Aqui é tudo teu</p>
+    <p>Adiciona séries com o + e vê o que os teus amigos andam a ver na página Amigos.</p>
   </section>
 <?php else: ?>
   <section class="painel vidro vazio">

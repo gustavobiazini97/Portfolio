@@ -3,13 +3,14 @@
 -- (A base de dados em si é criada antes: no WAMP/phpMyAdmin ou no painel do alojamento.)
 -- Só usa CREATE TABLE IF NOT EXISTS, por isso pode correr-se várias vezes sem perder dados.
 
--- Contas (no máximo duas; o limite é aplicado no Model User)
+-- Contas: o par (as duas primeiras) e os amigos que entram por link de convite (ver amizades)
 CREATE TABLE IF NOT EXISTS users (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   nome          VARCHAR(40)  NOT NULL,             -- nome que aparece na app (personalizado)
   username      VARCHAR(30)  NOT NULL UNIQUE,      -- usado para entrar
   password_hash VARCHAR(255) NOT NULL,             -- password_hash() do PHP, nunca a palavra-passe
   novidades_vistas SMALLINT UNSIGNED NOT NULL DEFAULT 0,  -- id da última novidade que já viu (database/novidades.json)
+  par_id        INT UNSIGNED NULL,                 -- o par (a pessoa com quem partilha séries); null = sem par
   criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -122,4 +123,34 @@ CREATE TABLE IF NOT EXISTS bibliotecas (
   KEY idx_bibliotecas_serie (serie_id),
   CONSTRAINT fk_bib_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
   CONSTRAINT fk_bib_serie FOREIGN KEY (serie_id) REFERENCES series(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Amizades: uma linha por sentido (A→B e B→A), para consultar "os amigos de X" com uma só condição
+CREATE TABLE IF NOT EXISTS amizades (
+  user_id   INT UNSIGNED NOT NULL,
+  amigo_id  INT UNSIGNED NOT NULL,
+  desde     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, amigo_id),
+  CONSTRAINT fk_amizade_user  FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_amizade_amigo FOREIGN KEY (amigo_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Pedidos de amizade pendentes (quem já tem conta e foi procurado pelo utilizador exato)
+CREATE TABLE IF NOT EXISTS pedidos_amizade (
+  de_id     INT UNSIGNED NOT NULL,
+  para_id   INT UNSIGNED NOT NULL,
+  criado_em DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (de_id, para_id),
+  CONSTRAINT fk_pedido_de   FOREIGN KEY (de_id)   REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_pedido_para FOREIGN KEY (para_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Links de convite para criar conta: uso único e com validade; quem os usa fica amigo de quem convidou
+CREATE TABLE IF NOT EXISTS convites_amigo (
+  codigo    CHAR(32)     PRIMARY KEY,               -- aleatório, vai no link
+  de_id     INT UNSIGNED NOT NULL,
+  criado_em DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expira_em DATETIME     NOT NULL,
+  usado_por INT UNSIGNED NULL,
+  CONSTRAINT fk_convite_de FOREIGN KEY (de_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;

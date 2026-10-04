@@ -412,7 +412,7 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
 document.querySelectorAll('[data-convidar]').forEach(function (botao) {
   botao.addEventListener('click', function () {
     var link = botao.dataset.convidar;
-    var texto = 'Cria a tua conta no Anime a Dois para vermos quem vai à frente 👀';
+    var texto = botao.dataset.texto || 'Cria a tua conta no Anime a Dois para vermos quem vai à frente 👀';
     if (navigator.share) {
       navigator.share({ title: 'Anime a Dois', text: texto, url: link }).catch(function () {});
     } else if (navigator.clipboard) {

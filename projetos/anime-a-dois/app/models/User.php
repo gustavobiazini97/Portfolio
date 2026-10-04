@@ -158,10 +158,16 @@ class User extends Model
         return array_values($novos);
     }
 
-    // A outra conta (a app só tem duas); null enquanto o parceiro não se registar
+    // O par: a pessoa com quem partilhas séries (users.par_id); null se ainda não tens par
     public function parceiro(): ?User
     {
-        return static::where('id', '!=', $this->id)->orderBy('id')->first();
+        return $this->par_id ? static::find($this->par_id) : null;
+    }
+
+    // Ainda falta o par se registar? (só a primeira conta, enquanto não chega o máximo de contas do casal)
+    public function esperaPar(): bool
+    {
+        return $this->par_id === null && static::count() < (Database::config()['max_contas'] ?? 2);
     }
 
     // O registo só está aberto enquanto houver menos contas do que o máximo
@@ -171,9 +177,10 @@ class User extends Model
     }
 
     // Cria uma conta nova; lança InvalidArgumentException com a mensagem para o utilizador
-    public static function registar(array $dados): User
+    // $convite = link de convite válido (Amizade::convite): abre o registo e liga a conta ao amigo que convidou
+    public static function registar(array $dados, ?object $convite = null): User
     {
-        if (!static::registoAberto()) {
+        if ($convite === null && !static::registoAberto()) {
             throw new InvalidArgumentException('O registo está fechado: já existem as duas contas.');
         }
 
@@ -208,7 +215,21 @@ class User extends Model
             'novidades_vistas' => Novidade::ultima(),   // conta nova: começa sem novidades por ver
         ]);
 
-        // As séries do seed (Naruto, Shippuden, Boruto) começam na biblioteca de todos (conjuntas)
+        if ($convite !== null) {
+            // Amigo convidado: biblioteca vazia e amigo de quem convidou (sem par)
+            Amizade::usarConvite($convite, $user);
+            return $user;
+        }
+
+        // Segunda conta do casal: ficam par uma da outra
+        $primeiro = static::where('id', '!=', $user->id)->orderBy('id')->first();
+        if ($primeiro !== null) {
+            static::where('id', $primeiro->id)->update(['par_id' => $user->id]);
+            $user->par_id = $primeiro->id;
+            $user->save();
+        }
+
+        // As séries do seed (Naruto, Shippuden, Boruto) começam na biblioteca do casal (conjuntas)
         $agora = date('Y-m-d H:i:s');
         $linhas = Serie::whereNull('adicionada_por')->pluck('id')
             ->map(fn ($id) => ['user_id' => $user->id, 'serie_id' => $id, 'estado' => 'a_ver', 'desde' => $agora])->all();

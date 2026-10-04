@@ -95,6 +95,12 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Perfil → "Atualizações": mostra a versão (id da última novidade) e o botão "Procurar atualizações" (apaga as caches e recarrega).
 - Service worker v8: CSS/JS com rede primeiro (a app atualiza ao abrir; offline usa a cache).
 
+**Amigos**
+- Página Amigos (ícone no Início): lista, pedidos, link de convite e adicionar por utilizador exato (sem pesquisa parcial).
+- Link de convite (`convites_amigo`): uso único, 7 dias; abre o registo (que é fechado) e a conta nasce amiga de quem convidou, sem par e com a biblioteca vazia.
+- Os amigos veem o perfil e a biblioteca uns dos outros (`?c=perfil&a=pessoa`); não partilham séries. O par é só um: `users.par_id` (o `migrate.php` liga as duas contas existentes).
+- Tabelas novas: `amizades` (duas linhas por amizade), `pedidos_amizade`, `convites_amigo`.
+
 **Quero ver contigo**
 - Convites recebidos ("Bora ver" / "Agora não") e enviados ("à espera de…" / "Cancelar").
 
@@ -184,6 +190,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | AniList + Kitsu no lugar do Jikan (em baixo); fillers chegam quando o Jikan voltar |
 | 04/10 | Bibliotecas individuais, séries conjuntas por convite |
 | 04/10 | Perfil do par, adicionar séries da fila do par, botão de atualizações |
+| 04/10 | Amigos: link de convite, pedidos, perfil do amigo, `par_id` |
 
 ---
 

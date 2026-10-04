@@ -791,3 +791,11 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
 .atualizacao { display: flex; flex-direction: column; gap: 12px; }
 .atualizacao-texto { font-size: 13.5px; color: var(--suave); }
 .atualizacao .btn-texto { align-self: flex-start; }
+
+/* ---------- Amigos ---------- */
+.btn-redondo { position: relative; }                       /* para a bolinha de pedidos */
+.ponto-aviso { position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--par-txt); box-shadow: 0 0 0 2px var(--vidro-borda); }
+.amigo-linha { display: flex; align-items: center; gap: 12px; }
+.amigo-link { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.amigo-nome { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 15px; font-weight: 500; }
+.amigos-bloco { margin-top: 0; }

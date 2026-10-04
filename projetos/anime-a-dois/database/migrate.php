@@ -47,6 +47,7 @@ $colunas = [
     ['preferencias', 'serie_push',  'TINYINT(1) NOT NULL DEFAULT 1'],
     ['preferencias', 'serie_email', 'TINYINT(1) NOT NULL DEFAULT 0'],
     ['users', 'novidades_vistas',  'SMALLINT UNSIGNED NOT NULL DEFAULT 0'],
+    ['users', 'par_id',            'INT UNSIGNED NULL'],
 ];
 
 $schema = Capsule::schema();
@@ -79,6 +80,15 @@ if (Capsule::table('bibliotecas')->count() === 0 && Capsule::table('users')->cou
     }
     Capsule::table('bibliotecas')->insertOrIgnore($linhas);
     echo 'Bibliotecas individuais: ' . count($linhas) . " linhas criadas a partir das séries atuais.\n";
+}
+
+// O par passa a ser explícito (users.par_id), porque já não há só duas contas. Uma vez só: se ainda
+// ninguém tem par e existem exatamente duas contas, são par uma da outra.
+if (Capsule::table('users')->whereNotNull('par_id')->count() === 0 && Capsule::table('users')->count() === 2) {
+    [$a, $b] = Capsule::table('users')->orderBy('id')->pluck('id')->all();
+    Capsule::table('users')->where('id', $a)->update(['par_id' => $b]);
+    Capsule::table('users')->where('id', $b)->update(['par_id' => $a]);
+    echo "Par definido: $a e $b.\n";
 }
 
 echo "Estrutura atualizada.\n";

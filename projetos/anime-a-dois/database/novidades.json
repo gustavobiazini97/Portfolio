@@ -85,6 +85,16 @@
         "Toca numa série da fila \"está a ver\" para a adicionar à tua biblioteca; passa a ser dos dois e ele é avisado.",
         "No teu perfil há um botão \"Procurar atualizações\". A app também atualiza sozinha ao abrir."
       ]
+    },
+    {
+      "id": 10,
+      "data": "2026-10-04",
+      "titulo": "Amigos",
+      "itens": [
+        "Novo botão dos amigos no Início: convida com um link de uso único (a pessoa cria conta já ligada a ti) ou adiciona quem já tem conta pelo utilizador.",
+        "Os amigos veem o perfil e a biblioteca uns dos outros: último episódio e progresso.",
+        "O par continua a ser só um: é com ele que partilhas séries e notificações."
+      ]
     }
   ]
 }

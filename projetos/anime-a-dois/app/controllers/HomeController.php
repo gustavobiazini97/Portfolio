@@ -55,7 +55,9 @@ class HomeController extends Controller
             'podeRemover' => $serie ? $serie->podeSerRemovidaPor($user) : false,
             // Para a pesquisa marcar o que já cá está: mal_id → biblioteca | convite | par
             'jaCa'        => Serie::situacaoNaPesquisa($user, $par),
-            'novidades'   => Novidade::porVer($user),   // o que mudou na app desde a última vez que viste
+            'novidades'   => Novidade::porVer($user),
+            'pedidosAmigos' => Amizade::pedidosRecebidos($user)->count(),   // bolinha no ícone dos amigos
+            'esperaPar'   => $user->esperaPar(),   // o que mudou na app desde a última vez que viste
         ]);
     }
 
@@ -76,7 +78,7 @@ class HomeController extends Controller
     private function resumoVs(array $meu, array $dele, ?User $parceiro, ?User $par): string
     {
         if ($par === null) {
-            return 'Quando o teu par criar conta, aparece aqui ao teu lado.';
+            return 'Série só tua por agora.';
         }
         if ($parceiro === null) {
             return 'Só tu tens esta série. Convida ' . $par->nome . ' para verem os dois.';

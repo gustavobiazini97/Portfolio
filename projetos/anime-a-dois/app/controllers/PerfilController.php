@@ -18,7 +18,7 @@ class PerfilController extends Controller
         ]);
     }
 
-    // GET ?id=<user>: perfil do teu par (foto, último episódio e as séries dele). Só o teu e o do teu par.
+    // GET ?id=<user>: perfil do teu par ou de um amigo (foto, último episódio e as séries dele). De mais ninguém.
     public function pessoa(): void
     {
         $user = $this->exigirLogin();
@@ -29,18 +29,21 @@ class PerfilController extends Controller
         if ($id === $user->id) {
             $this->redirect('perfil');
         }
-        // Null guard: só se vê o perfil do par
-        if ($par === null || $par->id !== $id) {
+        // Null guard: só se vê o perfil do par e dos amigos
+        $pessoa = User::find($id);
+        if ($pessoa === null || ($par?->id !== $id && !Amizade::sao($user, $pessoa))) {
             http_response_code(404);
             exit('Página não encontrada.');
         }
+        $ehPar = $par?->id === $id;
 
         $this->render('perfil/pessoa', [
-            'titulo'     => $par->nome,
+            'titulo'     => $pessoa->nome,
             'user'       => $user,
-            'pessoa'     => $par,
-            'ultimo'     => $par->ultimoVisto(),
-            'biblioteca' => Serie::biblioteca($par, $user),   // a dele; 'par' = a tua % nas conjuntas
+            'pessoa'     => $pessoa,
+            'ehPar'      => $ehPar,
+            'ultimo'     => $pessoa->ultimoVisto(),
+            'biblioteca' => Serie::biblioteca($pessoa, $user),   // a dele; 'par' = a tua % (só conta nas conjuntas)
         ]);
     }
 

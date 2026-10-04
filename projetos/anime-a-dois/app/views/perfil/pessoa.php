@@ -1,5 +1,5 @@
-<?php /* Perfil do teu par.
-   Variáveis: $user (tu), $pessoa (o par), $ultimo (Episodio ou null), $biblioteca (['serie','estado','conjunta','tu','par']), $flash */
+<?php /* Perfil do teu par ou de um amigo.
+   Variáveis: $user (tu), $pessoa (o par ou um amigo), $ehPar, $ultimo (Episodio ou null), $biblioteca (['serie','estado','conjunta','tu','par']), $flash */
 
 // Estado por extenso (o Serie tem o texto) e capa pequena (imagem ou iniciais sobre a cor da série)
 $capaMini = function (Serie $s): string {
@@ -44,7 +44,7 @@ $capaMini = function (Serie $s): string {
             <?= $capaMini($s) ?>
             <span class="pessoa-serie-texto">
               <span class="pessoa-serie-nome"><?= e($s->nomeCurto()) ?></span>
-              <span class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= $item['tu'] ?>%<?= $abre ? '' : ' · só ' . e($pessoa->nome) ?></span>
+              <span class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= $item['tu'] ?>%<?= $abre ? '' : ($ehPar ? ' · só ' . e($pessoa->nome) : ' · ainda não tens') ?></span>
               <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['tu'] ?>" aria-label="<?= e($pessoa->nome) ?>: <?= $item['tu'] ?>%"></progress>
             </span>
           </<?= $abre ? 'a' : 'div' ?>>
@@ -53,3 +53,12 @@ $capaMini = function (Serie $s): string {
     </ul>
   <?php endif; ?>
 </section>
+
+<?php if (!$ehPar): ?>
+  <!-- Só os amigos se podem desfazer (o par não) -->
+  <form class="acao-fundo" method="post" action="<?= e(url('amigos', 'remover')) ?>" data-confirmar="Tirar <?= e($pessoa->nome) ?> dos amigos?">
+    <?= csrf_campo() ?>
+    <input type="hidden" name="id" value="<?= $pessoa->id ?>">
+    <button type="submit" class="btn btn-secundario">Tirar dos amigos</button>
+  </form>
+<?php endif; ?>
