@@ -12,9 +12,12 @@ if (PHP_SAPI !== 'cli') {
 $base = rtrim(Database::config()['jikan_url'] ?? 'https://api.jikan.moe/v4', '/');
 
 // Um pedido simples com curl: código HTTP, tempo e erro (se houver)
-function testar(string $url): string
+function testar(string $url, bool $soIpv4 = false): string
 {
     $ch = curl_init($url);
+    if ($soIpv4) {
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);   // força IPv4 (o IPv6 do alojamento pode não ter saída)
+    }
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CONNECTTIMEOUT => 5,
@@ -34,5 +37,9 @@ function testar(string $url): string
 
 echo 'Jikan pesquisa: ' . testar($base . '/anime?q=dragon%20ball&limit=12&sfw=true') . "\n";
 echo 'Jikan anime:    ' . testar($base . '/anime/52991') . "\n";
+echo 'Jikan só IPv4:  ' . testar($base . '/anime/52991', true) . "\n";
+echo 'GitHub (saída): ' . testar('https://api.github.com/zen') . "\n";
+echo 'DNS jikan:      ' . implode(', ', array_merge(gethostbynamel('api.jikan.moe') ?: ['sem IPv4'], array_column(dns_get_record('api.jikan.moe', DNS_AAAA) ?: [], 'ipv6'))) . "\n";
+echo 'Proxy no ambiente: ' . (getenv('https_proxy') ?: getenv('HTTPS_PROXY') ?: 'nenhum') . "\n";
 echo 'max_execution_time (CLI): ' . ini_get('max_execution_time') . "\n";
 echo 'Capas no seed:  ' . Serie::whereNotNull('capa')->count() . ' de ' . Serie::count() . " séries\n";
