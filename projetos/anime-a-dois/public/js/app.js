@@ -751,9 +751,10 @@ function enviarAoServidor(url, campos, ms) {
   var input = document.getElementById('pesquisa-texto');
   var estado = document.getElementById('pesquisa-estado');
   var lista = document.getElementById('resultados');
-  var nomePar = folha.dataset.parNome || '';
+  var ligados = [];       // o par e os amigos, a quem se pode convidar: [{id, nome}]
+  try { ligados = JSON.parse(folha.dataset.ligados || '[]'); } catch (e) { /* sem convites */ }
   var textoInicial = estado.textContent;
-  var jaCa = {};          // mal_id → 'biblioteca' | 'proposta' (vem do servidor na página)
+  var jaCa = {};          // mal_id → 'biblioteca' | 'convite' (vem do servidor na página)
   try { jaCa = JSON.parse(folha.dataset.jaCa || '{}'); } catch (e) { /* sem marcas "já está" */ }
 
   var espera = null;      // temporizador do "parou de escrever"
@@ -824,23 +825,37 @@ function enviarAoServidor(url, campos, ms) {
       var detalhes = document.createElement('p'); detalhes.className = 'resultado-info'; detalhes.textContent = info(r);
       var acoes = document.createElement('div'); acoes.className = 'resultado-acoes';
 
-      // biblioteca = já é tua; convite = o par convidou-te; par = está na biblioteca dele (só por convite)
+      // biblioteca = já é tua; convite = alguém te convidou para ela
       var ja = jaCa[r.mal_id];
       if (ja) {
         var aviso = document.createElement('span'); aviso.className = 'resultado-ja';
-        aviso.textContent = ja === 'convite' ? 'Tens um convite para esta: aceita-o no Início'
-          : ja === 'par' ? 'Está na fila de ' + nomePar + ' no Início: toca nela para adicionar'
-          : '✓ Já está na tua biblioteca';
+        aviso.textContent = ja === 'convite' ? 'Tens um convite para esta: aceita-o no Início' : '✓ Já está na tua biblioteca';
         acoes.appendChild(aviso);
       } else {
-        acoes.appendChild(botao(nomePar ? 'Só para mim' : 'Adicionar', '', function () { adicionar(r, 'ver'); }));
-        if (nomePar) acoes.appendChild(botao('Quero ver com ' + nomePar, 'secundario', function () { adicionar(r, 'propor'); }));
+        botoesDeAdicionar(acoes, r);
       }
 
       texto.appendChild(nome); texto.appendChild(detalhes); texto.appendChild(acoes);
       li.appendChild(capa); li.appendChild(texto);
       lista.appendChild(li);
     });
+  }
+
+  // "Só para mim" + convidar alguém (com uma só pessoa, o botão já diz o nome; com várias, abre a escolha)
+  function botoesDeAdicionar(acoes, r) {
+    acoes.innerHTML = '';
+    acoes.appendChild(botao(ligados.length ? 'Só para mim' : 'Adicionar', '', function () { adicionar(r, 'ver', 0); }));
+    if (ligados.length === 1) {
+      acoes.appendChild(botao('Quero ver com ' + ligados[0].nome, 'secundario', function () { adicionar(r, 'propor', ligados[0].id); }));
+    } else if (ligados.length > 1) {
+      acoes.appendChild(botao('Ver com…', 'secundario', function () {
+        acoes.innerHTML = '';
+        ligados.forEach(function (l) {
+          acoes.appendChild(botao(l.nome, 'secundario', function () { adicionar(r, 'propor', l.id); }));
+        });
+        acoes.appendChild(botao('‹ Voltar', 'link', function () { botoesDeAdicionar(acoes, r); }));
+      }));
+    }
   }
 
   function botao(texto, extra, acao) {
@@ -857,7 +872,7 @@ function enviarAoServidor(url, campos, ms) {
   }
 
   // Adiciona (ou propõe): busca os episódios (Jikan ou Kitsu) e manda tudo ao servidor
-  function adicionar(r, modo) {
+  function adicionar(r, modo, com) {
     if (ocupado) return;
     bloquear(true);
     mostrarEstado('A buscar os episódios de ' + r.nome + '…');
@@ -868,7 +883,7 @@ function enviarAoServidor(url, campos, ms) {
       .then(function (eps) {
         mostrarEstado('A guardar ' + r.nome + '…');
         return enviarAoServidor(folha.dataset.urlAdicionar, {
-          mal_id: r.mal_id, modo: modo, info: JSON.stringify(r), episodios: JSON.stringify(eps.lista), fonte: eps.fonte
+          mal_id: r.mal_id, modo: modo, com: com || 0, info: JSON.stringify(r), episodios: JSON.stringify(eps.lista), fonte: eps.fonte
         });
       })
       .then(function (resposta) {

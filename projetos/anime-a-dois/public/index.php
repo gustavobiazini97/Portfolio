@@ -24,7 +24,7 @@ $rotas = [
     'estatisticas' => ['index'],
     'amigos' => ['index', 'criarConvite', 'pedir', 'aceitar', 'recusar', 'remover'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],
-    'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'juntar', 'aceitar', 'recusar', 'remover'],
+    'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'juntar', 'aceitar', 'recusar', 'separar', 'remover'],
     'perfil' => ['index', 'pessoa', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword',
                  'guardarNotificacoes', 'subscrever', 'desubscrever', 'testarNotificacao'],
 ];

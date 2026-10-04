@@ -1,7 +1,15 @@
 <?php /* Perfil do teu par ou de um amigo.
    Variáveis: $user (tu), $pessoa (o par ou um amigo), $ehPar, $ultimo (Episodio ou null), $biblioteca (['serie','estado','conjunta','tu','par']), $flash */
 
-// Estado por extenso (o Serie tem o texto) e capa pequena (imagem ou iniciais sobre a cor da série)
+// Capa da folha "adicionar" (imagem ou iniciais sobre a cor da série)
+$capa = function (Serie $s, string $classe): string {
+    if ($s->capa) {
+        return '<img class="' . e($classe) . '" src="' . e($s->capa) . '" alt="" loading="lazy" referrerpolicy="no-referrer">';
+    }
+    return '<span class="' . e($classe) . ' capa-sem" data-acento="' . e((string) $s->acento) . '">' . e(mb_strtoupper(mb_substr($s->nomeCurto(), 0, 2))) . '</span>';
+};
+
+// Capa pequena da lista (imagem ou iniciais sobre a cor da série)
 $capaMini = function (Serie $s): string {
     if ($s->capa) {
         return '<img class="pessoa-capa" src="' . e($s->capa) . '" alt="" loading="lazy" referrerpolicy="no-referrer">';
@@ -31,7 +39,7 @@ $capaMini = function (Serie $s): string {
   <?php endif; ?>
 </section>
 
-<!-- A biblioteca dela: as conjuntas abrem; as só dela ficam só para espreitar -->
+<!-- A biblioteca dela: as que também tens abrem; as outras abrem uma folha para as adicionares -->
 <section class="painel vidro">
   <div class="painel-titulo"><h2>Biblioteca de <?= e($pessoa->nome) ?></h2></div>
   <?php if ($biblioteca === []): ?>
@@ -40,17 +48,18 @@ $capaMini = function (Serie $s): string {
     <ul class="pessoa-lista">
       <?php foreach ($biblioteca as $item): $s = $item['serie']; $abre = $s->naBibliotecaDe($user); ?>
         <li>
-          <<?= $abre ? 'a href="' . e(url('home', 'index', ['serie' => $s->slug])) . '"' : 'div' ?> class="pessoa-serie">
+          <<?= $abre ? 'a href="' . e(url('home', 'index', ['serie' => $s->slug])) . '"' : 'button type="button" data-abrir="juntar-' . (int) $pessoa->id . '-' . e($s->slug) . '"' ?> class="pessoa-serie">
             <?= $capaMini($s) ?>
             <span class="pessoa-serie-texto">
               <span class="pessoa-serie-nome"><?= e($s->nomeCurto()) ?></span>
-              <span class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= $item['tu'] ?>%<?= $abre ? '' : ($ehPar ? ' · só ' . e($pessoa->nome) : ' · ainda não tens') ?></span>
+              <span class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= $item['tu'] ?>%<?= $item['conjunta'] && $item['companheiro'] ? ' · vê com ' . ($item['companheiro']->id === $user->id ? 'ti' : 'outra pessoa') : '' ?><?= $abre ? '' : ' · toca para adicionar' ?></span>
               <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['tu'] ?>" aria-label="<?= e($pessoa->nome) ?>: <?= $item['tu'] ?>%"></progress>
             </span>
-          </<?= $abre ? 'a' : 'div' ?>>
+          </<?= $abre ? 'a' : 'button' ?>>
         </li>
       <?php endforeach; ?>
     </ul>
+    <?php foreach ($biblioteca as $item): if ($item['serie']->naBibliotecaDe($user)) continue; $dono = $pessoa; require __DIR__ . '/../layout/folha-juntar.php'; endforeach; ?>
   <?php endif; ?>
 </section>
 

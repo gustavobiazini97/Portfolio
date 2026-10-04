@@ -92,8 +92,18 @@
       "titulo": "Amigos",
       "itens": [
         "Novo botão dos amigos no Início: convida com um link de uso único (a pessoa cria conta já ligada a ti) ou adiciona quem já tem conta pelo utilizador.",
-        "Os amigos veem o perfil e a biblioteca uns dos outros: último episódio e progresso.",
-        "O par continua a ser só um: é com ele que partilhas séries e notificações."
+        "Os amigos veem o perfil e a biblioteca uns dos outros: último episódio e progresso."
+      ]
+    },
+    {
+      "id": 11,
+      "data": "2026-10-04",
+      "titulo": "Séries com amigos",
+      "itens": [
+        "Cada série pode ser vista com uma pessoa diferente: o teu par ou um amigo. Em \"Ver com…\" escolhes com quem; a pessoa aceita e passam a ter o placar, os comentários e os avisos dessa série.",
+        "No perfil de um amigo (e na fila \"está a ver\" do teu par), toca numa série para a adicionar só para ti ou para verem juntos.",
+        "Ao pesquisar, \"Só para mim\" ou convida logo alguém.",
+        "\"Deixar de ver juntos\" separa uma série quando quiseres; cada um fica com o seu progresso."
       ]
     }
   ]

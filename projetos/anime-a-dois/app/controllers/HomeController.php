@@ -10,8 +10,8 @@ class HomeController extends Controller
     {
         $user       = $this->exigirLogin();
         $par        = $user->parceiro();
-        $biblioteca = Serie::biblioteca($user, $par);                        // a tua (conjuntas e só tuas)
-        $doPar      = $par ? Serie::biblioteca($par, null, $user) : [];      // só dele: "A Andreia está a ver"
+        $biblioteca = Serie::biblioteca($user);                              // a tua (vistas com alguém e só tuas)
+        $doPar      = $par ? Serie::biblioteca($par, $user) : [];            // só dele: "A Andreia está a ver"
 
         // Último episódio de cada um (em qualquer série)
         $ultimoPar = $par ? $par->ultimoVisto() : null;
@@ -28,9 +28,11 @@ class HomeController extends Controller
             }
         }
 
-        // Da série aberta: é dos dois? (só nesse caso o par aparece no Vs) e em que estado está o convite
-        $conjunta = $serie ? $serie->conjunta($user, $par) : false;
-        $parVs    = $conjunta ? $par : null;
+        // Da série aberta: com quem a vês? (só esse companheiro aparece no Vs)
+        $ligados  = $user->ligados();
+        $convites = Serie::convites($user);
+        $parVs    = $serie ? $serie->companheiroDe($user) : null;
+        $conjunta = $parVs !== null;
         $meu      = $serie ? $serie->progressoDe($user) : null;
         $dele     = $serie ? $serie->progressoDe($parVs) : null;
 
@@ -43,18 +45,20 @@ class HomeController extends Controller
             'parVs'       => $parVs,
             'biblioteca'  => $biblioteca,
             'doPar'       => $doPar,
-            'convites'    => Serie::convites($user, $par),
+            'convites'    => $convites,
+            'ligados'     => $ligados,                                   // par + amigos: a quem convidar para ver contigo
+            // Convites que enviaste para a série aberta (ainda por responder)
+            'enviadosSerie' => $serie ? array_values(array_filter($convites, fn ($c) => !$c['recebido'] && $c['serie']->id === $serie->id)) : [],
             'serie'       => $serie,
             'meuEstado'   => $serie?->estadoDe($user),
             'conjunta'    => $conjunta,
-            'estadoPar'   => $serie && $par ? $serie->estadoDe($par) : null,   // null | convite | a_ver...
             'ultimoPar'   => $ultimoPar,
             'meu'         => $meu,
             'dele'        => $dele,
-            'resumo'      => $serie ? $this->resumoVs($meu, $dele, $parVs, $par) : '',
+            'resumo'      => $serie ? $this->resumoVs($meu, $dele, $parVs, $ligados->isNotEmpty()) : '',
             'podeRemover' => $serie ? $serie->podeSerRemovidaPor($user) : false,
             // Para a pesquisa marcar o que já cá está: mal_id → biblioteca | convite | par
-            'jaCa'        => Serie::situacaoNaPesquisa($user, $par),
+            'jaCa'        => Serie::situacaoNaPesquisa($user),
             'novidades'   => Novidade::porVer($user),
             'pedidosAmigos' => Amizade::pedidosRecebidos($user)->count(),   // bolinha no ícone dos amigos
             'esperaPar'   => $user->esperaPar(),   // o que mudou na app desde a última vez que viste
@@ -75,13 +79,10 @@ class HomeController extends Controller
     }
 
     // Frase por baixo das barras: quem vai à frente e por quantos episódios
-    private function resumoVs(array $meu, array $dele, ?User $parceiro, ?User $par): string
+    private function resumoVs(array $meu, array $dele, ?User $parceiro, bool $temLigados): string
     {
-        if ($par === null) {
-            return 'Série só tua por agora.';
-        }
         if ($parceiro === null) {
-            return 'Só tu tens esta série. Convida ' . $par->nome . ' para verem os dois.';
+            return $temLigados ? 'Vês esta série sozinho. Convida o teu par ou um amigo para verem juntos.' : 'Série só tua por agora.';
         }
 
         $dif = $meu['posicao'] - $dele['posicao'];

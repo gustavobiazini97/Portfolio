@@ -43,7 +43,7 @@ class PerfilController extends Controller
             'pessoa'     => $pessoa,
             'ehPar'      => $ehPar,
             'ultimo'     => $pessoa->ultimoVisto(),
-            'biblioteca' => Serie::biblioteca($pessoa, $user),   // a dele; 'par' = a tua % (só conta nas conjuntas)
+            'biblioteca' => Serie::biblioteca($pessoa),   // a dele (cada item diz se a vê com alguém)
         ]);
     }
 

@@ -21,9 +21,8 @@ class SerieController extends Controller
             $this->redirect('home', 'index', [], 'convites');
         }
 
-        // O par só aparece (mapa, avatares, comentários dele) se a série for dos dois
-        $par = $user->parceiro();
-        $parceiro = $serie->conjunta($user, $par) ? $par : null;
+        // O companheiro só aparece (mapa, avatares, comentários dele) se vês esta série com alguém
+        $parceiro = $serie->companheiroDe($user);
         $meu      = $serie->progressoDe($user);
 
         // Cartão que abre ao centro: o pedido no URL ou o seguinte ao teu
@@ -129,7 +128,13 @@ class SerieController extends Controller
             $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
         }
 
-        $lista = Comentario::with('autor')->where('episodio_id', $episodio->id)->orderBy('criado_em')->orderBy('id')->get();
+        // Só séries da tua biblioteca; e só os teus comentários e os de quem vê a série contigo
+        $serie = $episodio->serie;
+        if ($serie === null || !$serie->naBibliotecaDe($user)) {
+            $this->json(['ok' => false, 'mensagem' => 'Essa série não está na tua biblioteca.'], 403);
+        }
+        $autores = array_filter([$user->id, $serie->companheiroDe($user)?->id]);
+        $lista = Comentario::with('autor')->where('episodio_id', $episodio->id)->whereIn('user_id', $autores)->orderBy('criado_em')->orderBy('id')->get();
         $this->json([
             'ok'          => true,
             'comentarios' => $lista->map(fn ($c) => $c->paraJson($user))->all(),
@@ -148,8 +153,11 @@ class SerieController extends Controller
                 $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
             }
 
+            if ($episodio->serie === null || !$episodio->serie->naBibliotecaDe($user)) {
+                $this->json(['ok' => false, 'mensagem' => 'Essa série não está na tua biblioteca.'], 403);
+            }
             $comentario = Comentario::escrever($user, $episodio, $_POST['texto'] ?? '');
-            Notificador::comentario($user, $comentario);   // avisa o par (telemóvel/email, conforme ele quiser)
+            Notificador::comentario($user, $comentario);   // avisa o companheiro da série (telemóvel/email, conforme ele quiser)
             $_GET['episodio'] = $episodio->id;
             $this->comentarios();
         } catch (InvalidArgumentException $e) {

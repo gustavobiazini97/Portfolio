@@ -164,6 +164,22 @@ class User extends Model
         return $this->par_id ? static::find($this->par_id) : null;
     }
 
+    // Pessoas com quem podes partilhar séries: o par primeiro, depois os amigos (por ordem alfabética)
+    public function ligados()
+    {
+        $lista = collect();
+        if ($par = $this->parceiro()) {
+            $lista->push($par);
+        }
+        return $lista->concat(Amizade::amigosDe($this)->reject(fn ($a) => $a->id === $this->par_id))->values();
+    }
+
+    // O par ou um amigo?
+    public function ligadoA(User $outro): bool
+    {
+        return $outro->id !== $this->id && ($this->par_id === $outro->id || Amizade::sao($this, $outro));
+    }
+
     // Ainda falta o par se registar? (só a primeira conta, enquanto não chega o máximo de contas do casal)
     public function esperaPar(): bool
     {
@@ -234,6 +250,12 @@ class User extends Model
         $linhas = Serie::whereNull('adicionada_por')->pluck('id')
             ->map(fn ($id) => ['user_id' => $user->id, 'serie_id' => $id, 'estado' => 'a_ver', 'desde' => $agora])->all();
         Capsule::table('bibliotecas')->insertOrIgnore($linhas);
+
+        // As do seed passam a ser vistas pelo casal juntos
+        if ($primeiro !== null) {
+            Capsule::table('bibliotecas')->whereIn('serie_id', $linhas === [] ? [0] : array_column($linhas, 'serie_id'))->where('user_id', $user->id)->update(['com_id' => $primeiro->id]);
+            Capsule::table('bibliotecas')->whereIn('serie_id', $linhas === [] ? [0] : array_column($linhas, 'serie_id'))->where('user_id', $primeiro->id)->update(['com_id' => $user->id]);
+        }
 
         return $user;
     }

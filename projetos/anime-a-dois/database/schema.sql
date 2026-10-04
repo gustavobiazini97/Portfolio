@@ -112,13 +112,14 @@ CREATE TABLE IF NOT EXISTS subscricoes (
 ) ENGINE=InnoDB;
 
 -- Biblioteca de cada pessoa: que séries tem e em que estado (cada um tem o seu).
--- Uma série é CONJUNTA quando os dois a têm (com estado a_ver, pausa ou acabado).
--- estado 'convite' = o outro convidou esta pessoa a ver a série com ele ("Quero ver contigo").
+-- com_id = a pessoa com quem vê esta série (par ou amigo). A série é CONJUNTA quando as duas linhas
+-- (a de cada um) apontam uma para a outra. Cada pessoa tem no máximo um companheiro por série.
 CREATE TABLE IF NOT EXISTS bibliotecas (
   user_id  INT UNSIGNED NOT NULL,
   serie_id INT UNSIGNED NOT NULL,
-  estado   VARCHAR(10)  NOT NULL DEFAULT 'a_ver',     -- a_ver | pausa | acabado | convite
-  desde    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- quando entrou (ou quando chegou o convite)
+  estado   VARCHAR(10)  NOT NULL DEFAULT 'a_ver',     -- a_ver | pausa | acabado
+  desde    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- quando entrou
+  com_id   INT UNSIGNED NULL,                         -- com quem a vê (outro utilizador), ou null se a vê sozinho
   PRIMARY KEY (user_id, serie_id),
   KEY idx_bibliotecas_serie (serie_id),
   CONSTRAINT fk_bib_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
@@ -153,4 +154,17 @@ CREATE TABLE IF NOT EXISTS convites_amigo (
   expira_em DATETIME     NOT NULL,
   usado_por INT UNSIGNED NULL,
   CONSTRAINT fk_convite_de FOREIGN KEY (de_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Convites "Quero ver contigo": de_id convida para_id a ver esta série juntos (aceitar liga as duas bibliotecas)
+CREATE TABLE IF NOT EXISTS convites_serie (
+  serie_id  INT UNSIGNED NOT NULL,
+  de_id     INT UNSIGNED NOT NULL,
+  para_id   INT UNSIGNED NOT NULL,
+  criado_em DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (serie_id, de_id, para_id),
+  KEY idx_convites_para (para_id),
+  CONSTRAINT fk_cs_serie FOREIGN KEY (serie_id) REFERENCES series(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cs_de    FOREIGN KEY (de_id)    REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_cs_para  FOREIGN KEY (para_id)  REFERENCES users(id)  ON DELETE CASCADE
 ) ENGINE=InnoDB;

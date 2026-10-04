@@ -3,7 +3,7 @@
    Variáveis: $user, $parceiro (o par, ou null), $parVs (o par só se a série aberta for dos dois),
               $biblioteca (a tua: ['serie','estado','conjunta','tu','par']), $doPar (só do par, mesmo formato),
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
-              $meuEstado, $conjunta, $estadoPar, $ultimoPar (Episodio ou null), $meu, $dele, $resumo,
+              $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $dele, $resumo,
               $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar, $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);   // $dele já vem a zeros se a série for só tua
 $nomePar = $parceiro ? $parceiro->nome : null;
@@ -124,11 +124,11 @@ $selo = fn (array $item) => match ($item['estado']) {
            <?= $serie && $s->id === $serie->id ? 'aria-current="page"' : '' ?>>
           <span class="capa-moldura">
             <?= $capa($s, 'capa') ?>
-            <?php if ($item['conjunta']): ?>
-              <!-- Dos dois: os dois avatares pequenos no canto -->
-              <span class="capa-dois" title="Série dos dois">
+            <?php if ($item['conjunta'] && $item['companheiro']): ?>
+              <!-- Vista com alguém: os dois avatares pequenos no canto -->
+              <span class="capa-dois" title="Vês esta série com <?= e($item['companheiro']->nome) ?>">
                 <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
-                <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
+                <?php $avatarUser = $item['companheiro']; $avatarCor = 'par'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
               </span>
             <?php endif; ?>
             <?php if ($selo($item) !== ''): ?>
@@ -138,8 +138,8 @@ $selo = fn (array $item) => match ($item['estado']) {
           <span class="capa-nome"><?= e($s->nomeCurto()) ?></span>
           <span class="capa-barras">
             <progress class="barra barra-fina vs-tu-cor" max="100" value="<?= $item['tu'] ?>" aria-label="Tu: <?= $item['tu'] ?>%"></progress>
-            <?php if ($item['conjunta']): ?>
-              <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['par'] ?>" aria-label="<?= e($nomePar) ?>: <?= $item['par'] ?>%"></progress>
+            <?php if ($item['conjunta'] && $item['companheiro']): ?>
+              <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['par'] ?>" aria-label="<?= e($item['companheiro']->nome) ?>: <?= $item['par'] ?>%"></progress>
             <?php endif; ?>
           </span>
         </a>
@@ -149,7 +149,7 @@ $selo = fn (array $item) => match ($item['estado']) {
 </section>
 
 <?php if ($convites !== []): ?>
-  <!-- Quero ver contigo: convites para ver uma série a dois; aceitar põe-na nas duas bibliotecas -->
+  <!-- Quero ver contigo: convites do par ou de amigos para ver uma série juntos; aceitar põe-na na tua biblioteca -->
   <section class="painel vidro propostas" id="convites">
     <div class="painel-titulo">
       <h2>Quero ver contigo</h2>
@@ -163,7 +163,7 @@ $selo = fn (array $item) => match ($item['estado']) {
             <p class="proposta-nome"><?= e($p->nome) ?></p>
             <p class="proposta-info">
               <?= e(implode(' · ', array_filter([
-                  $c['recebido'] ? ($nomePar ?? 'O teu par') . ' convidou-te' : 'convidaste ' . ($nomePar ?? 'o teu par'),
+                  $c['recebido'] ? $c['de']->nome . ' convidou-te' : 'convidaste ' . $c['para']->nome,
                   plural((int) $p->total_episodios, 'ep.', 'ep.'),
                   $p->tipo,
                   $p->anos,
@@ -174,18 +174,21 @@ $selo = fn (array $item) => match ($item['estado']) {
                 <form method="post" action="<?= e(url('biblioteca', 'aceitar')) ?>">
                   <?= csrf_campo() ?>
                   <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
+                  <input type="hidden" name="de" value="<?= (int) $c['de']->id ?>">
                   <button type="submit" class="btn-pequeno">Bora ver</button>
                 </form>
                 <form method="post" action="<?= e(url('biblioteca', 'recusar')) ?>" data-confirmar="Recusar <?= e($p->nomeCurto()) ?>?">
                   <?= csrf_campo() ?>
                   <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
+                  <input type="hidden" name="outro" value="<?= (int) $c['de']->id ?>">
                   <button type="submit" class="link-suave">Agora não</button>
                 </form>
               <?php else: ?>
-                <span class="proposta-espera">à espera de <?= e($nomePar ?? 'o teu par') ?></span>
+                <span class="proposta-espera">à espera de <?= e($c['para']->nome) ?></span>
                 <form method="post" action="<?= e(url('biblioteca', 'recusar')) ?>" data-confirmar="Cancelar o convite de <?= e($p->nomeCurto()) ?>?">
                   <?= csrf_campo() ?>
                   <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
+                  <input type="hidden" name="outro" value="<?= (int) $c['para']->id ?>">
                   <button type="submit" class="link-suave">Cancelar</button>
                 </form>
               <?php endif; ?>
@@ -238,18 +241,30 @@ $selo = fn (array $item) => match ($item['estado']) {
     <?php endforeach; ?>
   </form>
 
-  <?php if ($parceiro && !$conjunta || $podeRemover): ?>
-    <!-- Ações da série: convidar o par (se for só tua) e tirar (se ainda não marcaste episódios) -->
+  <?php if ($ligados->isNotEmpty() || $conjunta || $podeRemover): ?>
+    <!-- Ações da série: ver com alguém (par ou amigo), deixar de ver juntos e tirar (se ainda não marcaste episódios) -->
     <div class="serie-acoes">
-      <?php if ($parceiro && !$conjunta): ?>
-        <?php if ($estadoPar === Serie::CONVITE): ?>
-          <span class="proposta-espera">Convite enviado · à espera de <?= e($nomePar) ?></span>
-        <?php else: ?>
+      <?php if ($conjunta): ?>
+        <span class="pessoa-legenda">Vês com <?= e($parVs->nome) ?></span>
+        <form method="post" action="<?= e(url('biblioteca', 'separar')) ?>" data-confirmar="Deixar de ver <?= e($serie->nomeCurto()) ?> com <?= e($parVs->nome) ?>? Cada um fica com o seu progresso.">
+          <?= csrf_campo() ?>
+          <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+          <button type="submit" class="link-suave">Deixar de ver juntos</button>
+        </form>
+      <?php elseif ($ligados->isNotEmpty()): ?>
+        <?php foreach ($enviadosSerie as $env): ?>
+          <span class="proposta-espera">Convite enviado · à espera de <?= e($env['para']->nome) ?></span>
+        <?php endforeach; ?>
+        <?php if ($ligados->count() === 1): ?>
+          <!-- Só há uma pessoa a quem convidar: botão direto -->
           <form method="post" action="<?= e(url('biblioteca', 'convidar')) ?>">
             <?= csrf_campo() ?>
             <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
-            <button type="submit" class="btn-pequeno secundario">Ver com <?= e($nomePar) ?></button>
+            <input type="hidden" name="com" value="<?= (int) $ligados->first()->id ?>">
+            <button type="submit" class="btn-pequeno secundario">Ver com <?= e($ligados->first()->nome) ?></button>
           </form>
+        <?php else: ?>
+          <button type="button" class="btn-pequeno secundario" data-abrir="folha-convidar">Ver com…</button>
         <?php endif; ?>
       <?php endif; ?>
       <?php if ($podeRemover): ?>
@@ -260,6 +275,33 @@ $selo = fn (array $item) => match ($item['estado']) {
         </form>
       <?php endif; ?>
     </div>
+
+    <?php if (!$conjunta && $ligados->count() > 1): ?>
+      <!-- Escolher com quem ver esta série: uma linha por pessoa (o par primeiro, depois os amigos) -->
+      <dialog class="folha vidro folha-par" id="folha-convidar" aria-label="Ver <?= e($serie->nomeCurto()) ?> com…">
+        <div class="folha-cima">
+          <h2>Ver <?= e($serie->nomeCurto()) ?> com…</h2>
+          <button type="button" class="btn-redondo vidro" data-fechar aria-label="Fechar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <ul class="pessoa-lista">
+          <?php foreach ($ligados as $l): ?>
+            <li>
+              <form class="amigo-linha" method="post" action="<?= e(url('biblioteca', 'convidar')) ?>">
+                <?= csrf_campo() ?>
+                <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+                <input type="hidden" name="com" value="<?= (int) $l->id ?>">
+                <?php $avatarUser = $l; $avatarCor = 'par'; $avatarExtra = 'avatar-mini'; require __DIR__ . '/../layout/avatar.php'; ?>
+                <span class="amigo-nome"><?= e($l->nome) ?></span>
+                <button type="submit" class="btn-texto vidro">Convidar</button>
+              </form>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+        <p class="pessoa-legenda par-nota">A pessoa recebe o convite e, se aceitar, passam a ver a série juntos.</p>
+      </dialog>
+    <?php endif; ?>
   <?php endif; ?>
 
   <a class="btn" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
@@ -276,7 +318,7 @@ $selo = fn (array $item) => match ($item['estado']) {
     </div>
     <div class="fila fila-par">
       <?php foreach ($doPar as $item): $s = $item['serie']; ?>
-        <button type="button" class="capa-item capa-<?= e($item['estado']) ?>" data-abrir="par-<?= e($s->slug) ?>" data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>">
+        <button type="button" class="capa-item capa-<?= e($item['estado']) ?>" data-abrir="juntar-<?= (int) $parceiro->id ?>-<?= e($s->slug) ?>" data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>">
           <span class="capa-moldura">
             <?= $capa($s, 'capa') ?>
             <?php if ($selo($item) !== ''): ?>
@@ -292,31 +334,7 @@ $selo = fn (array $item) => match ($item['estado']) {
     </div>
   </section>
 
-  <?php foreach ($doPar as $item): $s = $item['serie']; $prog = $s->progressoDe($parceiro); ?>
-    <!-- Folha da série do par: o que ele já viu + adicionar à tua biblioteca (passa a ser dos dois e ele é avisado) -->
-    <dialog class="folha vidro folha-par" id="par-<?= e($s->slug) ?>" aria-label="<?= e($s->nomeCurto()) ?>">
-      <div class="folha-cima">
-        <h2><?= e($s->nomeCurto()) ?></h2>
-        <button type="button" class="btn-redondo vidro" data-fechar aria-label="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-        </button>
-      </div>
-      <div class="par-detalhe">
-        <span class="capa-moldura par-detalhe-capa"><?= $capa($s, 'capa') ?></span>
-        <div class="par-detalhe-texto">
-          <p class="pessoa-legenda"><?= e(Serie::estadoTexto($item['estado'])) ?> · <?= e(plural((int) $s->total_episodios, 'episódio', 'episódios')) ?></p>
-          <p><?= e($nomePar) ?>: <?= $prog['vistos'] > 0 ? 'vai no episódio ' . $prog['posicao'] . ' (' . $prog['pct'] . '%)' : 'ainda não começou' ?></p>
-          <progress class="barra vs-par-cor" max="100" value="<?= $prog['pct'] ?>" aria-label="<?= e($nomePar) ?>: <?= $prog['pct'] ?>%"></progress>
-        </div>
-      </div>
-      <form method="post" action="<?= e(url('biblioteca', 'juntar')) ?>">
-        <?= csrf_campo() ?>
-        <input type="hidden" name="serie" value="<?= e($s->slug) ?>">
-        <button type="submit" class="btn">Adicionar à minha biblioteca</button>
-      </form>
-      <p class="pessoa-legenda par-nota">Passa a ser dos dois e <?= e($nomePar) ?> recebe um aviso. O teu progresso começa do zero.</p>
-    </dialog>
-  <?php endforeach; ?>
+  <?php foreach ($doPar as $item): $dono = $parceiro; require __DIR__ . '/../layout/folha-juntar.php'; endforeach; ?>
 <?php endif; ?>
 
 <!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).
@@ -324,7 +342,7 @@ $selo = fn (array $item) => match ($item['estado']) {
 <dialog class="folha vidro folha-adicionar" id="folha-adicionar" aria-labelledby="adicionar-titulo"
         data-ja-ca="<?= e(json_encode((object) $jaCa)) ?>"
         data-url-adicionar="<?= e(url('biblioteca', 'adicionar')) ?>"
-        data-par-nome="<?= e($nomePar ?? '') ?>">
+        data-ligados="<?= e(json_encode($ligados->map(fn ($l) => ['id' => $l->id, 'nome' => $l->nome])->values())) ?>">
   <div class="folha-cima">
     <h2 id="adicionar-titulo">Adicionar série</h2>
     <button type="button" class="btn-redondo vidro" id="adicionar-fechar" aria-label="Fechar">

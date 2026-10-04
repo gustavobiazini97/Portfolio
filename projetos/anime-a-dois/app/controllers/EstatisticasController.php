@@ -1,5 +1,5 @@
 <?php
-// Estatísticas de uma série: números dos dois, ritmo semanal, arcos e curiosidades.
+// Estatísticas de uma série: números dos dois (tu e o companheiro desta série), ritmo semanal, arcos e curiosidades.
 
 class EstatisticasController extends Controller
 {
@@ -7,7 +7,6 @@ class EstatisticasController extends Controller
     public function index(): void
     {
         $user     = $this->exigirLogin();
-        $parceiro = $user->parceiro();
         $series   = Serie::naBiblioteca($user);   // a tua biblioteca (sem convites)
 
         // Série do URL; senão a do último episódio que viste; senão a primeira
@@ -26,10 +25,8 @@ class EstatisticasController extends Controller
             $this->redirect('home');
         }
 
-        // Série só tua: as estatísticas mostram só os teus números
-        if (!$serie->conjunta($user, $parceiro)) {
-            $parceiro = null;
-        }
+        // Série só tua: as estatísticas mostram só os teus números; com companheiro, os dos dois
+        $parceiro = $serie->companheiroDe($user);
 
         $this->render('estatisticas/index', [
             'titulo'    => 'Estatísticas',

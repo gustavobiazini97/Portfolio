@@ -20,7 +20,8 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Notificações ao par (episódios e comentários) por telemóvel (Web Push) e/ou email, escolhidas no perfil
 - [x] Estatísticas por série: números dos dois, ritmo semanal com previsão, arcos (`database/arcos.json`) e curiosidades
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
-- [x] Biblioteca: fila de capas com progresso dos dois e estados (a ver, em pausa, acabado)
+- [x] Biblioteca individual: fila de capas com progresso e estados (a ver, em pausa, acabado) por pessoa
+- [x] Amigos (link de convite de uso único, pedido por utilizador) e séries vistas com o par ou com um amigo (um companheiro por série)
 - [x] Adicionar série pela pesquisa no MyAnimeList (Jikan): episódios, títulos, capa, filler e recap
 - [x] "Quero ver contigo": propostas que o par aceita ou recusa
 - [x] Popup "O que há de novo" — a cada atualização, acrescentar uma entrada a `database/novidades.json`
@@ -65,7 +66,7 @@ A primeira pessoa a abrir cria a conta 1, e a segunda cria a conta 2. A partir d
 app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
-  controllers/      AuthController, HomeController, SerieController, BibliotecaController, PerfilController, EstatisticasController
+  controllers/      AuthController, HomeController, SerieController, BibliotecaController, PerfilController, AmigosController, EstatisticasController
   models/           User, Serie, Episodio, Jikan, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)

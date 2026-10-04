@@ -799,3 +799,10 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
 .amigo-link { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
 .amigo-nome { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 15px; font-weight: 500; }
 .amigos-bloco { margin-top: 0; }
+
+/* Item da lista do perfil que abre uma folha: é um <button>, sem o aspeto de botão do browser */
+button.pessoa-serie { width: 100%; font: inherit; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
+.resultado-acoes .link { background: none; border: 0; color: var(--suave); }
+
+.pessoa-capa { background: var(--trilho); }   /* espaço da capa enquanto carrega */
+button.pessoa-serie { display: flex; }
