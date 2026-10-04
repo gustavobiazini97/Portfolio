@@ -115,6 +115,14 @@
         "O placar, os episódios e as estatísticas mostram cada pessoa; os comentários e avisos só chegam a quem vê a série contigo.",
         "\"Deixar de ver juntos\" é por pessoa: separas só com quem quiseres."
       ]
+    },
+    {
+      "id": 13,
+      "data": "2026-10-04",
+      "titulo": "Apagar conta",
+      "itens": [
+        "No Perfil, em \"Apagar conta\", podes eliminar a tua conta de vez: pede a palavra-passe e apaga tudo da base de dados (progresso, comentários, foto e ligações)."
+      ]
     }
   ]
 }

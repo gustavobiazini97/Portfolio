@@ -132,5 +132,19 @@
   <button type="submit" class="btn">Terminar sessão</button>
 </form>
 
+<!-- Apagar conta (fechado por defeito): pede a palavra-passe e apaga tudo da base de dados -->
+<details class="form vidro dobravel zona-perigo">
+  <summary>Apagar conta</summary>
+  <form method="post" action="<?= e(url('perfil', 'apagarConta')) ?>" class="dobravel-corpo" data-confirmar="Apagar a tua conta de vez? Perdes o progresso, os comentários e as ligações. Não dá para desfazer.">
+    <?= csrf_campo() ?>
+    <p class="atualizacao-texto">Isto apaga o teu progresso, os teus comentários, a foto e as ligações a amigos e ao par. Não dá para desfazer.</p>
+    <label class="campo">
+      <span>palavra-passe</span>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn-perigo">Apagar a minha conta</button>
+  </form>
+</details>
+
 <!-- Aviso curto (usado pelo envio da foto) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>

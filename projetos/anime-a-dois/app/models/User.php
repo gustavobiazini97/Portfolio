@@ -116,6 +116,19 @@ class User extends Model
         $this->save();
     }
 
+    // Apaga a conta de vez, confirmando a palavra-passe. As tabelas ligadas (vistos, comentários, biblioteca, foto,
+    // amizades, convites, avisos...) apagam-se sozinhas (ON DELETE CASCADE); só o par_id dos outros não tem chave, por isso limpa-se à mão.
+    public function apagarConta(string $password): void
+    {
+        if (!password_verify($password, $this->password_hash)) {
+            throw new InvalidArgumentException('A palavra-passe não está certa.');
+        }
+        \Illuminate\Database\Capsule\Manager::connection()->transaction(function () {
+            static::where('par_id', $this->id)->update(['par_id' => null]);   // quem tinha esta conta como par fica sem par
+            $this->delete();
+        });
+    }
+
     // Fecha o popup das novidades: fica tudo visto até à próxima atualização
     public function marcarNovidadesVistas(): void
     {

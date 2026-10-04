@@ -101,6 +101,9 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Os amigos veem o perfil e a biblioteca uns dos outros (`?c=perfil&a=pessoa`); não partilham séries. O par é só um: `users.par_id` (o `migrate.php` liga as duas contas existentes).
 - Tabelas novas: `amizades` (duas linhas por amizade), `pedidos_amizade`, `convites_amigo`.
 
+**Apagar conta**
+- Perfil → "Apagar conta": pede a palavra-passe e apaga o utilizador (`User::apagarConta`); o resto vai por `ON DELETE CASCADE` e o `par_id` de quem o tinha como par é limpo. Termina a sessão.
+
 **Séries com amigos** (várias pessoas por série)
 - Cada série pode ser vista com VÁRIAS pessoas (o par e amigos ao mesmo tempo); cada ligação é entre duas pessoas e vive na tabela `series_juntos` (duas linhas por ligação; `bibliotecas.com_id` ficou como legado e é migrado, marcador `juntos_migrado`). O Vs, os episódios, os comentários, as estatísticas e as notificações mostram só quem vê a série contigo.
 - Convites "Quero ver contigo" passam a ser da tabela `convites_serie` (de → para). "Ver com…" (série aberta) e "Só para mim / Ver com…" (pesquisa) escolhem a pessoa; aceitar liga as bibliotecas (e mantém o progresso de quem já tinha a série).

@@ -145,6 +145,27 @@ class PerfilController extends Controller
         }
     }
 
+    // POST: apaga a conta e tudo o que lhe pertence (pede a palavra-passe) e termina a sessão
+    public function apagarConta(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $user->apagarConta($_POST['password'] ?? '');
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível apagar a conta. Tenta outra vez.');
+        }
+
+        // Conta apagada: sessão nova e vazia
+        $_SESSION = [];
+        session_regenerate_id(true);
+        $this->flash('info', 'A tua conta foi apagada.');
+        $this->redirect('auth', 'login');
+    }
+
     // ---------- Notificações ----------
 
     // POST: o que quero receber e por onde

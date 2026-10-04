@@ -304,6 +304,9 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .dobravel summary::-webkit-details-marker { display: none; }
 .dobravel summary::after { content: "+"; font-size: 20px; color: var(--suave); }
 .dobravel[open] summary::after { content: "–"; }
+/* Apagar conta: o título e o botão em vermelho, para não se confundir com o resto */
+.zona-perigo summary { color: var(--erro); }
+.btn-perigo { background: var(--erro); color: #fff; }
 .dobravel-corpo { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
 .ultimo-texto { flex: 1; min-width: 0; }
 .ultimo-texto p:first-child { font-size: 13px; color: var(--suave); }
