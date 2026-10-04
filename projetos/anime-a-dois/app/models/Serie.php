@@ -15,11 +15,11 @@ class Serie extends Model
 
     protected $casts = ['em_emissao' => 'boolean'];
 
-    // Estados de uma série da biblioteca, pela ordem da fila (os acabados vão para o fim)
+    // Estados de uma série na biblioteca de cada pessoa, pela ordem da fila (os acabados vão para o fim)
     const ESTADOS = ['a_ver' => 'A ver', 'pausa' => 'Em pausa', 'acabado' => 'Acabado'];
 
-    // Série proposta por um ao outro ("Quero ver contigo"): ainda fora da biblioteca
-    const PROPOSTA = 'proposta';
+    // Na biblioteca de alguém, 'convite' = o outro convidou-o a ver esta série com ele ("Quero ver contigo")
+    const CONVITE = 'convite';
 
     // Número de cores de destaque para séries novas ([data-acento="1"] a "8" no CSS)
     const ACENTOS = 8;
@@ -47,25 +47,67 @@ class Serie extends Model
         return $slug === null ? null : static::where('slug', $slug)->first();
     }
 
-    // Só as da biblioteca (sem propostas), pela ordem simples: estado e depois a ordem de entrada.
-    // Para a fila do Início (com progresso e atividade) usa-se biblioteca().
-    public static function naBiblioteca()
+    // ---------- Bibliotecas (cada pessoa tem a sua; tabela bibliotecas) ----------
+
+    // Estado desta série na biblioteca de uma pessoa: a_ver | pausa | acabado | convite, ou null se não a tem
+    public function estadoDe(?User $u): ?string
     {
-        return static::where('estado', '!=', self::PROPOSTA)
-            ->orderByRaw("FIELD(estado, 'a_ver', 'pausa', 'acabado')")
-            ->orderBy('ordem')->orderBy('id')
+        if ($u === null) {
+            return null;
+        }
+        return Capsule::table('bibliotecas')->where('user_id', $u->id)->where('serie_id', $this->id)->value('estado');
+    }
+
+    // Está na biblioteca desta pessoa (convites não contam)?
+    public function naBibliotecaDe(?User $u): bool
+    {
+        $estado = $this->estadoDe($u);
+        return $estado !== null && $estado !== self::CONVITE;
+    }
+
+    // Conjunta = os dois têm-na na biblioteca
+    public function conjunta(User $u, ?User $par): bool
+    {
+        return $par !== null && $this->naBibliotecaDe($u) && $this->naBibliotecaDe($par);
+    }
+
+    // Séries da biblioteca de uma pessoa (sem convites), pela ordem simples: estado e ordem de entrada.
+    // Para a fila do Início (com progresso e atividade) usa-se biblioteca().
+    public static function naBiblioteca(User $u)
+    {
+        return static::join('bibliotecas', 'bibliotecas.serie_id', '=', 'series.id')
+            ->where('bibliotecas.user_id', $u->id)
+            ->where('bibliotecas.estado', '!=', self::CONVITE)
+            ->orderByRaw("FIELD(bibliotecas.estado, 'a_ver', 'pausa', 'acabado')")
+            ->orderBy('series.ordem')->orderBy('series.id')
+            ->select('series.*', 'bibliotecas.estado AS meu_estado')
             ->get();
     }
 
-    // Fila de capas do Início: cada item tem a série, a percentagem de cada um e a última atividade.
-    // Ordem: a ver → em pausa → acabado; dentro de cada estado, a mais mexida (ou a mais recente) primeiro.
-    public static function biblioteca(User $tu, ?User $par): array
+    // Fila de capas: as séries da biblioteca de $dono, cada uma com a percentagem dele, a do outro
+    // (só se for conjunta), o estado e a última atividade. Ordem: a ver → em pausa → acabado; dentro
+    // de cada estado, a mais mexida (ou a que entrou mais recentemente) primeiro.
+    //   $dono = quem é dono da fila; $outro = a outra pessoa (para as barrinhas das conjuntas)
+    //   $excluirDe = não mostrar as que esta pessoa também tem (fila "A Andreia está a ver")
+    public static function biblioteca(User $dono, ?User $outro, ?User $excluirDe = null): array
     {
-        $series = static::where('estado', '!=', self::PROPOSTA)->get();
+        $linhas = Capsule::table('bibliotecas')->where('user_id', $dono->id)->where('estado', '!=', self::CONVITE)->get()->keyBy('serie_id');
+        if ($excluirDe !== null) {
+            $tem = Capsule::table('bibliotecas')->where('user_id', $excluirDe->id)->pluck('serie_id')->flip();
+            $linhas = $linhas->reject(fn ($l) => isset($tem[$l->serie_id]));
+        }
+        if ($linhas->isEmpty()) {
+            return [];
+        }
+        $series = static::whereIn('id', $linhas->keys()->all())->get();
+
+        // Do outro: que séries tem na biblioteca (para saber quais são conjuntas)
+        $doOutro = $outro ? Capsule::table('bibliotecas')->where('user_id', $outro->id)->where('estado', '!=', self::CONVITE)->pluck('serie_id')->flip() : collect();
 
         // Vistos de cada pessoa em cada série, numa só consulta
         $contagens = Capsule::table('vistos')
             ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
+            ->whereIn('episodios.serie_id', $linhas->keys()->all())
             ->groupBy('episodios.serie_id', 'vistos.user_id')
             ->selectRaw('episodios.serie_id AS serie, vistos.user_id AS pessoa, COUNT(*) AS n, MAX(vistos.visto_em) AS ultimo')
             ->get();
@@ -80,26 +122,70 @@ class Serie extends Model
 
         $itens = [];
         foreach ($series as $s) {
-            // Atividade: o último episódio marcado por qualquer um, ou o dia em que entrou na biblioteca
-            $atividade = (string) $s->adicionada_em;
-            foreach ($porSerie[$s->id] ?? [] as $c) {
-                $atividade = max($atividade, (string) $c->ultimo);
+            $linha = $linhas[$s->id];
+            $conjunta = isset($doOutro[$s->id]);
+            // Atividade: o último episódio marcado pelo dono (ou pelos dois, se conjunta), ou quando entrou
+            $atividade = (string) $linha->desde;
+            foreach ($porSerie[$s->id] ?? [] as $pessoa => $c) {
+                if ($pessoa == $dono->id || $conjunta) {
+                    $atividade = max($atividade, (string) $c->ultimo);
+                }
             }
-            $itens[] = ['serie' => $s, 'tu' => $pct($s, $tu), 'par' => $pct($s, $par), 'atividade' => $atividade];
+            $itens[] = [
+                'serie'     => $s,
+                'estado'    => $linha->estado,
+                'conjunta'  => $conjunta,
+                'tu'        => $pct($s, $dono),
+                'par'       => $conjunta ? $pct($s, $outro) : null,
+                'atividade' => $atividade,
+            ];
         }
 
         $rank = array_flip(array_keys(self::ESTADOS));
         usort($itens, fn ($a, $b) =>
-            [$rank[$a['serie']->estado] ?? 0, $b['atividade'], $a['serie']->ordem, $a['serie']->id]
-            <=> [$rank[$b['serie']->estado] ?? 0, $a['atividade'], $b['serie']->ordem, $b['serie']->id]);
+            [$rank[$a['estado']] ?? 0, $b['atividade'], $a['serie']->ordem, $a['serie']->id]
+            <=> [$rank[$b['estado']] ?? 0, $a['atividade'], $b['serie']->ordem, $b['serie']->id]);
 
         return $itens;
     }
 
-    // Propostas ("Quero ver contigo"), as mais recentes primeiro, com quem propôs
-    public static function propostas()
+    // Convites ("Quero ver contigo"): os que recebeste e os que enviaste e ainda estão por responder.
+    // Cada item: ['serie' => Serie, 'recebido' => bool]
+    public static function convites(User $tu, ?User $par): array
     {
-        return static::with('autor')->where('estado', self::PROPOSTA)->orderByDesc('adicionada_em')->get();
+        $ids = [$tu->id];
+        if ($par !== null) {
+            $ids[] = $par->id;
+        }
+        $linhas = Capsule::table('bibliotecas')->whereIn('user_id', $ids)->where('estado', self::CONVITE)->orderByDesc('desde')->get();
+        $series = static::whereIn('id', $linhas->pluck('serie_id')->all())->get()->keyBy('id');
+
+        $lista = [];
+        foreach ($linhas as $l) {
+            if (isset($series[$l->serie_id])) {
+                $lista[] = ['serie' => $series[$l->serie_id], 'recebido' => $l->user_id == $tu->id];
+            }
+        }
+        return $lista;
+    }
+
+    // Para a pesquisa: mal_id → 'biblioteca' (já tens), 'convite' (estás convidado) ou 'par' (só o teu par tem)
+    public static function situacaoNaPesquisa(User $tu, ?User $par): array
+    {
+        $mapa = [];
+        $linhas = Capsule::table('bibliotecas')
+            ->join('series', 'series.id', '=', 'bibliotecas.serie_id')
+            ->whereNotNull('series.mal_id')
+            ->whereIn('bibliotecas.user_id', array_filter([$tu->id, $par?->id]))
+            ->get(['series.mal_id', 'bibliotecas.user_id', 'bibliotecas.estado']);
+        foreach ($linhas as $l) {
+            if ($l->user_id == $tu->id) {
+                $mapa[$l->mal_id] = $l->estado === self::CONVITE ? 'convite' : 'biblioteca';
+            } elseif ($l->estado !== self::CONVITE) {
+                $mapa[$l->mal_id] ??= 'par';
+            }
+        }
+        return $mapa;
     }
 
     // ---------- Nomes ----------
@@ -115,26 +201,43 @@ class Serie extends Model
         return ($antes !== false && mb_strlen($antes) >= 4) ? $antes : $this->nome;
     }
 
-    // "A ver", "Em pausa", "Acabado" (ou "Proposta")
-    public function estadoTexto(): string
+    // "A ver", "Em pausa", "Acabado" (ou "Convite")
+    public static function estadoTexto(?string $estado): string
     {
-        return self::ESTADOS[$this->estado] ?? 'Proposta';
+        return self::ESTADOS[$estado] ?? 'Convite';
     }
 
     // ---------- Adicionar / propor ----------
     // Os dados chegam do browser, que os foi buscar às APIs de anime (ver app/models/DadosAnime.php).
 
-    // Cria a série com todos os episódios. $proposta = true → fica em "Quero ver contigo".
+    // Põe a série na biblioteca de $autor e, se $convidar, convida o par a vê-la com ele.
+    // Se a série ainda não existe na app, é criada com todos os episódios.
     // $info e $episodios já validados por DadosAnime::info() e DadosAnime::episodios().
     // $comFillers = os episódios vieram do Jikan (com filler/recap); senão o browser tenta mais tarde.
-    public static function adicionarDoMal(User $autor, array $info, array $episodios, bool $proposta, bool $comFillers = false): Serie
+    public static function adicionarDoMal(User $autor, array $info, array $episodios, bool $convidar, bool $comFillers = false): Serie
     {
-        // Já existe? (o mal_id é único)
         $existe = static::where('mal_id', $info['mal_id'])->first();
         if ($existe !== null) {
-            throw new InvalidArgumentException($existe->estado === self::PROPOSTA
-                ? $existe->nome . ' já está em "Quero ver contigo".'
-                : $existe->nome . ' já está na biblioteca.');
+            $estado = $existe->estadoDe($autor);
+            if ($estado === self::CONVITE) {
+                throw new InvalidArgumentException('Já tens um convite para ' . $existe->nome . ': aceita-o no Início.');
+            }
+            if ($estado !== null) {
+                throw new InvalidArgumentException($existe->nome . ' já está na tua biblioteca.');
+            }
+            // Já está na biblioteca do par: juntar-te tornava-a "dos dois" sem ele confirmar
+            $par = $autor->parceiro();
+            if ($existe->naBibliotecaDe($par)) {
+                throw new InvalidArgumentException($existe->nome . ' já está na biblioteca de ' . $par->nome . ': pede-lhe para te convidar.');
+            }
+            // A série existe na app mas não é de ninguém (ex.: uma do seed que tiraste): volta para a tua
+            return Capsule::connection()->transaction(function () use ($existe, $autor, $convidar) {
+                $existe->juntarA($autor, 'a_ver');
+                if ($convidar) {
+                    $existe->convidar($autor);
+                }
+                return $existe;
+            });
         }
 
         $total = self::totalDe($info, $episodios);
@@ -142,7 +245,7 @@ class Serie extends Model
             throw new InvalidArgumentException('Ainda não se sabe quantos episódios tem ' . $info['nome'] . '.');
         }
 
-        return Capsule::connection()->transaction(function () use ($autor, $info, $episodios, $total, $proposta, $comFillers) {
+        return Capsule::connection()->transaction(function () use ($autor, $info, $episodios, $total, $convidar, $comFillers) {
             $agora = date('Y-m-d H:i:s');
             $serie = static::create([
                 'slug'            => self::slugLivre($info['nome']),
@@ -155,13 +258,16 @@ class Serie extends Model
                 'tipo'            => $info['tipo'],
                 'minutos_ep'      => $info['minutos'],
                 'em_emissao'      => $info['em_emissao'],
-                'estado'          => $proposta ? self::PROPOSTA : 'a_ver',
                 'acento'          => $info['mal_id'] % self::ACENTOS + 1,   // cor fixa por série, "ao calhas"
                 'adicionada_por'  => $autor->id,
                 'adicionada_em'   => $agora,
                 'sincronizada_em' => $comFillers ? $agora : null,   // null = fillers ainda por buscar
             ]);
             $serie->guardarEpisodios($episodios, $total, $comFillers);
+            $serie->juntarA($autor, 'a_ver');
+            if ($convidar) {
+                $serie->convidar($autor);
+            }
             return $serie;
         });
     }
@@ -260,52 +366,113 @@ class Serie extends Model
         return $slug;
     }
 
-    // ---------- Estado e propostas ----------
+    // ---------- Estado, convites e tirar (sempre na biblioteca de UMA pessoa) ----------
 
-    // Muda o estado de uma série da biblioteca (a ver, em pausa, acabado)
-    public function definirEstado(string $estado): void
+    // Põe (ou atualiza) a série na biblioteca de uma pessoa
+    private function juntarA(User $u, string $estado): void
+    {
+        Capsule::table('bibliotecas')->updateOrInsert(
+            ['user_id' => $u->id, 'serie_id' => $this->id],
+            ['estado' => $estado, 'desde' => date('Y-m-d H:i:s')]
+        );
+    }
+
+    // Muda o estado na TUA biblioteca (o do teu par fica como está)
+    public function definirEstado(User $u, string $estado): void
     {
         if (!isset(self::ESTADOS[$estado])) {
             throw new InvalidArgumentException('Estado desconhecido.');
         }
-        if ($this->estado === self::PROPOSTA) {
-            throw new InvalidArgumentException('Primeiro, o teu par tem de aceitar a proposta.');
+        if (!$this->naBibliotecaDe($u)) {
+            throw new InvalidArgumentException($this->nomeCurto() . ' não está na tua biblioteca.');
         }
-        $this->estado = $estado;
-        $this->save();
+        Capsule::table('bibliotecas')->where('user_id', $u->id)->where('serie_id', $this->id)->update(['estado' => $estado]);
     }
 
-    // O par aceita a proposta: passa para "a ver" e vai para o início da fila
+    // Convida o par a ver esta série contigo (tem de estar na tua biblioteca e ainda não na dele)
+    public function convidar(User $de): void
+    {
+        $par = $de->parceiro();
+        if ($par === null) {
+            throw new InvalidArgumentException('Ainda não tens par a quem convidar.');
+        }
+        if (!$this->naBibliotecaDe($de)) {
+            throw new InvalidArgumentException('Primeiro adiciona ' . $this->nomeCurto() . ' à tua biblioteca.');
+        }
+        $estadoPar = $this->estadoDe($par);
+        if ($estadoPar === self::CONVITE) {
+            throw new InvalidArgumentException('Já convidaste ' . $par->nome . ' para ' . $this->nomeCurto() . '.');
+        }
+        if ($estadoPar !== null) {
+            throw new InvalidArgumentException($this->nomeCurto() . ' já é dos dois.');
+        }
+        $this->juntarA($par, self::CONVITE);
+    }
+
+    // Aceitas o convite: a série entra na tua biblioteca, em "a ver" (passa a conjunta)
     public function aceitar(User $quem): void
     {
-        if ($this->estado !== self::PROPOSTA) {
-            throw new InvalidArgumentException($this->nome . ' já está na biblioteca.');
+        if ($this->estadoDe($quem) !== self::CONVITE) {
+            throw new InvalidArgumentException('Esse convite já não existe.');
         }
-        if ((int) $this->adicionada_por === $quem->id) {
-            throw new InvalidArgumentException('Quem aceita é o teu par.');
-        }
-        $this->estado = 'a_ver';
-        $this->adicionada_em = date('Y-m-d H:i:s');
-        $this->save();
+        $this->juntarA($quem, 'a_ver');
     }
 
-    // Só se pode tirar uma série sem episódios vistos (ou uma proposta): não se perde nada
-    public function podeSerRemovida(): bool
+    // Recusas o convite (quem foi convidado) ou cancelas o que enviaste (quem convidou)
+    public function retirarConvite(User $quem): void
     {
-        return $this->estado === self::PROPOSTA
-            || !Capsule::table('vistos')
+        $par = $quem->parceiro();
+        $apagados = Capsule::table('bibliotecas')
+            ->where('serie_id', $this->id)
+            ->where('estado', self::CONVITE)
+            ->whereIn('user_id', array_filter([$quem->id, $par?->id]))
+            ->delete();
+        if ($apagados === 0) {
+            throw new InvalidArgumentException('Esse convite já não existe.');
+        }
+        $this->apagarSeOrfa();
+    }
+
+    // Só podes tirar da TUA biblioteca uma série em que ainda não marcaste episódios (não perdes nada)
+    public function podeSerRemovidaPor(User $u): bool
+    {
+        return $this->naBibliotecaDe($u)
+            && !Capsule::table('vistos')
                 ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
                 ->where('episodios.serie_id', $this->id)
+                ->where('vistos.user_id', $u->id)
                 ->exists();
     }
 
-    // Apaga a série (os episódios e comentários vão com ela, pelo ON DELETE CASCADE)
-    public function remover(): void
+    // Tira da tua biblioteca (a do teu par fica igual). Um convite que tinhas enviado vai com ela.
+    public function removerDe(User $u): void
     {
-        if (!$this->podeSerRemovida()) {
-            throw new InvalidArgumentException('Já há episódios vistos de ' . $this->nome . ': não dá para tirar.');
+        if (!$this->podeSerRemovidaPor($u)) {
+            throw new InvalidArgumentException('Já marcaste episódios de ' . $this->nomeCurto() . ': não dá para tirar.');
         }
-        $this->delete();
+        Capsule::connection()->transaction(function () use ($u) {
+            Capsule::table('bibliotecas')->where('user_id', $u->id)->where('serie_id', $this->id)->delete();
+            $par = $u->parceiro();
+            if ($par !== null) {
+                Capsule::table('bibliotecas')->where('user_id', $par->id)->where('serie_id', $this->id)->where('estado', self::CONVITE)->delete();
+            }
+            $this->apagarSeOrfa();
+        });
+    }
+
+    // Série do MyAnimeList que já não está na biblioteca de ninguém e sem episódios vistos: apaga-se
+    // (as do seed ficam sempre: o seed volta a criá-las a cada deploy)
+    private function apagarSeOrfa(): void
+    {
+        if ($this->doSeed() || Capsule::table('bibliotecas')->where('serie_id', $this->id)->exists()) {
+            return;
+        }
+        $temVistos = Capsule::table('vistos')
+            ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
+            ->where('episodios.serie_id', $this->id)->exists();
+        if (!$temVistos) {
+            $this->delete();
+        }
     }
 
     // ---------- Arcos e progresso ----------

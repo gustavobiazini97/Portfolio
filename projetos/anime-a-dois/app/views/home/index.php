@@ -1,10 +1,11 @@
 <?php
 /* Início.
-   Variáveis: $user, $parceiro (ou null), $biblioteca (lista de ['serie','tu','par']), $propostas,
-              $serie (aberta, ou null se a biblioteca estiver vazia), $ultimoPar (Episodio ou null),
-              $meu, $dele, $resumo, $podeRemover, $jaCa (mal_id → biblioteca|proposta),
-              $novidades (as que ainda não viste), $flash */
-$comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);
+   Variáveis: $user, $parceiro (o par, ou null), $parVs (o par só se a série aberta for dos dois),
+              $biblioteca (a tua: ['serie','estado','conjunta','tu','par']), $doPar (só do par, mesmo formato),
+              $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
+              $meuEstado, $conjunta, $estadoPar, $ultimoPar (Episodio ou null), $meu, $dele, $resumo,
+              $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $flash */
+$comecou = $serie && ($meu['vistos'] > 0 || $dele['vistos'] > 0);   // $dele já vem a zeros se a série for só tua
 $nomePar = $parceiro ? $parceiro->nome : null;
 
 // Capa de uma série: a imagem do MyAnimeList ou, sem ela, as iniciais sobre a cor da série
@@ -14,6 +15,13 @@ $capa = function (Serie $s, string $classe): string {
     }
     $iniciais = mb_strtoupper(mb_substr($s->nomeCurto(), 0, 2));
     return '<span class="' . e($classe) . ' capa-sem" data-serie="' . e($s->slug) . '" data-acento="' . e((string) $s->acento) . '">' . e($iniciais) . '</span>';
+};
+
+// Selo no canto da capa: o estado (em pausa / acabado) e, nas da tua fila, se é dos dois
+$selo = fn (array $item) => match ($item['estado']) {
+    'acabado' => '✓ acabado',
+    'pausa'   => 'em pausa',
+    default   => '',
 };
 ?>
 <div class="topo">
@@ -39,15 +47,17 @@ $capa = function (Serie $s, string $classe): string {
 <?php require __DIR__ . '/../layout/flash.php'; ?>
 
 <?php if ($parceiro && $ultimoPar): ?>
-  <!-- Último episódio que o par viu (em qualquer série): abre a série nesse episódio -->
-  <a class="painel vidro ultimo painel-link" href="<?= e(url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero])) ?>">
+  <!-- Último episódio que o par viu (em qualquer série). Se a série também está na tua biblioteca,
+       o cartão abre-a nesse episódio; se é só dele, é só para espreitar. -->
+  <?php $abre = $ultimoPar->serie->naBibliotecaDe($user); ?>
+  <<?= $abre ? 'a' : 'div' ?> class="painel vidro ultimo<?= $abre ? ' painel-link' : '' ?>"<?= $abre ? ' href="' . e(url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero])) . '"' : '' ?>>
     <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = ''; require __DIR__ . '/../layout/avatar.php'; ?>
     <div class="ultimo-texto">
       <p><?= e($parceiro->nome . ' viu ' . tempo_relativo($ultimoPar->pivot->visto_em)) ?></p>
       <p><?= e($ultimoPar->serie->nomeCurto() . ' · episódio ' . $ultimoPar->numero) ?></p>
     </div>
     <span class="ultimo-num"><?= $ultimoPar->numero ?></span>
-  </a>
+  </<?= $abre ? 'a' : 'div' ?>>
 <?php elseif ($parceiro): ?>
   <section class="painel vidro vazio">
     <p><?= e($parceiro->nome) ?> ainda não marcou nenhum episódio</p>
@@ -64,11 +74,11 @@ $capa = function (Serie $s, string $classe): string {
   </section>
 <?php endif; ?>
 
-<!-- Biblioteca: fila de capas que desliza para os lados, com as duas barrinhas por baixo.
-     A ver → em pausa → acabado; tocar numa capa abre-a aqui em baixo (Vs e estado). -->
+<!-- A tua biblioteca: fila de capas que desliza para os lados. As séries dos dois têm duas barrinhas
+     (tu e o par); as só tuas, uma. A ver → em pausa → acabado; tocar numa capa abre-a aqui em baixo. -->
 <section class="biblioteca" aria-labelledby="biblioteca-titulo">
   <div class="secao-cima">
-    <h2 id="biblioteca-titulo">Biblioteca</h2>
+    <h2 id="biblioteca-titulo">A tua biblioteca</h2>
     <button type="button" class="btn-redondo vidro btn-adicionar" id="btn-adicionar" aria-label="Adicionar série">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     </button>
@@ -76,14 +86,14 @@ $capa = function (Serie $s, string $classe): string {
 
   <?php if ($biblioteca === []): ?>
     <div class="painel vidro vazio">
-      <p>A biblioteca está vazia</p>
+      <p>A tua biblioteca está vazia</p>
       <p>Toca no + e procura o próximo anime.</p>
     </div>
   <?php else: ?>
     <?php
-    // Séries do MyAnimeList ainda sem capa (as do seed, na primeira visita): o browser vai buscá-las
+    // Séries com id do MyAnimeList ainda sem capa (as do seed, na primeira visita): o browser vai buscá-las
     $semCapa = [];
-    foreach ($biblioteca as $item) {
+    foreach (array_merge($biblioteca, $doPar) as $item) {
         if ($item['serie']->capa === null && $item['serie']->mal_id !== null) {
             $semCapa[] = ['serie' => $item['serie']->slug, 'mal' => (int) $item['serie']->mal_id];
         }
@@ -92,19 +102,26 @@ $capa = function (Serie $s, string $classe): string {
     <div class="fila" id="fila" data-sem-capa="<?= e(json_encode($semCapa)) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>">
       <?php foreach ($biblioteca as $item): $s = $item['serie']; ?>
         <!-- data-serie/data-acento dão a cor da série só a este cartão (aro da capa e fundo sem imagem) -->
-        <a class="capa-item capa-<?= e($s->estado) ?>" href="<?= e(url('home', 'index', ['serie' => $s->slug])) ?>"
+        <a class="capa-item capa-<?= e($item['estado']) ?>" href="<?= e(url('home', 'index', ['serie' => $s->slug])) ?>"
            data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>"
            <?= $serie && $s->id === $serie->id ? 'aria-current="page"' : '' ?>>
           <span class="capa-moldura">
             <?= $capa($s, 'capa') ?>
-            <?php if ($s->estado !== 'a_ver'): ?>
-              <span class="capa-estado"><?= $s->estado === 'acabado' ? '✓ acabado' : 'em pausa' ?></span>
+            <?php if ($item['conjunta']): ?>
+              <!-- Dos dois: os dois avatares pequenos no canto -->
+              <span class="capa-dois" title="Série dos dois">
+                <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
+                <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = 'avatar-micro'; require __DIR__ . '/../layout/avatar.php'; ?>
+              </span>
+            <?php endif; ?>
+            <?php if ($selo($item) !== ''): ?>
+              <span class="capa-estado"><?= e($selo($item)) ?></span>
             <?php endif; ?>
           </span>
           <span class="capa-nome"><?= e($s->nomeCurto()) ?></span>
           <span class="capa-barras">
             <progress class="barra barra-fina vs-tu-cor" max="100" value="<?= $item['tu'] ?>" aria-label="Tu: <?= $item['tu'] ?>%"></progress>
-            <?php if ($parceiro): ?>
+            <?php if ($item['conjunta']): ?>
               <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['par'] ?>" aria-label="<?= e($nomePar) ?>: <?= $item['par'] ?>%"></progress>
             <?php endif; ?>
           </span>
@@ -114,45 +131,45 @@ $capa = function (Serie $s, string $classe): string {
   <?php endif; ?>
 </section>
 
-<?php if (count($propostas) > 0): ?>
-  <!-- Quero ver contigo: séries que um propõe ao outro; aceitar passa-as para "a ver" -->
-  <section class="painel vidro propostas" id="propostas">
+<?php if ($convites !== []): ?>
+  <!-- Quero ver contigo: convites para ver uma série a dois; aceitar põe-na nas duas bibliotecas -->
+  <section class="painel vidro propostas" id="convites">
     <div class="painel-titulo">
       <h2>Quero ver contigo</h2>
-      <span><?= plural(count($propostas), 'proposta', 'propostas') ?></span>
+      <span><?= plural(count($convites), 'convite', 'convites') ?></span>
     </div>
     <ul class="propostas-lista">
-      <?php foreach ($propostas as $p): $minha = (int) $p->adicionada_por === $user->id; ?>
+      <?php foreach ($convites as $c): $p = $c['serie']; ?>
         <li class="proposta">
           <?= $capa($p, 'proposta-capa') ?>
           <div class="proposta-texto">
             <p class="proposta-nome"><?= e($p->nome) ?></p>
             <p class="proposta-info">
               <?= e(implode(' · ', array_filter([
-                  $minha ? 'propuseste tu' : ($p->autor ? $p->autor->nome . ' propôs' : null),
+                  $c['recebido'] ? ($nomePar ?? 'O teu par') . ' convidou-te' : 'convidaste ' . ($nomePar ?? 'o teu par'),
                   plural((int) $p->total_episodios, 'ep.', 'ep.'),
                   $p->tipo,
                   $p->anos,
               ]))) ?>
             </p>
             <div class="proposta-acoes">
-              <?php if ($minha): ?>
-                <span class="proposta-espera">à espera de <?= e($nomePar ?? 'o teu par') ?></span>
-                <form method="post" action="<?= e(url('biblioteca', 'remover')) ?>" data-confirmar="Retirar a proposta de <?= e($p->nomeCurto()) ?>?">
-                  <?= csrf_campo() ?>
-                  <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
-                  <button type="submit" class="link-suave">Cancelar</button>
-                </form>
-              <?php else: ?>
+              <?php if ($c['recebido']): ?>
                 <form method="post" action="<?= e(url('biblioteca', 'aceitar')) ?>">
                   <?= csrf_campo() ?>
                   <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
                   <button type="submit" class="btn-pequeno">Bora ver</button>
                 </form>
-                <form method="post" action="<?= e(url('biblioteca', 'remover')) ?>" data-confirmar="Recusar <?= e($p->nomeCurto()) ?>?">
+                <form method="post" action="<?= e(url('biblioteca', 'recusar')) ?>" data-confirmar="Recusar <?= e($p->nomeCurto()) ?>?">
                   <?= csrf_campo() ?>
                   <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
                   <button type="submit" class="link-suave">Agora não</button>
+                </form>
+              <?php else: ?>
+                <span class="proposta-espera">à espera de <?= e($nomePar ?? 'o teu par') ?></span>
+                <form method="post" action="<?= e(url('biblioteca', 'recusar')) ?>" data-confirmar="Cancelar o convite de <?= e($p->nomeCurto()) ?>?">
+                  <?= csrf_campo() ?>
+                  <input type="hidden" name="serie" value="<?= e($p->slug) ?>">
+                  <button type="submit" class="link-suave">Cancelar</button>
                 </form>
               <?php endif; ?>
             </div>
@@ -165,10 +182,10 @@ $capa = function (Serie $s, string $classe): string {
 
 <?php if ($serie): ?>
   <?php if ($comecou): ?>
-    <!-- Vs da série aberta: uma barra fina por pessoa; o cartão todo abre a série -->
+    <!-- Vs da série aberta (ou só o teu progresso, se a série for só tua); o cartão todo abre a série -->
     <a class="painel vidro painel-link" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
       <div class="painel-titulo">
-        <h2><?= $parceiro ? e('Tu e ' . $parceiro->nome . ' em ' . $serie->nomeCurto()) : e('O teu progresso em ' . $serie->nomeCurto()) ?></h2>
+        <h2><?= $parVs ? e('Tu e ' . $parVs->nome . ' em ' . $serie->nomeCurto()) : e('O teu progresso em ' . $serie->nomeCurto()) ?></h2>
         <span><?= $serie->total_episodios ?> ep. <svg class="painel-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
       </div>
 
@@ -177,9 +194,9 @@ $capa = function (Serie $s, string $classe): string {
           <div class="vs-rotulo"><span>Tu</span><span><b><?= $meu['posicao'] ?></b> · <?= $meu['pct'] ?>%</span></div>
           <progress class="barra" max="100" value="<?= $meu['pct'] ?>" aria-label="Progresso: <?= $meu['pct'] ?>%"></progress>
         </div>
-        <?php if ($parceiro): ?>
+        <?php if ($parVs): ?>
           <div class="vs-linha vs-par">
-            <div class="vs-rotulo"><span><?= e($parceiro->nome) ?></span><span><b><?= $dele['posicao'] ?></b> · <?= $dele['pct'] ?>%</span></div>
+            <div class="vs-rotulo"><span><?= e($parVs->nome) ?></span><span><b><?= $dele['posicao'] ?></b> · <?= $dele['pct'] ?>%</span></div>
             <progress class="barra" max="100" value="<?= $dele['pct'] ?>" aria-label="Progresso: <?= $dele['pct'] ?>%"></progress>
           </div>
         <?php endif; ?>
@@ -189,34 +206,74 @@ $capa = function (Serie $s, string $classe): string {
     </a>
   <?php else: ?>
     <section class="painel vidro vazio">
-      <p>Ainda nenhum dos dois começou <?= e($serie->nomeCurto()) ?></p>
+      <p><?= $parVs ? 'Ainda nenhum dos dois começou ' : 'Ainda não começaste ' ?><?= e($serie->nomeCurto()) ?></p>
       <p>Marca o primeiro episódio e o placar aparece aqui.</p>
     </section>
   <?php endif; ?>
 
-  <!-- Estado da série aberta: os acabados vão para o fim da fila -->
+  <!-- O TEU estado desta série (o do par é dele): os acabados vão para o fim da tua fila -->
   <form class="estados vidro" method="post" action="<?= e(url('biblioteca', 'estado')) ?>" aria-label="Estado de <?= e($serie->nomeCurto()) ?>">
     <?= csrf_campo() ?>
     <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
     <?php foreach (Serie::ESTADOS as $valor => $texto): ?>
       <button type="submit" name="estado" value="<?= e($valor) ?>" class="estado"
-              aria-pressed="<?= $serie->estado === $valor ? 'true' : 'false' ?>"><?= e($texto) ?></button>
+              aria-pressed="<?= $meuEstado === $valor ? 'true' : 'false' ?>"><?= e($texto) ?></button>
     <?php endforeach; ?>
   </form>
 
-  <?php if ($podeRemover): ?>
-    <!-- Só aparece enquanto ninguém marcou episódios desta série: nada se perde -->
-    <form class="remover" method="post" action="<?= e(url('biblioteca', 'remover')) ?>" data-confirmar="Tirar <?= e($serie->nomeCurto()) ?> da biblioteca?">
-      <?= csrf_campo() ?>
-      <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
-      <button type="submit" class="link-suave">Tirar da biblioteca</button>
-    </form>
+  <?php if ($parceiro && !$conjunta || $podeRemover): ?>
+    <!-- Ações da série: convidar o par (se for só tua) e tirar (se ainda não marcaste episódios) -->
+    <div class="serie-acoes">
+      <?php if ($parceiro && !$conjunta): ?>
+        <?php if ($estadoPar === Serie::CONVITE): ?>
+          <span class="proposta-espera">Convite enviado · à espera de <?= e($nomePar) ?></span>
+        <?php else: ?>
+          <form method="post" action="<?= e(url('biblioteca', 'convidar')) ?>">
+            <?= csrf_campo() ?>
+            <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+            <button type="submit" class="btn-pequeno secundario">Ver com <?= e($nomePar) ?></button>
+          </form>
+        <?php endif; ?>
+      <?php endif; ?>
+      <?php if ($podeRemover): ?>
+        <form method="post" action="<?= e(url('biblioteca', 'remover')) ?>" data-confirmar="Tirar <?= e($serie->nomeCurto()) ?> da tua biblioteca?">
+          <?= csrf_campo() ?>
+          <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+          <button type="submit" class="link-suave">Tirar da biblioteca</button>
+        </form>
+      <?php endif; ?>
+    </div>
   <?php endif; ?>
 
-  <a class="btn acao-fundo" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
+  <a class="btn" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
     Ver episódios de <?= e($serie->nomeCurto()) ?>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
   </a>
+<?php endif; ?>
+
+<?php if ($doPar !== []): ?>
+  <!-- A <par> está a ver: as séries só dele, para espreitar o progresso (não abrem) -->
+  <section class="biblioteca biblioteca-par" aria-labelledby="par-titulo">
+    <div class="secao-cima">
+      <h2 id="par-titulo"><?= e($nomePar) ?> está a ver</h2>
+    </div>
+    <div class="fila fila-par">
+      <?php foreach ($doPar as $item): $s = $item['serie']; ?>
+        <div class="capa-item capa-<?= e($item['estado']) ?>" data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>">
+          <span class="capa-moldura">
+            <?= $capa($s, 'capa') ?>
+            <?php if ($selo($item) !== ''): ?>
+              <span class="capa-estado"><?= e($selo($item)) ?></span>
+            <?php endif; ?>
+          </span>
+          <span class="capa-nome"><?= e($s->nomeCurto()) ?></span>
+          <span class="capa-barras">
+            <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $item['tu'] ?>" aria-label="<?= e($nomePar) ?>: <?= $item['tu'] ?>%"></progress>
+          </span>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
 <?php endif; ?>
 
 <!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).

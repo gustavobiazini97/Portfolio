@@ -1,6 +1,7 @@
 <?php
-// Início: o último episódio do par, a biblioteca (fila de capas), as propostas "Quero ver contigo",
-// o Vs da série escolhida, com o estado dela (a ver, em pausa, acabado), e o popup das novidades.
+// Início: o último episódio do par, a tua biblioteca (fila de capas), a fila "A <par> está a ver",
+// os convites "Quero ver contigo", o Vs da série escolhida com o teu estado (a ver, em pausa, acabado)
+// e o popup das novidades.
 
 class HomeController extends Controller
 {
@@ -8,44 +9,52 @@ class HomeController extends Controller
     public function index(): void
     {
         $user       = $this->exigirLogin();
-        $parceiro   = $user->parceiro();
-        $biblioteca = Serie::biblioteca($user, $parceiro);   // [['serie', 'tu', 'par', 'atividade'], ...]
+        $par        = $user->parceiro();
+        $biblioteca = Serie::biblioteca($user, $par);                        // a tua (conjuntas e só tuas)
+        $doPar      = $par ? Serie::biblioteca($par, null, $user) : [];      // só dele: "A Andreia está a ver"
 
         // Último episódio de cada um (em qualquer série)
-        $ultimoPar = $parceiro ? $parceiro->ultimoVisto() : null;
+        $ultimoPar = $par ? $par->ultimoVisto() : null;
         $ultimoTu  = $user->ultimoVisto();
 
-        // Série aberta: a do URL (se não for proposta); senão a do último episódio do par (para o Vs
-        // ser da mesma série); senão a tua; senão a primeira da fila. null = biblioteca vazia.
-        $doUrl = Serie::porSlug($_GET['serie'] ?? null);
-        if ($doUrl !== null && $doUrl->estado === Serie::PROPOSTA) {
-            $doUrl = null;
+        // Série aberta: a do URL; senão a do último episódio do par; senão a tua; senão a primeira
+        // da fila. Tem de estar na TUA biblioteca. null = biblioteca vazia.
+        $candidatas = [Serie::porSlug($_GET['serie'] ?? null), $ultimoPar?->serie, $ultimoTu?->serie, $biblioteca[0]['serie'] ?? null];
+        $serie = null;
+        foreach ($candidatas as $c) {
+            if ($c !== null && $c->naBibliotecaDe($user)) {
+                $serie = $c;
+                break;
+            }
         }
-        $serie = $doUrl
-              ?? ($ultimoPar ? $ultimoPar->serie : null)
-              ?? ($ultimoTu ? $ultimoTu->serie : null)
-              ?? ($biblioteca[0]['serie'] ?? null);
 
-        $meu  = $serie ? $serie->progressoDe($user) : null;
-        $dele = $serie ? $serie->progressoDe($parceiro) : null;
+        // Da série aberta: é dos dois? (só nesse caso o par aparece no Vs) e em que estado está o convite
+        $conjunta = $serie ? $serie->conjunta($user, $par) : false;
+        $parVs    = $conjunta ? $par : null;
+        $meu      = $serie ? $serie->progressoDe($user) : null;
+        $dele     = $serie ? $serie->progressoDe($parVs) : null;
 
         $this->render('home/index', [
             'titulo'      => 'Início',
             'serieSlug'   => $serie?->slug,
             'serieAcento' => $serie?->acento,
             'user'        => $user,
-            'parceiro'    => $parceiro,
+            'parceiro'    => $par,
+            'parVs'       => $parVs,
             'biblioteca'  => $biblioteca,
-            'propostas'   => Serie::propostas(),
+            'doPar'       => $doPar,
+            'convites'    => Serie::convites($user, $par),
             'serie'       => $serie,
+            'meuEstado'   => $serie?->estadoDe($user),
+            'conjunta'    => $conjunta,
+            'estadoPar'   => $serie && $par ? $serie->estadoDe($par) : null,   // null | convite | a_ver...
             'ultimoPar'   => $ultimoPar,
             'meu'         => $meu,
             'dele'        => $dele,
-            'resumo'      => $serie ? $this->resumoVs($meu, $dele, $parceiro) : '',
-            'podeRemover' => $serie ? $serie->podeSerRemovida() : false,
-            // Para a pesquisa marcar logo o que já cá está: mal_id → 'biblioteca' | 'proposta'
-            'jaCa'        => Serie::whereNotNull('mal_id')->pluck('estado', 'mal_id')
-                                ->map(fn ($e) => $e === Serie::PROPOSTA ? 'proposta' : 'biblioteca')->all(),
+            'resumo'      => $serie ? $this->resumoVs($meu, $dele, $parVs, $par) : '',
+            'podeRemover' => $serie ? $serie->podeSerRemovidaPor($user) : false,
+            // Para a pesquisa marcar o que já cá está: mal_id → biblioteca | convite | par
+            'jaCa'        => Serie::situacaoNaPesquisa($user, $par),
             'novidades'   => Novidade::porVer($user),   // o que mudou na app desde a última vez que viste
         ]);
     }
@@ -64,10 +73,13 @@ class HomeController extends Controller
     }
 
     // Frase por baixo das barras: quem vai à frente e por quantos episódios
-    private function resumoVs(array $meu, array $dele, ?User $parceiro): string
+    private function resumoVs(array $meu, array $dele, ?User $parceiro, ?User $par): string
     {
-        if ($parceiro === null) {
+        if ($par === null) {
             return 'Quando o teu par criar conta, aparece aqui ao teu lado.';
+        }
+        if ($parceiro === null) {
+            return 'Só tu tens esta série. Convida ' . $par->nome . ' para verem os dois.';
         }
 
         $dif = $meu['posicao'] - $dele['posicao'];

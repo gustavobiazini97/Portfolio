@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS series (
   tipo            VARCHAR(20)  NULL,                -- TV, Movie, OVA, ONA...
   minutos_ep      TINYINT UNSIGNED NULL,            -- duração de um episódio (as Estatísticas usam 23 se faltar)
   em_emissao      TINYINT(1)   NOT NULL DEFAULT 0,  -- ainda a sair: os episódios novos são buscados de vez em quando
-  estado          VARCHAR(10)  NOT NULL DEFAULT 'a_ver',   -- proposta | a_ver | pausa | acabado
+  estado          VARCHAR(10)  NOT NULL DEFAULT 'a_ver',   -- ANTIGO (estado partilhado); agora o estado vive em bibliotecas
   acento          TINYINT UNSIGNED NULL,            -- cor da série (1–8, ver [data-acento] no CSS)
   adicionada_por  INT UNSIGNED NULL,                -- quem adicionou (ou propôs)
   adicionada_em   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -108,4 +108,18 @@ CREATE TABLE IF NOT EXISTS subscricoes (
   auth       VARCHAR(255) NOT NULL,
   criado_em  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_sub_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Biblioteca de cada pessoa: que séries tem e em que estado (cada um tem o seu).
+-- Uma série é CONJUNTA quando os dois a têm (com estado a_ver, pausa ou acabado).
+-- estado 'convite' = o outro convidou esta pessoa a ver a série com ele ("Quero ver contigo").
+CREATE TABLE IF NOT EXISTS bibliotecas (
+  user_id  INT UNSIGNED NOT NULL,
+  serie_id INT UNSIGNED NOT NULL,
+  estado   VARCHAR(10)  NOT NULL DEFAULT 'a_ver',     -- a_ver | pausa | acabado | convite
+  desde    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- quando entrou (ou quando chegou o convite)
+  PRIMARY KEY (user_id, serie_id),
+  KEY idx_bibliotecas_serie (serie_id),
+  CONSTRAINT fk_bib_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_bib_serie FOREIGN KEY (serie_id) REFERENCES series(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;

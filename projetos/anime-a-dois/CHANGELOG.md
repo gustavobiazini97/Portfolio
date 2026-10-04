@@ -81,8 +81,17 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - As capas que faltam (as do Naruto, na primeira visita) também são buscadas pelo telemóvel.
 - A mesma série não entra duas vezes (o `mal_id` é único; as do Naruto já têm o seu).
 
+**Bibliotecas individuais** (tabela `bibliotecas`)
+- Cada um tem a sua biblioteca e o seu estado em cada série (a ver, em pausa, acabado).
+- Série **conjunta** = está nas duas bibliotecas; só passa a conjunta por convite aceite. Capas das conjuntas têm os dois avatares.
+- Ao adicionar: "Só para mim" ou "Quero ver com…" (fica na tua + convite). Numa série só tua, "Ver com…" envia o convite.
+- Fila "A … está a ver" com as séries só do par (só para espreitar; não abrem).
+- Tirar da biblioteca: só da tua e só se ainda não marcaste episódios dela; a do par fica igual.
+- Notificações de episódios e comentários só nas séries conjuntas; séries só tuas não avisam o par.
+- O `migrate.php` criou as bibliotecas a partir das séries antigas (as do seed para os dois, as adicionadas só para quem as adicionou).
+
 **Quero ver contigo**
-- Lista de séries propostas por um ao outro. "Bora ver" passa-a para "a ver"; "Agora não" ou "Cancelar" retira-a.
+- Convites recebidos ("Bora ver" / "Agora não") e enviados ("à espera de…" / "Cancelar").
 
 **O que há de novo** (popup)
 - Ao abrir o Início, cada um vê as novidades que ainda não viu; ao fechar, ficam vistas até à próxima.
@@ -168,6 +177,7 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 | 04/10 | Jikan chamado pelo telemóvel (o alwaysdata não chega lá): pesquisa rápida e sem erro |
 | 04/10 | Popup "O que há de novo" |
 | 04/10 | AniList + Kitsu no lugar do Jikan (em baixo); fillers chegam quando o Jikan voltar |
+| 04/10 | Bibliotecas individuais, séries conjuntas por convite |
 
 ---
 

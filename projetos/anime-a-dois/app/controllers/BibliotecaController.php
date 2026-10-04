@@ -5,7 +5,7 @@
 
 class BibliotecaController extends Controller
 {
-    // POST: mal_id + modo ("ver" = já na biblioteca, "propor" = Quero ver contigo)
+    // POST: mal_id + modo ("ver" = só para ti, "propor" = para ti + convite ao par: Quero ver contigo)
     //       + info (JSON), episodios (JSON) e fonte ("jikan" = com fillers), que o browser foi buscar
     public function adicionar(): void
     {
@@ -17,15 +17,18 @@ class BibliotecaController extends Controller
             $info      = DadosAnime::info($this->lerJson('info'), $malId);
             $episodios = DadosAnime::episodios($this->lerJson('episodios'));
 
-            // Sem par ainda não há a quem propor: entra logo na biblioteca
-            $proposta = ($_POST['modo'] ?? 'ver') === 'propor' && $user->parceiro() !== null;
-            $serie = Serie::adicionarDoMal($user, $info, $episodios, $proposta, ($_POST['fonte'] ?? '') === 'jikan');
+            // "propor" = fica na tua biblioteca e o par recebe um convite; sem par, só na tua
+            $convidar = ($_POST['modo'] ?? 'ver') === 'propor' && $user->parceiro() !== null;
+            $serie = Serie::adicionarDoMal($user, $info, $episodios, $convidar, ($_POST['fonte'] ?? '') === 'jikan');
 
-            Notificador::serie($user, $serie, $proposta ? 'proposta' : 'adicionada');
+            // Séries só tuas não incomodam o par; o convite sim
+            if ($convidar) {
+                Notificador::serie($user, $serie, 'convite');
+            }
 
             $this->responder(true,
-                $proposta ? 'Proposta enviada: ' . $serie->nomeCurto() . '.' : $serie->nomeCurto() . ' entrou na biblioteca.',
-                $proposta ? url('home') . '#propostas' : url('home', 'index', ['serie' => $serie->slug]));
+                $convidar ? $serie->nomeCurto() . ' entrou na tua biblioteca e o convite foi enviado.' : $serie->nomeCurto() . ' entrou na tua biblioteca.',
+                url('home', 'index', ['serie' => $serie->slug]));
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         } catch (PDOException $e) {
@@ -65,23 +68,40 @@ class BibliotecaController extends Controller
         return is_array($dados) ? $dados : [];
     }
 
-    // POST: serie (slug) + estado (a_ver | pausa | acabado)
+    // POST: serie (slug) + estado (a_ver | pausa | acabado) — na TUA biblioteca
     public function estado(): void
     {
         $this->exigirPost();
-        $this->exigirLogin();
+        $user = $this->exigirLogin();
         $serie = $this->serieDoPost();
 
         try {
-            $serie->definirEstado($_POST['estado'] ?? '');
-            $this->responder(true, $serie->nomeCurto() . ': ' . mb_strtolower($serie->estadoTexto()) . '.',
+            $estado = $_POST['estado'] ?? '';
+            $serie->definirEstado($user, $estado);
+            $this->responder(true, $serie->nomeCurto() . ': ' . mb_strtolower(Serie::estadoTexto($estado)) . '.',
                 url('home', 'index', ['serie' => $serie->slug]));
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         }
     }
 
-    // POST: o par aceita uma proposta → passa para "a ver"
+    // POST: convida o par a ver contigo uma série que já tens (passa a conjunta quando ele aceitar)
+    public function convidar(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+        $serie = $this->serieDoPost();
+
+        try {
+            $serie->convidar($user);
+            Notificador::serie($user, $serie, 'convite');
+            $this->responder(true, 'Convite enviado: ' . $serie->nomeCurto() . '.', url('home', 'index', ['serie' => $serie->slug]));
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        }
+    }
+
+    // POST: aceitas o convite → a série entra na tua biblioteca e passa a ser dos dois
     public function aceitar(): void
     {
         $this->exigirPost();
@@ -91,24 +111,39 @@ class BibliotecaController extends Controller
         try {
             $serie->aceitar($user);
             Notificador::serie($user, $serie, 'aceite');
-            $this->responder(true, $serie->nomeCurto() . ' passou para "a ver".', url('home', 'index', ['serie' => $serie->slug]));
+            $this->responder(true, $serie->nomeCurto() . ' agora é dos dois.', url('home', 'index', ['serie' => $serie->slug]));
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         }
     }
 
-    // POST: recusar/cancelar uma proposta, ou tirar da biblioteca uma série ainda por começar
-    public function remover(): void
+    // POST: recusar um convite recebido, ou cancelar um enviado
+    public function recusar(): void
     {
         $this->exigirPost();
-        $this->exigirLogin();
+        $user = $this->exigirLogin();
         $serie = $this->serieDoPost();
 
         try {
-            $eraProposta = $serie->estado === Serie::PROPOSTA;
             $nome = $serie->nomeCurto();
-            $serie->remover();
-            $this->responder(true, $eraProposta ? 'Proposta de ' . $nome . ' retirada.' : $nome . ' saiu da biblioteca.', url('home'));
+            $serie->retirarConvite($user);
+            $this->responder(true, 'Convite de ' . $nome . ' retirado.', url('home'));
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        }
+    }
+
+    // POST: tira uma série da TUA biblioteca (só se ainda não marcaste episódios dela)
+    public function remover(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+        $serie = $this->serieDoPost();
+
+        try {
+            $nome = $serie->nomeCurto();
+            $serie->removerDe($user);
+            $this->responder(true, $nome . ' saiu da tua biblioteca.', url('home'));
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         }

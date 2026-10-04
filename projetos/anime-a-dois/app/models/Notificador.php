@@ -36,6 +36,10 @@ class Notificador
     // Marcaste episódios como vistos (só quando ficam vistos; desmarcar não avisa)
     public static function episodios(User $autor, Serie $serie, array $numeros, array $titulos): void
     {
+        // Séries só tuas não incomodam o par
+        if (!$serie->conjunta($autor, $autor->parceiro())) {
+            return;
+        }
         sort($numeros);
         $n = count($numeros);
         if ($n === 0) {
@@ -63,8 +67,8 @@ class Notificador
     public static function comentario(User $autor, Comentario $comentario): void
     {
         $episodio = $comentario->episodio()->with('serie')->first();
-        if ($episodio === null) {
-            return;
+        if ($episodio === null || !$episodio->serie->conjunta($autor, $autor->parceiro())) {
+            return;   // só nas séries dos dois
         }
         $texto = mb_strlen($comentario->texto) > 140 ? mb_substr($comentario->texto, 0, 139) . '…' : $comentario->texto;
 
@@ -76,14 +80,13 @@ class Notificador
         ]);
     }
 
-    // Séries: $evento = 'adicionada' (já está na biblioteca), 'proposta' (Quero ver contigo) ou 'aceite'
+    // Séries: $evento = 'convite' (Quero ver contigo) ou 'aceite' (o convite foi aceite)
     public static function serie(User $autor, Serie $serie, string $evento): void
     {
         $episodios = plural((int) $serie->total_episodios, 'episódio', 'episódios');
         [$titulo, $corpo, $url] = match ($evento) {
-            'proposta' => [$autor->nome . ' quer ver ' . $serie->nome . ' contigo', $episodios . ' · abre a app para aceitar', url('home') . '#propostas'],
-            'aceite'   => [$autor->nome . ' aceitou ' . $serie->nome, 'Já está na biblioteca, em "a ver"', url('home', 'index', ['serie' => $serie->slug])],
-            default    => [$autor->nome . ' adicionou ' . $serie->nome, 'Já está na biblioteca · ' . $episodios, url('home', 'index', ['serie' => $serie->slug])],
+            'aceite' => [$autor->nome . ' aceitou ver ' . $serie->nome . ' contigo', 'Agora é dos dois', url('home', 'index', ['serie' => $serie->slug])],
+            default  => [$autor->nome . ' quer ver ' . $serie->nome . ' contigo', $episodios . ' · abre a app para aceitar', url('home') . '#convites'],
         };
 
         self::paraPar($autor, 'serie', [

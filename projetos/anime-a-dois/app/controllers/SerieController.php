@@ -15,14 +15,15 @@ class SerieController extends Controller
             $this->redirect('home');
         }
 
-        // Propostas ainda não estão na biblioteca: primeiro o par tem de aceitar
-        if ($serie->estado === Serie::PROPOSTA) {
-            $this->flash('info', $serie->nomeCurto() . ' ainda é uma proposta.');
-            $this->redirect('home', 'index', [], 'propostas');
+        // Só abre séries da tua biblioteca (um convite aceita-se primeiro no Início)
+        if (!$serie->naBibliotecaDe($user)) {
+            $this->flash('info', $serie->nomeCurto() . ' não está na tua biblioteca.');
+            $this->redirect('home', 'index', [], 'convites');
         }
 
-
-        $parceiro = $user->parceiro();
+        // O par só aparece (mapa, avatares, comentários dele) se a série for dos dois
+        $par = $user->parceiro();
+        $parceiro = $serie->conjunta($user, $par) ? $par : null;
         $meu      = $serie->progressoDe($user);
 
         // Cartão que abre ao centro: o pedido no URL ou o seguinte ao teu
@@ -62,6 +63,11 @@ class SerieController extends Controller
         try {
             $serie = Serie::porSlug($_POST['serie'] ?? null);
             $ids   = array_map('intval', (array) ($_POST['episodio_ids'] ?? []));
+
+            // Só séries da tua biblioteca
+            if ($serie !== null && !$serie->naBibliotecaDe($user)) {
+                $this->falhar($serie->nomeCurto() . ' não está na tua biblioteca.');
+            }
 
             // Só episódios que existem E pertencem a esta série
             $episodios = $serie === null ? collect() : Episodio::whereIn('id', $ids)->where('serie_id', $serie->id)->orderBy('numero')->get();

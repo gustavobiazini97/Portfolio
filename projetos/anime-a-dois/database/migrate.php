@@ -57,4 +57,28 @@ foreach ($colunas as [$tabela, $coluna, $definicao]) {
     }
 }
 
+// Passagem para bibliotecas individuais (uma vez só: quando a tabela ainda está vazia).
+//   séries do seed (Naruto, Shippuden, Boruto) → conjuntas: entram na biblioteca de todos;
+//   séries adicionadas por alguém → só na biblioteca de quem as adicionou;
+//   propostas antigas → na biblioteca de quem propôs + convite para o outro.
+if (Capsule::table('bibliotecas')->count() === 0 && Capsule::table('users')->count() > 0) {
+    $users = Capsule::table('users')->pluck('id')->all();
+    $linhas = [];
+    foreach (Capsule::table('series')->get() as $s) {
+        if ($s->adicionada_por === null) {
+            foreach ($users as $u) {
+                $linhas[] = ['user_id' => $u, 'serie_id' => $s->id, 'estado' => $s->estado === 'proposta' ? 'a_ver' : $s->estado, 'desde' => $s->adicionada_em];
+            }
+        } elseif ($s->estado === 'proposta') {
+            foreach ($users as $u) {
+                $linhas[] = ['user_id' => $u, 'serie_id' => $s->id, 'estado' => $u == $s->adicionada_por ? 'a_ver' : 'convite', 'desde' => $s->adicionada_em];
+            }
+        } else {
+            $linhas[] = ['user_id' => $s->adicionada_por, 'serie_id' => $s->id, 'estado' => $s->estado, 'desde' => $s->adicionada_em];
+        }
+    }
+    Capsule::table('bibliotecas')->insertOrIgnore($linhas);
+    echo 'Bibliotecas individuais: ' . count($linhas) . " linhas criadas a partir das séries atuais.\n";
+}
+
 echo "Estrutura atualizada.\n";

@@ -824,13 +824,16 @@ function enviarAoServidor(url, campos, ms) {
       var detalhes = document.createElement('p'); detalhes.className = 'resultado-info'; detalhes.textContent = info(r);
       var acoes = document.createElement('div'); acoes.className = 'resultado-acoes';
 
+      // biblioteca = já é tua; convite = o par convidou-te; par = está na biblioteca dele (só por convite)
       var ja = jaCa[r.mal_id];
       if (ja) {
         var aviso = document.createElement('span'); aviso.className = 'resultado-ja';
-        aviso.textContent = ja === 'proposta' ? 'Já está em "Quero ver contigo"' : '✓ Já está na biblioteca';
+        aviso.textContent = ja === 'convite' ? 'Tens um convite para esta: aceita-o no Início'
+          : ja === 'par' ? 'Está na biblioteca de ' + nomePar + ': pede-lhe para te convidar'
+          : '✓ Já está na tua biblioteca';
         acoes.appendChild(aviso);
       } else {
-        acoes.appendChild(botao('Adicionar', '', function () { adicionar(r, 'ver'); }));
+        acoes.appendChild(botao(nomePar ? 'Só para mim' : 'Adicionar', '', function () { adicionar(r, 'ver'); }));
         if (nomePar) acoes.appendChild(botao('Quero ver com ' + nomePar, 'secundario', function () { adicionar(r, 'propor'); }));
       }
 
@@ -898,13 +901,13 @@ function enviarAoServidor(url, campos, ms) {
       return Anime.anime(s.mal)
         .then(function (info) { return enviarAoServidor(fila.dataset.url, { serie: s.serie, info: JSON.stringify(info) }); })
         .then(function (resposta) {
-          // Troca as iniciais pela capa, sem recarregar
-          var item = fila.querySelector('.capa-item[data-serie="' + s.serie + '"] .capa');
-          if (item && resposta.capa) {
+          // Troca as iniciais pela capa, sem recarregar (na tua fila e na do par)
+          if (!resposta.capa) return;
+          document.querySelectorAll('.capa-item[data-serie="' + s.serie + '"] .capa').forEach(function (item) {
             var img = document.createElement('img');
             img.className = 'capa'; img.src = resposta.capa; img.alt = ''; img.referrerPolicy = 'no-referrer';
             item.replaceWith(img);
-          }
+          });
         })
         .catch(function () { /* fica para a próxima visita */ });
     });

@@ -2,6 +2,7 @@
 // Conta de utilizador. Toda a lógica de registo e login vive aqui (não nos controllers).
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 class User extends Model
 {
@@ -200,12 +201,20 @@ class User extends Model
             throw new InvalidArgumentException('As palavras-passe não coincidem.');
         }
 
-        return static::create([
+        $user = static::create([
             'nome'          => $nome,
             'username'      => $username,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
             'novidades_vistas' => Novidade::ultima(),   // conta nova: começa sem novidades por ver
         ]);
+
+        // As séries do seed (Naruto, Shippuden, Boruto) começam na biblioteca de todos (conjuntas)
+        $agora = date('Y-m-d H:i:s');
+        $linhas = Serie::whereNull('adicionada_por')->pluck('id')
+            ->map(fn ($id) => ['user_id' => $user->id, 'serie_id' => $id, 'estado' => 'a_ver', 'desde' => $agora])->all();
+        Capsule::table('bibliotecas')->insertOrIgnore($linhas);
+
+        return $user;
     }
 
     // Devolve o utilizador se as credenciais estiverem certas; null caso contrário

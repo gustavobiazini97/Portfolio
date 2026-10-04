@@ -8,7 +8,7 @@ class EstatisticasController extends Controller
     {
         $user     = $this->exigirLogin();
         $parceiro = $user->parceiro();
-        $series   = Serie::naBiblioteca();   // sem propostas
+        $series   = Serie::naBiblioteca($user);   // a tua biblioteca (sem convites)
 
         // Série do URL; senão a do último episódio que viste; senão a primeira
         $ultimo = $user->ultimoVisto();
@@ -16,9 +16,19 @@ class EstatisticasController extends Controller
                ?? ($ultimo ? $ultimo->serie : null)
                ?? $series->first();
 
-        // Null guard: base de dados sem séries (ou uma proposta no URL)
-        if ($serie === null || $serie->estado === Serie::PROPOSTA) {
+        // Série do URL fora da tua biblioteca → a primeira da tua
+        if ($serie !== null && !$serie->naBibliotecaDe($user)) {
+            $serie = $series->first();
+        }
+
+        // Null guard: biblioteca vazia
+        if ($serie === null) {
             $this->redirect('home');
+        }
+
+        // Série só tua: as estatísticas mostram só os teus números
+        if (!$serie->conjunta($user, $parceiro)) {
+            $parceiro = null;
         }
 
         $this->render('estatisticas/index', [

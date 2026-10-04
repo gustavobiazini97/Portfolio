@@ -391,6 +391,22 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
   font-size: 10.5px; font-weight: 500;
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
+/* "Dos dois": os dois avatares pequenos sobrepostos no canto de cima da capa */
+.capa-dois { position: absolute; top: 6px; right: 6px; display: flex; }
+.capa-dois .avatar + .avatar { margin-left: -6px; }
+.avatar-micro { width: 20px; height: 20px; font-size: 9px; box-shadow: 0 0 0 1.5px rgba(20, 22, 30, .55); }
+
+/* Fila "A <par> está a ver": só para espreitar, cartões mais pequenos e sem toque */
+.biblioteca-par .capa-item { flex-basis: 84px; cursor: default; }
+.biblioteca-par .capa-item:active { transform: none; }
+.biblioteca-par .capa-moldura { border-radius: 14px; box-shadow: 0 6px 14px var(--sombra); }
+.biblioteca-par .capa-estado { font-size: 9.5px; padding: 1px 6px; left: 4px; bottom: 4px; }
+.biblioteca-par .secao-cima h2 { font-size: 14px; color: var(--suave); }
+
+/* Ações da série aberta: convidar o par e tirar da biblioteca, lado a lado */
+.serie-acoes { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: -4px; }
+.serie-acoes .link-suave { margin-top: 0; }
+
 .capa-nome { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; }
 .capa-item[aria-current="page"] .capa-nome { font-weight: 500; }
 .capa-barras { display: flex; flex-direction: column; gap: 3px; padding: 0 2px; }
