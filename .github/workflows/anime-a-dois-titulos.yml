@@ -1,0 +1,34 @@
+# Vai buscar os títulos de todos os episódios e grava projetos/anime-a-dois/database/episodios.json.
+# Corre à mão (separador Actions → "Títulos Anime a Dois" → Run workflow) ou quando o script muda.
+# Depois disso, o deploy normal mete os títulos na base de dados (seed.php).
+
+name: Títulos Anime a Dois
+
+on:
+  workflow_dispatch:
+  push:                    # também corre quando o script ou este workflow mudam
+    paths:
+      - 'projetos/anime-a-dois/database/titulos.py'
+      - '.github/workflows/anime-a-dois-titulos.yml'
+
+permissions:
+  contents: write          # para fazer commit do ficheiro gerado
+
+jobs:
+  titulos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Buscar episódios
+        run: python3 projetos/anime-a-dois/database/titulos.py
+
+      # Só faz commit se o ficheiro mudou
+      - name: Gravar no repositório
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
+          git add projetos/anime-a-dois/database/episodios.json
+          git diff --cached --quiet && echo "Sem alterações." && exit 0
+          git commit -m "Anime a Dois: títulos de todos os episódios (animefillerlist)"
+          git push

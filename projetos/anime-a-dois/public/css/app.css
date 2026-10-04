@@ -1,0 +1,601 @@
+/* Anime a Dois — estilos da app.
+   Visual: vidro fosco (glassmorphism) sobre manchas difusas, letra arredondada e pequena.
+   Cores: sálvia = tu, alperce = o teu par; cada série tem um acento só para o separador e o brilho. */
+
+/* ---------- Tokens: tema claro (por defeito) ---------- */
+:root {
+  --bg: #F5F3F8;                         /* fundo quase branco, ligeiramente lilás */
+  --vidro: rgba(255, 255, 255, .52);     /* painéis translúcidos */
+  --vidro-borda: rgba(255, 255, 255, .75);
+  --brilho: rgba(255, 255, 255, .9);     /* reflexo no topo de cada painel */
+  --sombra: rgba(30, 40, 70, .10);
+  --campo: rgba(255, 255, 255, .6);      /* fundo dos inputs */
+  --selec: rgba(255, 255, 255, .95);
+  --tinta: #1A1F2B;                      /* texto principal */
+  --suave: #5E6676;                      /* texto secundário */
+  --linha: rgba(26, 31, 43, .10);
+  --trilho: rgba(26, 31, 43, .08);       /* parte vazia das barras */
+  --tu: #B9D3B0;                         /* sálvia (pastel: barras, pontos) */
+  --par: #F5C89A;                        /* alperce */
+  --tu-txt: #4E7A43;                     /* versões escuras para números e texto */
+  --par-txt: #A0581C;
+  --no-pastel: #2A2433;                  /* texto por cima de um fundo pastel */
+  --orbe-tu: rgba(185, 211, 176, .55);   /* manchas difusas do fundo */
+  --orbe-par: rgba(245, 200, 154, .55);
+  --btn: #1A1F2B;
+  --btn-txt: #FFFFFF;
+  --erro: #B4413A;
+  --raio: 28px;                          /* cantos dos painéis */
+  --blur: blur(24px) saturate(160%);     /* o efeito de vidro */
+  color-scheme: light;
+}
+
+/* ---------- Tokens: tema escuro ---------- */
+[data-tema="escuro"] {
+  --bg: #0E1116;
+  --vidro: rgba(255, 255, 255, .06);
+  --vidro-borda: rgba(255, 255, 255, .12);
+  --brilho: rgba(255, 255, 255, .14);
+  --sombra: rgba(0, 0, 0, .35);
+  --campo: rgba(255, 255, 255, .07);
+  --selec: rgba(255, 255, 255, .16);
+  --tinta: #E9ECF2;
+  --suave: #A0A8B6;
+  --linha: rgba(255, 255, 255, .10);
+  --trilho: rgba(255, 255, 255, .10);
+  --tu-txt: #CDE0C6;
+  --par-txt: #F8D7B4;
+  --no-pastel: #1F1A28;
+  --orbe-tu: rgba(150, 190, 135, .22);
+  --orbe-par: rgba(230, 170, 110, .22);
+  --btn: #E9ECF2;
+  --btn-txt: #0E1116;
+  --erro: #F08A82;
+  color-scheme: dark;
+}
+
+/* ---------- Acento de cada série (separador ativo + brilho no topo) ---------- */
+[data-serie="naruto"]    { --acento: #F7C59F; --brilho-serie: rgba(247, 197, 159, .6); }
+[data-serie="shippuden"] { --acento: #F2A7A0; --brilho-serie: rgba(242, 167, 160, .6); }
+[data-serie="boruto"]    { --acento: #A9C4EE; --brilho-serie: rgba(169, 196, 238, .6); }
+[data-tema="escuro"] [data-serie="naruto"]    { --brilho-serie: rgba(247, 197, 159, .28); }
+[data-tema="escuro"] [data-serie="shippuden"] { --brilho-serie: rgba(242, 167, 160, .28); }
+[data-tema="escuro"] [data-serie="boruto"]    { --brilho-serie: rgba(169, 196, 238, .28); }
+
+/* ---------- Base ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--tinta);
+  font: 400 14px/1.5 'M PLUS Rounded 1c', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background .4s, color .4s;
+}
+a { color: var(--tinta); }
+button, input { font: inherit; color: inherit; }
+a, button { -webkit-tap-highlight-color: transparent; }   /* tira o realce azul do Android ao tocar */
+:focus-visible { outline: 2px solid var(--tu-txt); outline-offset: 3px; }
+
+/* ---------- Fundo: manchas difusas que dão vida ao vidro ---------- */
+.fundo { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.orbe { position: absolute; border-radius: 50%; filter: blur(70px); }
+.orbe-tu    { width: 320px; height: 320px; background: var(--orbe-tu);  top: 50px;  left: -110px; }
+.orbe-par   { width: 300px; height: 300px; background: var(--orbe-par); top: 420px; right: -100px; }
+.orbe-serie { width: 380px; height: 260px; background: var(--brilho-serie, transparent); top: -120px; left: 50%; transform: translateX(-50%); filter: blur(80px); transition: background .6s; }
+
+/* ---------- Vidro: classe partilhada por todos os painéis ---------- */
+.vidro {
+  background: var(--vidro);
+  border: 1px solid var(--vidro-borda);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: inset 0 1px 0 var(--brilho), 0 18px 40px var(--sombra);
+}
+
+/* Largura de telemóvel, centrada em ecrãs maiores */
+.ecra {
+  width: 100%; max-width: 480px; min-height: 100dvh; margin: 0 auto;
+  padding: calc(18px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));   /* longe das barras do sistema */
+  display: flex; flex-direction: column; gap: 14px;
+}
+/* Página da série: o ecrã tem a altura exata do telemóvel e a pista fica com o espaço que sobra,
+   por isso o botão nunca sai do ecrã (na app instalada há mais altura do que no browser) */
+html:has(body.pagina-serie) { height: 100%; overflow: hidden; overscroll-behavior: none; }   /* nada para baixo: sem scroll nem "esticar" */
+body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-behavior: none; }
+.pagina-serie .ecra { height: 100%; min-height: 0; }   /* 100% da janela real (o 100dvh contava com as barras na app instalada) */
+
+/* App instalada: o Android pode desenhar a página por baixo das barras do sistema.
+   viewport-fit=cover (no <head>) faz o env() devolver a altura delas; o max() é uma margem
+   mínima (44px, a barra de navegação típica) para telemóveis que não a indicam. */
+@media (display-mode: standalone) {
+  .ecra { padding-bottom: calc(20px + max(env(safe-area-inset-bottom), 44px)); }
+}
+.app-instalada .ecra { padding-bottom: calc(20px + max(env(safe-area-inset-bottom), 44px)); }   /* o mesmo, via js/tema.js */
+
+/* ---------- Barra de topo ---------- */
+.topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.topo-meio { font-size: 16px; font-weight: 500; }
+.topo-acoes { display: flex; gap: 8px; }
+.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 15px; font-weight: 700; }
+
+/* Logótipo (img/logo.svg): dois ecrãs empilhados — o teu à frente, o do par atrás */
+.logo { display: block; width: 34px; height: 34px; flex-shrink: 0; }
+.logo-grande { width: 96px; height: 96px; }
+
+/* Botão redondo de vidro (tema, voltar, sair) */
+.btn-redondo {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--tinta); cursor: pointer; text-decoration: none;
+  box-shadow: inset 0 1px 0 var(--brilho);
+}
+.btn-redondo svg { width: 17px; height: 17px; }
+
+/* Ícone do tema: lua no claro, sol no escuro */
+.icone-sol { display: none; }
+[data-tema="escuro"] .icone-sol { display: block; }
+[data-tema="escuro"] .icone-lua { display: none; }
+
+/* ---------- Botões principais ---------- */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; height: 52px; border-radius: 26px; border: 0;
+  background: var(--btn); color: var(--btn-txt);
+  font-size: 15px; font-weight: 500; text-decoration: none; cursor: pointer;
+  transition: transform .15s, opacity .2s;
+}
+.btn:active { transform: scale(.98); }
+.btn svg { width: 16px; height: 16px; }
+.btn-secundario { background: var(--vidro); color: var(--tinta); border: 1px solid var(--vidro-borda); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+
+/* ---------- Formulários ---------- */
+.form { border-radius: var(--raio); padding: 22px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
+.campo { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--suave); }
+.campo > span { padding-left: 4px; }
+.campo input {
+  height: 48px; border-radius: 16px; padding: 0 16px;
+  border: 1px solid var(--linha); background: var(--campo); color: var(--tinta);
+  font-size: 16px;                       /* 16px evita o zoom automático do telemóvel */
+  transition: border-color .2s;
+}
+.campo input:focus { outline: none; border-color: var(--tu-txt); }
+.campo small { padding-left: 4px; font-size: 12px; color: var(--suave); }
+.form .btn { margin-top: 6px; }
+
+/* ---------- Mensagens flash ---------- */
+.flash { border-radius: 20px; padding: 12px 16px; font-size: 13.5px; }
+.flash-erro { color: var(--erro); }
+.flash-sucesso, .flash-info { color: var(--tinta); }
+
+/* ---------- Entrar / criar conta ---------- */
+.auth { flex: 1; display: flex; flex-direction: column; }
+.auth-cabeca { margin: 12vh 0 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.auth-titulo { margin-top: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.auth-sub { margin-top: 6px; font-size: 13.5px; color: var(--suave); }
+.auth-sub strong { color: var(--par-txt); font-weight: 500; }
+.auth .form { margin-top: auto; }
+
+/* Botão "Instalar app" no hero: só aparece quando o Chrome deixa instalar */
+.btn-instalar {
+  margin-top: 18px; height: 40px; padding: 0 18px 0 14px; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13.5px; font-weight: 500; color: var(--tu-txt); cursor: pointer;
+  box-shadow: inset 0 1px 0 var(--brilho), 0 8px 20px var(--sombra);
+}
+.btn-instalar[hidden] { display: none; }        /* o hidden tem de ganhar ao inline-flex */
+.btn-instalar svg { width: 16px; height: 16px; }
+.auth-rodape { margin-top: 16px; text-align: center; font-size: 13.5px; color: var(--suave); }
+.auth-rodape a { font-weight: 500; }
+
+/* ---------- Separadores de séries (controlo segmentado) ---------- */
+.separadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 22px; box-shadow: inset 0 1px 0 var(--brilho); }
+.separador {
+  height: 38px; border-radius: 18px;
+  display: grid; place-items: center;
+  font-size: 13.5px; color: var(--suave); text-decoration: none;
+  transition: background .4s, color .4s;
+}
+.separador[aria-current="page"] { background: var(--acento); color: var(--no-pastel); font-weight: 500; box-shadow: 0 2px 10px var(--sombra); }
+
+/* ---------- Painéis da dashboard ---------- */
+.painel { border-radius: var(--raio); padding: 20px; }
+.painel-titulo { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.painel-titulo h2 { font-size: 15px; font-weight: 500; }
+.painel-titulo span { font-size: 12.5px; color: var(--suave); }
+
+/* Último episódio do par: avatar, texto e número */
+.ultimo { display: flex; align-items: center; gap: 14px; }
+.avatar { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 16px; color: var(--no-pastel); }
+.avatar-tu  { background: var(--tu); }
+.avatar-par { background: var(--par); }
+.avatar { overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }   /* foto de perfil no lugar da inicial */
+
+/* Avatar no topo do início: abre o perfil */
+.avatar-link { display: block; border-radius: 50%; text-decoration: none; }
+.avatar-topo { width: 44px; height: 44px; box-shadow: 0 0 0 2px var(--vidro-borda), 0 6px 16px var(--sombra); }
+
+/* ---------- Perfil ---------- */
+.perfil-foto { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 26px 20px 20px; }
+.foto-escolher { position: relative; display: block; cursor: pointer; border-radius: 50%; }
+.avatar-xl { width: 112px; height: 112px; font-size: 40px; box-shadow: 0 0 0 4px var(--vidro-borda), 0 14px 30px var(--sombra); }
+.foto-camara {                          /* botãozinho de câmara no canto do avatar */
+  position: absolute; right: -2px; bottom: -2px;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--btn); color: var(--btn-txt);
+  box-shadow: 0 0 0 3px var(--bg);
+}
+.foto-camara svg { width: 18px; height: 18px; }
+.foto-escolher.a-enviar { opacity: .5; pointer-events: none; }
+.escondido { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }   /* input de ficheiro invisível mas acessível */
+.foto-escolher:focus-within { outline: 2px solid var(--tu-txt); outline-offset: 4px; }
+.perfil-nome { margin-top: 14px; font-size: 18px; font-weight: 500; }
+.perfil-user { font-size: 13px; color: var(--suave); }
+.link-suave { margin-top: 10px; background: none; border: 0; padding: 6px; font-size: 13px; color: var(--suave); text-decoration: underline; cursor: pointer; }
+
+/* ---------- Notificações (perfil) ---------- */
+.notif-titulo { font-size: 15px; font-weight: 500; }
+.notif-sub { margin-top: -8px; font-size: 13px; color: var(--suave); }
+/* Grelha: o quê (linhas) × por onde (colunas) */
+.notif-grade { display: grid; grid-template-columns: 1fr 72px 56px; align-items: center; row-gap: 12px; font-size: 14px; }
+.notif-col { font-size: 12px; color: var(--suave); text-align: center; }
+.notif-grade .interruptor { justify-self: center; }
+
+/* Interruptor (checkbox com aspeto de botão deslizante) */
+.interruptor { position: relative; display: inline-block; width: 44px; height: 26px; cursor: pointer; }
+.interruptor input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.interruptor i {
+  position: absolute; inset: 0; border-radius: 13px;
+  background: var(--trilho); border: 1px solid var(--linha);
+  transition: background .2s;
+}
+.interruptor i::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--selec); box-shadow: 0 1px 3px var(--sombra);
+  transition: transform .2s;
+}
+.interruptor input:checked + i { background: var(--tu-txt); border-color: transparent; }
+.interruptor input:checked + i::after { transform: translateX(18px); background: #fff; }
+.interruptor input:focus-visible + i { outline: 2px solid var(--tu-txt); outline-offset: 2px; }
+
+.notif-telemovel { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--linha); }
+.notif-estado { font-size: 13px; color: var(--suave); }
+.notif-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Secção que abre e fecha (mudar palavra-passe) */
+.dobravel { gap: 0; }
+.dobravel summary { cursor: pointer; font-size: 15px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.dobravel summary::-webkit-details-marker { display: none; }
+.dobravel summary::after { content: "+"; font-size: 20px; color: var(--suave); }
+.dobravel[open] summary::after { content: "–"; }
+.dobravel-corpo { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.ultimo-texto { flex: 1; min-width: 0; }
+.ultimo-texto p:first-child { font-size: 13px; color: var(--suave); }
+.ultimo-texto p:last-child { margin-top: 2px; font-size: 17px; font-weight: 500; }
+.ultimo-num { font-size: 30px; font-weight: 700; letter-spacing: -.02em; color: var(--par-txt); }
+
+/* Vs: uma barra fina por pessoa */
+.vs-linhas { margin-top: 18px; display: flex; flex-direction: column; gap: 16px; }
+.vs-linha { display: flex; flex-direction: column; gap: 8px; }
+.vs-rotulo { display: flex; justify-content: space-between; font-size: 13px; }
+.vs-rotulo span:last-child { color: var(--suave); }
+.vs-rotulo b { font-weight: 700; }
+.vs-tu b  { color: var(--tu-txt); }
+.vs-par b { color: var(--par-txt); }
+.barra {                                 /* <progress>: a largura vem do value, sem CSS inline */
+  display: block; width: 100%; height: 6px;
+  -webkit-appearance: none; appearance: none;
+  border: 0; border-radius: 6px; overflow: hidden;
+  background: var(--trilho);
+}
+.barra::-webkit-progress-bar { background: var(--trilho); border-radius: 6px; }
+.barra::-webkit-progress-value { border-radius: 6px; }
+.vs-tu .barra::-webkit-progress-value  { background: var(--tu); }
+.vs-par .barra::-webkit-progress-value { background: var(--par); }
+.vs-tu .barra::-moz-progress-bar  { background: var(--tu); border-radius: 6px; }
+.vs-par .barra::-moz-progress-bar { background: var(--par); border-radius: 6px; }
+.vs-resumo { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--linha); font-size: 13px; color: var(--suave); }
+
+/* Cartões que são links: sem sublinhado, com seta e reação ao toque */
+.painel-link { display: block; color: inherit; text-decoration: none; transition: transform .15s; }
+.painel-link.ultimo { display: flex; }
+.painel-link:active { transform: scale(.985); }
+.painel-titulo span { display: inline-flex; align-items: center; gap: 4px; }
+.painel-seta { width: 15px; height: 15px; color: var(--suave); }
+.btn-convite { margin-top: 14px; }
+
+/* Estado vazio (série por começar, par por criar conta) */
+.vazio { text-align: center; padding: 28px 20px; }
+.vazio p:first-child { font-size: 15px; font-weight: 500; }
+.vazio p + p { margin-top: 6px; font-size: 13px; color: var(--suave); }   /* a frase de apoio (mesmo com um botão a seguir) */
+
+.acao-fundo { margin-top: auto; }
+
+/* ---------- Página da série: mapa dos episódios ---------- */
+.mapa { border-radius: var(--raio); padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 12px; }
+.mapa-info { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--suave); }
+.mapa-legenda { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; }
+.mapa-legenda i { width: 10px; height: 10px; border-radius: 3px; }
+.mapa-legenda i + i, .mapa-legenda i:not(:first-child) { margin-left: 6px; }
+.leg-visto  { background: linear-gradient(90deg, var(--tu) 50%, var(--par) 50%); }   /* as duas cores = "visto" */
+.leg-filler { background: var(--trilho); outline: 1px dashed var(--suave); outline-offset: -1px; }
+
+/* UMA grelha para as duas pessoas: coluna do nome com a largura do nome maior (até 104px),
+   barra com o resto, percentagem à direita — as barras ficam sempre iguais e alinhadas */
+.mapa-grade {
+  display: grid;
+  grid-template-columns: fit-content(104px) minmax(0, 1fr) auto;
+  align-items: center; column-gap: 10px; row-gap: 10px;
+}
+.mapa-quem { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: 12.5px; }
+.mapa-quem .avatar { width: 22px; height: 22px; font-size: 10px; box-shadow: 0 0 0 1.5px var(--vidro-borda); }
+.mapa-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* nomes compridos não empurram a barra */
+
+/* Percentagem numa pastilha com a cor da pessoa */
+.mapa-pct {
+  min-width: 46px; text-align: center;
+  padding: 3px 8px; border-radius: 10px;
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.pct-tu  { color: var(--tu-txt);  background: color-mix(in srgb, var(--tu) 30%, transparent); }
+.pct-par { color: var(--par-txt); background: color-mix(in srgb, var(--par) 30%, transparent); }
+
+/* Riscos: um por episódio; preenchido = visto, mais claro = filler */
+.riscos {
+  display: flex; height: 20px; border-radius: 7px; overflow: hidden;
+  background: var(--trilho);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .08);          /* "calha" ligeiramente cavada */
+}
+.riscos i { flex: 1 1 0; }
+.riscos-tu  i.v { background: var(--tu); }
+.riscos-par i.v { background: var(--par); }
+.riscos i.f { opacity: .35; }
+
+/* Régua 1 · metade · total, alinhada com as barras */
+.mapa-escala {
+  grid-column: 2; display: flex; justify-content: space-between;
+  margin-top: -4px; font-size: 10.5px; color: var(--suave); font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Pista: cartões de episódio que deslizam e encaixam ao centro ---------- */
+.pista {
+  display: flex; gap: 12px;
+  margin: 0 -20px;                       /* sai das margens para ir de ponta a ponta */
+  flex: 1 1 0; min-height: 0;            /* ocupa o espaço livre entre o mapa e o painel; os cartões ficam ao meio */
+  align-items: center;
+  padding: 10px calc(50% - 86px) 26px;   /* o primeiro e o último também ficam centrados; folga para a sombra */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.pista::-webkit-scrollbar { display: none; }
+.ep {
+  flex: 0 0 172px; height: 236px;       /* tamanho fixo: compacto em qualquer ecrã (com espaço para o título) */
+  scroll-snap-align: center;
+  border-radius: 30px; padding: 18px;
+  display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
+  text-align: left; cursor: pointer;
+  transform: scale(.94); transition: transform .25s, border-color .25s;
+  box-shadow: inset 0 1px 0 var(--brilho), 0 10px 22px var(--sombra);  /* mais curta: cabe na pista sem ser cortada */
+}
+.ep.ativo { transform: scale(1); border-color: var(--tu-txt); }
+.ep-cima { display: flex; width: 100%; justify-content: space-between; font-size: 12px; color: var(--suave); }
+.ep-num { font-size: 46px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.ep-estados { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--suave); }
+.ep-estado { display: flex; align-items: center; gap: 7px; }
+.ponto { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid; }
+.ponto-tu  { border-color: var(--tu-txt); }
+.ponto-par { border-color: var(--par-txt); }
+.ponto-tu.v  { background: var(--tu-txt); }
+.ponto-par.v { background: var(--par-txt); }
+
+/* Ecrãs baixos: os cartões já mostram título e quem viu, por isso o painel de baixo sai
+   para os cartões caberem inteiros */
+@media (max-height: 760px) {
+  .pagina-serie .detalhe { display: none; }
+}
+
+/* ---------- Comentários ---------- */
+/* Balão no canto do cartão: só aparece quando o episódio tem comentários */
+.ep-coment { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 500; color: var(--tinta); }
+.ep-coment[hidden] { display: none; }
+.ep-coment svg { width: 14px; height: 14px; }
+.modo-multiplo .ep-coment { display: none; }   /* no modo seleção, o canto é do visto */
+
+/* Botão "Comentários" à direita de "Selecionar vários" */
+.acoes-linha .acoes-info { flex: 1; text-align: center; }
+.btn-coment { display: inline-flex; align-items: center; gap: 7px; }
+.btn-coment svg { width: 16px; height: 16px; }
+.modo-multiplo .btn-coment { display: none; }
+
+/* Folha: sobe de baixo, ocupa no máximo 80% do ecrã */
+.folha {
+  margin: auto auto 0; width: 100%; max-width: 480px; max-height: 80dvh;
+  border-radius: 28px 28px 0 0; border-bottom: 0;
+  padding: 18px 18px calc(16px + env(safe-area-inset-bottom));
+  color: var(--tinta);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);   /* mais opaco que os painéis: fica por cima de tudo */
+  flex-direction: column; gap: 12px;
+}
+.folha[open] { display: flex; animation: folha-sobe .25s ease-out; }
+.folha::backdrop { background: rgba(10, 12, 18, .35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+@keyframes folha-sobe { from { transform: translateY(40px); opacity: 0; } }
+.folha-cima { display: flex; justify-content: space-between; align-items: center; }
+.folha-cima h2 { font-size: 16px; font-weight: 500; }
+.folha-lista { list-style: none; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; min-height: 40px; padding: 2px; }
+.coment { display: flex; gap: 10px; align-items: flex-start; }
+.coment .avatar { width: 34px; height: 34px; font-size: 13px; flex-shrink: 0; }
+.coment-corpo { flex: 1; min-width: 0; }
+.coment-cima { display: flex; gap: 8px; align-items: baseline; font-size: 12.5px; }
+.coment-cima b { font-weight: 500; }
+.coment-cima span { color: var(--suave); }
+.coment-texto { margin-top: 2px; font-size: 14px; white-space: pre-line; overflow-wrap: anywhere; }   /* respeita as mudanças de linha */
+.coment-apagar { margin-left: auto; background: none; border: 0; padding: 2px 4px; font-size: 12px; color: var(--suave); text-decoration: underline; cursor: pointer; }
+.folha-vazio { font-size: 13.5px; color: var(--suave); text-align: center; padding: 10px 0; }
+.folha-form { display: flex; gap: 8px; align-items: flex-end; }
+.folha-form textarea {
+  flex: 1; resize: none; max-height: 120px;
+  padding: 12px 14px; border-radius: 18px;
+  border: 1px solid var(--linha); background: var(--campo); color: var(--tinta);
+  font: 400 16px/1.4 'M PLUS Rounded 1c', sans-serif;
+}
+.folha-form textarea:focus { outline: none; border-color: var(--tu-txt); }
+.folha-enviar { width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; padding: 0; }
+
+/* Etiqueta "filler": escura e sólida, salta à vista em qualquer cor de cartão e tema */
+.etiqueta-filler {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px 3px 8px; border-radius: 10px;
+  background: var(--tinta); color: var(--bg);
+  font-size: 11.5px; font-weight: 500; letter-spacing: .02em;
+}
+.etiqueta-filler::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .7; }
+.chip.etiqueta-filler { padding: 3px 12px 3px 10px; font-size: 12px; background: var(--tinta); color: var(--bg); }   /* ganha ao cinzento do .chip */
+
+/* Número e título do episódio no meio do cartão */
+.ep-meio { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.ep-titulo {
+  font-size: 11.5px; line-height: 1.35; color: var(--suave);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;   /* no máximo 2 linhas */
+  min-height: 2.7em;
+}
+.ep.visto .ep-titulo, .ep.par-viu .ep-titulo { color: var(--tinta); opacity: .75; }
+
+/* Cor do cartão conta quem viu: sálvia = só tu, alperce = só o par, degradê = os dois */
+.ep.visto {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tu) 62%, transparent), color-mix(in srgb, var(--tu) 22%, var(--vidro)));
+  border-color: color-mix(in srgb, var(--tu-txt) 35%, transparent);
+}
+.ep.par-viu {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--par) 55%, transparent), color-mix(in srgb, var(--par) 20%, var(--vidro)));
+  border-color: color-mix(in srgb, var(--par-txt) 30%, transparent);
+}
+.ep.visto.par-viu {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tu) 70%, transparent) 0%, color-mix(in srgb, var(--par) 70%, transparent) 100%);
+}
+:root:not([data-tema="escuro"]) .ep.visto        { background: linear-gradient(160deg, color-mix(in srgb, var(--tu) 95%, white), color-mix(in srgb, var(--tu) 55%, white)); }
+:root:not([data-tema="escuro"]) .ep.par-viu      { background: linear-gradient(160deg, color-mix(in srgb, var(--par) 90%, white), color-mix(in srgb, var(--par) 50%, white)); }
+:root:not([data-tema="escuro"]) .ep.visto.par-viu { background: linear-gradient(150deg, color-mix(in srgb, var(--tu) 95%, white), color-mix(in srgb, var(--par) 95%, white)); }
+.ep.visto .ep-num { color: var(--tu-txt); }
+.ep.par-viu:not(.visto) .ep-num { color: var(--par-txt); }
+.ep.visto.ativo { border-color: var(--tu-txt); }
+
+/* Quem viu: dois avatares sobrepostos + uma frase curta */
+.ep-quem { display: flex; flex-direction: column; gap: 8px; }
+.ep-avs { display: flex; }
+.ep-av { display: inline-flex; border-radius: 50%; transition: opacity .25s, filter .25s, transform .25s; }
+.ep-avs .ep-av + .ep-av { margin-left: -9px; }                       /* sobrepostos, como o logótipo */
+.ep-av .avatar { box-shadow: 0 0 0 2px var(--bg); }                  /* aro que separa os dois */
+.ep-av:not(.v) { opacity: .35; filter: grayscale(1); }               /* ainda não viu: esbatido */
+.ep-av.v { transform: scale(1.04); }
+.avatar-mini { width: 30px; height: 30px; font-size: 12.5px; }
+.ep-rotulo { font-size: 12px; color: var(--suave); }
+.ep.visto .ep-rotulo, .ep.par-viu .ep-rotulo { color: var(--tinta); }
+
+/* Visto de seleção: escondido fora do modo "Selecionar vários" */
+.ep-check { display: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--linha); color: transparent; place-items: center; }
+.ep-check svg { width: 14px; height: 14px; }
+.modo-multiplo .ep-check { display: grid; }
+.modo-multiplo .ep.ativo { border-color: var(--vidro-borda); }          /* no modo seleção, o realce é o visto */
+.ep.selecionado { border-color: var(--tu-txt); }
+.ep.selecionado .ep-check { background: var(--tu-txt); border-color: var(--tu-txt); color: var(--bg); }
+
+/* ---------- Painel do episódio ao centro ---------- */
+.detalhe { border-radius: var(--raio); padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.detalhe-cima { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.detalhe-cima h2 { font-size: 16px; font-weight: 500; }
+.chip { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: var(--trilho); color: var(--suave); }
+.detalhe-nome { font-size: 13.5px; color: var(--suave); min-height: 1.5em; }
+.detalhe-nome:empty { display: none; }
+.detalhe-estados { display: flex; gap: 22px; flex-wrap: wrap; font-size: 12.5px; color: var(--suave); line-height: 1.3; }
+.detalhe-pessoa { display: flex; align-items: center; gap: 9px; }
+.detalhe-estados b { font-weight: 500; color: var(--tinta); }
+
+/* ---------- Ações da página da série ---------- */
+.acoes { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.acoes-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.acoes-info { font-size: 13px; color: var(--suave); }
+.btn-texto { height: 38px; padding: 0 16px; border-radius: 19px; font-size: 13.5px; cursor: pointer; box-shadow: inset 0 1px 0 var(--brilho); }
+.modo-multiplo .btn-texto { color: var(--tu-txt); font-weight: 500; }
+.btn:disabled { opacity: .45; cursor: default; }
+
+/* Aviso curto que aparece em cima e desaparece sozinho */
+.aviso {
+  position: fixed; left: 50%; bottom: calc(150px + env(safe-area-inset-bottom)); z-index: 20;   /* por cima dos botões, sem tapar o título */
+  transform: translate(-50%, 12px); opacity: 0;
+  max-width: calc(100% - 40px); padding: 11px 18px; border-radius: 22px;
+  font-size: 13.5px; white-space: nowrap;
+  transition: opacity .25s, transform .25s;
+}
+.aviso.mostrar { opacity: 1; transform: translate(-50%, 0); }
+.aviso.erro { color: var(--erro); }
+
+/* Reduz animações para quem o pede no sistema */
+@media (prefers-reduced-motion: reduce) {
+  *, .pista { transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Estatísticas ---------- */
+
+/* Grelha de dois cartões (pessoas e curiosidades) */
+.est-pessoas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.est-pessoa { border-radius: 22px; padding: 14px 16px; min-width: 0; }
+.est-quem { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; min-width: 0; }
+.est-quem span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* nomes longos não partem o cartão */
+.avatar-mini { width: 24px; height: 24px; font-size: 11px; flex-shrink: 0; }
+.est-numero { margin-top: 10px; font-size: 30px; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+.est-tu  .est-numero { color: var(--tu-txt); }
+.est-par .est-numero { color: var(--par-txt); }
+.est-legenda { margin-top: 3px; font-size: 12px; color: var(--suave); }
+.est-bloco { padding: 14px 16px; }
+.est-nota { margin-top: 10px; font-size: 12.5px; color: var(--suave); }
+
+/* Ritmo: 6 colunas, duas barras por coluna, alinhadas em baixo */
+.ritmo { margin-top: 12px; height: 92px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.ritmo-semana { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.ritmo-barras { flex: 1; display: flex; gap: 3px; align-items: flex-end; }
+.ritmo-barra { flex: 1; min-height: 2px; border-radius: 4px 4px 2px 2px; }
+.ritmo-tu  { background: var(--tu); }
+.ritmo-par { background: var(--par); }
+.ritmo-rotulo { font-size: 10.5px; color: var(--suave); text-align: center; line-height: 1.2; }
+/* Alturas das barras em degraus de 10% (nivel-0 fica com o mínimo de 2px) */
+.nivel-0 { height: 0; }   .nivel-1 { height: 10%; } .nivel-2 { height: 20%; } .nivel-3 { height: 30%; }
+.nivel-4 { height: 40%; } .nivel-5 { height: 50%; } .nivel-6 { height: 60%; } .nivel-7 { height: 70%; }
+.nivel-8 { height: 80%; } .nivel-9 { height: 90%; } .nivel-10 { height: 100%; }
+
+/* Legenda com pontos coloridos */
+.legenda-pontos { display: inline-flex; gap: 10px; font-size: 11.5px; }
+.legenda-pontos > span { display: inline-flex; align-items: center; gap: 4px; max-width: 90px; overflow: hidden; white-space: nowrap; }
+.ponto { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ponto-tu  { background: var(--tu); }
+.ponto-par { background: var(--par); }
+
+/* Arcos: nome + episódios | duas barras | selo */
+.arcos { list-style: none; margin-top: 6px; }
+.arco { display: grid; grid-template-columns: minmax(0, 1fr) 96px 22px; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--linha); }
+.arco-texto { min-width: 0; }
+.arco-nome { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arco-filler .arco-nome { color: var(--suave); }   /* intervalos de filler mais apagados */
+.arco-eps { display: block; font-size: 11.5px; color: var(--suave); }
+.arco-barras { display: flex; flex-direction: column; gap: 4px; }
+.barra-fina { height: 5px; }
+.vs-tu-cor::-webkit-progress-value  { background: var(--tu); }
+.vs-par-cor::-webkit-progress-value { background: var(--par); }
+.vs-tu-cor::-moz-progress-bar  { background: var(--tu); border-radius: 6px; }
+.vs-par-cor::-moz-progress-bar { background: var(--par); border-radius: 6px; }
+
+/* Selo do arco: ✓ os dois, ½ na cor de quem acabou, vazio se ninguém */
+.selo { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: var(--no-pastel); }
+.selo-nada    { background: var(--trilho); }
+.selo-tu      { background: var(--tu); }
+.selo-par     { background: var(--par); }
+.selo-os-dois { background: linear-gradient(135deg, var(--tu), var(--par)); }
+
+/* Curiosidades */
+.est-curio { border-radius: 20px; padding: 12px 14px; }
+.est-curio-num { font-size: 22px; font-weight: 700; }
