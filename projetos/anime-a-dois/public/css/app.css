@@ -515,7 +515,7 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
 }
 .pista::-webkit-scrollbar { display: none; }
 .ep {
-  flex: 0 0 172px; height: 236px;       /* tamanho fixo: compacto em qualquer ecrã (com espaço para o título) */
+  flex: 0 0 172px; height: min(236px, 100%);   /* compacto (com espaço para o título), mas nunca maior do que a pista: encolhe em vez de ser cortado */
   scroll-snap-align: center;
   border-radius: 30px; padding: 18px;
   display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
@@ -536,8 +536,12 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
 
 /* Ecrãs baixos: os cartões já mostram título e quem viu, por isso o painel de baixo sai
    para os cartões caberem inteiros */
-@media (max-height: 760px) {
+@media (max-height: 820px) {
   .pagina-serie .detalhe { display: none; }
+}
+/* O mapa ganha uma linha por companheiro, por isso com duas ou mais pessoas o painel sai mais cedo */
+@media (max-height: 900px) {
+  .pagina-serie.com-2 .detalhe, .pagina-serie.com-3 .detalhe { display: none; }
 }
 
 /* ---------- Comentários ---------- */

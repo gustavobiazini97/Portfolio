@@ -35,7 +35,7 @@ class SerieController extends Controller
             'titulo'     => $serie->nome,
             'serieSlug'  => $serie->slug,
             'serieAcento' => $serie->acento,      // cor das séries novas ([data-acento] no CSS)
-            'classeBody' => 'pagina-serie',   // ecrã de altura fixa: a pista ocupa o que sobra
+            'classeBody' => 'pagina-serie com-' . min($companheiros->count(), 3),   // ecrã de altura fixa: a pista ocupa o que sobra; com-N = quantos companheiros (o mapa cresce uma linha por pessoa)
             'user'      => $user,
             'companheiros' => $companheiros,
             'serie'     => $serie,
