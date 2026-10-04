@@ -101,6 +101,9 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Os amigos veem o perfil e a biblioteca uns dos outros (`?c=perfil&a=pessoa`); não partilham séries. O par é só um: `users.par_id` (o `migrate.php` liga as duas contas existentes).
 - Tabelas novas: `amizades` (duas linhas por amizade), `pedidos_amizade`, `convites_amigo`.
 
+**Ecrã de entrar com apresentação**
+- Por baixo do login: carrossel com 5 capturas reais (`public/img/apresentacao/*.jpg`, dados de teste, sem capas) e vantagens; campo "Tenho um convite" que aceita o código ou o link inteiro (`AuthController::registo` apanha os 32 caracteres). O link "Criar conta" só aparece se o registo livre ainda estiver aberto.
+
 **Backoffice (admin)**
 - `users.admin` e `users.ultimo_acesso` (atualizado no máximo de 5 em 5 min em `exigirLogin`). O `migrate.php` marca como admin a conta mais antiga se ainda não houver nenhum; ninguém se promove na app.
 - `?c=admin` (só admins; as outras contas vão para o Início): números (contas, novas, ativas 1/7/30 dias, séries, vistos, comentários, amizades, push), séries mais vistas, lista de contas com pesquisa, criar, editar (nome, utilizador, repor palavra-passe) e apagar (nunca admins). Link no Perfil.

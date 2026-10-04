@@ -852,3 +852,27 @@ button.pessoa-serie { display: flex; }
 .admin-conta-texto { display: flex; flex-direction: column; min-width: 0; }
 .admin-conta-acoes { display: flex; gap: 6px; }
 .admin-apagar { color: var(--erro); }
+
+/* ---------- Apresentação no ecrã de entrar ---------- */
+.apresentacao { margin-top: 28px; padding-top: 8px; }
+.apresentacao-titulo { font-size: 20px; font-weight: 700; text-align: center; letter-spacing: -.01em; }
+.apresentacao-texto { margin: 8px 8px 0; text-align: center; font-size: 13.5px; color: var(--suave); }
+/* Carrossel: cartões lado a lado que "encaixam" ao deslizar; sai um bocado do ecrã para convidar a deslizar */
+.apresentacao-carrossel {
+  list-style: none; display: flex; gap: 16px; margin: 18px -16px 0; padding: 4px 16px 12px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+}
+.apresentacao-carrossel::-webkit-scrollbar { display: none; }
+.apresentacao-cartao { flex: 0 0 62%; max-width: 260px; scroll-snap-align: center; text-align: center; }
+.apresentacao-cartao h3 { margin-top: 12px; font-size: 15px; font-weight: 700; }
+.apresentacao-cartao p { margin-top: 4px; font-size: 12.5px; color: var(--suave); }
+/* Moldura de telemóvel: cantos redondos e aro escuro à volta da captura (cortada para mostrar só o topo) */
+.telemovel { display: block; border-radius: 28px; padding: 6px; background: #14161c; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.telemovel img { display: block; width: 100%; height: 330px; object-fit: cover; object-position: top; border-radius: 22px; }
+.apresentacao-pontos { list-style: none; margin: 8px 0 0; display: grid; gap: 8px; font-size: 13.5px; }
+.apresentacao-pontos li { position: relative; padding-left: 26px; }
+.apresentacao-pontos li::before { content: "✓"; position: absolute; left: 4px; color: var(--tu-txt); font-weight: 700; }
+/* Caixa do código de convite */
+.convite-caixa { margin: 28px 0 24px; }
+.convite-titulo { font-size: 17px; font-weight: 700; }
+html { scroll-behavior: smooth; }

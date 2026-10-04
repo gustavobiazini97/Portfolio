@@ -49,10 +49,11 @@ class AuthController extends Controller
         }
 
         // Com link de convite válido o registo abre, e a conta fica amiga de quem convidou
-        $codigo  = $_GET['convite'] ?? null;
+        // Aceita o código sozinho ou o link inteiro colado (apanha os 32 caracteres do código)
+        $codigo = isset($_GET['convite']) ? (preg_match('/[a-f0-9]{32}/i', $_GET['convite'], $m) ? strtolower($m[0]) : '-') : null;
         $convite = Amizade::convite($codigo);
         if ($codigo !== null && $convite === null) {
-            $this->flash('erro', 'Esse link de convite já não é válido. Pede um novo.');
+            $this->flash('erro', 'Esse convite não é válido ou já expirou. Pede um novo.');
             $this->redirect('auth', 'login');
         }
         if ($convite === null && !User::registoAberto()) {
