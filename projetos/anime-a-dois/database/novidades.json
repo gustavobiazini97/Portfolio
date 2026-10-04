@@ -131,6 +131,16 @@
       "itens": [
         "No Perfil, em \"Cores\", escolhes entre 6 paletas para \"tu\" e para quem vê contigo. Só mudam para ti e ficam guardadas na conta, por isso seguem-te entre telemóveis."
       ]
+    },
+    {
+      "id": 16,
+      "data": "2026-10-04",
+      "titulo": "Privacidade, continuar e avisos de amizade",
+      "itens": [
+        "Perfil → Privacidade: podes mostrar aos amigos só as séries que vês com eles (o teu par continua a ver tudo).",
+        "No Início, o botão \"Continuar · episódio N\" leva direto ao episódio seguinte ao teu mais avançado.",
+        "Recebes um aviso quando alguém te pede amizade ou aceita o teu pedido; podes ligar ou desligar em Notificações."
+      ]
     }
   ]
 }

@@ -106,9 +106,24 @@ class Notificador
         ]);
     }
 
+    // Amizades: $evento = 'pedido' (alguém te pediu amizade) ou 'aceite' (aceitaram o teu pedido / ficaram amigos)
+    public static function amigos(User $autor, User $para, string $evento): void
+    {
+        [$titulo, $corpo] = $evento === 'aceite'
+            ? [$autor->nome . ' é agora teu amigo', 'Já podem ver o perfil um do outro']
+            : [$autor->nome . ' quer ser teu amigo', 'Abre a app para aceitar'];
+
+        self::paraPessoa($para, 'amigo', [
+            'titulo' => $titulo,
+            'corpo'  => $corpo,
+            'url'    => url('amigos'),
+            'tag'    => 'amigo-' . $autor->id,
+        ]);
+    }
+
     // ---------- Envio ----------
 
-    // Envia a uma pessoa pelos canais que ela escolheu; $tipo: 'ep', 'com' ou 'serie'
+    // Envia a uma pessoa pelos canais que ela escolheu; $tipo: 'ep', 'com', 'serie' ou 'amigo'
     private static function paraPessoa(User $destino, string $tipo, array $msg): void
     {
         $par  = $destino;

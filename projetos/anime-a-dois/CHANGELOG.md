@@ -101,6 +101,11 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 - Os amigos veem o perfil e a biblioteca uns dos outros (`?c=perfil&a=pessoa`); não partilham séries. O par é só um: `users.par_id` (o `migrate.php` liga as duas contas existentes).
 - Tabelas novas: `amizades` (duas linhas por amizade), `pedidos_amizade`, `convites_amigo`.
 
+**Privacidade, Continuar e avisos de amizade**
+- `users.so_juntos`: com a opção ligada (Perfil → Privacidade) os amigos só veem as séries que a pessoa vê com eles, e o último episódio dessas (`User::veTudo/ultimoVistoPara`); o par vê sempre tudo. Aplica-se no perfil do amigo e na lista de Amigos.
+- Início: o botão passa a "Continuar · episódio N" (seguinte ao mais avançado) quando já começaste e falta ver.
+- Avisos de amizade (`Notificador::amigos`, preferências `amigo_push/amigo_email`): pedido recebido e pedido aceite; `Amizade::pedir` devolve `pedido` ou `amigos`.
+
 **Cores à escolha**
 - `users.paleta` (índice em `User::PALETAS`, 6 paletas); `paleta_atual()` põe `data-paleta` no `<html>` (sem piscar) e o `app.css` redefine `--tu/--par/--tu-txt/--par-txt/--orbe-*` por paleta, nos dois temas. Perfil → "Cores" com pré-visualização imediata (`#form-paleta` em `app.js`). Só muda para quem escolhe.
 

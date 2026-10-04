@@ -37,13 +37,20 @@ class PerfilController extends Controller
         }
         $ehPar = $par?->id === $id;
 
+        // A biblioteca dele (cada item diz com quem a vê); se ele só mostra o que vê contigo, ficam só essas
+        $biblioteca = Serie::biblioteca($pessoa);
+        if (!$pessoa->veTudo($user)) {
+            $biblioteca = array_values(array_filter($biblioteca, fn ($i) => in_array($user->id, array_map(fn ($c) => $c['user']->id, $i['companheiros']), true)));
+        }
+
         $this->render('perfil/pessoa', [
             'titulo'     => $pessoa->nome,
             'user'       => $user,
             'pessoa'     => $pessoa,
             'ehPar'      => $ehPar,
-            'ultimo'     => $pessoa->ultimoVisto(),
-            'biblioteca' => Serie::biblioteca($pessoa),   // a dele (cada item diz se a vê com alguém)
+            'ultimo'     => $pessoa->ultimoVistoPara($user),
+            'biblioteca' => $biblioteca,
+            'soJuntos'   => !$pessoa->veTudo($user),   // ele só mostra o que vê contigo
         ]);
     }
 
@@ -142,6 +149,20 @@ class PerfilController extends Controller
             $this->responder(false, $e->getMessage());
         } catch (PDOException $e) {
             $this->responder(false, 'Não foi possível alterar a palavra-passe.');
+        }
+    }
+
+    // POST: privacidade — os amigos só veem as séries que vês com eles (o par vê sempre tudo)
+    public function guardarPrivacidade(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $user->alterarSoJuntos(!empty($_POST['so_juntos']));
+            $this->responder(true, 'Privacidade guardada.');
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível guardar.');
         }
     }
 

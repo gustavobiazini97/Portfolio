@@ -41,7 +41,8 @@ class Amizade
     // ---------- Pedidos pelo nome de utilizador ----------
 
     // Envia um pedido ao utilizador com este nome EXATO (não há pesquisa parcial: ninguém navega pelas contas)
-    public static function pedir(User $de, string $username): void
+    // Devolve 'amigos' (ele já te tinha pedido: ficam amigos) ou 'pedido' (pedido enviado); $para fica com a pessoa a avisar
+    public static function pedir(User $de, string $username, ?User &$para = null): string
     {
         $username = strtolower(trim($username));
         $para = $username === '' ? null : User::where('username', $username)->first();
@@ -57,12 +58,13 @@ class Amizade
         // Se a outra pessoa já tinha pedido a amizade, é como aceitar
         if (Capsule::table('pedidos_amizade')->where('de_id', $para->id)->where('para_id', $de->id)->exists()) {
             self::aceitar($de, $para);
-            return;
+            return 'amigos';
         }
         if (Capsule::table('pedidos_amizade')->where('de_id', $de->id)->where('para_id', $para->id)->exists()) {
             throw new InvalidArgumentException('Já enviaste um pedido a ' . $para->nome . '.');
         }
         Capsule::table('pedidos_amizade')->insert(['de_id' => $de->id, 'para_id' => $para->id]);
+        return 'pedido';
     }
 
     // $quem aceita o pedido que $de lhe enviou

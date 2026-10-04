@@ -42,6 +42,33 @@ class User extends Model
                     ->first();
     }
 
+    // Quem me vê por inteiro? Eu, o meu par, ou qualquer amigo se não escolhi "só o que vemos juntos"
+    public function veTudo(User $quem): bool
+    {
+        return !$this->so_juntos || $quem->id === $this->id || $quem->id === $this->par_id;
+    }
+
+    // Último episódio que $quem pode ver: o de sempre, ou (com "só juntos") o das séries que esta pessoa vê com $quem
+    public function ultimoVistoPara(User $quem): ?Episodio
+    {
+        if ($this->veTudo($quem)) {
+            return $this->ultimoVisto();
+        }
+        $series = \Illuminate\Database\Capsule\Manager::table('series_juntos')->where('user_id', $this->id)->where('com_id', $quem->id)->pluck('serie_id')->all();
+        if ($series === []) {
+            return null;
+        }
+        return $this->vistos()->with('serie')->whereIn('episodios.serie_id', $series)
+                    ->orderByPivot('visto_em', 'desc')->orderBy('episodios.numero', 'desc')->first();
+    }
+
+    // Liga/desliga "os amigos só veem o que vemos juntos"
+    public function alterarSoJuntos(bool $valor): void
+    {
+        $this->so_juntos = $valor ? 1 : 0;
+        $this->save();
+    }
+
     // ---------- Perfil ----------
 
     // Dados da foto SEM os bytes (só para saber se existe e a data, que entra no URL)

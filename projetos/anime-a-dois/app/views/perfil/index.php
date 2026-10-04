@@ -71,11 +71,22 @@
   <button type="submit" class="btn btn-secundario">Guardar cores</button>
 </form>
 
+<!-- Privacidade: o que os amigos veem da tua biblioteca (o teu par vê sempre tudo) -->
+<form class="form vidro" method="post" action="<?= e(url('perfil', 'guardarPrivacidade')) ?>">
+  <?= csrf_campo() ?>
+  <div class="painel-titulo"><h2>Privacidade</h2></div>
+  <label class="linha-interruptor">
+    <span>Mostrar aos amigos só as séries que vemos juntos<small>Os amigos deixam de ver as outras séries e o último episódio delas. O teu par vê sempre tudo.</small></span>
+    <span class="interruptor"><input type="checkbox" name="so_juntos" value="1" <?= $user->so_juntos ? 'checked' : '' ?>><i></i></span>
+  </label>
+  <button type="submit" class="btn btn-secundario">Guardar</button>
+</form>
+
 <!-- Notificações: o que receber (linhas) e por onde (colunas) -->
 <form class="form vidro notif" method="post" action="<?= e(url('perfil', 'guardarNotificacoes')) ?>">
   <?= csrf_campo() ?>
   <h2 class="notif-titulo">Notificações</h2>
-  <p class="notif-sub">Quando o teu par marca episódios, comenta ou traz uma série nova.</p>
+  <p class="notif-sub">Quando o teu par ou um amigo marca episódios, comenta, traz uma série nova ou te pede amizade.</p>
 
   <div class="notif-grade" role="group" aria-label="O que receber e por onde">
     <span></span><span class="notif-col">Telemóvel</span><span class="notif-col">Email</span>
@@ -87,6 +98,10 @@
     <span>Comentários</span>
     <label class="interruptor"><input type="checkbox" name="com_push" value="1" <?= $pref->com_push ? 'checked' : '' ?>><i></i><span class="escondido">Comentários no telemóvel</span></label>
     <label class="interruptor"><input type="checkbox" name="com_email" value="1" <?= $pref->com_email ? 'checked' : '' ?>><i></i><span class="escondido">Comentários por email</span></label>
+
+    <span>Pedidos de amizade</span>
+    <label class="interruptor"><input type="checkbox" name="amigo_push" value="1" <?= $pref->amigo_push ? 'checked' : '' ?>><i></i><span class="escondido">Amizades no telemóvel</span></label>
+    <label class="interruptor"><input type="checkbox" name="amigo_email" value="1" <?= $pref->amigo_email ? 'checked' : '' ?>><i></i><span class="escondido">Amizades por email</span></label>
 
     <span>Séries novas e propostas</span>
     <label class="interruptor"><input type="checkbox" name="serie_push" value="1" <?= $pref->serie_push ? 'checked' : '' ?>><i></i><span class="escondido">Séries no telemóvel</span></label>

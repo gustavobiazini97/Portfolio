@@ -40,8 +40,9 @@ class AmigosController extends Controller
         $user = $this->exigirLogin();
 
         try {
-            Amizade::pedir($user, $_POST['username'] ?? '');
-            $this->flash('sucesso', 'Pedido enviado (ou amizade feita, se ele já te tinha pedido).');
+            $resultado = Amizade::pedir($user, $_POST['username'] ?? '', $para);
+            Notificador::amigos($user, $para, $resultado === 'amigos' ? 'aceite' : 'pedido');   // avisa a outra pessoa
+            $this->flash('sucesso', $resultado === 'amigos' ? 'Ele já te tinha pedido: agora são amigos.' : 'Pedido enviado.');
         } catch (InvalidArgumentException $e) {
             $this->flash('erro', $e->getMessage());
         }
@@ -60,6 +61,7 @@ class AmigosController extends Controller
                 throw new InvalidArgumentException('Esse pedido já não existe.');
             }
             Amizade::aceitar($user, $outro);
+            Notificador::amigos($user, $outro, 'aceite');   // avisa quem tinha pedido
             $this->flash('sucesso', 'Agora tu e ' . $outro->nome . ' são amigos.');
         } catch (InvalidArgumentException $e) {
             $this->flash('erro', $e->getMessage());

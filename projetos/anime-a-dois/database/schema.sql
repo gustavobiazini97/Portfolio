@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255) NOT NULL,             -- password_hash() do PHP, nunca a palavra-passe
   novidades_vistas SMALLINT UNSIGNED NOT NULL DEFAULT 0,  -- id da última novidade que já viu (database/novidades.json)
   par_id        INT UNSIGNED NULL,                 -- o par (a pessoa com quem partilha séries); null = sem par
+  so_juntos     TINYINT(1)   NOT NULL DEFAULT 0,   -- 1 = os amigos só veem as séries que vê com eles (e o último episódio dessas)
   paleta        TINYINT UNSIGNED NOT NULL DEFAULT 0,   -- cores da app que ele escolheu (índice em User::PALETAS)
   admin         TINYINT(1)   NOT NULL DEFAULT 0,   -- 1 = tem acesso ao backoffice (?c=admin)
   ultimo_acesso DATETIME     NULL,                 -- última vez que abriu a app (atualizado no máximo de 5 em 5 min)
@@ -97,6 +98,8 @@ CREATE TABLE IF NOT EXISTS preferencias (
   ep_email   TINYINT(1)   NOT NULL DEFAULT 0,      -- episódios marcados → email
   com_push   TINYINT(1)   NOT NULL DEFAULT 1,      -- comentários → telemóvel
   com_email  TINYINT(1)   NOT NULL DEFAULT 0,      -- comentários → email
+  amigo_push  TINYINT(1)  NOT NULL DEFAULT 1,      -- pedidos de amizade (recebido / aceite) → telemóvel
+  amigo_email TINYINT(1)  NOT NULL DEFAULT 0,      -- pedidos de amizade → email
   serie_push  TINYINT(1)  NOT NULL DEFAULT 1,      -- séries adicionadas/propostas → telemóvel
   serie_email TINYINT(1)  NOT NULL DEFAULT 0,      -- séries adicionadas/propostas → email
   CONSTRAINT fk_pref_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

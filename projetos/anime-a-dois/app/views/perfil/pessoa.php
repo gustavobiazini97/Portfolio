@@ -43,7 +43,7 @@ $capaMini = function (Serie $s): string {
 <section class="painel vidro">
   <div class="painel-titulo"><h2>Biblioteca de <?= e($pessoa->nome) ?></h2></div>
   <?php if ($biblioteca === []): ?>
-    <p class="folha-vazio">Ainda não tem séries.</p>
+    <p class="folha-vazio"><?= $soJuntos ? e($pessoa->nome) . ' só mostra aos amigos as séries que vê com eles.' : 'Ainda não tem séries.' ?></p>
   <?php else: ?>
     <ul class="pessoa-lista">
       <?php foreach ($biblioteca as $item): $s = $item['serie']; $abre = $s->naBibliotecaDe($user); ?>

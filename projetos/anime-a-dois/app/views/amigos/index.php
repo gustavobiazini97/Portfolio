@@ -34,7 +34,7 @@
     <p class="folha-vazio">Ainda não tens amigos aqui. Envia um link de convite ou adiciona alguém que já tenha conta.</p>
   <?php else: ?>
     <ul class="pessoa-lista">
-      <?php foreach ($amigos as $a): $ult = $a->ultimoVisto(); ?>
+      <?php foreach ($amigos as $a): $ult = $a->ultimoVistoPara($user); ?>
         <li class="amigo-linha">
           <a class="amigo-link" href="<?= e(url('perfil', 'pessoa', ['id' => $a->id])) ?>">
             <?php $avatarUser = $a; $avatarCor = 'par'; $avatarExtra = 'avatar-mini'; require __DIR__ . '/../layout/avatar.php'; ?>
