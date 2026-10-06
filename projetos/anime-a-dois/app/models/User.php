@@ -2,16 +2,27 @@
 // Conta de utilizador. Toda a lógica de registo e login vive aqui (não nos controllers).
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 class User extends Model
 {
     protected $table = 'users';
     public $timestamps = false;
 
-    protected $fillable = ['nome', 'username', 'password_hash'];
+    protected $fillable = ['nome', 'username', 'password_hash', 'novidades_vistas'];
 
     // Nunca expor o hash se o Model for convertido em array/JSON
     protected $hidden = ['password_hash'];
+
+    // Paletas de cores (índice = users.paleta; 0 = a original). As cores em si estão em public/css/app.css ([data-paleta]).
+    public const PALETAS = [
+        0 => 'Sálvia e alperce',
+        1 => 'Azul e rosa',
+        2 => 'Roxo e amarelo',
+        3 => 'Turquesa e coral',
+        4 => 'Rosa e verde',
+        5 => 'Azul e laranja',
+    ];
 
     // Episódios que este utilizador marcou como vistos (tabela vistos)
     public function vistos()
@@ -29,6 +40,33 @@ class User extends Model
                     ->orderByPivot('visto_em', 'desc')
                     ->orderBy('episodios.numero', 'desc')   // desempate quando têm a mesma hora
                     ->first();
+    }
+
+    // Quem me vê por inteiro? Eu, o meu par, ou qualquer amigo se não escolhi "só o que vemos juntos"
+    public function veTudo(User $quem): bool
+    {
+        return !$this->so_juntos || $quem->id === $this->id || $quem->id === $this->par_id;
+    }
+
+    // Último episódio que $quem pode ver: o de sempre, ou (com "só juntos") o das séries que esta pessoa vê com $quem
+    public function ultimoVistoPara(User $quem): ?Episodio
+    {
+        if ($this->veTudo($quem)) {
+            return $this->ultimoVisto();
+        }
+        $series = \Illuminate\Database\Capsule\Manager::table('series_juntos')->where('user_id', $this->id)->where('com_id', $quem->id)->pluck('serie_id')->all();
+        if ($series === []) {
+            return null;
+        }
+        return $this->vistos()->with('serie')->whereIn('episodios.serie_id', $series)
+                    ->orderByPivot('visto_em', 'desc')->orderBy('episodios.numero', 'desc')->first();
+    }
+
+    // Liga/desliga "os amigos só veem o que vemos juntos"
+    public function alterarSoJuntos(bool $valor): void
+    {
+        $this->so_juntos = $valor ? 1 : 0;
+        $this->save();
     }
 
     // ---------- Perfil ----------
@@ -115,6 +153,55 @@ class User extends Model
         $this->save();
     }
 
+    // Apaga a conta de vez, confirmando a palavra-passe. As tabelas ligadas (vistos, comentários, biblioteca, foto,
+    // amizades, convites, avisos...) apagam-se sozinhas (ON DELETE CASCADE); só o par_id dos outros não tem chave, por isso limpa-se à mão.
+    public function apagarConta(string $password): void
+    {
+        if (!password_verify($password, $this->password_hash)) {
+            throw new InvalidArgumentException('A palavra-passe não está certa.');
+        }
+        $this->eliminar();
+    }
+
+    // Apaga a conta sem pedir palavra-passe (o backoffice usa isto depois de confirmar quem é admin)
+    public function eliminar(): void
+    {
+        \Illuminate\Database\Capsule\Manager::connection()->transaction(function () {
+            static::where('par_id', $this->id)->update(['par_id' => null]);   // quem tinha esta conta como par fica sem par
+            $this->delete();
+        });
+    }
+
+    // Regista que a pessoa abriu a app (no máximo de 5 em 5 minutos, para não escrever na base de dados a cada pedido)
+    public function tocar(): void
+    {
+        if ($this->ultimo_acesso === null || strtotime($this->ultimo_acesso) < time() - 300) {
+            static::where('id', $this->id)->update(['ultimo_acesso' => date('Y-m-d H:i:s')]);
+        }
+    }
+
+    // Escolhe as cores da app (só vale para quem escolhe)
+    public function alterarPaleta(int $paleta): void
+    {
+        if (!array_key_exists($paleta, self::PALETAS)) {
+            throw new InvalidArgumentException('Essa paleta não existe.');
+        }
+        $this->paleta = $paleta;
+        $this->save();
+    }
+
+    public function ehAdmin(): bool
+    {
+        return (int) $this->admin === 1;
+    }
+
+    // Fecha o popup das novidades: fica tudo visto até à próxima atualização
+    public function marcarNovidadesVistas(): void
+    {
+        $this->novidades_vistas = Novidade::ultima();
+        $this->save();
+    }
+
     // Indica se este episódio já está marcado como visto
     public function viu(Episodio $episodio): bool
     {
@@ -150,10 +237,32 @@ class User extends Model
         return array_values($novos);
     }
 
-    // A outra conta (a app só tem duas); null enquanto o parceiro não se registar
+    // O par: a pessoa com quem partilhas séries (users.par_id); null se ainda não tens par
     public function parceiro(): ?User
     {
-        return static::where('id', '!=', $this->id)->orderBy('id')->first();
+        return $this->par_id ? static::find($this->par_id) : null;
+    }
+
+    // Pessoas com quem podes partilhar séries: o par primeiro, depois os amigos (por ordem alfabética)
+    public function ligados()
+    {
+        $lista = collect();
+        if ($par = $this->parceiro()) {
+            $lista->push($par);
+        }
+        return $lista->concat(Amizade::amigosDe($this)->reject(fn ($a) => $a->id === $this->par_id))->values();
+    }
+
+    // O par ou um amigo?
+    public function ligadoA(User $outro): bool
+    {
+        return $outro->id !== $this->id && ($this->par_id === $outro->id || Amizade::sao($this, $outro));
+    }
+
+    // Ainda falta o par se registar? (só a primeira conta, enquanto não chega o máximo de contas do casal)
+    public function esperaPar(): bool
+    {
+        return $this->par_id === null && static::count() < (Database::config()['max_contas'] ?? 2);
     }
 
     // O registo só está aberto enquanto houver menos contas do que o máximo
@@ -162,13 +271,9 @@ class User extends Model
         return static::count() < (Database::config()['max_contas'] ?? 2);
     }
 
-    // Cria uma conta nova; lança InvalidArgumentException com a mensagem para o utilizador
-    public static function registar(array $dados): User
+    // Valida nome, utilizador e palavra-passe de uma conta nova (registo ou backoffice); devolve os valores limpos
+    public static function validarNovos(array $dados): array
     {
-        if (!static::registoAberto()) {
-            throw new InvalidArgumentException('O registo está fechado: já existem as duas contas.');
-        }
-
         // Limpeza: espaços a mais fora; username sempre em minúsculas
         $nome      = trim($dados['nome'] ?? '');
         $username  = strtolower(trim($dados['username'] ?? ''));
@@ -193,11 +298,57 @@ class User extends Model
             throw new InvalidArgumentException('As palavras-passe não coincidem.');
         }
 
-        return static::create([
+        return ['nome' => $nome, 'username' => $username, 'password' => $password];
+    }
+
+    // Cria uma conta nova; lança InvalidArgumentException com a mensagem para o utilizador
+    // $convite = link de convite válido (Amizade::convite): abre o registo e liga a conta ao amigo que convidou
+    public static function registar(array $dados, ?object $convite = null): User
+    {
+        if ($convite === null && !static::registoAberto()) {
+            throw new InvalidArgumentException('O registo está fechado: já existem as duas contas.');
+        }
+
+        ['nome' => $nome, 'username' => $username, 'password' => $password] = static::validarNovos($dados);
+
+        $user = static::create([
             'nome'          => $nome,
             'username'      => $username,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'novidades_vistas' => Novidade::ultima(),   // conta nova: começa sem novidades por ver
         ]);
+
+        if ($convite !== null) {
+            // Amigo convidado: biblioteca vazia e amigo de quem convidou (sem par)
+            Amizade::usarConvite($convite, $user);
+            return $user;
+        }
+
+        // Segunda conta do casal: ficam par uma da outra
+        $primeiro = static::where('id', '!=', $user->id)->orderBy('id')->first();
+        if ($primeiro !== null) {
+            static::where('id', $primeiro->id)->update(['par_id' => $user->id]);
+            $user->par_id = $primeiro->id;
+            $user->save();
+        }
+
+        // As séries do seed (Naruto, Shippuden, Boruto) começam na biblioteca do casal (conjuntas)
+        $agora = date('Y-m-d H:i:s');
+        $linhas = Serie::whereNull('adicionada_por')->pluck('id')
+            ->map(fn ($id) => ['user_id' => $user->id, 'serie_id' => $id, 'estado' => 'a_ver', 'desde' => $agora])->all();
+        Capsule::table('bibliotecas')->insertOrIgnore($linhas);
+
+        // As do seed passam a ser vistas pelo casal juntos
+        if ($primeiro !== null) {
+            foreach (array_column($linhas, 'serie_id') as $serieId) {
+                Capsule::table('series_juntos')->insertOrIgnore([
+                    ['serie_id' => $serieId, 'user_id' => $user->id,     'com_id' => $primeiro->id],
+                    ['serie_id' => $serieId, 'user_id' => $primeiro->id, 'com_id' => $user->id],
+                ]);
+            }
+        }
+
+        return $user;
     }
 
     // Devolve o utilizador se as credenciais estiverem certas; null caso contrário

@@ -100,6 +100,17 @@ abstract class Controller
             }
             $this->redirect('auth', 'login');   // sem aviso: na primeira visita seria só ruído
         }
+        $user->tocar();
+        return $user;
+    }
+
+    // Backoffice: só contas admin; as outras vão para o início sem saber que a página existe
+    protected function exigirAdmin(): User
+    {
+        $user = $this->exigirLogin();
+        if (!$user->ehAdmin()) {
+            $this->redirect('home');
+        }
         return $user;
     }
 }

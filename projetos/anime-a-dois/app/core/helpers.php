@@ -11,6 +11,21 @@ if (!function_exists('e')) {
 }
 
 // URL interno no formato do mini-MVC: index.php?c=controller&a=acao&...
+// Paleta de cores da pessoa com sessão (0 = original); usada no <html data-paleta> para as cores aparecerem sem piscar
+function paleta_atual(): int
+{
+    static $paleta = null;
+    if ($paleta === null) {
+        $id = $_SESSION['user_id'] ?? null;
+        try {
+            $paleta = $id === null ? 0 : (int) User::where('id', $id)->value('paleta');
+        } catch (Throwable $e) {
+            $paleta = 0;   // base de dados ainda sem a coluna (antes do migrate): cores originais
+        }
+    }
+    return $paleta;
+}
+
 function url(string $c, string $a = 'index', array $params = []): string
 {
     return 'index.php?' . http_build_query(['c' => $c, 'a' => $a] + $params);
@@ -59,4 +74,21 @@ function tempo_relativo(?string $data): string
 function csrf_campo(): string
 {
     return '<input type="hidden" name="_csrf" value="' . e($_SESSION['_csrf'] ?? '') . '">';
+}
+
+// Corre uma tarefa DEPOIS de a resposta chegar ao telemóvel (notificações, buscar episódios novos).
+// No alojamento (PHP-FPM) o fastcgi_finish_request() entrega a página primeiro; uma falha aqui
+// fica só no log e nunca estraga o pedido.
+function depois(callable $tarefa): void
+{
+    register_shutdown_function(function () use ($tarefa) {
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+        try {
+            $tarefa();
+        } catch (Throwable $e) {
+            error_log('Tarefa em segundo plano: ' . $e->getMessage());
+        }
+    });
 }

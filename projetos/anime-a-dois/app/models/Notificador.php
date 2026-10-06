@@ -1,6 +1,6 @@
 <?php
-// Envia ao par as notificações de "marcou episódios" e "comentou", por telemóvel (Web Push)
-// e/ou email, conforme as preferências DELE. Uma falha aqui nunca estraga o marcar/comentar.
+// Envia ao par as notificações de "marcou episódios", "comentou" e "adicionou/propôs uma série",
+// por telemóvel (Web Push) e/ou email, conforme as preferências DELE. Uma falha aqui nunca estraga o marcar/comentar.
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Minishlink\WebPush\Subscription;
@@ -36,6 +36,11 @@ class Notificador
     // Marcaste episódios como vistos (só quando ficam vistos; desmarcar não avisa)
     public static function episodios(User $autor, Serie $serie, array $numeros, array $titulos): void
     {
+        // Séries só tuas não incomodam ninguém: só avisa quem vê esta série contigo
+        $companheiros = $serie->companheirosDe($autor);
+        if ($companheiros->isEmpty()) {
+            return;
+        }
         sort($numeros);
         $n = count($numeros);
         if ($n === 0) {
@@ -51,67 +56,89 @@ class Notificador
             $corpo  = $serie->nome . ' · ' . $numeros[0] . '–' . $numeros[$n - 1];
         }
 
-        self::paraPar($autor, 'ep', [
-            'titulo' => $titulo,
-            'corpo'  => $corpo,
-            'url'    => url('serie', 'ver', ['serie' => $serie->slug, 'ep' => $numeros[$n - 1]]),
-            'tag'    => 'ep-' . $serie->slug,          // várias marcações seguidas substituem-se em vez de empilhar
-        ]);
+        foreach ($companheiros as $c) {
+            self::paraPessoa($c, 'ep', [
+                'titulo' => $titulo,
+                'corpo'  => $corpo,
+                'url'    => url('serie', 'ver', ['serie' => $serie->slug, 'ep' => $numeros[$n - 1]]),
+                'tag'    => 'ep-' . $serie->slug,          // várias marcações seguidas substituem-se em vez de empilhar
+            ]);
+        }
     }
 
     // Escreveste um comentário
     public static function comentario(User $autor, Comentario $comentario): void
     {
         $episodio = $comentario->episodio()->with('serie')->first();
-        if ($episodio === null) {
-            return;
+        $companheiros = $episodio ? $episodio->serie->companheirosDe($autor) : collect();
+        if ($companheiros->isEmpty()) {
+            return;   // só nas séries vistas com alguém
         }
         $texto = mb_strlen($comentario->texto) > 140 ? mb_substr($comentario->texto, 0, 139) . '…' : $comentario->texto;
 
-        self::paraPar($autor, 'com', [
-            'titulo' => $autor->nome . ' comentou o episódio ' . $episodio->numero,
-            'corpo'  => $texto,
-            'url'    => url('serie', 'ver', ['serie' => $episodio->serie->slug, 'ep' => $episodio->numero]),
-            'tag'    => 'com-' . $episodio->id,
+        foreach ($companheiros as $c) {
+            self::paraPessoa($c, 'com', [
+                'titulo' => $autor->nome . ' comentou o episódio ' . $episodio->numero,
+                'corpo'  => $texto,
+                'url'    => url('serie', 'ver', ['serie' => $episodio->serie->slug, 'ep' => $episodio->numero]),
+                'tag'    => 'com-' . $episodio->id,
+            ]);
+        }
+    }
+
+    // Séries: $evento = 'convite' (Quero ver contigo), 'aceite' (o convite foi aceite) ou 'juntou' (juntou-se a uma série tua).
+    // $para = quem recebe o aviso.
+    public static function serie(User $autor, Serie $serie, string $evento, User $para): void
+    {
+        $episodios = plural((int) $serie->total_episodios, 'episódio', 'episódios');
+        [$titulo, $corpo, $url] = match ($evento) {
+            'aceite' => [$autor->nome . ' aceitou ver ' . $serie->nome . ' contigo', 'Agora vêem a série juntos', url('home', 'index', ['serie' => $serie->slug])],
+            'juntou' => [$autor->nome . ' juntou-se a ti em ' . $serie->nome, 'Agora vêem a série juntos', url('home', 'index', ['serie' => $serie->slug])],
+            default  => [$autor->nome . ' quer ver ' . $serie->nome . ' contigo', $episodios . ' · abre a app para aceitar', url('home') . '#convites'],
+        };
+
+        self::paraPessoa($para, 'serie', [
+            'titulo' => $titulo,
+            'corpo'  => $corpo,
+            'url'    => $url,
+            'tag'    => 'serie-' . $serie->id,
+            'imagem' => $serie->capa,   // no Android aparece a capa em grande na notificação
+        ]);
+    }
+
+    // Amizades: $evento = 'pedido' (alguém te pediu amizade) ou 'aceite' (aceitaram o teu pedido / ficaram amigos)
+    public static function amigos(User $autor, User $para, string $evento): void
+    {
+        [$titulo, $corpo] = $evento === 'aceite'
+            ? [$autor->nome . ' é agora teu amigo', 'Já podem ver o perfil um do outro']
+            : [$autor->nome . ' quer ser teu amigo', 'Abre a app para aceitar'];
+
+        self::paraPessoa($para, 'amigo', [
+            'titulo' => $titulo,
+            'corpo'  => $corpo,
+            'url'    => url('amigos'),
+            'tag'    => 'amigo-' . $autor->id,
         ]);
     }
 
     // ---------- Envio ----------
 
-    // Envia ao par pelos canais que ele escolheu; $tipo: 'ep' ou 'com'
-    private static function paraPar(User $autor, string $tipo, array $msg): void
+    // Envia a uma pessoa pelos canais que ela escolheu; $tipo: 'ep', 'com', 'serie' ou 'amigo'
+    private static function paraPessoa(User $destino, string $tipo, array $msg): void
     {
-        $par = $autor->parceiro();
-        if ($par === null) {
-            return;
-        }
+        $par  = $destino;
         $pref = Preferencia::de($par);
 
         // Links absolutos (a notificação abre fora da página)
         $msg['url'] = url_absoluto() . $msg['url'];
 
         // Depois de a resposta chegar ao telemóvel de quem marcou (não atrasa o botão)
-        self::depois(function () use ($par, $pref, $tipo, $msg) {
+        depois(function () use ($par, $pref, $tipo, $msg) {
             if ($pref->{$tipo . '_push'}) {
                 self::push($par, $msg);
             }
             if ($pref->{$tipo . '_email'} && $pref->email) {
                 self::email($pref->email, $msg);
-            }
-        });
-    }
-
-    // Corre a função quando o pedido acabar; no alojamento (PHP-FPM) a resposta já foi entregue
-    private static function depois(callable $tarefa): void
-    {
-        register_shutdown_function(function () use ($tarefa) {
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
-            }
-            try {
-                $tarefa();
-            } catch (Throwable $e) {
-                error_log('Notificador: ' . $e->getMessage());   // nunca rebenta com o pedido
             }
         });
     }

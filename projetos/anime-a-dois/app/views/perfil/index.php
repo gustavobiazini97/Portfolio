@@ -53,11 +53,40 @@
   <button type="submit" class="btn btn-secundario">Guardar</button>
 </form>
 
+<!-- Cores: cada pessoa escolhe as suas (só mudam para ti). Tocar numa amostra pré-visualiza logo; "Guardar" grava -->
+<form class="form vidro" method="post" action="<?= e(url('perfil', 'guardarPaleta')) ?>" id="form-paleta">
+  <?= csrf_campo() ?>
+  <div class="painel-titulo"><h2>Cores</h2></div>
+  <p class="atualizacao-texto">As cores de "tu" e de quem vê contigo. Só mudam para ti.</p>
+  <div class="paletas">
+    <?php foreach (User::PALETAS as $i => $nome): ?>
+      <label class="paleta">
+        <input type="radio" name="paleta" value="<?= (int) $i ?>" <?= (int) $user->paleta === $i ? 'checked' : '' ?>>
+        <!-- data-paleta dá a esta amostra as cores dessa paleta (ver app.css) -->
+        <span class="amostra" data-paleta="<?= (int) $i ?>"><i></i><i></i></span>
+        <small><?= e($nome) ?></small>
+      </label>
+    <?php endforeach; ?>
+  </div>
+  <button type="submit" class="btn btn-secundario">Guardar cores</button>
+</form>
+
+<!-- Privacidade: o que os amigos veem da tua biblioteca (o teu par vê sempre tudo) -->
+<form class="form vidro" method="post" action="<?= e(url('perfil', 'guardarPrivacidade')) ?>">
+  <?= csrf_campo() ?>
+  <div class="painel-titulo"><h2>Privacidade</h2></div>
+  <label class="linha-interruptor">
+    <span>Mostrar aos amigos só as séries que vemos juntos<small>Os amigos deixam de ver as outras séries e o último episódio delas. O teu par vê sempre tudo.</small></span>
+    <span class="interruptor"><input type="checkbox" name="so_juntos" value="1" <?= $user->so_juntos ? 'checked' : '' ?>><i></i></span>
+  </label>
+  <button type="submit" class="btn btn-secundario">Guardar</button>
+</form>
+
 <!-- Notificações: o que receber (linhas) e por onde (colunas) -->
 <form class="form vidro notif" method="post" action="<?= e(url('perfil', 'guardarNotificacoes')) ?>">
   <?= csrf_campo() ?>
   <h2 class="notif-titulo">Notificações</h2>
-  <p class="notif-sub">Quando o teu par marca episódios ou comenta.</p>
+  <p class="notif-sub">Quando o teu par ou um amigo marca episódios, comenta, traz uma série nova ou te pede amizade.</p>
 
   <div class="notif-grade" role="group" aria-label="O que receber e por onde">
     <span></span><span class="notif-col">Telemóvel</span><span class="notif-col">Email</span>
@@ -69,6 +98,14 @@
     <span>Comentários</span>
     <label class="interruptor"><input type="checkbox" name="com_push" value="1" <?= $pref->com_push ? 'checked' : '' ?>><i></i><span class="escondido">Comentários no telemóvel</span></label>
     <label class="interruptor"><input type="checkbox" name="com_email" value="1" <?= $pref->com_email ? 'checked' : '' ?>><i></i><span class="escondido">Comentários por email</span></label>
+
+    <span>Pedidos de amizade</span>
+    <label class="interruptor"><input type="checkbox" name="amigo_push" value="1" <?= $pref->amigo_push ? 'checked' : '' ?>><i></i><span class="escondido">Amizades no telemóvel</span></label>
+    <label class="interruptor"><input type="checkbox" name="amigo_email" value="1" <?= $pref->amigo_email ? 'checked' : '' ?>><i></i><span class="escondido">Amizades por email</span></label>
+
+    <span>Séries novas e propostas</span>
+    <label class="interruptor"><input type="checkbox" name="serie_push" value="1" <?= $pref->serie_push ? 'checked' : '' ?>><i></i><span class="escondido">Séries no telemóvel</span></label>
+    <label class="interruptor"><input type="checkbox" name="serie_email" value="1" <?= $pref->serie_email ? 'checked' : '' ?>><i></i><span class="escondido">Séries por email</span></label>
   </div>
 
   <label class="campo">
@@ -116,10 +153,35 @@
   </form>
 </details>
 
+<!-- Atualizações: a app atualiza sozinha; o botão força a procura e recarrega com os ficheiros mais recentes -->
+<section class="form vidro atualizacao" id="atualizacao">
+  <div class="painel-titulo"><h2>Atualizações</h2><span>versão 1.<?= (int) $versao ?></span>   <!-- 1.N: N = id da última novidade --></div>
+  <p class="atualizacao-texto" id="atualizacao-estado">A app atualiza sozinha ao abrir. Se algo parecer desatualizado, toca aqui.</p>
+  <button type="button" class="btn-texto vidro" id="btn-atualizar">Procurar atualizações</button>
+</section>
+
 <form class="acao-fundo" method="post" action="<?= e(url('auth', 'sair')) ?>">
   <?= csrf_campo() ?>
   <button type="submit" class="btn">Terminar sessão</button>
 </form>
+
+<?php if ($user->ehAdmin()): ?>
+  <a class="btn btn-secundario" href="<?= e(url('admin')) ?>">Backoffice</a>
+<?php endif; ?>
+
+<!-- Apagar conta (fechado por defeito): pede a palavra-passe e apaga tudo da base de dados -->
+<details class="form vidro dobravel zona-perigo">
+  <summary>Apagar conta</summary>
+  <form method="post" action="<?= e(url('perfil', 'apagarConta')) ?>" class="dobravel-corpo" data-confirmar="Apagar a tua conta de vez? Perdes o progresso, os comentários e as ligações. Não dá para desfazer.">
+    <?= csrf_campo() ?>
+    <p class="atualizacao-texto">Isto apaga o teu progresso, os teus comentários, a foto e as ligações a amigos e ao par. Não dá para desfazer.</p>
+    <label class="campo">
+      <span>palavra-passe</span>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn-perigo">Apagar a minha conta</button>
+  </form>
+</details>
 
 <!-- Aviso curto (usado pelo envio da foto) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>

@@ -14,16 +14,22 @@ session_start();
 
 require __DIR__ . '/../app/bootstrap.php';
 
+// Sessão expirada mas com "manter sessão iniciada": reabre-a pelo cookie
+SessaoLonga::restaurar();
+
 // Token CSRF da sessão, criado uma vez e usado em todos os formulários
 $_SESSION['_csrf'] ??= bin2hex(random_bytes(32));
 
 // Rotas permitidas: controller => [ações]. O que não estiver aqui dá 404.
 $rotas = [
     'auth'  => ['login', 'entrar', 'registo', 'registar', 'sair'],
-    'home'  => ['index'],
+    'home'  => ['index', 'novidadesVistas'],
     'estatisticas' => ['index'],
+    'amigos' => ['index', 'criarConvite', 'pedir', 'aceitar', 'recusar', 'remover'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],
-    'perfil' => ['index', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword',
+    'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'juntar', 'aceitar', 'recusar', 'separar', 'remover'],
+    'admin' => ['index', 'novo', 'criar', 'editar', 'guardar', 'apagar'],
+    'perfil' => ['index', 'pessoa', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword', 'guardarPaleta', 'guardarPrivacidade', 'apagarConta',
                  'guardarNotificacoes', 'subscrever', 'desubscrever', 'testarNotificacao'],
 ];
 

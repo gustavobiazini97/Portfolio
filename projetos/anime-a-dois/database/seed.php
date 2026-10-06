@@ -36,14 +36,17 @@ if (is_file($ficheiroTitulos)) {
     }
 }
 
-// Slug no JSON → slug curto usado na app, pela ordem do filtro
+// Slug no JSON → slug curto usado na app, pela ordem da biblioteca
 $mapa = [
     'naruto'                         => 'naruto',
     'naruto-shippuden'               => 'shippuden',
     'boruto-naruto-next-generations' => 'boruto',
 ];
 
-Capsule::connection()->transaction(function () use ($dados, $mapa, $todos) {
+// Id de cada uma no MyAnimeList: impede que a pesquisa as adicione outra vez e permite ir buscar a capa
+$malIds = ['naruto' => 20, 'shippuden' => 1735, 'boruto' => 34566];
+
+Capsule::connection()->transaction(function () use ($dados, $mapa, $todos, $malIds) {
     $ordem = 0;
     foreach ($mapa as $origem => $slug) {
         $show = $dados['shows'][$origem] ?? null;
@@ -60,6 +63,8 @@ Capsule::connection()->transaction(function () use ($dados, $mapa, $todos) {
                 'anos'            => $show['years'] ?? null,
                 'total_episodios' => $show['total'],
                 'ordem'           => ++$ordem,
+                'mal_id'          => $malIds[$slug],
+                'adicionada_em'   => '2026-10-03 00:00:00',   // o dia em que a app nasceu: as séries novas ficam à frente
             ]
         );
 
@@ -84,5 +89,8 @@ Capsule::connection()->transaction(function () use ($dados, $mapa, $todos) {
         printf("%-18s %3d episódios, %3d fillers, %3d títulos\n", $show['name'], $show['total'], count($fillers), count(array_filter($todos[$slug] ?? [])));
     }
 });
+
+// As capas destas três são preenchidas pelo browser na primeira visita ao Início
+// (o servidor não fala com as APIs de anime; ver app/models/DadosAnime.php).
 
 echo "Feito.\n";

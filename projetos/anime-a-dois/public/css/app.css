@@ -62,6 +62,25 @@
 [data-tema="escuro"] [data-serie="shippuden"] { --brilho-serie: rgba(242, 167, 160, .28); }
 [data-tema="escuro"] [data-serie="boruto"]    { --brilho-serie: rgba(169, 196, 238, .28); }
 
+/* Séries novas (do MyAnimeList): uma de 8 cores pastel, escolhida ao adicionar ([data-acento] = series.acento).
+   Também se aplica a cada capa da biblioteca, por isso o aro da capa escolhida tem a cor da própria série. */
+[data-acento="1"] { --acento: #C9B6F2; --brilho-serie: rgba(201, 182, 242, .6); }   /* lavanda */
+[data-acento="2"] { --acento: #9FD8D2; --brilho-serie: rgba(159, 216, 210, .6); }   /* menta-água */
+[data-acento="3"] { --acento: #F4B6CF; --brilho-serie: rgba(244, 182, 207, .6); }   /* rosa */
+[data-acento="4"] { --acento: #F2D98C; --brilho-serie: rgba(242, 217, 140, .6); }   /* mostarda suave */
+[data-acento="5"] { --acento: #A7D3F2; --brilho-serie: rgba(167, 211, 242, .6); }   /* céu */
+[data-acento="6"] { --acento: #C7DFA0; --brilho-serie: rgba(199, 223, 160, .6); }   /* lima */
+[data-acento="7"] { --acento: #F3B58F; --brilho-serie: rgba(243, 181, 143, .6); }   /* pêssego */
+[data-acento="8"] { --acento: #B8C0F5; --brilho-serie: rgba(184, 192, 245, .6); }   /* pervinca */
+[data-tema="escuro"] [data-acento="1"] { --brilho-serie: rgba(201, 182, 242, .28); }
+[data-tema="escuro"] [data-acento="2"] { --brilho-serie: rgba(159, 216, 210, .28); }
+[data-tema="escuro"] [data-acento="3"] { --brilho-serie: rgba(244, 182, 207, .28); }
+[data-tema="escuro"] [data-acento="4"] { --brilho-serie: rgba(242, 217, 140, .28); }
+[data-tema="escuro"] [data-acento="5"] { --brilho-serie: rgba(167, 211, 242, .28); }
+[data-tema="escuro"] [data-acento="6"] { --brilho-serie: rgba(199, 223, 160, .28); }
+[data-tema="escuro"] [data-acento="7"] { --brilho-serie: rgba(243, 181, 143, .28); }
+[data-tema="escuro"] [data-acento="8"] { --brilho-serie: rgba(184, 192, 245, .28); }
+
 /* ---------- Base ---------- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -172,11 +191,17 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 
 /* ---------- Entrar / criar conta ---------- */
 .auth { flex: 1; display: flex; flex-direction: column; }
-.auth-cabeca { margin: 12vh 0 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.auth-cabeca { margin: clamp(0px, 3vh, 28px) 0 clamp(14px, 3vh, 28px); display: flex; flex-direction: column; align-items: center; text-align: center; }
 .auth-titulo { margin-top: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
 .auth-sub { margin-top: 6px; font-size: 13.5px; color: var(--suave); }
 .auth-sub strong { color: var(--par-txt); font-weight: 500; }
-.auth .form { margin-top: auto; }
+/* Cabeçalho e formulário juntos, no meio do ecrã (sem um buraco entre o nome da app e o formulário) */
+.auth { justify-content: center; padding-bottom: 6vh; }
+.auth .form { margin-top: 0; }
+/* Ecrã de entrar/criar conta: logo mais pequeno e formulário mais compacto, para caber sem scroll */
+.auth .logo-grande { width: 72px; height: 72px; }
+.auth .auth-titulo { margin-top: 12px; }
+.auth .form { gap: 8px; padding: 18px 16px 16px; }
 
 /* Botão "Instalar app" no hero: só aparece quando o Chrome deixa instalar */
 .btn-instalar {
@@ -190,9 +215,15 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .auth-rodape { margin-top: 16px; text-align: center; font-size: 13.5px; color: var(--suave); }
 .auth-rodape a { font-weight: 500; }
 
-/* ---------- Separadores de séries (controlo segmentado) ---------- */
-.separadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 22px; box-shadow: inset 0 1px 0 var(--brilho); }
+/* ---------- Separadores de séries (Estatísticas) ---------- */
+/* Com poucas séries dividem a largura; com muitas, deslizam para os lados */
+.separadores {
+  display: flex; gap: 4px; padding: 4px; border-radius: 22px; box-shadow: inset 0 1px 0 var(--brilho);
+  overflow-x: auto; scrollbar-width: none;
+}
+.separadores::-webkit-scrollbar { display: none; }
 .separador {
+  flex: 1 0 auto; padding: 0 14px; white-space: nowrap;
   height: 38px; border-radius: 18px;
   display: grid; place-items: center;
   font-size: 13.5px; color: var(--suave); text-decoration: none;
@@ -273,6 +304,9 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .dobravel summary::-webkit-details-marker { display: none; }
 .dobravel summary::after { content: "+"; font-size: 20px; color: var(--suave); }
 .dobravel[open] summary::after { content: "–"; }
+/* Apagar conta: o título e o botão em vermelho, para não se confundir com o resto */
+.zona-perigo summary { color: var(--erro); }
+.btn-perigo { background: var(--erro); color: #fff; }
 .dobravel-corpo { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
 .ultimo-texto { flex: 1; min-width: 0; }
 .ultimo-texto p:first-child { font-size: 13px; color: var(--suave); }
@@ -315,6 +349,112 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .vazio p + p { margin-top: 6px; font-size: 13px; color: var(--suave); }   /* a frase de apoio (mesmo com um botão a seguir) */
 
 .acao-fundo { margin-top: auto; }
+
+/* ---------- Biblioteca (Início): fila de capas ---------- */
+.secao-cima { display: flex; justify-content: space-between; align-items: center; padding-left: 4px; }
+.secao-cima h2 { font-size: 15px; font-weight: 500; }
+.btn-adicionar { width: 38px; height: 38px; border: 1px solid var(--vidro-borda); }   /* o "+" */
+.btn-adicionar svg { width: 18px; height: 18px; }
+.biblioteca { display: flex; flex-direction: column; gap: 10px; }
+
+/* Desliza na horizontal, de ponta a ponta do ecrã */
+.fila {
+  display: flex; gap: 12px;
+  margin: 0 -20px; padding: 6px 20px 8px;
+  overflow-x: auto; scroll-snap-type: x proximity; scroll-padding: 0 20px;
+  scrollbar-width: none;
+}
+.fila::-webkit-scrollbar { display: none; }
+
+.capa-item {
+  flex: 0 0 104px; min-width: 0;
+  display: flex; flex-direction: column; gap: 6px;
+  color: inherit; text-decoration: none; scroll-snap-align: start;
+  transition: transform .15s;
+}
+.capa-item:active { transform: scale(.97); }
+.capa-moldura {
+  position: relative; display: block; aspect-ratio: 2 / 3;
+  border-radius: 18px; overflow: hidden;
+  background: var(--trilho);
+  box-shadow: 0 10px 22px var(--sombra);
+  outline: 2.5px solid transparent; outline-offset: 2px;
+  transition: outline-color .25s;
+}
+.capa-item[aria-current="page"] .capa-moldura { outline-color: var(--acento, var(--tu-txt)); }   /* a série aberta em baixo */
+.capa { display: block; width: 100%; height: 100%; object-fit: cover; }
+.capa-acabado .capa { filter: saturate(.55); opacity: .8; }        /* acabadas: mais apagadas, no fim da fila */
+
+/* Sem imagem: as iniciais sobre a cor da série */
+.capa-sem {
+  display: grid; place-items: center;
+  background: linear-gradient(160deg, var(--acento, var(--tu)), color-mix(in srgb, var(--acento, var(--tu)) 35%, var(--vidro)));
+  font-size: 26px; font-weight: 700; color: var(--no-pastel);
+}
+
+/* Selo "em pausa" / "acabado" no canto da capa */
+.capa-estado {
+  position: absolute; left: 6px; bottom: 6px;
+  padding: 2px 8px; border-radius: 10px;
+  background: rgba(20, 22, 30, .72); color: #fff;
+  font-size: 10.5px; font-weight: 500;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+/* "Dos dois": os dois avatares pequenos sobrepostos no canto de cima da capa */
+.capa-dois { position: absolute; top: 6px; right: 6px; display: flex; }
+.capa-dois .avatar + .avatar { margin-left: -6px; }
+/* +N: há mais pessoas a ver esta série contigo */
+.capa-mais { margin-left: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: rgba(0,0,0,.65); color: #fff; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.avatar-micro { width: 20px; height: 20px; font-size: 9px; box-shadow: 0 0 0 1.5px rgba(20, 22, 30, .55); }
+
+/* Fila "A <par> está a ver": cartões mais pequenos; tocar abre a folha com o progresso e o botão de adicionar */
+.biblioteca-par .capa-item { flex-basis: 84px; cursor: pointer; }
+/* O cartão é um <button>: tira o aspeto de botão do browser */
+button.capa-item { font: inherit; text-align: left; background: none; border: 0; padding: 0; }
+.biblioteca-par .capa-moldura { border-radius: 14px; box-shadow: 0 6px 14px var(--sombra); }
+.biblioteca-par .capa-estado { font-size: 9.5px; padding: 1px 6px; left: 4px; bottom: 4px; }
+.biblioteca-par .secao-cima h2 { font-size: 14px; color: var(--suave); }
+
+/* Ações da série aberta: convidar o par e tirar da biblioteca, lado a lado */
+.serie-acoes { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: -4px; }
+.serie-acoes .link-suave { margin-top: 0; }
+
+.capa-nome { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; }
+.capa-item[aria-current="page"] .capa-nome { font-weight: 500; }
+.capa-barras { display: flex; flex-direction: column; gap: 3px; padding: 0 2px; }
+.capa-barras .barra { height: 4px; }
+
+/* ---------- Estado da série aberta (a ver / em pausa / acabado) ---------- */
+.estados { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 22px; box-shadow: inset 0 1px 0 var(--brilho); }
+.estado {
+  height: 36px; border: 0; border-radius: 18px; background: none;
+  font-size: 13px; color: var(--suave); cursor: pointer;
+  transition: background .3s, color .3s;
+}
+.estado[aria-pressed="true"] { background: var(--acento, var(--tu)); color: var(--no-pastel); font-weight: 500; box-shadow: 0 2px 10px var(--sombra); }
+.remover { text-align: center; margin-top: -8px; }
+.remover .link-suave { margin-top: 0; }
+
+/* Botão pequeno e cheio (aceitar proposta, adicionar série) */
+.btn-pequeno {
+  height: 34px; padding: 0 16px; border-radius: 17px; border: 0;
+  background: var(--btn); color: var(--btn-txt);
+  font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.btn-pequeno.secundario { background: var(--campo); color: var(--tinta); border: 1px solid var(--linha); }
+.btn-pequeno:disabled { opacity: .45; cursor: default; }
+
+/* ---------- Quero ver contigo (propostas) ---------- */
+.propostas-lista { list-style: none; margin-top: 8px; }
+.proposta { display: flex; gap: 12px; padding: 12px 0 2px; border-top: 1px solid var(--linha); margin-top: 8px; }
+.proposta:first-child { border-top: 0; margin-top: 0; }
+.proposta-capa { flex-shrink: 0; width: 52px; height: 74px; border-radius: 10px; object-fit: cover; font-size: 16px; }
+.proposta-texto { flex: 1; min-width: 0; }
+.proposta-nome { font-size: 14px; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.proposta-info { margin-top: 2px; font-size: 12px; color: var(--suave); }
+.proposta-acoes { margin-top: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.proposta-acoes .link-suave { margin-top: 0; }
+.proposta-espera { font-size: 12.5px; color: var(--par-txt); }
 
 /* ---------- Página da série: mapa dos episódios ---------- */
 .mapa { border-radius: var(--raio); padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 12px; }
@@ -375,7 +515,7 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 }
 .pista::-webkit-scrollbar { display: none; }
 .ep {
-  flex: 0 0 172px; height: 236px;       /* tamanho fixo: compacto em qualquer ecrã (com espaço para o título) */
+  flex: 0 0 172px; height: min(236px, 100%);   /* compacto (com espaço para o título), mas nunca maior do que a pista: encolhe em vez de ser cortado */
   scroll-snap-align: center;
   border-radius: 30px; padding: 18px;
   display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
@@ -396,8 +536,12 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 
 /* Ecrãs baixos: os cartões já mostram título e quem viu, por isso o painel de baixo sai
    para os cartões caberem inteiros */
-@media (max-height: 760px) {
+@media (max-height: 820px) {
   .pagina-serie .detalhe { display: none; }
+}
+/* O mapa ganha uma linha por companheiro, por isso com duas ou mais pessoas o painel sai mais cedo */
+@media (max-height: 900px) {
+  .pagina-serie.com-2 .detalhe, .pagina-serie.com-3 .detalhe { display: none; }
 }
 
 /* ---------- Comentários ---------- */
@@ -446,6 +590,41 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 }
 .folha-form textarea:focus { outline: none; border-color: var(--tu-txt); }
 .folha-enviar { width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; padding: 0; }
+
+/* ---------- Folha "Adicionar série" (pesquisa no MyAnimeList) ---------- */
+.folha-adicionar[open] { height: 80dvh; }                     /* altura fixa: não salta enquanto se escreve */
+.pesquisa {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  height: 48px; padding: 0 14px; border-radius: 16px;
+  border: 1px solid var(--linha); background: var(--campo);
+  transition: border-color .2s;
+}
+.pesquisa:focus-within { border-color: var(--tu-txt); }
+.pesquisa svg { width: 18px; height: 18px; color: var(--suave); flex-shrink: 0; }
+.pesquisa input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; font-size: 16px; outline: none; }
+.pesquisa input::-webkit-search-cancel-button { display: none; }
+.pesquisa-estado { font-size: 12.5px; color: var(--suave); padding-left: 4px; }
+.pesquisa-estado.erro { color: var(--erro); }
+
+.resultados { list-style: none; flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.resultado { display: flex; gap: 12px; padding: 10px 2px; border-top: 1px solid var(--linha); }
+.resultado:first-child { border-top: 0; }
+.resultado-capa { flex-shrink: 0; width: 56px; height: 80px; border-radius: 10px; object-fit: cover; background: var(--trilho); }
+.resultado-texto { flex: 1; min-width: 0; }
+.resultado-nome { font-size: 14px; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.resultado-info { margin-top: 2px; font-size: 12px; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resultado-acoes { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.resultado-ja { font-size: 12.5px; color: var(--tu-txt); }
+
+/* ---------- Popup "O que há de novo" (Início) ---------- */
+.novidades-lista { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 2px; }
+.novidade { border-radius: 20px; padding: 14px 16px; background: var(--campo); border: 1px solid var(--linha); }
+.novidade-cima { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.novidade-cima h3 { font-size: 14.5px; font-weight: 500; }
+.novidade ul { margin-top: 6px; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--suave); }
+.novidade li::marker { color: var(--tu-txt); }
+.folha-novidades .btn { flex-shrink: 0; }
+.novidades-lista:focus, .novidades-lista:focus-visible { outline: none; }   /* o dialog foca a lista ao abrir: sem contorno verde */
 
 /* Etiqueta "filler": escura e sólida, salta à vista em qualquer cor de cartão e tema */
 .etiqueta-filler {
@@ -534,6 +713,7 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 }
 .aviso.mostrar { opacity: 1; transform: translate(-50%, 0); }
 .aviso.erro { color: var(--erro); }
+.aviso.tocavel { cursor: pointer; }   /* "Saíram episódios novos · toca para ver" */
 
 /* Reduz animações para quem o pede no sistema */
 @media (prefers-reduced-motion: reduce) {
@@ -599,3 +779,138 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 /* Curiosidades */
 .est-curio { border-radius: 20px; padding: 12px 14px; }
 .est-curio-num { font-size: 22px; font-weight: 700; }
+
+/* ---------- Início: o avatar do par abre o perfil; o resto do cartão abre o episódio ---------- */
+.ultimo-link { display: contents; color: inherit; text-decoration: none; }
+
+/* ---------- Folha de uma série do par (adicionar à tua biblioteca) ---------- */
+.folha-par[open] { gap: 16px; }
+.par-detalhe { display: flex; gap: 14px; align-items: center; }
+.par-detalhe-capa { flex: 0 0 84px; border-radius: 14px; box-shadow: 0 6px 14px var(--sombra); }
+.par-detalhe-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.par-nota { text-align: center; }
+
+/* ---------- Perfil do par ---------- */
+.pessoa-cabeca { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 26px 20px 20px; }
+.pessoa-cabeca .avatar { margin-bottom: 10px; }
+.pessoa-ultimo { font-size: 18px; font-weight: 500; }
+.pessoa-legenda { font-size: 13px; color: var(--suave); }
+.pessoa-lista { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+.pessoa-serie { display: flex; gap: 12px; align-items: center; color: inherit; text-decoration: none; }
+.pessoa-capa { flex: 0 0 48px; width: 48px; height: 72px; border-radius: 10px; object-fit: cover; }
+.pessoa-capa.capa-sem { display: grid; place-items: center; font-size: 16px; }
+.pessoa-serie-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.pessoa-serie-nome { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Perfil: atualizações ---------- */
+.atualizacao { display: flex; flex-direction: column; gap: 12px; }
+.atualizacao-texto { font-size: 13.5px; color: var(--suave); }
+.atualizacao .btn-texto { align-self: flex-start; }
+
+/* ---------- Amigos ---------- */
+.btn-redondo { position: relative; }                       /* para a bolinha de pedidos */
+.ponto-aviso { position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--par-txt); box-shadow: 0 0 0 2px var(--vidro-borda); }
+.amigo-linha { display: flex; align-items: center; gap: 12px; }
+.amigo-link { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.amigo-nome { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 15px; font-weight: 500; }
+.amigos-bloco { margin-top: 0; }
+
+/* Item da lista do perfil que abre uma folha: é um <button>, sem o aspeto de botão do browser */
+button.pessoa-serie { width: 100%; font: inherit; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
+.resultado-acoes .link { background: none; border: 0; color: var(--suave); }
+
+.pessoa-capa { background: var(--trilho); }   /* espaço da capa enquanto carrega */
+button.pessoa-serie { display: flex; }
+
+/* Placeholders do ecrã de criar conta (as dicas ficam dentro do campo) */
+.auth .campo input::placeholder { color: var(--suave); opacity: .7; }
+/* Ecrãs baixos (Chrome com a barra de endereço): campos e cabeçalho mais compactos */
+@media (max-height: 780px) {
+  .ecra:has(.auth) { padding-bottom: calc(14px + env(safe-area-inset-bottom)); gap: 8px; }   /* menos folga em baixo e entre blocos */
+  .auth { padding-bottom: 0; }
+  .auth .logo-grande { width: 52px; height: 52px; }
+  .auth .auth-titulo { margin-top: 8px; font-size: 20px; }
+  .auth .auth-cabeca { margin-bottom: 12px; }
+  .auth .auth-rodape { margin-top: 10px; }
+  .auth .campo { gap: 4px; }
+  .auth .campo input { height: 44px; }
+  .auth .form { gap: 6px; padding: 14px 14px 14px; }
+  .auth .form .btn { margin-top: 4px; }
+}
+
+/* ---------- Backoffice (só admin) ---------- */
+/* Grelha de números: cartões pequenos, dois por linha no telemóvel */
+.admin-nums { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.admin-num { display: flex; flex-direction: column; padding: 10px 12px; border-radius: 14px; background: rgba(127,127,127,.1); }
+.admin-num b { font-size: 24px; line-height: 1.1; }
+.admin-num span { font-size: 12px; color: var(--suave); }
+.admin-top { margin-top: 10px; }
+/* Pesquisa de contas */
+.admin-pesquisa input {
+  width: 100%; height: 44px; border-radius: 16px; padding: 0 16px; margin-bottom: 8px; box-sizing: border-box;
+  border: 1px solid var(--linha); background: var(--campo); color: var(--tinta); font-size: 16px;
+}
+.admin-pesquisa input:focus { outline: none; border-color: var(--tu-txt); }
+/* Uma conta: texto à esquerda, ações à direita (quebram para baixo em ecrãs estreitos) */
+.admin-conta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }
+.admin-conta-texto { display: flex; flex-direction: column; min-width: 0; }
+.admin-conta-acoes { display: flex; gap: 6px; }
+.admin-apagar { color: var(--erro); }
+
+/* ---------- Apresentação no ecrã de entrar ---------- */
+.apresentacao { margin-top: 28px; padding-top: 8px; }
+.apresentacao-titulo { font-size: 20px; font-weight: 700; text-align: center; letter-spacing: -.01em; }
+.apresentacao-texto { margin: 8px 8px 0; text-align: center; font-size: 13.5px; color: var(--suave); }
+/* Carrossel: cartões lado a lado que "encaixam" ao deslizar; sai um bocado do ecrã para convidar a deslizar */
+.apresentacao-carrossel {
+  list-style: none; display: flex; gap: 16px; margin: 18px -16px 0; padding: 4px 16px 12px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+}
+.apresentacao-carrossel::-webkit-scrollbar { display: none; }
+.apresentacao-cartao { flex: 0 0 62%; max-width: 260px; scroll-snap-align: center; text-align: center; }
+.apresentacao-cartao h3 { margin-top: 12px; font-size: 15px; font-weight: 700; }
+.apresentacao-cartao p { margin-top: 4px; font-size: 12.5px; color: var(--suave); }
+/* Moldura de telemóvel: cantos redondos e aro escuro à volta da captura (cortada para mostrar só o topo) */
+.telemovel { display: block; border-radius: 28px; padding: 6px; background: #14161c; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.telemovel img { display: block; width: 100%; height: 330px; object-fit: cover; object-position: top; border-radius: 22px; }
+.apresentacao-pontos { list-style: none; margin: 8px 0 0; display: grid; gap: 8px; font-size: 13.5px; }
+.apresentacao-pontos li { position: relative; padding-left: 26px; }
+.apresentacao-pontos li::before { content: "✓"; position: absolute; left: 4px; color: var(--tu-txt); font-weight: 700; }
+/* Caixa do código de convite */
+.convite-caixa { margin: 28px 0 24px; }
+.convite-titulo { font-size: 17px; font-weight: 700; }
+html { scroll-behavior: smooth; }
+
+/* ---------- Paletas de cores (cada pessoa escolhe a sua; ver User::PALETAS) ----------
+   [data-paleta] está no <html> e nas amostras do perfil, por isso o mesmo bloco serve as duas. */
+[data-paleta="0"] { --tu: #B9D3B0; --par: #F5C89A; --tu-txt: #4E7A43; --par-txt: #A0581C; --orbe-tu: rgba(185, 211, 176, .55); --orbe-par: rgba(245, 200, 154, .55); }
+[data-paleta="1"] { --tu: #A9C4EE; --par: #F4B6CF; --tu-txt: #2F5C9E; --par-txt: #A63D6E; --orbe-tu: rgba(169, 196, 238, .55); --orbe-par: rgba(244, 182, 207, .55); }
+[data-paleta="2"] { --tu: #C9B6F2; --par: #F2D98C; --tu-txt: #5B3FA0; --par-txt: #8A6A0A; --orbe-tu: rgba(201, 182, 242, .55); --orbe-par: rgba(242, 217, 140, .55); }
+[data-paleta="3"] { --tu: #9FD8D2; --par: #F5A9A0; --tu-txt: #1F7A72; --par-txt: #B24238; --orbe-tu: rgba(159, 216, 210, .55); --orbe-par: rgba(245, 169, 160, .55); }
+[data-paleta="4"] { --tu: #F4B6CF; --par: #C7DFA0; --tu-txt: #A63D6E; --par-txt: #4E7A43; --orbe-tu: rgba(244, 182, 207, .55); --orbe-par: rgba(199, 223, 160, .55); }
+[data-paleta="5"] { --tu: #A7D3F2; --par: #F3B58F; --tu-txt: #2A6B9E; --par-txt: #A0581C; --orbe-tu: rgba(167, 211, 242, .55); --orbe-par: rgba(243, 181, 143, .55); }
+[data-tema="escuro"][data-paleta="0"], [data-tema="escuro"] [data-paleta="0"] { --tu-txt: #CDE0C6; --par-txt: #F8D7B4; --orbe-tu: rgba(185, 211, 176, .22); --orbe-par: rgba(245, 200, 154, .22); }
+[data-tema="escuro"][data-paleta="1"], [data-tema="escuro"] [data-paleta="1"] { --tu-txt: #C6D8F5; --par-txt: #F8CDE0; --orbe-tu: rgba(169, 196, 238, .22); --orbe-par: rgba(244, 182, 207, .22); }
+[data-tema="escuro"][data-paleta="2"], [data-tema="escuro"] [data-paleta="2"] { --tu-txt: #DCD0F7; --par-txt: #F6E4A8; --orbe-tu: rgba(201, 182, 242, .22); --orbe-par: rgba(242, 217, 140, .22); }
+[data-tema="escuro"][data-paleta="3"], [data-tema="escuro"] [data-paleta="3"] { --tu-txt: #BFE8E3; --par-txt: #F8C6C0; --orbe-tu: rgba(159, 216, 210, .22); --orbe-par: rgba(245, 169, 160, .22); }
+[data-tema="escuro"][data-paleta="4"], [data-tema="escuro"] [data-paleta="4"] { --tu-txt: #F8CDE0; --par-txt: #DCEBC0; --orbe-tu: rgba(244, 182, 207, .22); --orbe-par: rgba(199, 223, 160, .22); }
+[data-tema="escuro"][data-paleta="5"], [data-tema="escuro"] [data-paleta="5"] { --tu-txt: #C4E2F7; --par-txt: #F8D0B4; --orbe-tu: rgba(167, 211, 242, .22); --orbe-par: rgba(243, 181, 143, .22); }
+
+/* Escolha de cores no perfil: amostra de dois círculos + nome; o círculo escolhido leva aro */
+.paletas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.paleta { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-align: center; }
+.paleta input { position: absolute; opacity: 0; pointer-events: none; }
+.paleta small { font-size: 11.5px; color: var(--suave); }
+.amostra { display: flex; padding: 6px; border-radius: 999px; border: 2px solid var(--linha); transition: border-color .2s; }
+.amostra i { width: 26px; height: 26px; border-radius: 50%; }
+.amostra i:first-child { background: var(--tu); }
+.amostra i:last-child { background: var(--par); margin-left: -8px; }
+.paleta input:checked + .amostra { border-color: var(--tu-txt); }
+.paleta input:focus-visible + .amostra { outline: 2px solid var(--tu-txt); outline-offset: 2px; }
+
+/* Privacidade: texto à esquerda (com explicação por baixo) e interruptor à direita */
+.linha-interruptor { display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; font-size: 14.5px; }
+.linha-interruptor small { display: block; margin-top: 4px; font-size: 12px; color: var(--suave); }
+
+/* Login: o interruptor de manter sessão fica compacto, encostado ao botão */
+.lembrar { font-size: 13.5px; color: var(--suave); padding: 2px 4px; }

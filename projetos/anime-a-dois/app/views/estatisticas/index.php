@@ -1,7 +1,6 @@
 <?php
 /* Estatísticas de uma série.
-   Variáveis: $user, $parceiro (ou null), $series, $serie, $est (ver Estatisticas::calcular) */
-$nomePar = $parceiro ? $parceiro->nome : null;
+   Variáveis: $user, $companheiros (quem vê a série contigo; vazio se sozinho), $series, $serie, $est (ver Estatisticas::calcular) */
 ?>
 <div class="topo">
   <a class="btn-redondo vidro" href="<?= e(url('home', 'index', ['serie' => $serie->slug])) ?>" aria-label="Voltar ao início">
@@ -45,9 +44,9 @@ $nomePar = $parceiro ? $parceiro->nome : null;
       <div class="ritmo-semana">
         <div class="ritmo-barras">
           <span class="ritmo-barra ritmo-tu nivel-<?= $s['nivelTu'] ?>" title="Tu: <?= $s['tu'] ?>"></span>
-          <?php if ($parceiro): ?>
-            <span class="ritmo-barra ritmo-par nivel-<?= $s['nivelPar'] ?>" title="<?= e($nomePar . ': ' . $s['par']) ?>"></span>
-          <?php endif; ?>
+          <?php foreach ($s['com'] as $i => $n): ?>
+            <span class="ritmo-barra ritmo-par nivel-<?= $s['nivelCom'][$i] ?>" title="<?= e($companheiros[$i]->nome . ': ' . $n) ?>"></span>
+          <?php endforeach; ?>
         </div>
         <span class="ritmo-rotulo"><?= e($s['rotulo']) ?></span>
       </div>
@@ -63,7 +62,7 @@ $nomePar = $parceiro ? $parceiro->nome : null;
       <h2>Arcos</h2>
       <span class="legenda-pontos">
         <span><i class="ponto ponto-tu"></i>Tu</span>
-        <?php if ($parceiro): ?><span><i class="ponto ponto-par"></i><?= e($nomePar) ?></span><?php endif; ?>
+        <?php foreach ($companheiros as $c): ?><span><i class="ponto ponto-par"></i><?= e($c->nome) ?></span><?php endforeach; ?>
       </span>
     </div>
     <ul class="arcos">
@@ -75,9 +74,9 @@ $nomePar = $parceiro ? $parceiro->nome : null;
           </span>
           <span class="arco-barras">
             <progress class="barra barra-fina vs-tu-cor" max="100" value="<?= $a['pctTu'] ?>" aria-label="Tu: <?= $a['pctTu'] ?>%"></progress>
-            <?php if ($parceiro): ?>
-              <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $a['pctPar'] ?>" aria-label="<?= e($nomePar) ?>: <?= $a['pctPar'] ?>%"></progress>
-            <?php endif; ?>
+            <?php foreach ($a['pctCom'] as $i => $pct): ?>
+              <progress class="barra barra-fina vs-par-cor" max="100" value="<?= $pct ?>" aria-label="<?= e($companheiros[$i]->nome) ?>: <?= $pct ?>%"></progress>
+            <?php endforeach; ?>
           </span>
           <span class="selo selo-<?= e($a['selo'] ?: 'nada') ?>"
                 aria-label="<?= $a['selo'] === 'os-dois' ? 'Acabado pelos dois' : ($a['selo'] === '' ? 'Por acabar' : 'Acabado por um') ?>">
@@ -93,7 +92,7 @@ $nomePar = $parceiro ? $parceiro->nome : null;
 <section class="est-pessoas">
   <div class="est-curio vidro">
     <p class="est-curio-num"><?= $est['comentarios'] ?></p>
-    <p class="est-legenda"><?= $est['comentarios'] === 1 ? 'comentário' : 'comentários' ?> <?= $parceiro ? 'entre os dois' : 'teus' ?></p>
+    <p class="est-legenda"><?= $est['comentarios'] === 1 ? 'comentário' : 'comentários' ?> <?= $companheiros->isEmpty() ? 'teus' : ($companheiros->count() === 1 ? 'entre os dois' : 'entre todos') ?></p>
   </div>
   <div class="est-curio vidro">
     <p class="est-curio-num"><?= $est['recorde']['n'] ?? 0 ?></p>

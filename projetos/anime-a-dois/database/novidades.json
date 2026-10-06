@@ -1,0 +1,154 @@
+{
+  "_como": "Novidades mostradas no popup do Início. Ao publicar algo novo, acrescenta uma entrada no FIM com o id seguinte (nunca mudes os ids antigos). Cada pessoa vê só as entradas com id maior do que o último que já viu (users.novidades_vistas).",
+  "novidades": [
+    {
+      "id": 1,
+      "data": "2026-10-04",
+      "titulo": "Notificações",
+      "itens": [
+        "Recebes um aviso quando o teu par marca episódios ou comenta.",
+        "No perfil escolhes o que queres receber e por onde: telemóvel, email ou os dois."
+      ]
+    },
+    {
+      "id": 2,
+      "data": "2026-10-04",
+      "titulo": "Estatísticas",
+      "itens": [
+        "Botão das barras no topo: episódios e horas de cada um, ritmo por semana e quando acabam a série.",
+        "Arcos do Naruto e do Shippuden com um selo para quem já os acabou."
+      ]
+    },
+    {
+      "id": 3,
+      "data": "2026-10-04",
+      "titulo": "Biblioteca",
+      "itens": [
+        "O Início tem agora uma fila de capas com o progresso dos dois por baixo.",
+        "Cada série pode estar a ver, em pausa ou acabada; as acabadas vão para o fim.",
+        "Botão + para adicionar qualquer anime do MyAnimeList, com títulos, fillers e recaps."
+      ]
+    },
+    {
+      "id": 4,
+      "data": "2026-10-04",
+      "titulo": "Quero ver contigo",
+      "itens": [
+        "Ao adicionar, podes propor a série ao teu par em vez de a pôr logo na biblioteca.",
+        "O par aceita com \"Bora ver\" e ela passa para \"a ver\"."
+      ]
+    },
+    {
+      "id": 5,
+      "data": "2026-10-04",
+      "titulo": "Pesquisa mais rápida",
+      "itens": [
+        "A pesquisa de séries é feita diretamente pelo telemóvel, sem passar pelo servidor.",
+        "As séries em emissão avisam quando saem episódios novos."
+      ]
+    },
+    {
+      "id": 6,
+      "data": "2026-10-04",
+      "titulo": "Este popup",
+      "itens": [
+        "Sempre que houver novidades, aparecem aqui da próxima vez que abrires a app."
+      ]
+    },
+    {
+      "id": 7,
+      "data": "2026-10-04",
+      "titulo": "Pesquisa a funcionar de vez",
+      "itens": [
+        "A pesquisa e as capas passaram a vir do AniList, e os títulos dos episódios do Kitsu.",
+        "As etiquetas de filler das séries novas aparecem sozinhas quando o MyAnimeList (Jikan) voltar a funcionar; as do Naruto não mudam."
+      ]
+    },
+    {
+      "id": 8,
+      "data": "2026-10-04",
+      "titulo": "Cada um com a sua biblioteca",
+      "itens": [
+        "Podes adicionar séries só para ti, sem encher a biblioteca do teu par.",
+        "As séries dos dois têm os dois avatares na capa; para tornar uma série tua conjunta, usa \"Ver com…\" e o par aceita.",
+        "O estado (a ver, em pausa, acabado) é de cada um.",
+        "Por baixo aparece o que o teu par está a ver sozinho, para espreitares.",
+        "Notificações só das séries dos dois."
+      ]
+    },
+    {
+      "id": 9,
+      "data": "2026-10-04",
+      "titulo": "Perfil do par e séries dele",
+      "itens": [
+        "Toca na foto do teu par no Início para ver o perfil: último episódio visto e a biblioteca dele.",
+        "Toca numa série da fila \"está a ver\" para a adicionar à tua biblioteca; passa a ser dos dois e ele é avisado.",
+        "No teu perfil há um botão \"Procurar atualizações\". A app também atualiza sozinha ao abrir."
+      ]
+    },
+    {
+      "id": 10,
+      "data": "2026-10-04",
+      "titulo": "Amigos",
+      "itens": [
+        "Novo botão dos amigos no Início: convida com um link de uso único (a pessoa cria conta já ligada a ti) ou adiciona quem já tem conta pelo utilizador.",
+        "Os amigos veem o perfil e a biblioteca uns dos outros: último episódio e progresso."
+      ]
+    },
+    {
+      "id": 11,
+      "data": "2026-10-04",
+      "titulo": "Séries com amigos",
+      "itens": [
+        "Cada série pode ser vista com uma pessoa diferente: o teu par ou um amigo. Em \"Ver com…\" escolhes com quem; a pessoa aceita e passam a ter o placar, os comentários e os avisos dessa série.",
+        "No perfil de um amigo (e na fila \"está a ver\" do teu par), toca numa série para a adicionar só para ti ou para verem juntos.",
+        "Ao pesquisar, \"Só para mim\" ou convida logo alguém.",
+        "\"Deixar de ver juntos\" separa uma série quando quiseres; cada um fica com o seu progresso."
+      ]
+    },
+    {
+      "id": 12,
+      "data": "2026-10-04",
+      "titulo": "Várias pessoas na mesma série",
+      "itens": [
+        "Já podes ver a mesma série com várias pessoas: por exemplo o Naruto com o teu par e com um amigo, ao mesmo tempo.",
+        "O placar, os episódios e as estatísticas mostram cada pessoa; os comentários e avisos só chegam a quem vê a série contigo.",
+        "\"Deixar de ver juntos\" é por pessoa: separas só com quem quiseres."
+      ]
+    },
+    {
+      "id": 13,
+      "data": "2026-10-04",
+      "titulo": "Apagar conta",
+      "itens": [
+        "No Perfil, em \"Apagar conta\", podes eliminar a tua conta de vez: pede a palavra-passe e apaga tudo da base de dados (progresso, comentários, foto e ligações)."
+      ]
+    },
+    {
+      "id": 15,
+      "data": "2026-10-04",
+      "titulo": "Escolhe as tuas cores",
+      "itens": [
+        "No Perfil, em \"Cores\", escolhes entre 6 paletas para \"tu\" e para quem vê contigo. Só mudam para ti e ficam guardadas na conta, por isso seguem-te entre telemóveis."
+      ]
+    },
+    {
+      "id": 16,
+      "data": "2026-10-04",
+      "titulo": "Privacidade, continuar e avisos de amizade",
+      "itens": [
+        "Perfil → Privacidade: podes mostrar aos amigos só as séries que vês com eles (o teu par continua a ver tudo).",
+        "No Início, o botão \"Continuar · episódio N\" leva direto ao episódio seguinte ao teu mais avançado.",
+        "Recebes um aviso quando alguém te pede amizade ou aceita o teu pedido; podes ligar ou desligar em Notificações."
+      ]
+    },
+    {
+      "id": 17,
+      "data": "2026-10-04",
+      "titulo": "Sessão mantida",
+      "itens": [
+        "Já não tens de entrar de cada vez que a app fica fechada muito tempo: o ecrã de entrar tem \"Manter sessão iniciada\" (ligado por defeito) e a sessão dura 90 dias neste telemóvel. \"Terminar sessão\" apaga-a."
+      ]
+    }
+  ]
+}

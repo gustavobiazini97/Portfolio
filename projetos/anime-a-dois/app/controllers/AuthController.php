@@ -1,5 +1,5 @@
 <?php
-// Entrar, criar conta (só enquanto houver menos de 2) e sair.
+// Entrar, criar conta (as duas do casal, ou por link de convite de um amigo) e sair.
 
 class AuthController extends Controller
 {
@@ -34,6 +34,9 @@ class AuthController extends Controller
             // Novo ID de sessão ao entrar (evita fixação de sessão)
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
+            if (!empty($_POST['lembrar'])) {
+                SessaoLonga::criar($user);   // "manter sessão iniciada": fica 90 dias neste telemóvel
+            }
             $this->redirect('home');
         } catch (PDOException $e) {
             $this->flash('erro', 'Não foi possível ligar à base de dados.');
@@ -47,17 +50,27 @@ class AuthController extends Controller
         if ($this->utilizador() !== null) {
             $this->redirect('home');
         }
-        if (!User::registoAberto()) {
-            $this->flash('info', 'Já existem as duas contas. Entra com a tua.');
+
+        // Com link de convite válido o registo abre, e a conta fica amiga de quem convidou
+        // Aceita o código sozinho ou o link inteiro colado (apanha os 32 caracteres do código)
+        $codigo = isset($_GET['convite']) ? (preg_match('/[a-f0-9]{32}/i', $_GET['convite'], $m) ? strtolower($m[0]) : '-') : null;
+        $convite = Amizade::convite($codigo);
+        if ($codigo !== null && $convite === null) {
+            $this->flash('erro', 'Esse convite não é válido ou já expirou. Pede um novo.');
+            $this->redirect('auth', 'login');
+        }
+        if ($convite === null && !User::registoAberto()) {
+            $this->flash('info', 'O registo é só por convite. Pede um link a um amigo que já use a app.');
             $this->redirect('auth', 'login');
         }
 
-        // Se já há uma conta, esta é a segunda: mostramos com quem vai ficar ligada
-        $primeiro = User::orderBy('id')->first();
+        // Sem convite e com uma conta já criada, esta é a segunda do casal: mostramos com quem vai ficar ligada
+        $primeiro = $convite === null ? User::orderBy('id')->first() : null;
 
         $this->render('auth/registo', [
             'titulo'   => 'Criar conta',
             'primeiro' => $primeiro,
+            'convite'  => $convite,
         ]);
     }
 
@@ -67,10 +80,15 @@ class AuthController extends Controller
         $this->exigirPost();
 
         try {
-            $user = User::registar($_POST);
+            $convite = isset($_POST['convite']) && $_POST['convite'] !== '' ? Amizade::convite($_POST['convite']) : null;
+            if (isset($_POST['convite']) && $_POST['convite'] !== '' && $convite === null) {
+                throw new InvalidArgumentException('Esse link de convite já não é válido. Pede um novo.');
+            }
+            $user = User::registar($_POST, $convite);
 
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
+            SessaoLonga::criar($user);   // conta nova: já fica com a sessão mantida
             $this->flash('sucesso', 'Conta criada. Bem-vindo(a), ' . $user->nome . '!');
             $this->redirect('home');
         } catch (InvalidArgumentException $e) {
@@ -80,10 +98,10 @@ class AuthController extends Controller
                 'username' => $_POST['username'] ?? '',
             ]);
             $this->flash('erro', $e->getMessage());
-            $this->redirect('auth', 'registo');
+            $this->redirect('auth', 'registo', !empty($_POST['convite']) ? ['convite' => $_POST['convite']] : []);
         } catch (PDOException $e) {
             $this->flash('erro', 'Não foi possível criar a conta. Tenta outra vez.');
-            $this->redirect('auth', 'registo');
+            $this->redirect('auth', 'registo', !empty($_POST['convite']) ? ['convite' => $_POST['convite']] : []);
         }
     }
 
@@ -92,6 +110,7 @@ class AuthController extends Controller
     {
         $this->exigirPost();
 
+        SessaoLonga::terminar();
         $_SESSION = [];
         session_regenerate_id(true);
         $this->flash('info', 'Sessão terminada.');

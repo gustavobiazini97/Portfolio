@@ -7,7 +7,7 @@ class SerieController extends Controller
     public function ver(): void
     {
         $user  = $this->exigirLogin();
-        $serie = Serie::porSlug($_GET['serie'] ?? 'naruto');
+        $serie = Serie::porSlug($_GET['serie'] ?? null);
 
         // Null guard: slug desconhecido volta ao início
         if ($serie === null) {
@@ -15,7 +15,14 @@ class SerieController extends Controller
             $this->redirect('home');
         }
 
-        $parceiro = $user->parceiro();
+        // Só abre séries da tua biblioteca (um convite aceita-se primeiro no Início)
+        if (!$serie->naBibliotecaDe($user)) {
+            $this->flash('info', $serie->nomeCurto() . ' não está na tua biblioteca.');
+            $this->redirect('home', 'index', [], 'convites');
+        }
+
+        // Os companheiros só aparecem (mapa, avatares, comentários) se vês esta série com alguém
+        $companheiros = $serie->companheirosDe($user);
         $meu      = $serie->progressoDe($user);
 
         // Cartão que abre ao centro: o pedido no URL ou o seguinte ao teu
@@ -27,15 +34,18 @@ class SerieController extends Controller
         $this->render('serie/ver', [
             'titulo'     => $serie->nome,
             'serieSlug'  => $serie->slug,
-            'classeBody' => 'pagina-serie',   // ecrã de altura fixa: a pista ocupa o que sobra
+            'serieAcento' => $serie->acento,      // cor das séries novas ([data-acento] no CSS)
+            'classeBody' => 'pagina-serie com-' . min($companheiros->count(), 3),   // ecrã de altura fixa: a pista ocupa o que sobra; com-N = quantos companheiros (o mapa cresce uma linha por pessoa)
             'user'      => $user,
-            'parceiro'  => $parceiro,
+            'companheiros' => $companheiros,
             'serie'     => $serie,
             'fillers'   => $serie->totalFillers(),
             'meu'       => $meu,
-            'dele'      => $serie->progressoDe($parceiro),
-            'episodios' => $serie->episodiosPara($user, $parceiro),
+            'deles'     => $companheiros->map(fn ($c) => $serie->progressoDe($c))->all(),   // na ordem dos companheiros
+            'episodios' => $serie->episodiosPara($user, $companheiros),
             'inicial'   => $inicial,
+            // Faltam fillers ou a série em emissão está desatualizada: o browser vai buscar dados novos
+            'sincronizar' => $serie->precisaSincronizar(),
         ]);
     }
 
@@ -52,6 +62,11 @@ class SerieController extends Controller
         try {
             $serie = Serie::porSlug($_POST['serie'] ?? null);
             $ids   = array_map('intval', (array) ($_POST['episodio_ids'] ?? []));
+
+            // Só séries da tua biblioteca
+            if ($serie !== null && !$serie->naBibliotecaDe($user)) {
+                $this->falhar($serie->nomeCurto() . ' não está na tua biblioteca.');
+            }
 
             // Só episódios que existem E pertencem a esta série
             $episodios = $serie === null ? collect() : Episodio::whereIn('id', $ids)->where('serie_id', $serie->id)->orderBy('numero')->get();
@@ -113,7 +128,13 @@ class SerieController extends Controller
             $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
         }
 
-        $lista = Comentario::with('autor')->where('episodio_id', $episodio->id)->orderBy('criado_em')->orderBy('id')->get();
+        // Só séries da tua biblioteca; e só os teus comentários e os de quem vê a série contigo
+        $serie = $episodio->serie;
+        if ($serie === null || !$serie->naBibliotecaDe($user)) {
+            $this->json(['ok' => false, 'mensagem' => 'Essa série não está na tua biblioteca.'], 403);
+        }
+        $autores = array_merge([$user->id], $serie->companheirosDe($user)->pluck('id')->all());
+        $lista = Comentario::with('autor')->where('episodio_id', $episodio->id)->whereIn('user_id', $autores)->orderBy('criado_em')->orderBy('id')->get();
         $this->json([
             'ok'          => true,
             'comentarios' => $lista->map(fn ($c) => $c->paraJson($user))->all(),
@@ -132,8 +153,11 @@ class SerieController extends Controller
                 $this->json(['ok' => false, 'mensagem' => 'Esse episódio não existe.'], 404);
             }
 
+            if ($episodio->serie === null || !$episodio->serie->naBibliotecaDe($user)) {
+                $this->json(['ok' => false, 'mensagem' => 'Essa série não está na tua biblioteca.'], 403);
+            }
             $comentario = Comentario::escrever($user, $episodio, $_POST['texto'] ?? '');
-            Notificador::comentario($user, $comentario);   // avisa o par (telemóvel/email, conforme ele quiser)
+            Notificador::comentario($user, $comentario);   // avisa o companheiro da série (telemóvel/email, conforme ele quiser)
             $_GET['episodio'] = $episodio->id;
             $this->comentarios();
         } catch (InvalidArgumentException $e) {

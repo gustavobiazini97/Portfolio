@@ -1,6 +1,6 @@
-<?php /* Cabeçalho comum. Variáveis: $titulo, $appNome, $flash e, opcional, $serieSlug (acento da série) */ ?>
+<?php /* Cabeçalho comum. Variáveis: $titulo, $appNome, $flash e, opcionais, $serieSlug e $serieAcento (cor da série) */ ?>
 <!DOCTYPE html>
-<html lang="pt" data-tema="claro">
+<html lang="pt" data-tema="claro" data-paleta="<?= paleta_atual() ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -18,7 +18,9 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </head>
-<body class="<?= e($classeBody ?? '') ?>" data-serie="<?= e($serieSlug ?? '') ?>">
+<!-- data-apis: endereços das APIs de anime que o js/app.js usa (config.php → 'apis') -->
+<body class="<?= e($classeBody ?? '') ?>" data-serie="<?= e($serieSlug ?? '') ?>" data-acento="<?= e((string) ($serieAcento ?? '')) ?>"
+      data-apis="<?= e(json_encode(Database::config()['apis'] ?? new stdClass())) ?>">
 
 <!-- Manchas difusas por trás do vidro; a terceira tem a cor da série aberta -->
 <div class="fundo" aria-hidden="true">

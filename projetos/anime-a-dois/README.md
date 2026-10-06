@@ -1,6 +1,6 @@
 # Anime a Dois
 
-Registo dos episódios vistos por duas pessoas, lado a lado: Naruto, Naruto Shippuden e Boruto.
+Registo dos episódios vistos por duas pessoas, lado a lado: Naruto, Shippuden e Boruto, e qualquer anime do MyAnimeList.
 
 PHP + MySQL, com um mini-MVC e o Eloquent (`illuminate/database`) a correr sem o resto do Laravel.
 O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamento com PHP.
@@ -20,7 +20,11 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Notificações ao par (episódios e comentários) por telemóvel (Web Push) e/ou email, escolhidas no perfil
 - [x] Estatísticas por série: números dos dois, ritmo semanal com previsão, arcos (`database/arcos.json`) e curiosidades
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
-- [x] API REST com login por token (`public/api.php`, documentada em `docs/API.md`), usada pela app Flutter em `../anime-a-dois-flutter`
+- [x] Biblioteca individual: fila de capas com progresso e estados (a ver, em pausa, acabado) por pessoa
+- [x] Amigos (link de convite de uso único, pedido por utilizador) e séries vistas com o par ou com um amigo (várias pessoas por série)
+- [x] Adicionar série pela pesquisa no MyAnimeList (Jikan): episódios, títulos, capa, filler e recap
+- [x] "Quero ver contigo": propostas que o par aceita ou recusa
+- [x] Popup "O que há de novo" — a cada atualização, acrescentar uma entrada a `database/novidades.json`
 
 ## Online (alwaysdata)
 
@@ -62,19 +66,18 @@ A primeira pessoa a abrir cria a conta 1, e a segunda cria a conta 2. A partir d
 app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
-  api/              controllers da API REST (AuthApi, SeriesApi, ComentariosApi, PerfilApi)
-  controllers/      AuthController, HomeController, SerieController, PerfilController, EstatisticasController
-  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas, Token (a lógica vive aqui)
+  controllers/      AuthController, HomeController, SerieController, BibliotecaController, PerfilController, AmigosController, EstatisticasController
+  models/           User, Serie, Episodio, Jikan, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php
-docs/API.md         documentação da API REST
-public/             index.php (site), api.php (API), css/ e js/
+public/             index.php (front controller), css/ e js/
 ```
 
 Rotas no formato `index.php?c=<controller>&a=<ação>`; só as que estão listadas em `public/index.php` existem.
 
 ## Dados
 
-Os episódios vêm de `../naruto-fillers/data/fillers.json` (o projeto irmão neste portfólio).
+Os episódios do Naruto vêm de `../naruto-fillers/data/fillers.json` (o projeto irmão neste portfólio).
+As outras séries vêm do [AniList](https://anilist.co) (pesquisa, capas, episódios), do [Kitsu](https://kitsu.app) (títulos) e do [Jikan](https://jikan.moe) (fillers e recaps, quando está a funcionar). Os pedidos são feitos pelo browser; o servidor só recebe e valida os dados (`app/models/DadosAnime.php`).
 O `seed.php` pode correr-se outra vez sempre que esse ficheiro for atualizado: atualiza sem duplicar e não mexe nos episódios vistos.

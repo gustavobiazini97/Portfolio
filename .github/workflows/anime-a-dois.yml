@@ -96,3 +96,5 @@ jobs:
         run: |
           sshpass -e ssh -o StrictHostKeyChecking=accept-new "$AD_CONTA@$AD_SSH" \
             "cd $AD_PASTA && php database/migrate.php && php database/seed.php"
+
+

@@ -11,9 +11,46 @@ class PerfilController extends Controller
         $this->render('perfil/index', [
             'titulo'      => 'Perfil',
             'user'        => $user,
+            'versao'      => Novidade::ultima(),   // "nível de atualização" mostrado no botão de procurar atualizações
             'pref'        => Preferencia::de($user),
             'vapidPublica' => Notificador::vapid()['publicKey'],   // o browser precisa dela para subscrever
             'telemoveis'  => Subscricao::where('user_id', $user->id)->count(),
+        ]);
+    }
+
+    // GET ?id=<user>: perfil do teu par ou de um amigo (foto, último episódio e as séries dele). De mais ninguém.
+    public function pessoa(): void
+    {
+        $user = $this->exigirLogin();
+        $par  = $user->parceiro();
+        $id   = (int) ($_GET['id'] ?? 0);
+
+        // O teu próprio perfil é a página de definições
+        if ($id === $user->id) {
+            $this->redirect('perfil');
+        }
+        // Null guard: só se vê o perfil do par e dos amigos
+        $pessoa = User::find($id);
+        if ($pessoa === null || ($par?->id !== $id && !Amizade::sao($user, $pessoa))) {
+            http_response_code(404);
+            exit('Página não encontrada.');
+        }
+        $ehPar = $par?->id === $id;
+
+        // A biblioteca dele (cada item diz com quem a vê); se ele só mostra o que vê contigo, ficam só essas
+        $biblioteca = Serie::biblioteca($pessoa);
+        if (!$pessoa->veTudo($user)) {
+            $biblioteca = array_values(array_filter($biblioteca, fn ($i) => in_array($user->id, array_map(fn ($c) => $c['user']->id, $i['companheiros']), true)));
+        }
+
+        $this->render('perfil/pessoa', [
+            'titulo'     => $pessoa->nome,
+            'user'       => $user,
+            'pessoa'     => $pessoa,
+            'ehPar'      => $ehPar,
+            'ultimo'     => $pessoa->ultimoVistoPara($user),
+            'biblioteca' => $biblioteca,
+            'soJuntos'   => !$pessoa->veTudo($user),   // ele só mostra o que vê contigo
         ]);
     }
 
@@ -107,12 +144,66 @@ class PerfilController extends Controller
         try {
             $user->alterarPassword($_POST['atual'] ?? '', $_POST['nova'] ?? '', $_POST['confirmar'] ?? '');
             session_regenerate_id(true);   // credenciais novas, sessão nova
+            SessaoLonga::terminarTodas($user);   // os outros telemóveis têm de entrar outra vez...
+            SessaoLonga::criar($user);           // ...e este mantém-se
             $this->responder(true, 'Palavra-passe alterada.');
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         } catch (PDOException $e) {
             $this->responder(false, 'Não foi possível alterar a palavra-passe.');
         }
+    }
+
+    // POST: privacidade — os amigos só veem as séries que vês com eles (o par vê sempre tudo)
+    public function guardarPrivacidade(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $user->alterarSoJuntos(!empty($_POST['so_juntos']));
+            $this->responder(true, 'Privacidade guardada.');
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível guardar.');
+        }
+    }
+
+    // POST: escolhe as cores da app
+    public function guardarPaleta(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $user->alterarPaleta((int) ($_POST['paleta'] ?? 0));
+            $this->responder(true, 'Cores guardadas.');
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível guardar as cores.');
+        }
+    }
+
+    // POST: apaga a conta e tudo o que lhe pertence (pede a palavra-passe) e termina a sessão
+    public function apagarConta(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirLogin();
+
+        try {
+            $user->apagarConta($_POST['password'] ?? '');
+        } catch (InvalidArgumentException $e) {
+            $this->responder(false, $e->getMessage());
+        } catch (PDOException $e) {
+            $this->responder(false, 'Não foi possível apagar a conta. Tenta outra vez.');
+        }
+
+        // Conta apagada: sessão nova e vazia
+        SessaoLonga::terminar();
+        $_SESSION = [];
+        session_regenerate_id(true);
+        $this->flash('info', 'A tua conta foi apagada.');
+        $this->redirect('auth', 'login');
     }
 
     // ---------- Notificações ----------

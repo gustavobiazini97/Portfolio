@@ -1,7 +1,9 @@
 <?php
 /* Página da série.
-   Variáveis: $serie, $user, $parceiro (ou null), $fillers, $meu, $dele, $episodios, $inicial, $flash */
-$nomePar   = $parceiro ? $parceiro->nome : null;
+   Variáveis: $serie, $user, $companheiros (Users que vêem a série contigo; vazio se sozinho), $fillers, $meu,
+              $deles (progresso de cada companheiro, na mesma ordem), $episodios, $inicial,
+              $sincronizar (o browser vai buscar fillers ou episódios novos), $flash */
+$nomes = $companheiros->pluck('nome')->all();
 
 // Avatares (foto ou inicial) gerados uma vez e repetidos em todos os cartões
 $avatarHtml = function ($pessoa, string $cor): string {
@@ -11,17 +13,23 @@ $avatarHtml = function ($pessoa, string $cor): string {
     return ob_get_clean();
 };
 $avTu  = $avatarHtml($user, 'tu');
-$avPar = $parceiro ? $avatarHtml($parceiro, 'par') : '';
+$avCom = $companheiros->map(fn ($c) => $avatarHtml($c, 'par'))->all();   // na ordem dos companheiros
 
-// Frase curta por baixo dos avatares (o js/app.js tem a mesma lógica)
-$rotulo = function (bool $tu, bool $par) use ($nomePar): string {
-    if ($nomePar === null) return $tu ? 'visto' : 'por ver';
-    if ($tu && $par)       return 'os dois viram';
-    if ($tu)               return 'falta ' . $nomePar;
-    if ($par)              return $nomePar . ' já viu';
+// "Ana" · "Ana e Rui" · "3 pessoas" (o js/app.js tem a mesma lógica)
+$juntar = fn (array $n): string => count($n) === 1 ? $n[0] : (count($n) === 2 ? $n[0] . ' e ' . $n[1] : count($n) . ' pessoas');
+
+// Frase curta por baixo dos avatares (o js/app.js tem a mesma lógica); $com = viu/não viu por companheiro
+$rotulo = function (bool $tu, array $com) use ($nomes, $juntar): string {
+    if ($nomes === []) return $tu ? 'visto' : 'por ver';
+    $viram = []; $faltam = [];
+    foreach ($com as $i => $viu) { if ($viu) $viram[] = $nomes[$i]; else $faltam[] = $nomes[$i]; }
+    if ($tu && $faltam === []) return count($nomes) === 1 ? 'os dois viram' : 'todos viram';
+    if ($tu)                   return 'falta ' . $juntar($faltam);
+    if ($viram !== [])         return $juntar($viram) . (count($viram) === 1 ? ' já viu' : ' já viram');
     return 'por ver';
 };
 $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do painel e do botão (funciona sem JS)
+$temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a legenda só fala em recap se houver
 ?>
 <div class="topo">
   <a class="btn-redondo vidro" href="<?= e(url('home', 'index', ['serie' => $serie->slug])) ?>" aria-label="Voltar ao início">
@@ -39,23 +47,23 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 <section class="mapa vidro" aria-label="Episódios vistos por cada um">
   <div class="mapa-info">
     <span><?= e($serie->total_episodios . ' episódios') ?></span>
-    <span class="mapa-legenda"><i class="leg-visto"></i>visto <i class="leg-filler"></i>filler</span>
+    <span class="mapa-legenda"><i class="leg-visto"></i>visto <i class="leg-filler"></i>filler<?= $temRecaps ? '/recap' : '' ?></span>
   </div>
 
   <div class="mapa-grade">
     <span class="mapa-quem"><?= $avTu ?><span class="mapa-nome">Tu</span></span>
     <div class="riscos riscos-tu" id="riscos-tu" aria-hidden="true">
-      <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['tu'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
+      <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['tu'] ? 'v' : '') . ($ep['filler'] || $ep['recap'] ? ' f' : '') ?>"></i><?php endforeach; ?>
     </div>
     <span class="mapa-pct pct-tu" id="pct-tu"><?= $meu['pct'] ?>%</span>
 
-    <?php if ($parceiro): ?>
-      <span class="mapa-quem"><?= $avPar ?><span class="mapa-nome"><?= e($nomePar) ?></span></span>
+    <?php foreach ($companheiros as $i => $c): ?>
+      <span class="mapa-quem"><?= $avCom[$i] ?><span class="mapa-nome"><?= e($c->nome) ?></span></span>
       <div class="riscos riscos-par" aria-hidden="true">
-        <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['par'] ? 'v' : '') . ($ep['filler'] ? ' f' : '') ?>"></i><?php endforeach; ?>
+        <?php foreach ($episodios as $ep): ?><i class="<?= ($ep['com'][$i] ? 'v' : '') . ($ep['filler'] || $ep['recap'] ? ' f' : '') ?>"></i><?php endforeach; ?>
       </div>
-      <span class="mapa-pct pct-par"><?= $dele['pct'] ?>%</span>
-    <?php endif; ?>
+      <span class="mapa-pct pct-par"><?= $deles[$i]['pct'] ?>%</span>
+    <?php endforeach; ?>
 
     <!-- Régua por baixo das barras (só na coluna do meio) -->
     <div class="mapa-escala" aria-hidden="true">
@@ -66,19 +74,21 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 
 <!-- Pista: desliza para os lados; o cartão do centro é o selecionado
      (em "Selecionar vários", tocar num cartão junta-o à seleção) -->
-<div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>" data-par-nome="<?= e($nomePar ?? '') ?>">
+<div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>" data-companheiros="<?= e(json_encode($nomes)) ?>">
   <?php foreach ($episodios as $ep): ?>
     <button type="button"
-            class="ep vidro<?= $ep['tu'] ? ' visto' : '' ?><?= $ep['par'] ? ' par-viu' : '' ?><?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
+            class="ep vidro<?= $ep['tu'] ? ' visto' : '' ?><?= in_array(true, $ep['com'], true) ? ' par-viu' : '' ?><?= $ep['numero'] === $inicial ? ' ativo' : '' ?>"
             data-id="<?= $ep['id'] ?>" data-n="<?= $ep['numero'] ?>"
-            data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-par="<?= $ep['par'] ? '1' : '0' ?>"
-            data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
+            data-tu="<?= $ep['tu'] ? '1' : '0' ?>" data-com="<?= e(implode(',', array_map(fn ($v) => $v ? '1' : '0', $ep['com']))) ?>"
+            data-filler="<?= $ep['filler'] ? '1' : '0' ?>" data-recap="<?= $ep['recap'] ? '1' : '0' ?>" data-titulo="<?= e($ep['titulo'] ?? '') ?>"
             data-coment="<?= $ep['coment'] ?>"
             <?= $ep['numero'] === $inicial ? 'data-inicial' : '' ?>
             aria-label="Episódio <?= $ep['numero'] ?>">
       <span class="ep-cima">
         <?php if ($ep['filler']): ?>
           <span class="etiqueta-filler">filler</span>
+        <?php elseif ($ep['recap']): ?>
+          <span class="etiqueta-filler">recap</span>
         <?php else: ?>
           <span>episódio</span>
         <?php endif; ?>
@@ -95,9 +105,9 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
       <span class="ep-quem">
         <span class="ep-avs">
           <span class="ep-av ep-av-tu<?= $ep['tu'] ? ' v' : '' ?>"><?= $avTu ?></span>
-          <?php if ($parceiro): ?><span class="ep-av ep-av-par<?= $ep['par'] ? ' v' : '' ?>"><?= $avPar ?></span><?php endif; ?>
+          <?php foreach ($ep['com'] as $i => $viu): ?><span class="ep-av ep-av-par<?= $viu ? ' v' : '' ?>"><?= $avCom[$i] ?></span><?php endforeach; ?>
         </span>
-        <span class="ep-rotulo"><?= e($rotulo($ep['tu'], $ep['par'])) ?></span>
+        <span class="ep-rotulo"><?= e($rotulo($ep['tu'], $ep['com'])) ?></span>
       </span>
     </button>
   <?php endforeach; ?>
@@ -107,7 +117,8 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
 <section class="detalhe vidro" id="detalhe" aria-live="polite">
   <div class="detalhe-cima">
     <h2 id="detalhe-titulo">Episódio <?= $epInicial['numero'] ?></h2>
-    <span class="chip<?= $epInicial['filler'] ? ' etiqueta-filler' : '' ?>" id="detalhe-tipo"><?= $epInicial['filler'] ? 'filler' : 'canónico' ?></span>
+    <?php $tipoInicial = $epInicial['filler'] ? 'filler' : ($epInicial['recap'] ? 'recap' : 'canónico'); ?>
+    <span class="chip<?= $tipoInicial !== 'canónico' ? ' etiqueta-filler' : '' ?>" id="detalhe-tipo"><?= $tipoInicial ?></span>
   </div>
   <p class="detalhe-nome" id="detalhe-nome"><?= e($epInicial['titulo'] ?? '') ?></p>
   <div class="detalhe-estados">
@@ -115,12 +126,12 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
       <span class="ep-av<?= $epInicial['tu'] ? ' v' : '' ?>" id="detalhe-av-tu"><?= $avTu ?></span>
       <span>Tu<br><b id="detalhe-tu"><?= $epInicial['tu'] ? 'visto' : 'por ver' ?></b></span>
     </span>
-    <?php if ($parceiro): ?>
+    <?php foreach ($companheiros as $i => $c): ?>
       <span class="detalhe-pessoa">
-        <span class="ep-av<?= $epInicial['par'] ? ' v' : '' ?>" id="detalhe-av-par"><?= $avPar ?></span>
-        <span><?= e($nomePar) ?><br><b id="detalhe-par"><?= $epInicial['par'] ? 'visto' : 'por ver' ?></b></span>
+        <span class="ep-av<?= $epInicial['com'][$i] ? ' v' : '' ?>" id="detalhe-av-c<?= $i ?>"><?= $avCom[$i] ?></span>
+        <span><?= e($c->nome) ?><br><b id="detalhe-c<?= $i ?>"><?= $epInicial['com'][$i] ? 'visto' : 'por ver' ?></b></span>
       </span>
-    <?php endif; ?>
+    <?php endforeach; ?>
   </div>
 </section>
 
@@ -145,6 +156,12 @@ $epInicial = $episodios[$inicial - 1] ?? $episodios[0];   // estado inicial do p
     <?= $epInicial['tu'] ? 'Desmarcar episódio ' . $epInicial['numero'] : 'Marcar episódio ' . $epInicial['numero'] . ' como visto' ?>
   </button>
 </form>
+
+<?php if ($sincronizar): ?>
+  <!-- Faltam fillers ou há episódios novos: o js/app.js vai buscá-los às APIs e manda-os ao servidor -->
+  <span hidden id="sincronizar" data-serie="<?= e($serie->slug) ?>" data-mal="<?= (int) $serie->mal_id ?>"
+        data-em-emissao="<?= $serie->em_emissao ? '1' : '0' ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>"></span>
+<?php endif; ?>
 
 <!-- Aviso curto depois de marcar (substitui o recarregar da página) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>
