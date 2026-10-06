@@ -391,3 +391,77 @@ Future<bool> confirmar(BuildContext context, String titulo, String texto, {Strin
   );
   return r == true;
 }
+
+// ---------- Peças iguais às do site ----------
+
+// Botão redondo de vidro (voltar, tema, estatísticas…), 44×44 como o .btn-redondo do site
+class BotaoRedondo extends StatelessWidget {
+  final Widget icone;
+  final VoidCallback? onTap;
+  final String? tooltip;
+  final double tamanho;
+
+  const BotaoRedondo({super.key, required this.icone, this.onTap, this.tooltip, this.tamanho = 44});
+
+  @override
+  Widget build(BuildContext context) {
+    final botao = SizedBox(
+      width: tamanho,
+      height: tamanho,
+      child: Vidro(
+        raio: tamanho / 2,
+        padding: EdgeInsets.zero,
+        onTap: onTap,
+        child: Center(child: IconTheme.merge(data: const IconThemeData(size: 18), child: icone)),
+      ),
+    );
+    return tooltip == null ? botao : Tooltip(message: tooltip!, child: botao);
+  }
+}
+
+// Avatares sobrepostos (cartões de episódio, capas): quem ainda não viu fica esbatido e a cinzento
+class AvataresSobrepostos extends StatelessWidget {
+  final List<(Utilizador?, Color, bool)> pessoas; // (pessoa, cor, já viu?)
+  final double tamanho;
+
+  const AvataresSobrepostos({super.key, required this.pessoas, this.tamanho = 26});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Paleta.de(context);
+    return SizedBox(
+      height: tamanho + 4,
+      width: tamanho + 4 + (pessoas.length - 1).clamp(0, 10) * (tamanho - 9),
+      child: Stack(
+        children: [
+          for (var i = 0; i < pessoas.length; i++)
+            Positioned(
+              left: i * (tamanho - 9),
+              child: Opacity(
+                opacity: pessoas[i].$3 ? 1 : 0.35,
+                child: ColorFiltered(
+                  // Ainda não viu: a preto e branco (como o filter: grayscale(1) do site)
+                  colorFilter: pessoas[i].$3
+                      ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
+                      : const ColorFilter.matrix(<double>[
+                          0.2126, 0.7152, 0.0722, 0, 0,
+                          0.2126, 0.7152, 0.0722, 0, 0,
+                          0.2126, 0.7152, 0.0722, 0, 0,
+                          0, 0, 0, 1, 0,
+                        ]),
+                  child: Container(
+                    padding: const EdgeInsets.all(2), // aro que separa os avatares
+                    decoration: BoxDecoration(color: p.bg, shape: BoxShape.circle),
+                    child: Avatar(user: pessoas[i].$1, cor: pessoas[i].$2, tamanho: tamanho),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Mistura duas cores como o color-mix(in srgb, a X%, b) do CSS
+Color misturar(Color a, double pctA, Color b) => Color.lerp(b, a, pctA)!;

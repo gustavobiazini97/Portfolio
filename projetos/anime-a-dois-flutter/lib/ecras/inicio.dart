@@ -1,12 +1,13 @@
-// Início (igual ao do site): o último episódio do par, a tua biblioteca (fila de capas), a série escolhida
-// com o Vs, o teu estado e as ações (ver com alguém, deixar de ver juntos, tirar), os convites
-// "Quero ver contigo" e a fila "O teu par está a ver".
+// Início, igual ao do site:
+//   topo (logótipo, estatísticas, amigos, tema, o teu avatar), último episódio do par (com o número grande),
+//   a tua biblioteca em capas, a série aberta (placar com o episódio de cada um e a frase do Vs),
+//   o teu estado, "Vês com… · Deixar de ver juntos", "Continuar · episódio N",
+//   os convites "Quero ver contigo" e a fila "<par> está a ver".
 
 import 'package:flutter/material.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
-import '../config.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
@@ -16,6 +17,21 @@ import 'estatisticas.dart';
 import 'perfil.dart';
 import 'pessoa.dart';
 import 'serie.dart';
+
+// Resumo da série aberta (GET /series/{slug}?episodios=0): o placar do Início
+class _Aberta {
+  final String slug;
+  final String estado;
+  final bool podeRemover;
+  final Progresso tu;
+  final List<(Utilizador, Progresso)> companheiros;
+  final String resumo;
+
+  const _Aberta(this.slug, this.estado, this.podeRemover, this.tu, this.companheiros, this.resumo);
+
+  // Alguém já começou a série? (senão o placar dá lugar a "Ainda não começaste…")
+  bool get comecou => tu.vistos > 0 || companheiros.any((c) => c.$2.vistos > 0);
+}
 
 class EcraInicio extends StatefulWidget {
   const EcraInicio({super.key});
@@ -37,7 +53,8 @@ class _EcraInicioState extends State<EcraInicio> {
   Map<String, dynamic> _jaCa = {};
   int _pedidosAmigos = 0;
 
-  String? _selecionada; // slug da série aberta no painel do Vs
+  String? _selecionada; // slug da série aberta
+  _Aberta? _aberta; // o resumo dela
   bool _aCarregar = true;
   bool _ocupado = false; // uma ação a decorrer (bloqueia os botões)
   String? _erro;
@@ -71,6 +88,7 @@ class _EcraInicioState extends State<EcraInicio> {
         _erro = null;
         _aCarregar = false;
       });
+      await _carregarAberta();
     } on ApiErro catch (e) {
       if (!mounted) return;
       setState(() {
@@ -78,6 +96,44 @@ class _EcraInicioState extends State<EcraInicio> {
         _aCarregar = false;
       });
     }
+  }
+
+  // Placar da série aberta (sem a lista de episódios)
+  Future<void> _carregarAberta() async {
+    final slug = _selecionada;
+    if (slug == null) {
+      setState(() => _aberta = null);
+      return;
+    }
+    try {
+      final d = await Api.instancia.get('/series/$slug?episodios=0');
+      if (!mounted || slug != _selecionada) return; // entretanto escolheu outra
+      setState(() {
+        _aberta = _Aberta(
+          slug,
+          d['estado'] as String? ?? 'a_ver',
+          d['podeRemover'] == true,
+          Progresso.deJson(d['tu'] as Map<String, dynamic>),
+          ((d['companheiros'] as List?) ?? []).map((c) {
+            final m = c as Map<String, dynamic>;
+            return (Utilizador.deJson(m['user'] as Map<String, dynamic>), Progresso.deJson(m['progresso'] as Map<String, dynamic>));
+          }).toList(),
+          d['resumo'] as String? ?? '',
+        );
+      });
+    } on ApiErro {
+      // sem placar: o resto do Início continua a funcionar
+    }
+  }
+
+  // Escolher outra capa: muda já o realce e vai buscar o placar dela
+  void _escolher(ItemBiblioteca i) {
+    if (i.serie.slug == _selecionada) return;
+    setState(() {
+      _selecionada = i.serie.slug;
+      _aberta = null;
+    });
+    _carregarAberta();
   }
 
   // Abre um ecrã e, ao voltar, recarrega (pode ter havido episódios marcados, séries novas, …)
@@ -118,251 +174,271 @@ class _EcraInicioState extends State<EcraInicio> {
       body: Fundo(
         acento: atual?.serie.cor,
         child: SafeArea(
-          child: Column(
-            children: [
-              // ---------- Barra de topo ----------
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 6, 6),
-                child: Row(
-                  children: [
-                    Image.asset('assets/icon/icon.png', width: 32, height: 32),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(appNome,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                    ),
-                    IconButton(
-                      tooltip: 'Estatísticas',
-                      icon: const Icon(Icons.insights_rounded),
-                      onPressed: atual == null ? null : () => _abrir(EcraEstatisticas(slug: atual.serie.slug)),
-                    ),
-                    // Amigos (bolinha se há pedidos por responder)
-                    IconButton(
-                      tooltip: 'Amigos',
-                      icon: Badge(
-                        isLabelVisible: _pedidosAmigos > 0,
-                        label: Text('$_pedidosAmigos'),
-                        backgroundColor: p.parTxt,
-                        child: const Icon(Icons.group_rounded),
+          child: _aCarregar
+              ? const Carregando()
+              : (_erro != null && _user == null)
+                  ? ErroComRetry(
+                      mensagem: _erro!,
+                      aoTentar: () {
+                        setState(() => _aCarregar = true);
+                        _carregar();
+                      },
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _carregar,
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+                        children: [
+                          _topo(p, escuro),
+                          const SizedBox(height: 14),
+                          ..._conteudo(p, atual),
+                        ],
                       ),
-                      onPressed: () => _abrir(const EcraAmigos()),
                     ),
-                    IconButton(
-                      tooltip: escuro ? 'Tema claro' : 'Tema escuro',
-                      icon: Icon(escuro ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-                      onPressed: Sessao.instancia.alternarTema,
-                    ),
-                    // O teu avatar abre o perfil
-                    IconButton(
-                      tooltip: 'Perfil',
-                      onPressed: () => _abrir(const EcraPerfil()),
-                      icon: Avatar(user: _user, cor: p.tu, tamanho: 32),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(child: _conteudo(p, atual)),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  Widget _conteudo(Paleta p, ItemBiblioteca? atual) {
-    if (_aCarregar) return const Carregando();
-    if (_erro != null && _user == null) {
-      return ErroComRetry(
-        mensagem: _erro!,
-        aoTentar: () {
-          setState(() => _aCarregar = true);
-          _carregar();
-        },
-      );
-    }
-
-    final textos = Theme.of(context).textTheme;
-    final recebidos = _convites.where((c) => c.recebido).toList();
-    final enviados = _convites.where((c) => !c.recebido).toList();
-
-    return RefreshIndicator(
-      onRefresh: _carregar,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 28),
-        children: [
-          Text('Olá, ${_user?.nome ?? ''}', style: textos.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(height: 14),
-
-          // O que o par viu por último (abre a série nesse episódio, se for tua; senão o perfil dele)
-          if (_ultimoPar != null && _par != null) ...[
-            _cartaoUltimo(p, _par!, _ultimoPar!),
-            const SizedBox(height: 14),
-          ],
-
-          // Ainda falta o par criar conta
-          if (_esperaPar) ...[
-            Vidro(
-              child: Row(
-                children: [
-                  Icon(Icons.favorite_border_rounded, color: p.parTxt),
-                  const SizedBox(width: 12),
-                  const Expanded(child: Text('O teu par ainda não tem conta. Quando criar, aparece aqui ao teu lado.')),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-          ],
-
-          // ---------- A tua biblioteca ----------
-          Row(
-            children: [
-              Expanded(
-                child: Text('A tua biblioteca', style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-              ),
-              FilledButton.tonalIcon(
-                onPressed: () => _abrir(EcraAdicionar(ligados: _ligados, jaCa: _jaCa)),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Adicionar'),
-              ),
-            ],
+  // Topo: logótipo e "anime a dois"; à direita estatísticas, amigos, tema e o teu avatar
+  Widget _topo(Paleta p, bool escuro) {
+    final atual = _itemAtual;
+    return Row(
+      children: [
+        Image.asset('assets/icon/icon.png', width: 34, height: 34),
+        const SizedBox(width: 10),
+        const Expanded(child: Text('anime a dois', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+        BotaoRedondo(
+          tooltip: 'Estatísticas',
+          icone: const Icon(Icons.bar_chart_rounded),
+          onTap: atual == null ? null : () => _abrir(EcraEstatisticas(slug: atual.serie.slug)),
+        ),
+        const SizedBox(width: 8),
+        Badge(
+          isLabelVisible: _pedidosAmigos > 0,
+          smallSize: 10,
+          backgroundColor: p.parTxt,
+          child: BotaoRedondo(
+            tooltip: 'Amigos',
+            icone: const Icon(Icons.people_outline_rounded),
+            onTap: () => _abrir(const EcraAmigos()),
           ),
-          const SizedBox(height: 10),
-          if (_biblioteca.isEmpty)
-            Vidro(
-              child: Text(
-                'Ainda não tens séries. Toca em Adicionar para procurar uma, ou junta-te a uma série de um amigo.',
-                style: TextStyle(color: p.suave),
-              ),
-            )
-          else
-            _fila(p, _biblioteca, (i) => setState(() => _selecionada = i.serie.slug), selecionada: _selecionada),
-
-          // ---------- A série escolhida: Vs, estado e ações ----------
-          if (atual != null) ...[
-            const SizedBox(height: 14),
-            _painelSerie(p, atual),
-          ],
-
-          // ---------- Quero ver contigo ----------
-          if (_convites.isNotEmpty) ...[
-            const SizedBox(height: 18),
-            Text('Quero ver contigo', style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 10),
-            for (final c in recebidos) _cartaoConvite(p, c),
-            for (final c in enviados) _cartaoConvite(p, c),
-          ],
-
-          // ---------- O teu par está a ver (só as dele que não tens) ----------
-          if (_par != null && _doPar.isNotEmpty) ...[
-            const SizedBox(height: 18),
-            Text('${_par!.nome} está a ver', style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 10),
-            _fila(p, _doPar, (i) => _folhaJuntar(p, i, _par!), dono: _par),
-          ],
-        ],
-      ),
+        ),
+        const SizedBox(width: 8),
+        BotaoRedondo(
+          tooltip: escuro ? 'Tema claro' : 'Tema escuro',
+          icone: Icon(escuro ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+          onTap: Sessao.instancia.alternarTema,
+        ),
+        const SizedBox(width: 8),
+        // O teu avatar abre o perfil
+        GestureDetector(
+          onTap: () => _abrir(const EcraPerfil()),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: p.vidroBorda, width: 2),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .12), blurRadius: 16, offset: const Offset(0, 6))],
+            ),
+            child: Avatar(user: _user, cor: p.tu, tamanho: 42),
+          ),
+        ),
+      ],
     );
   }
 
-  // "Andreia viu o episódio 12 · há 2 horas"
-  Widget _cartaoUltimo(Paleta p, Utilizador par, Ultimo u) {
+  List<Widget> _conteudo(Paleta p, ItemBiblioteca? atual) {
     final textos = Theme.of(context).textTheme;
+    return [
+      // ---------- Último episódio do par ----------
+      if (_par != null && _ultimoPar != null) ...[
+        _cartaoUltimo(p, _par!, _ultimoPar!),
+        const SizedBox(height: 14),
+      ] else if (_esperaPar) ...[
+        Vidro(
+          padding: const EdgeInsets.all(20),
+          child: Text('O teu par ainda não tem conta. Quando criar, aparece aqui ao teu lado.', style: TextStyle(color: p.suave)),
+        ),
+        const SizedBox(height: 14),
+      ],
+
+      // ---------- A tua biblioteca ----------
+      Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: Row(
+          children: [
+            const Expanded(child: Text('A tua biblioteca', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500))),
+            BotaoRedondo(
+              tooltip: 'Adicionar série',
+              tamanho: 38,
+              icone: const Icon(Icons.add_rounded),
+              onTap: () => _abrir(EcraAdicionar(ligados: _ligados, jaCa: _jaCa)),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 10),
+      if (_biblioteca.isEmpty)
+        Vidro(
+          padding: const EdgeInsets.all(20),
+          child: Text('Ainda não tens séries. Toca em + para procurar uma, ou junta-te a uma série de um amigo.',
+              style: TextStyle(color: p.suave)),
+        )
+      else
+        _fila(p, _biblioteca, _escolher, selecionada: _selecionada),
+
+      // ---------- Quero ver contigo ----------
+      if (_convites.isNotEmpty) ...[
+        const SizedBox(height: 14),
+        _convitesPainel(p),
+      ],
+
+      // ---------- A série aberta ----------
+      if (atual != null) ...[
+        const SizedBox(height: 14),
+        ..._serieAberta(p, atual),
+      ],
+
+      // ---------- <par> está a ver (só as dele que não tens) ----------
+      if (_par != null && _doPar.isNotEmpty) ...[
+        const SizedBox(height: 18),
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text('${_par!.nome} está a ver', style: textos.bodyMedium?.copyWith(fontSize: 14, color: p.suave)),
+        ),
+        const SizedBox(height: 10),
+        _fila(p, _doPar, (i) => _folhaJuntar(p, i, _par!), dono: _par),
+      ],
+    ];
+  }
+
+  // "Andreia viu há 2 dias / Naruto · episódio 4" com o número grande à direita
+  Widget _cartaoUltimo(Paleta p, Utilizador par, Ultimo u) {
     final tens = _biblioteca.any((i) => i.serie.slug == u.serie);
+    final nomeCurto = _biblioteca.where((i) => i.serie.slug == u.serie).map((i) => i.serie.nomeCurto).firstOrNull ?? u.serieNome;
     return Vidro(
-      onTap: () => _abrir(tens ? EcraSerie(slug: u.serie, episodio: u.numero) : EcraPessoa(id: par.id)),
+      padding: const EdgeInsets.all(20),
+      // Se a série também é tua, abre-a nesse episódio; senão é só para espreitar (a foto abre o perfil)
+      onTap: tens ? () => _abrir(EcraSerie(slug: u.serie, episodio: u.numero)) : null,
       child: Row(
         children: [
-          Avatar(user: par, cor: p.par, tamanho: 44),
+          GestureDetector(
+            onTap: () => _abrir(EcraPessoa(id: par.id)),
+            child: Avatar(user: par, cor: p.par, tamanho: 44),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${par.nome} viu o episódio ${u.numero}',
-                    style: textos.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                Text('${par.nome} viu ${u.quando}', style: TextStyle(fontSize: 13, color: p.suave)),
                 const SizedBox(height: 2),
-                Text(
-                  [u.serieNome, if (u.titulo != null) u.titulo!].join(' · '),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: textos.bodySmall?.copyWith(color: p.suave),
-                ),
-                if (u.quando.isNotEmpty)
-                  Text(u.quando, style: textos.labelSmall?.copyWith(color: p.parTxt, fontWeight: FontWeight.w700)),
+                Text('$nomeCurto · episódio ${u.numero}',
+                    maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: p.suave),
+          Text('${u.numero}', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, letterSpacing: -.6, color: p.parTxt)),
         ],
       ),
     );
   }
 
-  // Fila de capas que desliza para os lados. Cada capa: estado, a percentagem e a dos companheiros.
-  //   dono = de quem é a fila (null = tua); selecionada = slug com aro
+  // Fila de capas (desliza para os lados). A tua: avatares de quem vê contigo no canto e duas barrinhas;
+  // a do par: capas mais pequenas, uma barrinha (a dele).
   Widget _fila(Paleta p, List<ItemBiblioteca> itens, void Function(ItemBiblioteca) aoTocar,
       {String? selecionada, Utilizador? dono}) {
-    final textos = Theme.of(context).textTheme;
+    final doPar = dono != null;
+    final largura = doPar ? 84.0 : 104.0;
     return SizedBox(
-      height: 232,
+      height: largura * 1.5 + (doPar ? 44 : 58),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
         itemCount: itens.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, n) {
           final i = itens[n];
           final escolhida = i.serie.slug == selecionada;
+          final selo = i.estado == 'acabado' ? '✓ acabado' : (i.estado == 'pausa' ? 'em pausa' : '');
           return GestureDetector(
             onTap: () => aoTocar(i),
             child: SizedBox(
-              width: 116,
+              width: largura,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Stack(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(21),
-                          border: Border.all(color: escolhida ? i.serie.cor : Colors.transparent, width: 2.5),
+                  // Capa com aro na cor da série quando é a aberta
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(doPar ? 16 : 20),
+                      border: Border.all(color: escolhida ? i.serie.cor : Colors.transparent, width: 2.5),
+                    ),
+                    child: Stack(
+                      children: [
+                        Opacity(
+                          opacity: i.estado == 'acabado' ? .8 : 1, // acabadas: mais apagadas
+                          child: Capa(serie: i.serie, largura: largura - 9, raio: doPar ? 14 : 18),
                         ),
-                        child: Capa(serie: i.serie, largura: 106),
-                      ),
-                      // Vista com alguém: o avatar do primeiro companheiro (+N se houver mais)
-                      if (i.companheiros.isNotEmpty)
-                        Positioned(
-                          right: 8,
-                          bottom: 8,
-                          child: Row(
-                            children: [
-                              Avatar(user: i.companheiros.first.user, cor: p.par, tamanho: 24),
-                              if (i.companheiros.length > 1)
-                                Container(
-                                  margin: const EdgeInsets.only(left: 3),
-                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                  decoration: BoxDecoration(color: p.par, borderRadius: BorderRadius.circular(10)),
-                                  child: Text('+${i.companheiros.length - 1}',
-                                      style: TextStyle(color: p.noPastel, fontSize: 11, fontWeight: FontWeight.w800)),
+                        // Vista com alguém: o teu avatar e o do primeiro companheiro (+N) no canto de cima
+                        if (!doPar && i.companheiros.isNotEmpty)
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: Row(
+                              children: [
+                                AvataresSobrepostos(
+                                  tamanho: 18,
+                                  pessoas: [(_user, p.tu, true), (i.companheiros.first.user, p.par, true)],
                                 ),
-                            ],
+                                if (i.companheiros.length > 1)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    decoration: BoxDecoration(color: Colors.black.withValues(alpha: .65), borderRadius: BorderRadius.circular(9)),
+                                    child: Text('+${i.companheiros.length - 1}',
+                                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                    ],
+                        // Selo "em pausa" / "✓ acabado"
+                        if (selo.isNotEmpty)
+                          Positioned(
+                            left: 6,
+                            bottom: 6,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(color: const Color(0xB814161E), borderRadius: BorderRadius.circular(10)),
+                              child: Text(selo, style: TextStyle(color: Colors.white, fontSize: doPar ? 9.5 : 10.5, fontWeight: FontWeight.w500)),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  Text(i.serie.nomeCurto,
-                      maxLines: 1, overflow: TextOverflow.ellipsis, style: textos.labelLarge?.copyWith(fontWeight: FontWeight.w800)),
-                  Text('${i.estadoTexto} · ${i.pct}%', style: textos.labelSmall?.copyWith(color: p.suave)),
-                  const SizedBox(height: 4),
-                  // Barrinhas: a do dono da fila e a do primeiro companheiro
-                  BarraProgresso(pct: i.pct, cor: dono == null ? p.tu : p.par, altura: 4),
-                  if (i.companheiros.isNotEmpty) ...[
-                    const SizedBox(height: 3),
-                    BarraProgresso(pct: i.companheiros.first.pct, cor: dono == null ? p.par : p.tu, altura: 4),
-                  ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Text(i.serie.nomeCurto,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12.5, fontWeight: escolhida ? FontWeight.w500 : FontWeight.w400)),
+                  ),
+                  const SizedBox(height: 6),
+                  // Barrinhas: a tua e a do primeiro companheiro (na fila do par, só a dele)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Column(
+                      children: [
+                        BarraProgresso(pct: i.pct, cor: doPar ? p.par : p.tu, altura: 4),
+                        if (!doPar && i.companheiros.isNotEmpty) ...[
+                          const SizedBox(height: 3),
+                          BarraProgresso(pct: i.companheiros.first.pct, cor: p.par, altura: 4),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -372,92 +448,292 @@ class _EcraInicioState extends State<EcraInicio> {
     );
   }
 
-  // Painel da série escolhida: com quem vês, as barras, o teu estado e as ações
-  Widget _painelSerie(Paleta p, ItemBiblioteca i) {
-    final textos = Theme.of(context).textTheme;
+  // A série aberta: placar, estado, "Vês com…", ações e "Continuar · episódio N"
+  List<Widget> _serieAberta(Paleta p, ItemBiblioteca i) {
     final s = i.serie;
-    final comp = i.companheiros;
+    final a = _aberta?.slug == s.slug ? _aberta : null; // placar só quando chegou o desta série
+    final comp = a?.companheiros ?? [];
+    final nomes = comp.map((c) => c.$1.nome).toList();
     final titulo = comp.isEmpty
-        ? '${s.nomeCurto} · só tua'
-        : 'Tu e ${comp.length == 1 ? comp.first.user.nome : '${comp.length} pessoas'} em ${s.nomeCurto}';
-    // Pessoas ligadas a ti que ainda não vêem esta série contigo
-    final porConvidar = _ligados.where((l) => !comp.any((c) => c.user.id == l.id)).toList();
+        ? 'O teu progresso em ${s.nomeCurto}'
+        : 'Tu e ${comp.length == 1 ? nomes.first : '${comp.length} pessoas'} em ${s.nomeCurto}';
 
+    // Convites que enviaste para esta série (à espera de resposta)
+    final enviados = _convites.where((c) => !c.recebido && c.serie.slug == s.slug).toList();
+    // Quem ainda pode ser convidado: ligados que não vêem a série contigo nem têm convite pendente
+    final convidaveis = _ligados
+        .where((l) => !comp.any((c) => c.$1.id == l.id) && !enviados.any((e) => e.para.id == l.id))
+        .toList();
+
+    // Continuar: se já começaste e ainda falta, leva ao episódio seguinte ao teu mais avançado
+    final seguinte = (a != null && a.tu.vistos > 0 && a.tu.posicao < s.totalEpisodios) ? a.tu.posicao + 1 : null;
+
+    return [
+      // ---------- Placar (o cartão todo abre a série) ----------
+      if (a == null)
+        const Vidro(padding: EdgeInsets.all(28), child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))))
+      else if (a.comecou)
+        Vidro(
+          padding: const EdgeInsets.all(20),
+          onTap: () => _abrir(EcraSerie(slug: s.slug)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Expanded(child: Text(titulo, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500))),
+                  Text('${s.totalEpisodios} ep.', style: TextStyle(fontSize: 12.5, color: p.suave)),
+                  Icon(Icons.chevron_right_rounded, size: 18, color: p.suave),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _linhaVs(p, 'Tu', a.tu, true),
+              for (final c in comp) ...[
+                const SizedBox(height: 16),
+                _linhaVs(p, c.$1.nome, c.$2, false),
+              ],
+              const SizedBox(height: 18),
+              Divider(height: 1, color: p.linha),
+              const SizedBox(height: 14),
+              Text(a.resumo, style: TextStyle(fontSize: 13, color: p.suave)),
+            ],
+          ),
+        )
+      else
+        Vidro(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${comp.isEmpty ? 'Ainda não começaste' : 'Ainda ninguém começou'} ${s.nomeCurto}'),
+              const SizedBox(height: 4),
+              Text('Marca o primeiro episódio e o placar aparece aqui.', style: TextStyle(fontSize: 13, color: p.suave)),
+            ],
+          ),
+        ),
+      const SizedBox(height: 14),
+
+      // ---------- O TEU estado desta série (o dos outros é deles) ----------
+      Vidro(
+        raio: 22,
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            for (final (valor, texto) in const [('a_ver', 'A ver'), ('pausa', 'Em pausa'), ('acabado', 'Acabado')])
+              Expanded(
+                child: GestureDetector(
+                  onTap: (_ocupado || (a?.estado ?? i.estado) == valor)
+                      ? null
+                      : () => _acao(() => Api.instancia.put('/series/${s.slug}/estado', {'estado': valor})),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: (a?.estado ?? i.estado) == valor ? s.cor : Colors.transparent,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      texto,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: (a?.estado ?? i.estado) == valor ? p.noPastel : p.suave,
+                        fontWeight: (a?.estado ?? i.estado) == valor ? FontWeight.w500 : FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+
+      // ---------- Vês com… · Deixar de ver juntos · Ver com… · Tirar ----------
+      if (_ligados.isNotEmpty || comp.isNotEmpty || (a?.podeRemover ?? false)) ...[
+        const SizedBox(height: 6),
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 16,
+          runSpacing: 2,
+          children: [
+            for (final c in comp) ...[
+              Text('Vês com ${c.$1.nome}', style: TextStyle(fontSize: 13, color: p.suave)),
+              _linkSuave(p, 'Deixar de ver juntos', () async {
+                if (await confirmar(context, 'Deixar de ver juntos?',
+                    'Deixar de ver ${s.nomeCurto} com ${c.$1.nome}? Cada um fica com o seu progresso.')) {
+                  _acao(() => Api.instancia.delete('/series/${s.slug}/juntos/${c.$1.id}'));
+                }
+              }),
+            ],
+            for (final e in enviados)
+              Text('Convite enviado · à espera de ${e.para.nome}', style: TextStyle(fontSize: 12.5, color: p.parTxt)),
+            if (convidaveis.length == 1)
+              _botaoPequeno(p, 'Ver com ${convidaveis.first.nome}',
+                  () => _acao(() => Api.instancia.post('/series/${s.slug}/convites', {'com': convidaveis.first.id})))
+            else if (convidaveis.length > 1)
+              _botaoPequeno(p, 'Ver com…', () => _folhaConvidar(p, s, convidaveis)),
+            if (a?.podeRemover ?? false)
+              _linkSuave(p, 'Tirar da biblioteca', () async {
+                if (await confirmar(context, 'Tirar ${s.nomeCurto}?', 'Tirar ${s.nomeCurto} da tua biblioteca?', sim: 'Tirar')) {
+                  _acao(() => Api.instancia.delete('/series/${s.slug}'));
+                }
+              }),
+          ],
+        ),
+      ],
+      const SizedBox(height: 10),
+
+      // ---------- Continuar · episódio N ----------
+      SizedBox(
+        height: 52,
+        child: FilledButton(
+          onPressed: () => _abrir(EcraSerie(slug: s.slug, episodio: seguinte)),
+          style: FilledButton.styleFrom(padding: EdgeInsets.zero),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(seguinte != null ? 'Continuar · episódio $seguinte' : 'Ver episódios de ${s.nomeCurto}',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right_rounded, size: 18),
+            ],
+          ),
+        ),
+      ),
+    ];
+  }
+
+  // Uma linha do placar: "Tu" à esquerda, "50 · 23%" à direita (o número a negrito na cor da pessoa), barra por baixo
+  Widget _linhaVs(Paleta p, String nome, Progresso pr, bool ehTu) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(nome, style: const TextStyle(fontSize: 13))),
+            Text.rich(TextSpan(
+              style: TextStyle(fontSize: 13, color: p.suave),
+              children: [
+                TextSpan(text: '${pr.posicao}', style: TextStyle(fontWeight: FontWeight.w700, color: ehTu ? p.tuTxt : p.parTxt)),
+                TextSpan(text: ' · ${pr.pct}%'),
+              ],
+            )),
+          ],
+        ),
+        const SizedBox(height: 8),
+        BarraProgresso(pct: pr.pct, cor: ehTu ? p.tu : p.par, altura: 6),
+      ],
+    );
+  }
+
+  // Link sublinhado e discreto ("Deixar de ver juntos", "Agora não", …)
+  Widget _linkSuave(Paleta p, String texto, VoidCallback onTap) => InkWell(
+        onTap: _ocupado ? null : onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Text(texto, style: TextStyle(fontSize: 13, color: p.suave, decoration: TextDecoration.underline, decorationColor: p.suave)),
+        ),
+      );
+
+  // Botão pequeno (secundário): "Ver com X"
+  Widget _botaoPequeno(Paleta p, String texto, VoidCallback onTap, {bool cheio = false}) => SizedBox(
+        height: 34,
+        child: cheio
+            ? FilledButton(
+                onPressed: _ocupado ? null : onTap,
+                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16), textStyle: const TextStyle(fontSize: 13)),
+                child: Text(texto),
+              )
+            : OutlinedButton(
+                onPressed: _ocupado ? null : onTap,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  backgroundColor: p.campo,
+                  side: BorderSide(color: p.linha),
+                  textStyle: const TextStyle(fontSize: 13),
+                ),
+                child: Text(texto),
+              ),
+      );
+
+  // Quero ver contigo: os convites recebidos ("Bora ver" / "Agora não") e os enviados ("Cancelar")
+  Widget _convitesPainel(Paleta p) {
+    final n = _convites.length;
     return Vidro(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Título + abrir a série
           Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              Expanded(child: Text(titulo, style: textos.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
-              FilledButton(
-                onPressed: () => _abrir(EcraSerie(slug: s.slug)),
-                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10)),
-                child: const Text('Abrir'),
-              ),
+              const Expanded(child: Text('Quero ver contigo', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500))),
+              Text('$n ${n == 1 ? 'convite' : 'convites'}', style: TextStyle(fontSize: 12.5, color: p.suave)),
             ],
           ),
-          const SizedBox(height: 12),
-          LinhaPct(nome: _user?.nome ?? 'Tu', pct: i.pct, ehTu: true),
-          for (final c in comp) ...[
-            const SizedBox(height: 8),
-            LinhaPct(nome: c.user.nome, pct: c.pct, ehTu: false),
+          const SizedBox(height: 8),
+          for (var k = 0; k < n; k++) ...[
+            if (k > 0) Divider(height: 16, color: p.linha),
+            _proposta(p, _convites[k]),
           ],
-          const SizedBox(height: 14),
+        ],
+      ),
+    );
+  }
 
-          // O TEU estado desta série (o dos outros é deles)
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'a_ver', label: Text('A ver')),
-              ButtonSegment(value: 'pausa', label: Text('Em pausa')),
-              ButtonSegment(value: 'acabado', label: Text('Acabado')),
-            ],
-            selected: {i.estado},
-            showSelectedIcon: false,
-            onSelectionChanged: _ocupado
-                ? null
-                : (novo) => _acao(() => Api.instancia.put('/series/${s.slug}/estado', {'estado': novo.first})),
-          ),
-          const SizedBox(height: 10),
-
-          // Ações: ver com alguém, deixar de ver juntos, tirar
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              if (porConvidar.isNotEmpty)
-                OutlinedButton.icon(
-                  onPressed: _ocupado ? null : () => _folhaConvidar(p, s, porConvidar),
-                  icon: const Icon(Icons.person_add_alt_rounded, size: 18),
-                  label: const Text('Ver com…'),
+  Widget _proposta(Paleta p, ConviteSerie c) {
+    final s = c.serie;
+    final info = [
+      c.recebido ? '${c.de.nome} convidou-te' : 'convidaste ${c.para.nome}',
+      '${s.totalEpisodios} ep.',
+      if (s.tipo != null) s.tipo!,
+      if (s.anos != null) s.anos!,
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Capa(serie: s, largura: 52, raio: 10),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(s.nome, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 2),
+                Text(info, style: TextStyle(fontSize: 12, color: p.suave)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: c.recebido
+                      ? [
+                          _botaoPequeno(p, 'Bora ver',
+                              () => _acao(() => Api.instancia.post('/series/${s.slug}/convites/aceitar', {'de': c.de.id})),
+                              cheio: true),
+                          _linkSuave(p, 'Agora não', () async {
+                            if (await confirmar(context, 'Recusar ${s.nomeCurto}?', 'O convite de ${c.de.nome} desaparece.', sim: 'Recusar')) {
+                              _acao(() => Api.instancia.delete('/series/${s.slug}/convites/${c.de.id}'));
+                            }
+                          }),
+                        ]
+                      : [
+                          Text('à espera de ${c.para.nome}', style: TextStyle(fontSize: 12.5, color: p.parTxt)),
+                          _linkSuave(p, 'Cancelar', () async {
+                            if (await confirmar(context, 'Cancelar o convite?', 'Cancelar o convite de ${s.nomeCurto}?', sim: 'Cancelar convite')) {
+                              _acao(() => Api.instancia.delete('/series/${s.slug}/convites/${c.para.id}'));
+                            }
+                          }),
+                        ],
                 ),
-              for (final c in comp)
-                TextButton(
-                  onPressed: _ocupado
-                      ? null
-                      : () async {
-                          if (await confirmar(context, 'Deixar de ver juntos?',
-                              'Tu e ${c.user.nome} passam a ver ${s.nomeCurto} cada um a sua. Ninguém perde o progresso.')) {
-                            _acao(() => Api.instancia.delete('/series/${s.slug}/juntos/${c.user.id}'));
-                          }
-                        },
-                  child: Text('Deixar de ver com ${c.user.nome}'),
-                ),
-              // Só dá para tirar enquanto não marcaste episódios (a API confirma)
-              if (i.pct == 0)
-                TextButton(
-                  onPressed: _ocupado
-                      ? null
-                      : () async {
-                          if (await confirmar(context, 'Tirar ${s.nomeCurto}?', 'Sai da tua biblioteca. A dos outros fica igual.',
-                              sim: 'Tirar')) {
-                            _acao(() => Api.instancia.delete('/series/${s.slug}'));
-                          }
-                        },
-                  child: Text('Tirar da biblioteca', style: TextStyle(color: p.erro)),
-                ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -475,16 +751,20 @@ class _EcraInicioState extends State<EcraInicio> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text('Ver ${s.nomeCurto} com…', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+              child: Text('Ver ${s.nomeCurto} com…', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
             ),
             for (final u in pessoas)
               ListTile(
                 leading: Avatar(user: u, cor: p.par),
                 title: Text(u.nome),
-                subtitle: Text(u.id == _par?.id ? 'o teu par' : '@${u.username}'),
+                trailing: const Text('Convidar'),
                 onTap: () => Navigator.pop(ctx, u),
               ),
-            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+              child: Text('A pessoa recebe o convite e, se aceitar, passam a ver a série juntos.',
+                  style: TextStyle(fontSize: 13, color: p.suave)),
+            ),
           ],
         ),
       ),
@@ -494,97 +774,44 @@ class _EcraInicioState extends State<EcraInicio> {
     }
   }
 
-  // Um convite: recebido (aceitar / recusar) ou enviado (cancelar)
-  Widget _cartaoConvite(Paleta p, ConviteSerie c) {
-    final textos = Theme.of(context).textTheme;
-    final s = c.serie;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Vidro(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Capa(serie: s, largura: 54, raio: 12),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(s.nomeCurto, style: textos.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-                  Text(
-                    c.recebido ? '${c.de.nome} quer ver contigo' : 'Convidaste ${c.para.nome}',
-                    style: textos.bodySmall?.copyWith(color: p.suave),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: c.recebido
-                        ? [
-                            FilledButton(
-                              onPressed: _ocupado
-                                  ? null
-                                  : () => _acao(() => Api.instancia.post('/series/${s.slug}/convites/aceitar', {'de': c.de.id})),
-                              child: const Text('Aceitar'),
-                            ),
-                            TextButton(
-                              onPressed: _ocupado ? null : () => _acao(() => Api.instancia.delete('/series/${s.slug}/convites/${c.de.id}')),
-                              child: const Text('Recusar'),
-                            ),
-                          ]
-                        : [
-                            TextButton(
-                              onPressed: _ocupado ? null : () => _acao(() => Api.instancia.delete('/series/${s.slug}/convites/${c.para.id}')),
-                              child: const Text('Cancelar convite'),
-                            ),
-                          ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Série de outra pessoa que ainda não tens: ver com ela, ou só para ti
   Future<void> _folhaJuntar(Paleta p, ItemBiblioteca i, Utilizador dono) async {
     final s = i.serie;
     final escolha = await showModalBottomSheet<String>(
       context: context,
-      builder: (ctx) {
-        final textos = Theme.of(ctx).textTheme;
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Capa(serie: s, largura: 64, raio: 12),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(s.nome, style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                          Text('${dono.nome} · ${i.estadoTexto} · ${i.pct}%', style: textos.bodySmall?.copyWith(color: p.suave)),
-                        ],
-                      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Capa(serie: s, largura: 64, raio: 12),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.nome, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 4),
+                        Text('${dono.nome} · ${i.estadoTexto} · ${i.pct}%', style: TextStyle(fontSize: 13, color: p.suave)),
+                        const SizedBox(height: 8),
+                        BarraProgresso(pct: i.pct, cor: p.par, altura: 6),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                FilledButton(onPressed: () => Navigator.pop(ctx, 'com'), child: Text('Ver com ${dono.nome}')),
-                const SizedBox(height: 8),
-                OutlinedButton(onPressed: () => Navigator.pop(ctx, 'so'), child: const Text('Adicionar só para mim')),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              FilledButton(onPressed: () => Navigator.pop(ctx, 'com'), child: Text('Ver com ${dono.nome}')),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: () => Navigator.pop(ctx, 'so'), child: const Text('Adicionar só para mim')),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
     if (escolha == null) return;
     _acao(() => Api.instancia.post('/series/${s.slug}/juntar', escolha == 'com' ? {'com': dono.id} : {}));

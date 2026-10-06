@@ -1,5 +1,7 @@
-// Página de uma série da tua biblioteca: o mapa (tu + quem a vê contigo), a pista de cartões que desliza na horizontal
-// e o marcar/desmarcar (um episódio com um toque, vários com toque longo → seleção).
+// Página de uma série da tua biblioteca, igual à do site:
+//   mapa (um risco por episódio, para ti e para quem vê contigo, % e régua 1 · metade · total),
+//   pista de cartões compactos que encaixam ao centro (cor = quem viu, avatares, "os dois viram"…),
+//   painel do episódio ao centro, "Selecionar vários", "Comentários" e o botão de marcar.
 
 import 'dart:math' as math;
 
@@ -7,14 +9,14 @@ import 'package:flutter/material.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 import 'comentarios.dart';
-import 'estatisticas.dart';
 
 class EcraSerie extends StatefulWidget {
   final String slug;
-  final int? episodio; // número a abrir ao centro (ex.: o último que o par viu)
+  final int? episodio; // número a abrir ao centro (ex.: o seguinte ao teu, ou o último que o par viu)
 
   const EcraSerie({super.key, required this.slug, this.episodio});
 
@@ -28,17 +30,19 @@ class _EcraSerieState extends State<EcraSerie> {
   Utilizador? _user;
   List<Utilizador> _companheiros = []; // quem vê esta série contigo (pela ordem da API)
   List<Progresso> _progressoCom = []; // progresso de cada companheiro
-  String _resumo = ''; // frase do Vs
   List<Episodio> _eps = [];
   Progresso _meu = const Progresso(); // o teu progresso (atualizado a cada marcação)
 
   PageController? _pista;
   int _atual = 0; // índice do cartão ao centro
+  bool _multiplo = false; // modo "Selecionar vários"
   final Set<int> _selecionados = {}; // IDs escolhidos no modo de seleção
   bool _aGuardar = false;
   String? _erro;
 
-  bool get _aSelecionar => _selecionados.isNotEmpty;
+  // Largura de um cartão + espaço (172 + 12, como no site)
+  static const _larguraCartao = 172.0;
+  static const _espaco = 12.0;
 
   @override
   void initState() {
@@ -61,8 +65,8 @@ class _EcraSerieState extends State<EcraSerie> {
       final meu = Progresso.deJson(d['tu'] as Map<String, dynamic>);
       final comp = ((d['companheiros'] as List?) ?? []).map((c) => c as Map<String, dynamic>).toList();
 
-      // Cartão inicial: o pedido; senão o seguinte ao último que viste (como no site)
-      final numero = widget.episodio ?? meu.posicao + 1;
+      // Cartão inicial: o pedido; senão o seguinte ao teu mais avançado (como no site)
+      final numero = widget.episodio ?? math.min(meu.posicao + 1, serie.totalEpisodios);
       final indice = (numero - 1).clamp(0, math.max(0, eps.length - 1)).toInt();
 
       setState(() {
@@ -71,17 +75,58 @@ class _EcraSerieState extends State<EcraSerie> {
         _user = Utilizador.deJson(d['user'] as Map<String, dynamic>);
         _companheiros = comp.map((c) => Utilizador.deJson(c['user'] as Map<String, dynamic>)).toList();
         _progressoCom = comp.map((c) => Progresso.deJson(c['progresso'] as Map<String, dynamic>)).toList();
-        _resumo = d['resumo'] as String? ?? '';
         _eps = eps;
         _atual = indice;
-        _pista?.dispose();
-        // viewportFraction < 1: vê-se um pedaço dos cartões vizinhos
-        _pista = PageController(viewportFraction: 0.62, initialPage: indice);
         _erro = null;
       });
     } on ApiErro catch (e) {
       if (mounted) setState(() => _erro = e.mensagem);
     }
+  }
+
+  // O PageController depende da largura do ecrã (viewportFraction = cartão / ecrã): cria-se no primeiro build
+  PageController _controlador(double largura) {
+    final fracao = (_larguraCartao + _espaco) / largura;
+    if (_pista == null || (_pista!.viewportFraction - fracao).abs() > 0.001) {
+      final antigo = _pista;
+      _pista = PageController(viewportFraction: fracao, initialPage: _atual);
+      if (antigo != null) WidgetsBinding.instance.addPostFrameCallback((_) => antigo.dispose());
+    }
+    return _pista!;
+  }
+
+  // ---------- Textos (iguais aos do site) ----------
+
+  // "Gustavo e Rui", "3 pessoas"
+  String _juntar(List<String> l) => l.length == 1 ? l[0] : (l.length == 2 ? '${l[0]} e ${l[1]}' : '${l.length} pessoas');
+
+  // Frase por baixo dos avatares de cada cartão
+  String _rotulo(Episodio e) {
+    if (_companheiros.isEmpty) return e.tu ? 'visto' : 'por ver';
+    final viram = <String>[], faltam = <String>[];
+    for (var i = 0; i < _companheiros.length; i++) {
+      final viu = i < e.com.length && e.com[i];
+      (viu ? viram : faltam).add(_companheiros[i].nome);
+    }
+    if (e.tu && faltam.isEmpty) return _companheiros.length == 1 ? 'os dois viram' : 'todos viram';
+    if (e.tu) return 'falta ${_juntar(faltam)}';
+    if (viram.isNotEmpty) return '${_juntar(viram)}${viram.length == 1 ? ' já viu' : ' já viram'}';
+    return 'por ver';
+  }
+
+  // Texto do botão principal
+  String _textoBotao() {
+    if (_multiplo) {
+      final n = _selecionados.length;
+      if (n == 0) return 'Toca nos episódios a escolher';
+      final todosVistos = _eps.where((e) => _selecionados.contains(e.id)).every((e) => e.tu);
+      return todosVistos
+          ? 'Desmarcar $n ${n == 1 ? 'episódio' : 'episódios'}'
+          : 'Marcar $n ${n == 1 ? 'episódio' : 'episódios'} como vistos';
+    }
+    if (_eps.isEmpty) return '';
+    final e = _eps[_atual];
+    return e.tu ? 'Desmarcar episódio ${e.numero}' : 'Marcar episódio ${e.numero} como visto';
   }
 
   // ---------- Marcar ----------
@@ -96,6 +141,7 @@ class _EcraSerieState extends State<EcraSerie> {
         e.tu = visto;
       }
       _selecionados.clear();
+      _multiplo = false;
     });
 
     try {
@@ -105,9 +151,9 @@ class _EcraSerieState extends State<EcraSerie> {
       });
       if (!mounted) return;
       setState(() => _meu = Progresso.deJson(d['progresso'] as Map<String, dynamic>));
-      if (eps.length > 1) aviso(context, d['mensagem'] as String);
+      aviso(context, d['mensagem'] as String);
 
-      // Depois de marcar o episódio do centro, desliza para o seguinte
+      // Depois de marcar o episódio do centro, desliza para o seguinte (como no site)
       if (avancar && _atual < _eps.length - 1) {
         _pista?.animateToPage(_atual + 1, duration: const Duration(milliseconds: 380), curve: Curves.easeOutCubic);
       }
@@ -124,19 +170,29 @@ class _EcraSerieState extends State<EcraSerie> {
     }
   }
 
-  // Toque num cartão: seleção, centrar, ou alternar o do centro
-  void _tocar(int i) {
-    final ep = _eps[i];
-    if (_aSelecionar) {
-      setState(() => _selecionados.contains(ep.id) ? _selecionados.remove(ep.id) : _selecionados.add(ep.id));
-    } else if (i != _atual) {
-      _pista?.animateToPage(i, duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
-    } else {
-      _marcar([ep], visto: !ep.tu);
+  // Botão principal: o episódio do centro, ou os escolhidos no modo de seleção
+  void _botaoPrincipal() {
+    if (_multiplo) {
+      final escolhidos = _eps.where((e) => _selecionados.contains(e.id)).toList();
+      if (escolhidos.isEmpty) return;
+      _marcar(escolhidos, visto: !escolhidos.every((e) => e.tu));
+    } else if (_eps.isNotEmpty) {
+      final e = _eps[_atual];
+      _marcar([e], visto: !e.tu, avancar: !e.tu);
     }
   }
 
-  // Abre a folha de comentários e atualiza o balão quando muda
+  // Toque num cartão: no modo de seleção escolhe; fora dele centra (e o do centro alterna)
+  void _tocar(int i) {
+    final ep = _eps[i];
+    if (_multiplo) {
+      setState(() => _selecionados.contains(ep.id) ? _selecionados.remove(ep.id) : _selecionados.add(ep.id));
+    } else if (i != _atual) {
+      _pista?.animateToPage(i, duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
+    }
+  }
+
+  // Abre a folha de comentários e atualiza o número no cartão
   Future<void> _comentarios(Episodio ep) async {
     await showModalBottomSheet<void>(
       context: context,
@@ -156,49 +212,56 @@ class _EcraSerieState extends State<EcraSerie> {
   Widget build(BuildContext context) {
     final p = Paleta.de(context);
     final serie = _serie;
+    final escuro = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Fundo(
         acento: serie?.cor,
         child: SafeArea(
-          child: Column(
-            children: [
-              // Topo: voltar, nome, estatísticas
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 6, 8, 0),
-                child: Row(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+            child: Column(
+              children: [
+                // Topo: voltar, nome ao centro, tema (como no site)
+                Row(
                   children: [
-                    const BackButton(),
+                    BotaoRedondo(
+                      tooltip: 'Voltar',
+                      icone: const Icon(Icons.chevron_left_rounded),
+                      onTap: () => Navigator.of(context).maybePop(),
+                    ),
                     Expanded(
                       child: Text(
                         serie?.nome ?? '',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
                       ),
                     ),
-                    IconButton(
-                      tooltip: 'Estatísticas',
-                      icon: const Icon(Icons.insights_rounded),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => EcraEstatisticas(slug: widget.slug)),
-                      ),
+                    BotaoRedondo(
+                      tooltip: escuro ? 'Tema claro' : 'Tema escuro',
+                      icone: Icon(escuro ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+                      onTap: Sessao.instancia.alternarTema,
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                child: serie == null
-                    ? (_erro == null
-                        ? const Carregando()
-                        : ErroComRetry(
-                            mensagem: _erro!,
-                            aoTentar: () {
-                              setState(() => _erro = null);
-                              _carregar();
-                            },
-                          ))
-                    : _corpo(p, serie),
-              ),
-            ],
+                const SizedBox(height: 14),
+                Expanded(
+                  child: serie == null
+                      ? (_erro == null
+                          ? const Carregando()
+                          : ErroComRetry(
+                              mensagem: _erro!,
+                              aoTentar: () {
+                                setState(() => _erro = null);
+                                _carregar();
+                              },
+                            ))
+                      : _corpo(p, serie),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -206,239 +269,308 @@ class _EcraSerieState extends State<EcraSerie> {
   }
 
   Widget _corpo(Paleta p, Serie serie) {
-    final textos = Theme.of(context).textTheme;
     final atual = _eps.isEmpty ? null : _eps[_atual];
+    // Ecrãs baixos: o painel do episódio sai para os cartões caberem (como no site)
+    final alturaEcra = MediaQuery.sizeOf(context).height;
+    final mostrarDetalhe = alturaEcra >= 760 + (_companheiros.length > 1 ? 60 : 0);
 
     return Column(
       children: [
-        // ---------- Mapa dos dois ----------
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-          child: Vidro(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                LinhaPessoa(nome: _user?.nome ?? 'Tu', progresso: _meu, total: serie.totalEpisodios, ehTu: true),
-                for (var c = 0; c < _companheiros.length; c++) ...[
-                  const SizedBox(height: 10),
-                  LinhaPessoa(nome: _companheiros[c].nome, progresso: _progressoCom[c], total: serie.totalEpisodios, ehTu: false),
-                ],
-                const SizedBox(height: 8),
-                Text(
-                  [
-                    '${serie.totalEpisodios} episódios',
-                    if (serie.totalFillers > 0) '${serie.totalFillers} fillers',
-                    if (_resumo.isNotEmpty) _resumo,
-                  ].join(' · '),
-                  style: textos.labelSmall?.copyWith(color: p.suave),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _mapa(p, serie),
 
-        // ---------- Pista de episódios ----------
+        // ---------- Pista: cartões que deslizam e encaixam ao centro ----------
         Expanded(
-          child: PageView.builder(
-            controller: _pista,
-            itemCount: _eps.length,
-            onPageChanged: (i) => setState(() => _atual = i),
-            itemBuilder: (context, i) => AnimatedBuilder(
-              animation: _pista!,
-              // Os cartões afastados do centro ficam mais pequenos e mais transparentes
-              builder: (context, cartao) {
-                final pagina = (_pista!.hasClients && _pista!.position.haveDimensions)
-                    ? (_pista!.page ?? _atual.toDouble())
-                    : _atual.toDouble();
-                final distancia = math.min((pagina - i).abs(), 1.0);
-                return Transform.scale(
-                  scale: 1 - distancia * 0.12,
-                  child: Opacity(opacity: 1 - distancia * 0.4, child: cartao),
-                );
-              },
-              child: _cartao(p, _eps[i], i),
-            ),
-          ),
-        ),
-
-        // ---------- Régua para saltar episódios (útil nas séries com 500) ----------
-        if (_eps.length > 1)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 64,
-                  child: Text('ep ${_atual + 1}', textAlign: TextAlign.center, style: textos.labelMedium),
-                ),
-                Expanded(
-                  child: Slider(
-                    value: (_atual + 1).toDouble(),
-                    min: 1,
-                    max: _eps.length.toDouble(),
-                    onChanged: (v) => _pista?.jumpToPage(v.round() - 1),
+          child: LayoutBuilder(
+            builder: (context, c) {
+              final controlador = _controlador(MediaQuery.sizeOf(context).width);
+              final altura = math.min(236.0, c.maxHeight - 36);
+              // A pista vai de ponta a ponta do ecrã (sai do padding de 20)
+              return OverflowBox(
+                maxWidth: MediaQuery.sizeOf(context).width,
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: PageView.builder(
+                    controller: controlador,
+                    itemCount: _eps.length,
+                    padEnds: true,
+                    onPageChanged: (i) => setState(() => _atual = i),
+                    itemBuilder: (context, i) => Center(
+                      child: SizedBox(
+                        width: _larguraCartao,
+                        height: math.max(150.0, altura),
+                        child: _cartao(p, _eps[i], i),
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(
-                  width: 44,
-                  child: Text('${_eps.length}', style: textos.labelMedium?.copyWith(color: p.suave)),
-                ),
-              ],
+              );
+            },
+          ),
+        ),
+
+        // ---------- Painel do episódio ao centro ----------
+        if (mostrarDetalhe && atual != null && !_multiplo) ...[
+          _detalhe(p, atual),
+          const SizedBox(height: 10),
+        ],
+
+        // ---------- Ações ----------
+        Row(
+          children: [
+            _pilula(
+              p,
+              _multiplo ? 'Cancelar' : 'Selecionar vários',
+              destaque: _multiplo,
+              onTap: () => setState(() {
+                _multiplo = !_multiplo;
+                _selecionados.clear();
+              }),
             ),
-          ),
-
-        // ---------- Botões de baixo ----------
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-          child: _aSelecionar ? _barraSelecao(p) : _barraNormal(p, atual),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                _multiplo && _selecionados.isNotEmpty
+                    ? '${_selecionados.length} ${_selecionados.length == 1 ? 'selecionado' : 'selecionados'}'
+                    : '',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: p.suave),
+              ),
+            ),
+            if (!_multiplo && atual != null)
+              _pilula(
+                p,
+                atual.coment > 0 ? 'Comentários · ${atual.coment}' : 'Comentários',
+                icone: Icons.chat_bubble_outline_rounded,
+                onTap: () => _comentarios(atual),
+              ),
+          ],
         ),
+        const SizedBox(height: 10),
+        _botao(p),
       ],
     );
   }
 
-  // Botão principal (marcar o episódio do centro) + comentários
-  Widget _barraNormal(Paleta p, Episodio? atual) {
-    if (atual == null) return const SizedBox.shrink();
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: _aGuardar ? null : () => _marcar([atual], visto: !atual.tu, avancar: !atual.tu),
-            icon: Icon(atual.tu ? Icons.undo_rounded : Icons.check_rounded),
-            label: Text(atual.tu ? 'Desmarcar o ${atual.numero}' : 'Vi o episódio ${atual.numero}'),
-          ),
-        ),
-        const SizedBox(width: 10),
-        IconButton.filledTonal(
-          tooltip: 'Comentários',
-          onPressed: () => _comentarios(atual),
-          icon: Badge(
-            isLabelVisible: atual.coment > 0,
-            label: Text('${atual.coment}'),
-            backgroundColor: p.parTxt,
-            child: const Icon(Icons.chat_bubble_outline_rounded),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Modo de seleção: marcar ou desmarcar todos os escolhidos de uma vez
-  Widget _barraSelecao(Paleta p) {
-    final escolhidos = _eps.where((e) => _selecionados.contains(e.id)).toList();
-    return Row(
-      children: [
-        TextButton(
-          onPressed: () => setState(_selecionados.clear),
-          child: const Text('Cancelar'),
-        ),
-        const Spacer(),
-        OutlinedButton(
-          onPressed: _aGuardar ? null : () => _marcar(escolhidos, visto: false),
-          child: const Text('Desmarcar'),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          onPressed: _aGuardar ? null : () => _marcar(escolhidos, visto: true),
-          child: Text('Marcar ${escolhidos.length}'),
-        ),
-      ],
-    );
-  }
-
-  // Um cartão da pista
-  Widget _cartao(Paleta p, Episodio e, int i) {
+  // Mapa: "N episódios" + legenda; uma linha por pessoa (avatar, nome, riscos, %); régua por baixo
+  Widget _mapa(Paleta p, Serie serie) {
     final textos = Theme.of(context).textTheme;
+    final pequeno = textos.bodySmall?.copyWith(fontSize: 12.5, color: p.suave);
+    final total = serie.totalEpisodios;
+
+    // Uma linha da tabela: [avatar + nome] [riscos] [pastilha com a %]
+    TableRow linha(Utilizador? u, String nome, bool Function(Episodio) viu, int pct, bool ehTu) => TableRow(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10, bottom: 10),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 104),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Avatar(user: u, cor: ehTu ? p.tu : p.par, tamanho: 22),
+                    const SizedBox(width: 7),
+                    Flexible(child: Text(nome, overflow: TextOverflow.ellipsis, style: textos.bodySmall?.copyWith(fontSize: 12.5))),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _Riscos(eps: _eps, viu: viu, cor: ehTu ? p.tu : p.par, trilho: p.trilho),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10, bottom: 10),
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 46),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: (ehTu ? p.tu : p.par).withValues(alpha: 0.30),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$pct%',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: ehTu ? p.tuTxt : p.parTxt),
+                ),
+              ),
+            ),
+          ],
+        );
+
+    return Vidro(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text('$total episódios', style: pequeno)),
+              // Legenda: visto (as duas cores) e filler (tracejado)
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  gradient: LinearGradient(colors: [p.tu, p.tu, p.par, p.par], stops: const [0, .5, .5, 1]),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text('visto', style: pequeno?.copyWith(fontSize: 11.5)),
+              const SizedBox(width: 12),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: p.trilho,
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(color: p.suave, width: 1),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(_eps.any((e) => e.recap) ? 'filler/recap' : 'filler', style: pequeno?.copyWith(fontSize: 11.5)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Table(
+            columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth(), 2: IntrinsicColumnWidth()},
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              linha(_user, 'Tu', (e) => e.tu, _meu.pct, true),
+              for (var c = 0; c < _companheiros.length; c++)
+                linha(_companheiros[c], _companheiros[c].nome, (e) => c < e.com.length && e.com[c], _progressoCom[c].pct, false),
+              // Régua 1 · metade · total, alinhada com as barras
+              TableRow(
+                children: [
+                  const SizedBox.shrink(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      for (final n in [1, (total / 2).round(), total])
+                        Text('$n', style: TextStyle(fontSize: 10.5, color: p.suave)),
+                    ],
+                  ),
+                  const SizedBox.shrink(),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Um cartão da pista (compacto, como no site)
+  Widget _cartao(Paleta p, Episodio e, int i) {
+    final escuro = Theme.of(context).brightness == Brightness.dark;
+    final ativo = i == _atual;
     final selecionado = _selecionados.contains(e.id);
+    final com = e.algumCom;
 
     // Cor do cartão conta quem viu: a tua cor = só tu, a do par = só companheiros, degradê = os dois
-    final com = e.algumCom;
-    Gradient? tinta;
+    Gradient? fundo;
+    Color? borda;
     if (e.tu && com) {
-      tinta = LinearGradient(
+      fundo = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [p.tu.withValues(alpha: 0.75), p.par.withValues(alpha: 0.75)],
+        colors: escuro
+            ? [p.tu.withValues(alpha: .70), p.par.withValues(alpha: .70)]
+            : [misturar(p.tu, .95, Colors.white), misturar(p.par, .95, Colors.white)],
       );
     } else if (e.tu) {
-      tinta = LinearGradient(colors: [p.tu.withValues(alpha: 0.75), p.tu.withValues(alpha: 0.45)]);
+      fundo = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: escuro
+            ? [p.tu.withValues(alpha: .62), misturar(p.tu, .22, p.vidro)]
+            : [misturar(p.tu, .95, Colors.white), misturar(p.tu, .55, Colors.white)],
+      );
+      borda = p.tuTxt.withValues(alpha: .35);
     } else if (com) {
-      tinta = LinearGradient(colors: [p.par.withValues(alpha: 0.75), p.par.withValues(alpha: 0.45)]);
+      fundo = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: escuro
+            ? [p.par.withValues(alpha: .55), misturar(p.par, .20, p.vidro)]
+            : [misturar(p.par, .90, Colors.white), misturar(p.par, .50, Colors.white)],
+      );
+      borda = p.parTxt.withValues(alpha: .30);
     }
-    // Texto escuro por cima do pastel; senão a cor normal
-    final corTexto = tinta != null ? p.noPastel : p.tinta;
+    if (ativo || selecionado) borda = p.tuTxt;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 14),
-      child: Vidro(
-        raio: 30,
-        padding: const EdgeInsets.all(20),
-        tinta: tinta,
+    final corNumero = e.tu ? p.tuTxt : (com ? p.parTxt : p.tinta);
+    final corTitulo = (e.tu || com) ? p.tinta.withValues(alpha: .75) : p.suave;
+
+    return AnimatedScale(
+      scale: ativo || selecionado ? 1 : .94,
+      duration: const Duration(milliseconds: 250),
+      child: GestureDetector(
         onTap: () => _tocar(i),
-        // Toque longo: entra no modo de seleção com este episódio
-        onLongPress: () => setState(() => _selecionados.add(e.id)),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(color: corTexto),
+        onLongPress: () => setState(() {
+          _multiplo = true;
+          _selecionados.add(e.id);
+        }),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: fundo == null ? p.vidro : null,
+            gradient: fundo,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: borda ?? p.vidroBorda, width: ativo || selecionado ? 1.5 : 1),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: escuro ? .30 : .08), blurRadius: 22, offset: const Offset(0, 10))],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Cima: "episódio", etiqueta filler/recap e comentários (ou o visto do modo de seleção)
               Row(
                 children: [
-                  Text('EPISÓDIO',
-                      style: textos.labelSmall
-                          ?.copyWith(letterSpacing: 1.6, fontWeight: FontWeight.w700, color: corTexto.withValues(alpha: 0.7))),
+                  Text('episódio', style: TextStyle(fontSize: 12, color: p.suave)),
                   const Spacer(),
-                  if (_aSelecionar)
-                    Icon(
-                      selecionado ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                      color: corTexto,
+                  if (_multiplo)
+                    Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selecionado ? p.tuTxt : null,
+                        border: Border.all(color: selecionado ? p.tuTxt : p.linha, width: 1.5),
+                      ),
+                      child: selecionado ? Icon(Icons.check_rounded, size: 14, color: p.bg) : null,
+                    )
+                  else if (e.filler || e.recap)
+                    _Etiqueta(e.filler ? 'filler' : 'recap')
+                  else if (e.coment > 0)
+                    Row(
+                      children: [
+                        Icon(Icons.chat_bubble_outline_rounded, size: 14, color: p.tinta),
+                        const SizedBox(width: 3),
+                        Text('${e.coment}', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500, color: p.tinta)),
+                      ],
                     ),
                 ],
               ),
-              Text(
-                '${e.numero}',
-                style: textos.displayMedium?.copyWith(fontWeight: FontWeight.w800, color: corTexto, height: 1.1),
-              ),
-              if (e.filler) ...[
-                const SizedBox(height: 6),
-                // Etiqueta "filler" bem visível
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: corTexto.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: corTexto.withValues(alpha: 0.35)),
-                  ),
-                  child: Text('filler', style: textos.labelSmall?.copyWith(fontWeight: FontWeight.w800, color: corTexto)),
-                ),
-              ],
-              const SizedBox(height: 10),
-              Expanded(
-                child: Text(
-                  e.titulo ?? 'Sem título',
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: textos.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: corTexto),
-                ),
-              ),
-              // Quem viu (avatares) e o balão dos comentários
-              Row(
+              // Meio: número e título (no máximo 2 linhas)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (e.tu) Avatar(user: _user, cor: p.tu, tamanho: 26),
-                  // Os companheiros que já viram (pela mesma ordem da API)
-                  for (var c = 0; c < e.com.length && c < _companheiros.length; c++)
-                    if (e.com[c])
-                      Padding(
-                        padding: const EdgeInsets.only(left: 4),
-                        child: Avatar(user: _companheiros[c], cor: p.par, tamanho: 26),
-                      ),
-                  const Spacer(),
-                  if (e.coment > 0) ...[
-                    Icon(Icons.chat_bubble_rounded, size: 16, color: corTexto.withValues(alpha: 0.8)),
-                    const SizedBox(width: 4),
-                    Text('${e.coment}', style: textos.labelMedium?.copyWith(color: corTexto)),
-                  ],
+                  Text('${e.numero}',
+                      style: TextStyle(fontSize: 46, fontWeight: FontWeight.w700, letterSpacing: -1.4, height: 1, color: corNumero)),
+                  const SizedBox(height: 6),
+                  Text(e.titulo ?? '',
+                      maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5, height: 1.35, color: corTitulo)),
+                ],
+              ),
+              // Baixo: quem viu (avatares) e a frase
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AvataresSobrepostos(pessoas: [
+                    (_user, p.tu, e.tu),
+                    for (var c = 0; c < _companheiros.length; c++) (_companheiros[c], p.par, c < e.com.length && e.com[c]),
+                  ]),
+                  const SizedBox(height: 6),
+                  Text(_rotulo(e), style: TextStyle(fontSize: 12, color: (e.tu || com) ? p.tinta : p.suave)),
                 ],
               ),
             ],
@@ -447,4 +579,179 @@ class _EcraSerieState extends State<EcraSerie> {
       ),
     );
   }
+
+  // Painel do episódio ao centro: número, tipo, título e o estado de cada pessoa
+  Widget _detalhe(Paleta p, Episodio e) {
+    final tipo = e.filler ? 'filler' : (e.recap ? 'recap' : 'canónico');
+    Widget pessoa(Utilizador? u, String nome, Color cor, bool viu) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AvataresSobrepostos(pessoas: [(u, cor, viu)], tamanho: 24),
+            const SizedBox(width: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(nome, style: TextStyle(fontSize: 12.5, color: p.suave, height: 1.3)),
+                Text(viu ? 'visto' : 'por ver', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: p.tinta, height: 1.3)),
+              ],
+            ),
+          ],
+        );
+
+    return Vidro(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text('Episódio ${e.numero}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
+              if (tipo == 'canónico')
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(color: p.trilho, borderRadius: BorderRadius.circular(12)),
+                  child: Text(tipo, style: TextStyle(fontSize: 12, color: p.suave)),
+                )
+              else
+                _Etiqueta(tipo),
+            ],
+          ),
+          if ((e.titulo ?? '').isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(e.titulo!, style: TextStyle(fontSize: 13.5, color: p.suave)),
+          ],
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 22,
+            runSpacing: 8,
+            children: [
+              pessoa(_user, 'Tu', p.tu, e.tu),
+              for (var c = 0; c < _companheiros.length; c++)
+                pessoa(_companheiros[c], _companheiros[c].nome, p.par, c < e.com.length && e.com[c]),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Botão em pílula de vidro ("Selecionar vários", "Comentários")
+  Widget _pilula(Paleta p, String texto, {IconData? icone, bool destaque = false, required VoidCallback onTap}) {
+    return SizedBox(
+      height: 38,
+      child: Vidro(
+        raio: 19,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        onTap: onTap,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icone != null) ...[Icon(icone, size: 16, color: p.tinta), const SizedBox(width: 6)],
+            Text(texto,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  color: destaque ? p.tuTxt : p.tinta,
+                  fontWeight: destaque ? FontWeight.w500 : FontWeight.w400,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Botão principal: escuro para marcar; de vidro (secundário) para desmarcar
+  Widget _botao(Paleta p) {
+    final texto = _textoBotao();
+    final desmarcar = texto.startsWith('Desmarcar');
+    final desativado = _aGuardar || (_multiplo && _selecionados.isEmpty) || _eps.isEmpty;
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: desmarcar
+          ? Vidro(
+              raio: 26,
+              padding: EdgeInsets.zero,
+              onTap: desativado ? null : _botaoPrincipal,
+              child: Center(child: Text(texto, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: p.tinta))),
+            )
+          : FilledButton(
+              onPressed: desativado ? null : _botaoPrincipal,
+              style: FilledButton.styleFrom(padding: EdgeInsets.zero),
+              child: Text(texto, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+            ),
+    );
+  }
+}
+
+// Etiqueta "filler"/"recap": escura e sólida, salta à vista em qualquer cor de cartão e tema
+class _Etiqueta extends StatelessWidget {
+  final String texto;
+
+  const _Etiqueta(this.texto);
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Paleta.de(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 3, 10, 3),
+      decoration: BoxDecoration(color: p.tinta, borderRadius: BorderRadius.circular(10)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 6, height: 6, decoration: BoxDecoration(color: p.bg.withValues(alpha: .7), shape: BoxShape.circle)),
+          const SizedBox(width: 5),
+          Text(texto, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500, color: p.bg, letterSpacing: .2)),
+        ],
+      ),
+    );
+  }
+}
+
+// Riscos do mapa: um por episódio; preenchido = visto, mais claro = filler/recap
+class _Riscos extends StatelessWidget {
+  final List<Episodio> eps;
+  final bool Function(Episodio) viu;
+  final Color cor;
+  final Color trilho;
+
+  const _Riscos({required this.eps, required this.viu, required this.cor, required this.trilho});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(7),
+      child: SizedBox(
+        height: 20,
+        child: CustomPaint(size: Size.infinite, painter: _PintorRiscos(eps, viu, cor, trilho)),
+      ),
+    );
+  }
+}
+
+class _PintorRiscos extends CustomPainter {
+  final List<Episodio> eps;
+  final bool Function(Episodio) viu;
+  final Color cor;
+  final Color trilho;
+
+  _PintorRiscos(this.eps, this.viu, this.cor, this.trilho);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, Paint()..color = trilho);
+    if (eps.isEmpty) return;
+    final largura = size.width / eps.length;
+    final cheio = Paint()..color = cor;
+    final claro = Paint()..color = cor.withValues(alpha: .35);
+    for (var i = 0; i < eps.length; i++) {
+      final e = eps[i];
+      if (!viu(e)) continue;
+      // +0.6 para não ficarem riscas finas entre episódios seguidos
+      canvas.drawRect(Rect.fromLTWH(i * largura, 0, largura + 0.6, size.height), (e.filler || e.recap) ? claro : cheio);
+    }
+  }
+
+  // Redesenha sempre (os vistos mudam dentro da mesma lista)
+  @override
+  bool shouldRepaint(covariant _PintorRiscos antigo) => true;
 }

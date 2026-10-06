@@ -64,7 +64,8 @@ class SeriesApi extends ApiController
         ]);
     }
 
-    // GET /series/{slug} — série da tua biblioteca: o teu estado, os companheiros, o Vs e os episódios
+    // GET /series/{slug}[?episodios=0] — série da tua biblioteca: o teu estado, os companheiros, o Vs e os episódios.
+    // Com ?episodios=0 não manda a lista de episódios (o painel do Início só precisa do resumo).
     public function ver(string $slug): void
     {
         $user  = $this->exigirToken();
@@ -85,7 +86,7 @@ class SeriesApi extends ApiController
             'companheiros' => $companheiros->map(fn ($c, $i) => ['user' => $this->userJson($c), 'progresso' => $deles[$i]])->all(),
             'resumo'       => self::resumoVs($meu, $companheiros, $deles, $user->ligados()->isNotEmpty()),
             // Cada episódio: id, numero, titulo, filler, recap, tu, com (um bool por companheiro, pela mesma ordem), coment
-            'episodios'    => $serie->episodiosPara($user, $companheiros),
+            'episodios'    => ($_GET['episodios'] ?? '1') === '0' ? null : $serie->episodiosPara($user, $companheiros),
         ]);
     }
 
