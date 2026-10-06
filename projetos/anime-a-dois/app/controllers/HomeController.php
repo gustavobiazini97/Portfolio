@@ -38,6 +38,7 @@ class HomeController extends Controller
 
         $this->render('home/index', [
             'titulo'      => 'Início',
+            'classeBody'  => 'pagina-inicio',   // no computador o Início fica em duas colunas (app.css)
             'serieSlug'   => $serie?->slug,
             'serieAcento' => $serie?->acento,
             'user'        => $user,

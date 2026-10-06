@@ -914,3 +914,63 @@ html { scroll-behavior: smooth; }
 
 /* Login: o interruptor de manter sessão fica compacto, encostado ao botão */
 .lembrar { font-size: 13.5px; color: var(--suave); padding: 2px 4px; }
+
+/* ---------- Início: contentores das duas colunas ----------
+   No telemóvel não contam: os filhos ficam diretamente no .ecra (coluna única, ordem de sempre). */
+.inicio, .inicio-principal, .inicio-lado { display: contents; }
+
+/* ---------- Ecrãs largos (computador, tablet deitado) ----------
+   Até 900px fica tudo igual ao telemóvel. A partir daí a página aproveita a largura:
+   o Início em duas colunas, a página da série larga, o resto numa coluna de leitura. */
+@media (min-width: 900px) {
+  /* Coluna de leitura para as páginas simples (perfil, amigos, estatísticas, entrar…) */
+  .ecra { max-width: 760px; padding-left: 32px; padding-right: 32px; }
+
+  /* Páginas largas: Início e série */
+  .pagina-inicio .ecra, .pagina-serie .ecra { max-width: 1160px; }
+
+  /* Manchas do fundo maiores, para não ficarem só num canto */
+  .orbe-tu  { width: 560px; height: 560px; left: -160px; }
+  .orbe-par { width: 520px; height: 520px; right: -160px; }
+
+  /* --- Início: biblioteca e companhia à esquerda, a série aberta à direita --- */
+  .inicio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-rows: auto 1fr;          /* o espaço que sobra vai para a 2.ª linha (fila do par), sem buracos */
+    column-gap: 32px; row-gap: 14px;
+    align-items: start;
+  }
+  .inicio-principal { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .inicio > .biblioteca-par { grid-column: 1; grid-row: 2; }
+  .inicio-lado {
+    grid-column: 2; grid-row: 1 / span 2;
+    display: flex; flex-direction: column; gap: 14px;
+    position: sticky; top: 24px;           /* acompanha o scroll da coluna da esquerda */
+  }
+
+  /* Biblioteca em grelha (deixa de deslizar para os lados: há espaço para todas) */
+  .pagina-inicio .fila {
+    margin: 0; padding: 6px 2px 8px;
+    flex-wrap: wrap; overflow: visible; gap: 16px;
+  }
+  .pagina-inicio .capa-item { flex-basis: 128px; }
+  .pagina-inicio .biblioteca-par .capa-item { flex-basis: 100px; }
+
+  /* --- Página da série: mais cartões à vista e ações centradas --- */
+  /* A pista vai de ponta a ponta da janela (não fica cortada nas margens da página) */
+  .pista { margin: 0 calc(50% - 50vw); padding-left: calc(50vw - 100px); padding-right: calc(50vw - 100px); }
+  .ep { flex-basis: 200px; height: min(268px, 100%); }
+  .ep-num { font-size: 52px; }
+  .pagina-serie .detalhe,
+  .pagina-serie .acoes { width: 100%; max-width: 560px; align-self: center; }
+
+  /* Folhas (adicionar, comentários, convites) e avisos: ao centro, não presos ao fundo de um ecrã largo */
+  .folha { margin: auto; max-height: 86dvh; border-radius: var(--raio); border-bottom: 1px solid var(--vidro-borda); }
+  .aviso { bottom: 40px; }
+}
+
+/* Ecrãs muito largos: as capas um pouco maiores */
+@media (min-width: 1280px) {
+  .pagina-inicio .capa-item { flex-basis: 140px; }
+}

@@ -51,6 +51,11 @@ $selo = fn (array $item) => match ($item['estado']) {
 
 <?php require __DIR__ . '/../layout/flash.php'; ?>
 
+<!-- Início em duas colunas no computador (app.css, @media min-width: 900px): à esquerda o último do par,
+     a biblioteca, os convites e a fila do par; à direita a série aberta. No telemóvel os contentores
+     não contam (display: contents) e fica tudo numa coluna, pela ordem de sempre. -->
+<div class="inicio">
+<div class="inicio-principal">
 <?php if ($parceiro && $ultimoPar): ?>
   <!-- Último episódio que o par viu (em qualquer série). Se a série também está na tua biblioteca,
        o cartão abre-a nesse episódio; se é só dele, é só para espreitar. -->
@@ -201,7 +206,10 @@ $selo = fn (array $item) => match ($item['estado']) {
   </section>
 <?php endif; ?>
 
+</div><!-- /.inicio-principal -->
+
 <?php if ($serie): ?>
+<div class="inicio-lado">
   <?php if ($comecou): ?>
     <!-- Vs da série aberta (ou só o teu progresso, se a série for só tua); o cartão todo abre a série -->
     <a class="painel vidro painel-link" href="<?= e(url('serie', 'ver', ['serie' => $serie->slug])) ?>">
@@ -319,6 +327,7 @@ $selo = fn (array $item) => match ($item['estado']) {
     <?= $seguinte ? 'Continuar · episódio ' . $seguinte : 'Ver episódios de ' . e($serie->nomeCurto()) ?>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
   </a>
+</div><!-- /.inicio-lado -->
 <?php endif; ?>
 
 <?php if ($doPar !== []): ?>
@@ -347,6 +356,7 @@ $selo = fn (array $item) => match ($item['estado']) {
 
   <?php foreach ($doPar as $item): $dono = $parceiro; require __DIR__ . '/../layout/folha-juntar.php'; endforeach; ?>
 <?php endif; ?>
+</div><!-- /.inicio -->
 
 <!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).
      O telemóvel fala diretamente com as APIs de anime (AniList, Kitsu, Jikan) e manda os dados ao adicionar. -->
