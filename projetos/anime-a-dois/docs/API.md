@@ -3,8 +3,8 @@
 API em JSON por cima dos mesmos Models do site (`User`, `Serie`, `Episodio`, `Comentario`, …).
 É usada pela app Flutter (`projetos/anime-a-dois-flutter`). O site continua a funcionar como antes.
 
-- **Base:** `https://animeadois.alwaysdata.net/api` (o `.htaccess` passa `/api/<rota>` ao `api.php`; é a que a app usa)
-  - Também responde em `https://animeadois.alwaysdata.net/api.php/<rota>`.
+- **Base:** `https://animeadois.alwaysdata.net/api.php`
+  - Com o `.htaccess` também responde em `/api/…` (ex.: `/api/series`).
   - Sem `PATH_INFO`: `api.php?rota=/series`.
 - **Formato:** pedidos com `Content-Type: application/json` (ou formulário); respostas sempre JSON.
 - **Ficheiros:** `public/api.php` (rotas), `app/api/*Api.php` (controllers), `app/models/Token.php`.
@@ -110,7 +110,7 @@ Sucesso: `{ "ok": true, ... }`. Erro: `{ "ok": false, "mensagem": "..." }`, com 
 ## Exemplos (curl)
 
 ```bash
-B=https://animeadois.alwaysdata.net/api
+B=https://animeadois.alwaysdata.net/api.php
 
 # Entrar e guardar o token
 T=$(curl -s -X POST $B/auth/login -H 'Content-Type: application/json' \

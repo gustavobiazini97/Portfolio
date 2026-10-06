@@ -28,7 +28,7 @@ permissions:
   contents: write            # para criar/atualizar a release com o APK
 
 env:
-  API_URL: https://animeadois.alwaysdata.net/api   # o .htaccess passa /api/<rota> ao api.php
+  API_URL: https://animeadois.alwaysdata.net/api.php
 
 jobs:
   apk:

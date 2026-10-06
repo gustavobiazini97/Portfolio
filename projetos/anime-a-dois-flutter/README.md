@@ -11,7 +11,7 @@ O APK mais recente (debug, arm64) fica sempre no mesmo link:
 
 **https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk**
 
-A app usa a API em `https://animeadois.alwaysdata.net/api`.
+A app usa a API em `https://animeadois.alwaysdata.net/api.php`.
 
 No telemóvel: abrir o link, descarregar e instalar (o Android pede para autorizar "fontes desconhecidas").
 
