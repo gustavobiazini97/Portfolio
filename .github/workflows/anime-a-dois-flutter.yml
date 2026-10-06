@@ -3,9 +3,9 @@
 #
 # Resultado:
 #   1. o APK fica nos "Artifacts" da execução;
-#   2. e na release "anime-a-dois-apk", com links fixos para descarregar no telemóvel:
-#      .../releases/download/anime-a-dois-apk/anime-a-dois-arm64.apk  (mais pequeno, telemóveis atuais)
-#      .../releases/download/anime-a-dois-apk/anime-a-dois.apk        (universal, qualquer Android)
+#   2. e na release "anime-a-dois-apk", com um link fixo para descarregar no telemóvel:
+#      https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk
+# O APK é de debug e só arm64 (telemóveis atuais), para compilar mais depressa.
 #
 # Secret opcional: ANDROID_KEYSTORE_B64 (keystore em base64, ver o README da app).
 # Sem ele, cada APK é assinado com uma chave diferente e, para atualizar, é preciso desinstalar primeiro.
@@ -28,7 +28,7 @@ permissions:
   contents: write            # para criar/atualizar a release com o APK
 
 env:
-  API_URL: https://animeadois.alwaysdata.net/api.php
+  API_URL: https://animeadois.alwaysdata.net/api   # o .htaccess passa /api/<rota> ao api.php
 
 jobs:
   apk:
@@ -44,6 +44,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      # Cache do Gradle entre execuções (as dependências do Android não são descarregadas sempre)
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-anime-a-dois-${{ hashFiles('projetos/anime-a-dois-flutter/pubspec.yaml') }}
+          restore-keys: gradle-anime-a-dois-
 
       - uses: subosito/flutter-action@v2
         with:
@@ -92,24 +101,20 @@ jobs:
             echo "::notice::Sem ANDROID_KEYSTORE_B64 — o APK usa uma chave temporária."
           fi
 
-      # Número da build = número da execução (o Android exige que suba a cada versão)
-      - name: Compilar o APK
+      # Número da build = número da execução (o Android exige que suba a cada versão).
+      # Debug e só arm64: compila mais depressa (sem AOT) e uma única vez
+      - name: Compilar o APK (debug)
         run: |
-          flutter build apk --release \
+          flutter build apk --debug --target-platform android-arm64 \
             --dart-define=API_URL="$API_URL" \
             --build-number=${{ github.run_number }}
-          cp build/app/outputs/flutter-apk/app-release.apk anime-a-dois.apk
-          # Versão só para arm64 (quase todos os telemóveis atuais): ~3x mais pequena
-          flutter build apk --release --split-per-abi --target-platform android-arm64 \
-            --dart-define=API_URL="$API_URL" \
-            --build-number=${{ github.run_number }}
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk anime-a-dois-arm64.apk
-          ls -la *.apk
+          cp build/app/outputs/flutter-apk/app-debug.apk anime-a-dois.apk
+          ls -la anime-a-dois.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: anime-a-dois-apk
-          path: projetos/anime-a-dois-flutter/anime-a-dois*.apk
+          path: projetos/anime-a-dois-flutter/anime-a-dois.apk
 
       # Release com link fixo (o APK é substituído a cada compilação)
       - name: Publicar na release
@@ -121,4 +126,6 @@ jobs:
             gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
               --title "Anime a Dois (APK)" \
               --notes "APK da app Flutter do Anime a Dois. Atualizado automaticamente a cada compilação."
-          gh release upload "$TAG" anime-a-dois.apk anime-a-dois-arm64.apk --clobber
+          gh release upload "$TAG" anime-a-dois.apk --clobber
+          # Remove o APK arm64 antigo (deixou de ser gerado; o anime-a-dois.apk já é arm64)
+          gh release delete-asset "$TAG" anime-a-dois-arm64.apk -y 2>/dev/null || true
