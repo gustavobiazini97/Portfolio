@@ -1,4 +1,4 @@
-// Página de uma série: o mapa dos dois, a pista de cartões que desliza na horizontal
+// Página de uma série da tua biblioteca: o mapa (tu + quem a vê contigo), a pista de cartões que desliza na horizontal
 // e o marcar/desmarcar (um episódio com um toque, vários com toque longo → seleção).
 
 import 'dart:math' as math;
@@ -26,7 +26,9 @@ class _EcraSerieState extends State<EcraSerie> {
   // Dados do GET /series/{slug}
   Serie? _serie;
   Utilizador? _user;
-  Utilizador? _par;
+  List<Utilizador> _companheiros = []; // quem vê esta série contigo (pela ordem da API)
+  List<Progresso> _progressoCom = []; // progresso de cada companheiro
+  String _resumo = ''; // frase do Vs
   List<Episodio> _eps = [];
   Progresso _meu = const Progresso(); // o teu progresso (atualizado a cada marcação)
 
@@ -56,16 +58,20 @@ class _EcraSerieState extends State<EcraSerie> {
       if (!mounted) return;
       final serie = Serie.deJson(d['serie'] as Map<String, dynamic>);
       final eps = (d['episodios'] as List).map((e) => Episodio.deJson(e as Map<String, dynamic>)).toList();
+      final meu = Progresso.deJson(d['tu'] as Map<String, dynamic>);
+      final comp = ((d['companheiros'] as List?) ?? []).map((c) => c as Map<String, dynamic>).toList();
 
       // Cartão inicial: o pedido; senão o seguinte ao último que viste (como no site)
-      final numero = widget.episodio ?? serie.tu.posicao + 1;
+      final numero = widget.episodio ?? meu.posicao + 1;
       final indice = (numero - 1).clamp(0, math.max(0, eps.length - 1)).toInt();
 
       setState(() {
         _serie = serie;
-        _meu = serie.tu;
+        _meu = meu;
         _user = Utilizador.deJson(d['user'] as Map<String, dynamic>);
-        _par = Utilizador.talvez(d['parceiro']);
+        _companheiros = comp.map((c) => Utilizador.deJson(c['user'] as Map<String, dynamic>)).toList();
+        _progressoCom = comp.map((c) => Progresso.deJson(c['progresso'] as Map<String, dynamic>)).toList();
+        _resumo = d['resumo'] as String? ?? '';
         _eps = eps;
         _atual = indice;
         _pista?.dispose();
@@ -214,13 +220,17 @@ class _EcraSerieState extends State<EcraSerie> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 LinhaPessoa(nome: _user?.nome ?? 'Tu', progresso: _meu, total: serie.totalEpisodios, ehTu: true),
-                if (_par != null && serie.par != null) ...[
+                for (var c = 0; c < _companheiros.length; c++) ...[
                   const SizedBox(height: 10),
-                  LinhaPessoa(nome: _par!.nome, progresso: serie.par!, total: serie.totalEpisodios, ehTu: false),
+                  LinhaPessoa(nome: _companheiros[c].nome, progresso: _progressoCom[c], total: serie.totalEpisodios, ehTu: false),
                 ],
                 const SizedBox(height: 8),
                 Text(
-                  '${serie.totalEpisodios} episódios · ${serie.totalFillers} fillers',
+                  [
+                    '${serie.totalEpisodios} episódios',
+                    if (serie.totalFillers > 0) '${serie.totalFillers} fillers',
+                    if (_resumo.isNotEmpty) _resumo,
+                  ].join(' · '),
                   style: textos.labelSmall?.copyWith(color: p.suave),
                 ),
               ],
@@ -342,9 +352,10 @@ class _EcraSerieState extends State<EcraSerie> {
     final textos = Theme.of(context).textTheme;
     final selecionado = _selecionados.contains(e.id);
 
-    // Cor do cartão conta quem viu: sálvia = só tu, alperce = só o par, degradê = os dois
+    // Cor do cartão conta quem viu: a tua cor = só tu, a do par = só companheiros, degradê = os dois
+    final com = e.algumCom;
     Gradient? tinta;
-    if (e.tu && e.par) {
+    if (e.tu && com) {
       tinta = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -352,7 +363,7 @@ class _EcraSerieState extends State<EcraSerie> {
       );
     } else if (e.tu) {
       tinta = LinearGradient(colors: [p.tu.withValues(alpha: 0.75), p.tu.withValues(alpha: 0.45)]);
-    } else if (e.par) {
+    } else if (com) {
       tinta = LinearGradient(colors: [p.par.withValues(alpha: 0.75), p.par.withValues(alpha: 0.45)]);
     }
     // Texto escuro por cima do pastel; senão a cor normal
@@ -415,8 +426,13 @@ class _EcraSerieState extends State<EcraSerie> {
               Row(
                 children: [
                   if (e.tu) Avatar(user: _user, cor: p.tu, tamanho: 26),
-                  if (e.tu && e.par) const SizedBox(width: 4),
-                  if (e.par) Avatar(user: _par, cor: p.par, tamanho: 26),
+                  // Os companheiros que já viram (pela mesma ordem da API)
+                  for (var c = 0; c < e.com.length && c < _companheiros.length; c++)
+                    if (e.com[c])
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Avatar(user: _companheiros[c], cor: p.par, tamanho: 26),
+                      ),
                   const Spacer(),
                   if (e.coment > 0) ...[
                     Icon(Icons.chat_bubble_rounded, size: 16, color: corTexto.withValues(alpha: 0.8)),

@@ -1,70 +1,83 @@
-// Testes dos modelos: o JSON da API (igual ao que o api.php devolve) converte-se bem em classes Dart.
+// Testes dos modelos: o JSON da API v2 (igual ao que o api.php devolve) converte-se bem em classes Dart.
 // Correr com: flutter test
 
 import 'package:anime_a_dois/api/modelos.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  test('Série com progresso dos dois e cor em hexadecimal', () {
-    final s = Serie.deJson({
-      'slug': 'naruto',
+// Uma série como a API a envia
+Map<String, dynamic> _serie({String slug = 'naruto', String cor = '#F7C59F'}) => {
+      'slug': slug,
       'nome': 'Naruto',
       'nomeCurto': 'Naruto',
       'anos': '2002–2007',
       'totalEpisodios': 220,
-      'cor': '#F7C59F',
-      'tu': {'vistos': 12, 'pct': 5, 'posicao': 12},
-      'par': {'vistos': 5, 'pct': 2, 'posicao': 5},
-      'resumo': 'Vais 7 episódios à frente.',
+      'capa': null,
+      'tipo': null,
+      'emEmissao': false,
+      'minutosEp': null,
+      'malId': 20,
+      'cor': cor,
+    };
+
+Map<String, dynamic> _user(int id, String nome) =>
+    {'id': id, 'nome': nome, 'username': nome.toLowerCase(), 'inicial': nome[0], 'foto': null};
+
+void main() {
+  test('Item da biblioteca com companheiro e cor em hexadecimal', () {
+    final i = ItemBiblioteca.deJson({
+      'serie': _serie(),
+      'estado': 'a_ver',
+      'estadoTexto': 'A ver',
+      'conjunta': true,
+      'pct': 3,
+      'companheiros': [
+        {'user': _user(1, 'Gustavo'), 'pct': 5},
+      ],
     });
-    expect(s.tu.posicao, 12);
-    expect(s.par?.vistos, 5);
-    expect(s.cor, const Color(0xFFF7C59F));
+    expect(i.serie.cor, const Color(0xFFF7C59F));
+    expect(i.companheiros.single.user.nome, 'Gustavo');
+    expect(i.companheiros.single.pct, 5);
+    expect(i.naTua, isFalse); // só vem no perfil de outra pessoa
   });
 
-  test('Série sem par (ainda sem conta)', () {
-    final s = Serie.deJson({
-      'slug': 'boruto',
-      'nome': 'Boruto',
-      'totalEpisodios': 293,
-      'cor': '#A9C4EE',
-      'tu': {'vistos': 0, 'pct': 0, 'posicao': 0},
-      'par': null,
-      'resumo': '',
+  test('Convite recebido: a outra pessoa é quem convidou', () {
+    final c = ConviteSerie.deJson({
+      'serie': _serie(slug: 'frieren', cor: '#B8C0F5'),
+      'recebido': true,
+      'de': _user(1, 'Gustavo'),
+      'para': _user(3, 'Rui'),
     });
-    expect(s.par, isNull);
-    expect(s.nomeCurto, 'Boruto'); // sem nomeCurto usa o nome
+    expect(c.outro.nome, 'Gustavo');
   });
 
-  test('Episódio aceita filler como true ou 1', () {
-    expect(Episodio.deJson({'id': 26, 'numero': 26, 'filler': true}).filler, isTrue);
-    expect(Episodio.deJson({'id': 26, 'numero': 26, 'filler': 1}).filler, isTrue);
-    expect(Episodio.deJson({'id': 1, 'numero': 1, 'filler': false}).filler, isFalse);
+  test('Episódio com um booleano por companheiro', () {
+    final e = Episodio.deJson({'id': 5, 'numero': 5, 'filler': 1, 'recap': false, 'tu': true, 'com': [false, true], 'coment': 2});
+    expect(e.filler, isTrue);
+    expect(e.com, [false, true]);
+    expect(e.algumCom, isTrue);
+    expect(Episodio.deJson({'id': 6, 'numero': 6}).algumCom, isFalse);
   });
 
-  test('Estatísticas com recorde e sem previsão', () {
+  test('Estatísticas com vários companheiros', () {
     final e = Estatisticas.deJson({
       'pessoas': [
-        {
-          'user': {'id': 1, 'nome': 'Gus', 'username': 'gus', 'inicial': 'G', 'foto': null},
-          'cor': 'tu',
-          'vistos': 12,
-          'horas': '4,6 h',
-          'fillers': 'nenhum filler',
-        },
+        {'user': _user(2, 'Andreia'), 'cor': 'tu', 'vistos': 7, 'horas': '2,7 h', 'fillers': 'nenhum filler'},
+        {'user': _user(1, 'Gustavo'), 'cor': 'par', 'vistos': 12, 'horas': '4,6 h', 'fillers': 'nenhum filler'},
       ],
       'semanas': [
-        {'rotulo': 'esta', 'tu': 12, 'par': 5, 'nivelTu': 10, 'nivelPar': 4},
+        {'rotulo': 'esta', 'tu': 7, 'com': [12], 'nivelTu': 6, 'nivelCom': [10]},
       ],
       'previsao': null,
-      'arcos': [],
+      'arcos': [
+        {'nome': 'Land of Waves', 'de': 1, 'ate': 19, 'filler': false, 'total': 19, 'pctTu': 37, 'pctCom': [63], 'selo': ''},
+      ],
       'comentarios': 0,
-      'recorde': {'n': 12, 'quem': 'tu'},
+      'recorde': {'n': 12, 'quem': 'Gustavo'},
     });
-    expect(e.pessoas.single.ehTu, isTrue);
-    expect(e.semanas.single.nivelPar, 4);
-    expect(e.recordeN, 12);
-    expect(e.previsao, isNull);
+    expect(e.pessoas.first.ehTu, isTrue);
+    expect(e.semanas.single.nivelCom, [10]);
+    expect(e.arcos.single.pctCom, [63]);
+    expect(e.recordeQuem, 'Gustavo');
   });
 }

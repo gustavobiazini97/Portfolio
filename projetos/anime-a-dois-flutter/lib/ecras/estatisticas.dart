@@ -1,4 +1,4 @@
-// Estatísticas de uma série: os números dos dois, o ritmo das últimas semanas,
+// Estatísticas de uma série da tua biblioteca: os teus números e os de quem a vê contigo, o ritmo das últimas semanas,
 // a previsão de quando acabas, os arcos e as curiosidades.
 
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class EcraEstatisticas extends StatefulWidget {
 
 class _EcraEstatisticasState extends State<EcraEstatisticas> {
   late String _slug = widget.slug;
-  List<Serie> _series = []; // para os separadores
+  List<Serie> _series = []; // a tua biblioteca, para os separadores
   Serie? _serie;
   Estatisticas? _est;
   String? _erro;
@@ -36,7 +36,7 @@ class _EcraEstatisticasState extends State<EcraEstatisticas> {
     try {
       final d = await Api.instancia.get('/series');
       if (!mounted) return;
-      setState(() => _series = (d['series'] as List).map((s) => Serie.deJson(s as Map<String, dynamic>)).toList());
+      setState(() => _series = ItemBiblioteca.lista(d['series']).map((i) => i.serie).toList());
     } on ApiErro {
       // sem separadores, o ecrã continua a mostrar a série atual
     }
@@ -125,14 +125,16 @@ class _EcraEstatisticasState extends State<EcraEstatisticas> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
       children: [
-        // ---------- Tu vs par ----------
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        // ---------- Tu e quem vê contigo (duas por linha) ----------
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
           children: [
-            for (final pessoa in est.pessoas) ...[
-              Expanded(child: _cartaoPessoa(p, pessoa)),
-              if (pessoa != est.pessoas.last) const SizedBox(width: 12),
-            ],
+            for (final pessoa in est.pessoas)
+              SizedBox(
+                width: (MediaQuery.sizeOf(context).width - 32 - 12) / 2,
+                child: _cartaoPessoa(p, pessoa),
+              ),
           ],
         ),
         const SizedBox(height: 14),
@@ -233,8 +235,11 @@ class _EcraEstatisticasState extends State<EcraEstatisticas> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _barraVertical(s.nivelTu, s.tu, p.tu),
-                    const SizedBox(width: 3),
-                    _barraVertical(s.nivelPar, s.par, p.par),
+                    // Uma barra por companheiro (todos na cor do par)
+                    for (var c = 0; c < s.nivelCom.length; c++) ...[
+                      const SizedBox(width: 3),
+                      _barraVertical(s.nivelCom[c], c < s.com.length ? s.com[c] : 0, p.par),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -295,8 +300,10 @@ class _EcraEstatisticasState extends State<EcraEstatisticas> {
           ),
           const SizedBox(height: 5),
           BarraProgresso(pct: a.pctTu, cor: p.tu, altura: 6),
-          const SizedBox(height: 3),
-          BarraProgresso(pct: a.pctPar, cor: p.par, altura: 6),
+          for (final pct in a.pctCom) ...[
+            const SizedBox(height: 3),
+            BarraProgresso(pct: pct, cor: p.par, altura: 6),
+          ],
         ],
       ),
     );

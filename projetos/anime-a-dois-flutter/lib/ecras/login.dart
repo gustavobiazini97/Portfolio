@@ -1,4 +1,5 @@
-// Ecrã de entrada: utilizador + palavra-passe. Mostra "Criar conta" enquanto o registo estiver aberto.
+// Ecrã de entrada: utilizador + palavra-passe. "Criar conta" enquanto o registo do casal estiver aberto;
+// depois disso só se cria conta com um link de convite de um amigo ("Tenho um convite").
 
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ class _EcraLoginState extends State<EcraLogin> {
   final _form = GlobalKey<FormState>();
   final _username = TextEditingController();
   final _password = TextEditingController();
+  final _convite = TextEditingController(); // link (ou código) de convite de um amigo
 
   bool _aEntrar = false; // botão a rodar enquanto espera pela API
   bool _verPassword = false;
@@ -35,6 +37,7 @@ class _EcraLoginState extends State<EcraLogin> {
   void dispose() {
     _username.dispose();
     _password.dispose();
+    _convite.dispose();
     super.dispose();
   }
 
@@ -142,6 +145,43 @@ class _EcraLoginState extends State<EcraLogin> {
                         child: const Text('Ainda não tens conta? Criar conta'),
                       ),
                     ],
+
+                    // Tenho um convite: um amigo enviou-te um link (uso único, 7 dias)
+                    const SizedBox(height: 14),
+                    Vidro(
+                      padding: const EdgeInsets.fromLTRB(18, 6, 18, 14),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          title: const Text('Tenho um convite', style: TextStyle(fontWeight: FontWeight.w700)),
+                          childrenPadding: EdgeInsets.zero,
+                          children: [
+                            TextField(
+                              controller: _convite,
+                              autocorrect: false,
+                              decoration: const InputDecoration(labelText: 'Link do convite'),
+                            ),
+                            const SizedBox(height: 6),
+                            Text('O convite é de uso único e dura 7 dias.',
+                                style: textos.labelSmall?.copyWith(color: p.suave)),
+                            const SizedBox(height: 10),
+                            OutlinedButton(
+                              onPressed: () {
+                                if (_convite.text.trim().isEmpty) {
+                                  aviso(context, 'Cola primeiro o link que te enviaram.', erro: true);
+                                  return;
+                                }
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => EcraRegisto(convite: _convite.text.trim()),
+                                ));
+                              },
+                              child: const Text('Continuar'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

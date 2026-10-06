@@ -299,3 +299,95 @@ class TituloSecao extends StatelessWidget {
     );
   }
 }
+
+// ---------- Capas ----------
+
+// Capa de uma série (imagem do AniList/MyAnimeList) com cantos redondos; sem capa, um bloco na cor da série com o nome
+class Capa extends StatelessWidget {
+  final Serie serie;
+  final double largura;
+  final double raio;
+
+  const Capa({super.key, required this.serie, this.largura = 110, this.raio = 18});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Paleta.de(context);
+    final altura = largura * 1.42; // proporção das capas de anime
+
+    // Sem imagem (ou se falhar): fundo na cor da série com o nome curto
+    final semCapa = Container(
+      width: largura,
+      height: altura,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(10),
+      color: serie.cor.withValues(alpha: 0.85),
+      child: Text(
+        serie.nomeCurto,
+        textAlign: TextAlign.center,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: p.noPastel, fontWeight: FontWeight.w800, fontSize: largura * 0.13),
+      ),
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(raio),
+      child: serie.capa == null
+          ? semCapa
+          : Image.network(
+              serie.capa!,
+              width: largura,
+              height: altura,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => semCapa,
+            ),
+    );
+  }
+}
+
+// Linha de uma pessoa só com a percentagem (fila de capas, perfil de amigo): nome, % e barra
+class LinhaPct extends StatelessWidget {
+  final String nome;
+  final int pct;
+  final bool ehTu;
+
+  const LinhaPct({super.key, required this.nome, required this.pct, required this.ehTu});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Paleta.de(context);
+    final estilo = Theme.of(context).textTheme.bodySmall;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(nome, overflow: TextOverflow.ellipsis, style: estilo?.copyWith(fontWeight: FontWeight.w700)),
+            ),
+            Text('$pct%', style: estilo?.copyWith(color: ehTu ? p.tuTxt : p.parTxt, fontWeight: FontWeight.w800)),
+          ],
+        ),
+        const SizedBox(height: 6),
+        BarraProgresso(pct: pct, cor: ehTu ? p.tu : p.par),
+      ],
+    );
+  }
+}
+
+// Pede confirmação antes de uma ação (tirar série, desfazer amizade…); devolve true se a pessoa confirmou
+Future<bool> confirmar(BuildContext context, String titulo, String texto, {String sim = 'Sim'}) async {
+  final r = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(titulo),
+      content: Text(texto),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(sim)),
+      ],
+    ),
+  );
+  return r == true;
+}

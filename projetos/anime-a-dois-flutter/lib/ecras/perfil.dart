@@ -1,4 +1,5 @@
-// Perfil: foto, nome e utilizador, palavra-passe, notificações, tema e terminar sessão.
+// Perfil (igual ao site): foto, nome e utilizador, palavra-passe, cores (6 paletas), privacidade,
+// notificações, tema, terminar sessão e apagar conta.
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,6 +35,7 @@ class _EcraPerfilState extends State<EcraPerfil> {
   bool _aGuardarPass = false;
   bool _aGuardarNotif = false;
   bool _aGuardarFoto = false;
+  bool _soJuntos = false; // privacidade: os amigos só veem as séries que vês com eles
 
   @override
   void initState() {
@@ -49,12 +51,14 @@ class _EcraPerfilState extends State<EcraPerfil> {
     super.dispose();
   }
 
-  // GET /eu + GET /perfil/notificacoes ao mesmo tempo
+  // GET /eu (pela Sessao: também traz a paleta e a privacidade) + GET /perfil/notificacoes
   Future<void> _carregar() async {
     try {
       final r = await Future.wait([Api.instancia.get('/eu'), Api.instancia.get('/perfil/notificacoes')]);
+      await Sessao.instancia.carregarEu();
       if (!mounted) return;
       setState(() {
+        _soJuntos = Sessao.instancia.soJuntos;
         _definirUser(Utilizador.deJson(r[0]['user'] as Map<String, dynamic>));
         _pref = Preferencias.deJson(r[1]['preferencias'] as Map<String, dynamic>);
         _email.text = _pref!.email;
@@ -179,6 +183,62 @@ class _EcraPerfilState extends State<EcraPerfil> {
     }
   }
 
+  // Privacidade: guarda logo ao mudar o interruptor
+  Future<void> _mudarPrivacidade(bool valor) async {
+    setState(() => _soJuntos = valor);
+    try {
+      final d = await Api.instancia.put('/perfil/privacidade', {'so_juntos': valor});
+      Sessao.instancia.soJuntos = valor;
+      if (mounted) aviso(context, d['mensagem'] as String);
+    } on ApiErro catch (e) {
+      if (!mounted) return;
+      setState(() => _soJuntos = !valor);
+      aviso(context, e.mensagem, erro: true);
+    }
+  }
+
+  // Cores: muda já (a Sessao redesenha a app) e desfaz se a API recusar
+  Future<void> _mudarPaleta(int indice) async {
+    try {
+      await Sessao.instancia.mudarPaleta(indice);
+      if (mounted) aviso(context, 'Cores guardadas.');
+    } on ApiErro catch (e) {
+      if (mounted) aviso(context, e.mensagem, erro: true);
+    }
+  }
+
+  // Apagar conta: pede a palavra-passe numa janela e confirma
+  Future<void> _apagarConta() async {
+    final campo = TextEditingController();
+    final sim = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Apagar a tua conta?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Apaga a tua biblioteca, os episódios vistos, os comentários e as amizades. Não dá para desfazer.'),
+            const SizedBox(height: 12),
+            TextField(controller: campo, obscureText: true, decoration: const InputDecoration(labelText: 'Palavra-passe')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Apagar')),
+        ],
+      ),
+    );
+    final password = campo.text;
+    campo.dispose();
+    if (sim != true) return;
+    try {
+      await Api.instancia.post('/perfil/apagar', {'password': password});
+      await Sessao.instancia.contaApagada();
+    } on ApiErro catch (e) {
+      if (mounted) aviso(context, e.mensagem, erro: true);
+    }
+  }
+
   // ---------- Ecrã ----------
 
   @override
@@ -300,7 +360,7 @@ class _EcraPerfilState extends State<EcraPerfil> {
                 const TituloSecao('Notificações'),
                 Text(
                   'O que recebes quando o teu par marca episódios ou comenta. '
-                  '"Telemóvel" é a app do site instalada (Web Push).',
+                  '"Telemóvel" é a app do site instalada (Web Push); esta app ainda não recebe notificações.',
                   style: textos.bodySmall?.copyWith(color: p.suave),
                 ),
                 const SizedBox(height: 6),
@@ -326,6 +386,55 @@ class _EcraPerfilState extends State<EcraPerfil> {
           const SizedBox(height: 14),
         ],
 
+        // ---------- Cores (só para ti; as mesmas do site) ----------
+        Vidro(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const TituloSecao('Cores'),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (var i = 0; i < totalPaletas; i++)
+                    ChoiceChip(
+                      selected: Sessao.instancia.paleta == i,
+                      onSelected: (_) => _mudarPaleta(i),
+                      avatar: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final c in Paleta.amostra(i))
+                            Container(
+                              width: 10,
+                              height: 10,
+                              margin: const EdgeInsets.only(right: 2),
+                              decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+                            ),
+                        ],
+                      ),
+                      label: Text(i < Sessao.instancia.paletas.length ? Sessao.instancia.paletas[i] : 'Paleta ${i + 1}'),
+                      shape: const StadiumBorder(),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // ---------- Privacidade ----------
+        Vidro(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+          child: SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Os amigos só veem o que vemos juntos'),
+            subtitle: const Text('O teu par vê sempre tudo.'),
+            value: _soJuntos,
+            onChanged: _mudarPrivacidade,
+          ),
+        ),
+        const SizedBox(height: 14),
+
         // ---------- Aparência e sessão ----------
         Vidro(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
@@ -343,6 +452,13 @@ class _EcraPerfilState extends State<EcraPerfil> {
                 leading: Icon(Icons.logout_rounded, color: p.erro),
                 title: Text('Terminar sessão', style: TextStyle(color: p.erro, fontWeight: FontWeight.w700)),
                 onTap: Sessao.instancia.sair,
+              ),
+              const Divider(height: 1),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.delete_forever_rounded, color: p.erro),
+                title: Text('Apagar conta', style: TextStyle(color: p.erro)),
+                onTap: _apagarConta,
               ),
             ],
           ),

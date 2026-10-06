@@ -82,11 +82,24 @@ jobs:
         run: dart run flutter_launcher_icons
 
       # Erros de código param aqui; avisos de estilo só aparecem no log
+      # Erros de código param aqui; ficam também como anotação da execução (legíveis pela API do GitHub)
       - name: Analisar o código
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: |
+          if ! flutter analyze --no-fatal-infos --no-fatal-warnings > analise.txt 2>&1; then
+            cat analise.txt
+            echo "::error title=flutter analyze::$(grep -E 'error •' analise.txt | head -40 | sed ':a;N;$!ba;s/\n/%0A/g')"
+            exit 1
+          fi
+          tail -3 analise.txt
 
       - name: Testes
-        run: flutter test
+        run: |
+          if ! flutter test > testes.txt 2>&1; then
+            cat testes.txt
+            echo "::error title=flutter test::$(grep -iE 'error|expected|actual|failed' testes.txt | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')"
+            exit 1
+          fi
+          tail -2 testes.txt
 
       # Chave fixa de assinatura (se o secret existir): permite atualizar a app sem desinstalar
       - name: Chave de assinatura
@@ -105,9 +118,14 @@ jobs:
       # Release só para arm64 (quase todos os telemóveis atuais): uma compilação, APK pequeno
       - name: Compilar o APK (release)
         run: |
-          flutter build apk --release --split-per-abi --target-platform android-arm64 \
-            --dart-define=API_URL="$API_URL" \
-            --build-number=${{ github.run_number }}
+          if ! flutter build apk --release --split-per-abi --target-platform android-arm64 \
+                 --dart-define=API_URL="$API_URL" \
+                 --build-number=${{ github.run_number }} > build.txt 2>&1; then
+            cat build.txt
+            echo "::error title=flutter build::$(grep -iE 'error|exception|failed' build.txt | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')"
+            exit 1
+          fi
+          tail -3 build.txt
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk anime-a-dois.apk
           ls -la anime-a-dois.apk
 

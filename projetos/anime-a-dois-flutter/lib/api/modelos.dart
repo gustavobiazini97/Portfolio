@@ -1,12 +1,17 @@
 // Modelos: o JSON da API convertido em classes Dart (com os mesmos nomes do PHP).
+// Cada pessoa tem a sua biblioteca; cada série pode ser vista com uma ou mais pessoas (companheiros).
 
 import 'package:flutter/painting.dart';
 
 // Números do JSON podem chegar como int ou double; isto aceita os dois
 int _int(dynamic v) => v == null ? 0 : (v as num).toInt();
 
+// Lista do JSON (ou nada) → lista de mapas
+List<Map<String, dynamic>> _lista(dynamic v) =>
+    v == null ? [] : (v as List).map((e) => e as Map<String, dynamic>).toList();
+
 // "#F7C59F" → Color
-Color _cor(String? hex) {
+Color corDeHex(String? hex) {
   final limpo = (hex ?? '#C9C2E0').replaceFirst('#', '');
   return Color(int.parse('FF$limpo', radix: 16));
 }
@@ -36,9 +41,11 @@ class Utilizador {
         foto: j['foto'] as String?,
       );
 
-  // Para campos opcionais do JSON (ex.: parceiro ainda sem conta)
+  // Para campos opcionais do JSON (ex.: par ainda sem conta)
   static Utilizador? talvez(dynamic j) =>
       j == null ? null : Utilizador.deJson(j as Map<String, dynamic>);
+
+  static List<Utilizador> lista(dynamic j) => _lista(j).map(Utilizador.deJson).toList();
 }
 
 // ---------- Séries ----------
@@ -53,22 +60,20 @@ class Progresso {
 
   factory Progresso.deJson(Map<String, dynamic> j) =>
       Progresso(vistos: _int(j['vistos']), pct: _int(j['pct']), posicao: _int(j['posicao']));
-
-  static Progresso? talvez(dynamic j) =>
-      j == null ? null : Progresso.deJson(j as Map<String, dynamic>);
 }
 
+// Dados fixos de uma série (iguais para toda a gente)
 class Serie {
   final String slug;
   final String nome;
   final String nomeCurto;
   final String? anos;
   final int totalEpisodios;
-  final int totalFillers; // só vem no detalhe da série
+  final String? capa; // URL da capa (AniList/MyAnimeList) ou null
+  final String? tipo; // TV, Movie, OVA…
+  final bool emEmissao;
+  final int totalFillers; // só vem na página da série
   final Color cor; // acento da série
-  final Progresso tu;
-  final Progresso? par; // null enquanto o par não tem conta
-  final String resumo; // frase do Vs
 
   const Serie({
     required this.slug,
@@ -76,11 +81,11 @@ class Serie {
     required this.nomeCurto,
     this.anos,
     required this.totalEpisodios,
+    this.capa,
+    this.tipo,
+    this.emEmissao = false,
     this.totalFillers = 0,
     required this.cor,
-    required this.tu,
-    this.par,
-    required this.resumo,
   });
 
   factory Serie.deJson(Map<String, dynamic> j) => Serie(
@@ -89,15 +94,82 @@ class Serie {
         nomeCurto: j['nomeCurto'] as String? ?? j['nome'] as String,
         anos: j['anos'] as String?,
         totalEpisodios: _int(j['totalEpisodios']),
+        capa: j['capa'] as String?,
+        tipo: j['tipo'] as String?,
+        emEmissao: j['emEmissao'] == true,
         totalFillers: _int(j['totalFillers']),
-        cor: _cor(j['cor'] as String?),
-        tu: Progresso.deJson(j['tu'] as Map<String, dynamic>),
-        par: Progresso.talvez(j['par']),
-        resumo: j['resumo'] as String? ?? '',
+        cor: corDeHex(j['cor'] as String?),
       );
 }
 
-// Último episódio que alguém viu (cartão do Início)
+// Um companheiro numa série: quem vê contigo e a percentagem dele
+class Companheiro {
+  final Utilizador user;
+  final int pct;
+
+  const Companheiro(this.user, this.pct);
+
+  factory Companheiro.deJson(Map<String, dynamic> j) =>
+      Companheiro(Utilizador.deJson(j['user'] as Map<String, dynamic>), _int(j['pct']));
+}
+
+// Um cartão da fila de capas (a tua biblioteca, a do par ou a de um amigo)
+class ItemBiblioteca {
+  final Serie serie;
+  final String estado; // a_ver | pausa | acabado
+  final String estadoTexto; // "A ver", "Em pausa", "Acabado"
+  final bool conjunta; // vista com alguém
+  final int pct; // a percentagem do dono da biblioteca
+  final List<Companheiro> companheiros;
+  final bool naTua; // (perfil de outra pessoa) já está na tua biblioteca?
+  final bool vesCom; // (perfil de outra pessoa) já a vês com ela?
+
+  const ItemBiblioteca({
+    required this.serie,
+    required this.estado,
+    required this.estadoTexto,
+    required this.conjunta,
+    required this.pct,
+    required this.companheiros,
+    this.naTua = false,
+    this.vesCom = false,
+  });
+
+  factory ItemBiblioteca.deJson(Map<String, dynamic> j) => ItemBiblioteca(
+        serie: Serie.deJson(j['serie'] as Map<String, dynamic>),
+        estado: j['estado'] as String? ?? 'a_ver',
+        estadoTexto: j['estadoTexto'] as String? ?? '',
+        conjunta: j['conjunta'] == true,
+        pct: _int(j['pct']),
+        companheiros: _lista(j['companheiros']).map(Companheiro.deJson).toList(),
+        naTua: j['naTua'] == true,
+        vesCom: j['vesCom'] == true,
+      );
+
+  static List<ItemBiblioteca> lista(dynamic j) => _lista(j).map(ItemBiblioteca.deJson).toList();
+}
+
+// Convite "Quero ver contigo" (recebido ou enviado)
+class ConviteSerie {
+  final Serie serie;
+  final bool recebido;
+  final Utilizador de;
+  final Utilizador para;
+
+  const ConviteSerie({required this.serie, required this.recebido, required this.de, required this.para});
+
+  factory ConviteSerie.deJson(Map<String, dynamic> j) => ConviteSerie(
+        serie: Serie.deJson(j['serie'] as Map<String, dynamic>),
+        recebido: j['recebido'] == true,
+        de: Utilizador.deJson(j['de'] as Map<String, dynamic>),
+        para: Utilizador.deJson(j['para'] as Map<String, dynamic>),
+      );
+
+  // A outra pessoa do convite (quem convidou, se recebido; quem foi convidado, se enviado)
+  Utilizador get outro => recebido ? de : para;
+}
+
+// Último episódio que alguém viu (cartão do Início e do perfil de amigo)
 class Ultimo {
   final String serie; // slug
   final String serieNome;
@@ -129,23 +201,25 @@ class Ultimo {
   }
 }
 
-// Um cartão da pista de episódios. tu/par/coment mudam na app sem recarregar tudo.
+// Um cartão da pista de episódios. tu/com/coment mudam na app sem recarregar tudo.
 class Episodio {
   final int id;
   final int numero;
   final String? titulo;
   final bool filler;
+  final bool recap;
   bool tu; // tu já viste
-  bool par; // o teu par já viu
-  int coment; // número de comentários
+  final List<bool> com; // cada companheiro já viu? (pela ordem dos companheiros)
+  int coment; // número de comentários (teus e dos companheiros)
 
   Episodio({
     required this.id,
     required this.numero,
     this.titulo,
     this.filler = false,
+    this.recap = false,
     this.tu = false,
-    this.par = false,
+    this.com = const [],
     this.coment = 0,
   });
 
@@ -154,10 +228,14 @@ class Episodio {
         numero: _int(j['numero']),
         titulo: j['titulo'] as String?,
         filler: j['filler'] == true || j['filler'] == 1,
+        recap: j['recap'] == true || j['recap'] == 1,
         tu: j['tu'] == true,
-        par: j['par'] == true,
+        com: j['com'] == null ? const [] : (j['com'] as List).map((v) => v == true).toList(),
         coment: _int(j['coment']),
       );
+
+  // Algum companheiro já viu?
+  bool get algumCom => com.any((v) => v);
 }
 
 // ---------- Comentários ----------
@@ -204,23 +282,25 @@ class PessoaEst {
         fillers = j['fillers'] as String? ?? '';
 }
 
-// Uma semana do gráfico do ritmo (nível 0–10 = altura relativa da barra)
+// Uma semana do gráfico do ritmo (níveis 0–10 = altura relativa das barras)
 class Semana {
   final String rotulo;
-  final int tu, par, nivelTu, nivelPar;
+  final int tu, nivelTu;
+  final List<int> com, nivelCom; // um valor por companheiro
 
   Semana.deJson(Map<String, dynamic> j)
       : rotulo = j['rotulo'] as String? ?? '',
         tu = _int(j['tu']),
-        par = _int(j['par']),
         nivelTu = _int(j['nivelTu']),
-        nivelPar = _int(j['nivelPar']);
+        com = j['com'] == null ? const [] : (j['com'] as List).map(_int).toList(),
+        nivelCom = j['nivelCom'] == null ? const [] : (j['nivelCom'] as List).map(_int).toList();
 }
 
-// Um arco: intervalo de episódios e progresso de cada um
+// Um arco: intervalo de episódios e o progresso de cada pessoa
 class Arco {
   final String nome;
-  final int de, ate, total, pctTu, pctPar;
+  final int de, ate, total, pctTu;
+  final List<int> pctCom;
   final bool filler;
   final String selo; // 'os-dois' | 'tu' | 'par' | ''
 
@@ -230,7 +310,7 @@ class Arco {
         ate = _int(j['ate']),
         total = _int(j['total']),
         pctTu = _int(j['pctTu']),
-        pctPar = _int(j['pctPar']),
+        pctCom = j['pctCom'] == null ? const [] : (j['pctCom'] as List).map(_int).toList(),
         filler = j['filler'] == true,
         selo = j['selo'] as String? ?? '';
 }
@@ -242,16 +322,32 @@ class Estatisticas {
   final List<Arco> arcos;
   final int comentarios;
   final int? recordeN; // mais episódios marcados num só dia
-  final String? recordeQuem; // 'tu' ou o nome do par
+  final String? recordeQuem; // 'tu' ou o nome do companheiro
 
   Estatisticas.deJson(Map<String, dynamic> j)
-      : pessoas = (j['pessoas'] as List).map((p) => PessoaEst.deJson(p as Map<String, dynamic>)).toList(),
-        semanas = (j['semanas'] as List).map((s) => Semana.deJson(s as Map<String, dynamic>)).toList(),
+      : pessoas = _lista(j['pessoas']).map(PessoaEst.deJson).toList(),
+        semanas = _lista(j['semanas']).map(Semana.deJson).toList(),
         previsao = j['previsao'] as String?,
-        arcos = (j['arcos'] as List).map((a) => Arco.deJson(a as Map<String, dynamic>)).toList(),
+        arcos = _lista(j['arcos']).map(Arco.deJson).toList(),
         comentarios = _int(j['comentarios']),
         recordeN = j['recorde'] == null ? null : _int(j['recorde']['n']),
         recordeQuem = j['recorde'] == null ? null : j['recorde']['quem'] as String?;
+}
+
+// ---------- Amigos ----------
+
+// Link de convite para quem ainda não tem conta
+class ConviteAmigo {
+  final String link;
+  final String validoAte; // ISO 8601
+
+  const ConviteAmigo(this.link, this.validoAte);
+
+  static ConviteAmigo? talvez(dynamic j) {
+    if (j == null) return null;
+    final m = j as Map<String, dynamic>;
+    return ConviteAmigo(m['link'] as String, m['validoAte'] as String? ?? '');
+  }
 }
 
 // ---------- Notificações ----------

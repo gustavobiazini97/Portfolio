@@ -8,8 +8,9 @@ import 'paleta.dart';
 // A mesma letra do site
 const String letra = 'M PLUS Rounded 1c';
 
-ThemeData temaClaro() => _tema(Paleta.claro, Brightness.light);
-ThemeData temaEscuro() => _tema(Paleta.escuro, Brightness.dark);
+// Tema para a paleta escolhida pela pessoa (0–5)
+ThemeData temaClaro(int paleta) => _tema(Paleta.para(paleta, escuro: false), Brightness.light);
+ThemeData temaEscuro(int paleta) => _tema(Paleta.para(paleta, escuro: true), Brightness.dark);
 
 ThemeData _tema(Paleta p, Brightness brilho) {
   // Texto base do Material com a letra do site e as cores da paleta

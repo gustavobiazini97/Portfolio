@@ -29,8 +29,8 @@ class AnimeADois extends StatelessWidget {
         title: appNome,
         debugShowCheckedModeBanner: false,
         navigatorKey: sessao.navegador,
-        theme: temaClaro(),
-        darkTheme: temaEscuro(),
+        theme: temaClaro(sessao.paleta), // as cores que a pessoa escolheu no perfil
+        darkTheme: temaEscuro(sessao.paleta),
         themeMode: sessao.tema,
         // A chave força um ecrã novo ao entrar/sair (sem restos da sessão anterior)
         home: sessao.autenticado
