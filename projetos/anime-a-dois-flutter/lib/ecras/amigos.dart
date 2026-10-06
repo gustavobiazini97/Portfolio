@@ -3,9 +3,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../config.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 import 'pessoa.dart';
@@ -81,11 +83,24 @@ class _EcraAmigosState extends State<EcraAmigos> {
     }
   }
 
-  // Copia o link de convite para colar onde quiseres (WhatsApp, SMS…)
-  Future<void> _copiarLink() async {
+  // Mensagem do convite: o link para instalar a app e o código para colar em "Tenho um convite".
+  // A pessoa pode colar a mensagem inteira: a app e a API encontram o código lá dentro.
+  String _mensagem() => 'Vem ver anime comigo no Anime a Dois!\n'
+      '1. Instala a app: $linkApp\n'
+      '2. Abre-a, toca em «Tenho um convite» e cola isto: ${_convite!.codigo}\n'
+      '(O convite é de uso único e dura $_validade dias.)';
+
+  // Partilhar pelo menu do Android (WhatsApp, Messenger, SMS…)
+  Future<void> _partilhar() async {
     if (_convite == null) return;
-    await Clipboard.setData(ClipboardData(text: _convite!.link));
-    if (mounted) aviso(context, 'Link copiado. Cola-o numa mensagem.');
+    await Share.share(_mensagem(), subject: 'Convite para o Anime a Dois');
+  }
+
+  // Copiar a mensagem toda para colar onde quiseres
+  Future<void> _copiar() async {
+    if (_convite == null) return;
+    await Clipboard.setData(ClipboardData(text: _mensagem()));
+    if (mounted) aviso(context, 'Convite copiado. Cola-o numa mensagem.');
   }
 
   @override
@@ -232,33 +247,61 @@ class _EcraAmigosState extends State<EcraAmigos> {
               children: [
                 const TituloSecao('Ainda não tem conta?'),
                 Text(
-                  'Envia-lhe um link de convite. É de uso único e dura $_validade dias; quem o usar fica teu amigo.',
+                  'Envia-lhe a app e um convite: instala-a, cola o convite e ficam amigos. '
+                  'É de uso único e dura $_validade dias.',
                   style: textos.bodySmall?.copyWith(color: p.suave),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 if (_convite != null) ...[
-                  SelectableText(_convite!.link, style: textos.bodySmall),
-                  const SizedBox(height: 8),
+                  // Convite pronto: sem o endereço à vista, só o essencial
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(color: p.campo, borderRadius: BorderRadius.circular(18), border: Border.all(color: p.linha)),
+                    child: Row(
+                      children: [
+                        Icon(Icons.card_giftcard_rounded, color: p.tuTxt),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Convite pronto', style: TextStyle(fontWeight: FontWeight.w500)),
+                              Text('válido até ${_convite!.validoAteCurto}', style: textos.bodySmall?.copyWith(color: p.suave)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed: _copiarLink,
-                          icon: const Icon(Icons.copy_rounded, size: 18),
-                          label: const Text('Copiar link'),
+                          onPressed: _partilhar,
+                          icon: const Icon(Icons.share_rounded, size: 18),
+                          label: const Text('Partilhar'),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed: _ocupado ? null : () => _acao(() => Api.instancia.post('/amigos/convite')),
-                        child: const Text('Novo'),
+                      OutlinedButton.icon(
+                        onPressed: _copiar,
+                        icon: const Icon(Icons.copy_rounded, size: 18),
+                        label: const Text('Copiar'),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: TextButton(
+                      onPressed: _ocupado ? null : () => _acao(() => Api.instancia.post('/amigos/convite')),
+                      child: Text('Criar um convite novo', style: TextStyle(color: p.suave, fontSize: 13)),
+                    ),
                   ),
                 ] else
                   FilledButton(
                     onPressed: _ocupado ? null : () => _acao(() => Api.instancia.post('/amigos/convite')),
-                    child: const Text('Criar link de convite'),
+                    child: const Text('Criar convite'),
                   ),
               ],
             ),

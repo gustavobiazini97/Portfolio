@@ -10,3 +10,7 @@ const String apiUrl = String.fromEnvironment(
 
 // Nome que aparece no topo e no login
 const String appNome = 'Anime a Dois';
+
+// Link curto para instalar a app (o .htaccess do site redireciona para o APK mais recente).
+// Vai nos convites partilhados em Amigos.
+const String linkApp = 'https://animeadois.alwaysdata.net/app';

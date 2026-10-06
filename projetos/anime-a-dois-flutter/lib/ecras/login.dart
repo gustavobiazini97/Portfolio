@@ -146,7 +146,7 @@ class _EcraLoginState extends State<EcraLogin> {
                       ),
                     ],
 
-                    // Tenho um convite: um amigo enviou-te um link (uso único, 7 dias)
+                    // Tenho um convite: cola o que um amigo te enviou (o código, o link ou a mensagem inteira; a API encontra o código)
                     const SizedBox(height: 14),
                     Vidro(
                       padding: const EdgeInsets.fromLTRB(18, 6, 18, 14),
@@ -160,7 +160,7 @@ class _EcraLoginState extends State<EcraLogin> {
                             TextField(
                               controller: _convite,
                               autocorrect: false,
-                              decoration: const InputDecoration(labelText: 'Link do convite'),
+                              decoration: const InputDecoration(labelText: 'Convite', hintText: 'Cola aqui o que te enviaram'),
                             ),
                             const SizedBox(height: 6),
                             Text('O convite é de uso único e dura 7 dias.',
@@ -169,7 +169,7 @@ class _EcraLoginState extends State<EcraLogin> {
                             OutlinedButton(
                               onPressed: () {
                                 if (_convite.text.trim().isEmpty) {
-                                  aviso(context, 'Cola primeiro o link que te enviaram.', erro: true);
+                                  aviso(context, 'Cola primeiro o convite que te enviaram.', erro: true);
                                   return;
                                 }
                                 Navigator.of(context).push(MaterialPageRoute(

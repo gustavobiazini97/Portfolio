@@ -338,15 +338,24 @@ class Estatisticas {
 
 // Link de convite para quem ainda não tem conta
 class ConviteAmigo {
-  final String link;
+  final String codigo; // 32 caracteres; é o que a pessoa cola em "Tenho um convite"
+  final String link; // link do site (registo com o convite)
   final String validoAte; // ISO 8601
 
-  const ConviteAmigo(this.link, this.validoAte);
+  const ConviteAmigo(this.codigo, this.link, this.validoAte);
 
   static ConviteAmigo? talvez(dynamic j) {
     if (j == null) return null;
     final m = j as Map<String, dynamic>;
-    return ConviteAmigo(m['link'] as String, m['validoAte'] as String? ?? '');
+    return ConviteAmigo(m['codigo'] as String? ?? '', m['link'] as String, m['validoAte'] as String? ?? '');
+  }
+
+  // "13 out" (dia e mês da validade)
+  String get validoAteCurto {
+    final d = DateTime.tryParse(validoAte);
+    if (d == null) return '';
+    const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    return '${d.day} ${meses[d.month - 1]}';
   }
 }
 

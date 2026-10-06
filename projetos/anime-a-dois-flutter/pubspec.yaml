@@ -16,6 +16,7 @@ dependencies:
   shared_preferences: ^2.3.2    # guarda o token e o tema no telemóvel
   google_fonts: ^6.2.1          # M PLUS Rounded 1c, a mesma letra do site
   image_picker: ^1.1.2          # escolher/tirar a foto de perfil
+  share_plus: ^10.1.4           # partilhar o convite (menu do Android: WhatsApp, SMS…)
 
 dev_dependencies:
   flutter_test:
