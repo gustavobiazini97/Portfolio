@@ -229,31 +229,31 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 
 ## 3. API REST + app Flutter (6 de outubro)
 
-Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a usa. Ramo `feat/anime-a-dois-api`.
+Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a usa.
 
-### API (`public/api.php`)
+### Incidente (6/10, à noite) e regra nova
 
-- Ponto de entrada próprio, separado do site: `api.php/<rota>` (ou `/api/<rota>` com o `.htaccess`).
-- Responde sempre JSON: `{ ok, ... }` ou `{ ok: false, mensagem }`, com 401/403/404/405/422/500.
-- **Login com token** em vez de sessão: `POST /auth/login` devolve um token; os pedidos levam `Authorization: Bearer <token>`.
-  - Tabela nova `tokens` (só o sha256 do token), Model `Token`. Expira ao fim de 90 dias sem uso.
-  - Mudar a palavra-passe pela API termina as sessões dos outros telemóveis.
-- Rotas: conta, início, séries, marcar vistos, estatísticas, comentários, perfil, foto e notificações.
-- Controllers em `app/api/` (`AuthApi`, `SeriesApi`, `ComentariosApi`, `PerfilApi`); a lógica continua nos Models.
-- A frase do Vs passou do `HomeController` para `Serie::resumoVs()`, para o site e a API usarem a mesma. Cada série tem `Serie::cor()`.
-- Documentação completa em `docs/API.md`. Testada com MariaDB local e curl em todas as rotas.
+- A API foi feita a partir do `main`, que estava parado em 04/10 de manhã; o site novo (amigos, bibliotecas,
+  backoffice, paletas…) estava só no `feat/anime-a-dois`. O merge da API fez deploy da versão antiga por cima.
+- Reposto no mesmo dia: o `feat/anime-a-dois` foi juntado ao `main` (nos conflitos ficou a versão do site novo).
+  Os dados não foram tocados (o deploy só cria tabelas/colunas que faltam).
+- **Regra:** o deploy do site passou a correr **só a partir do `main`**. Trabalho novo sai de um ramo criado a partir do `main` e volta para o `main`.
+
+### API v2 (`public/api.php`, documentada em `docs/API.md`)
+
+- JSON por cima dos mesmos Models do site, com as mesmas regras: biblioteca por pessoa, companheiros por série,
+  convites "Quero ver contigo", amigos (link de convite e pedidos), perfil de amigo com a privacidade "só juntos",
+  comentários só entre quem vê a série junto, paletas, apagar conta.
+- Login com **token** (tabela `tokens`, só o sha256; 90 dias sem uso). Controllers em `app/api/`.
+- Fica de fora (só no site): backoffice, popup de novidades e a sincronização de fillers/episódios novos.
 
 ### App Flutter (`projetos/anime-a-dois-flutter`)
 
-- Login/registo, Início, página da série com a pista de cartões, comentários, estatísticas e perfil.
-- Mesmo visual do site (vidro, sálvia + alperce, acento por série, tema claro/escuro).
-- O APK é compilado pelo workflow **APK Anime a Dois** e publicado na release `anime-a-dois-apk`.
-
-### Falta confirmar
-
-- A app só funciona depois de a API estar no alwaysdata (fazer merge do ramo para o `main`, que corre o deploy e cria a tabela `tokens`).
-- Testar o APK no telemóvel.
-- Notificações nativas na app (precisaria de Firebase); por agora chegam pela app do site e por email.
+- Ecrãs equivalentes ao site: entrar/criar conta (com link de convite), Início (biblioteca em capas, Vs, estado,
+  ver com…, convites, fila do par), adicionar série (AniList + Jikan/Kitsu pelo telemóvel), série com vários
+  companheiros, comentários, estatísticas, amigos, perfil de amigo e perfil (6 paletas, privacidade, apagar conta).
+- Compilada no GitHub Actions (workflow **APK Anime a Dois**, release, só arm64) e publicada na release `anime-a-dois-apk`.
+- Ainda sem notificações nativas (precisaria de Firebase): os avisos chegam pela app do site e por email.
 
 ---
 

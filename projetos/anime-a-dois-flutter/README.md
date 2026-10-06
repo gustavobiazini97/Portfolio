@@ -32,17 +32,19 @@ e cola o resultado num secret do repo chamado **`ANDROID_KEYSTORE_B64`**
 
 ## Ecrãs
 
+Os mesmos do site (API v2): cada pessoa tem a sua biblioteca e cada série pode ser vista com o par e/ou amigos.
+
 | Ecrã | O que faz |
 |---|---|
-| Login / Criar conta | Token guardado no telemóvel; "Criar conta" só aparece enquanto há lugar |
-| Início | Último episódio que o par viu e um cartão por série com as barras dos dois e o Vs |
-| Série | Mapa dos dois, pista de cartões que desliza, régua para saltar episódios, marcar com um toque, seleção múltipla com toque longo |
-| Comentários | Folha por baixo da pista; os teus apagam-se com toque longo |
-| Estatísticas | Tu vs par, ritmo semanal, previsão, arcos com selo ✓ / ½, curiosidades |
-| Perfil | Foto (galeria/câmara), nome, utilizador, palavra-passe, notificações, tema, terminar sessão |
-
-Visual igual ao site: vidro fosco, sálvia (tu) + alperce (par), cor de acento por série,
-letra M PLUS Rounded 1c e tema claro/escuro.
+| Entrar / Criar conta | Token guardado no telemóvel; "Criar conta" enquanto há lugar para o casal; "Tenho um convite" para amigos |
+| Início | Último episódio do par, biblioteca em capas, série escolhida com o Vs e o estado, ver com…, deixar de ver juntos, tirar, convites "Quero ver contigo" e a fila do par |
+| Adicionar | Pesquisa no AniList (pelo telemóvel) e episódios do Jikan/Kitsu; "Adicionar" ou "Ver com…" |
+| Série | Mapa com todos os companheiros, pista de cartões, régua, marcar com um toque, seleção múltipla com toque longo |
+| Comentários | Só os teus e os de quem vê a série contigo |
+| Estatísticas | Tu e cada companheiro, ritmo semanal, previsão, arcos, curiosidades |
+| Amigos | Pedidos, link de convite (copiar), pedir por utilizador, desfazer amizade |
+| Perfil de amigo | Último episódio e biblioteca dele (respeita "só juntos"); juntar-se a séries |
+| Perfil | Foto, nome, utilizador, palavra-passe, 6 paletas, privacidade, notificações, tema, sair, apagar conta |
 
 ## Estrutura
 
@@ -51,11 +53,13 @@ lib/
   main.dart            arranque: Login ou Início conforme haja token
   config.dart          endereço da API (muda-se com --dart-define=API_URL=…)
   api/api.dart         cliente HTTP: token, JSON, erros (ApiErro)
-  api/modelos.dart     JSON → classes (Serie, Episodio, Comentario, Estatisticas…)
+  api/modelos.dart     JSON → classes (Serie, ItemBiblioteca, Episodio, ConviteSerie, Estatisticas…)
+  api/anime.dart       pesquisa no AniList e episódios do Jikan/Kitsu (pelo telemóvel)
   estado/sessao.dart   sessão (token) e tema, partilhados pela app
   tema/                cores (as mesmas do app.css) e ThemeData
   widgets/comum.dart   Fundo, Vidro, Avatar, BarraProgresso, LinhaPessoa…
-  ecras/               login, registo, inicio, serie, comentarios, estatisticas, perfil
+  ecras/               login, registo, inicio, adicionar, serie, comentarios, estatisticas,
+                       amigos, pessoa, perfil
 test/modelos_test.dart testes da conversão do JSON
 assets/icon/           ícone (o mesmo da PWA)
 ```
