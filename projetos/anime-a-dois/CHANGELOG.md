@@ -3,7 +3,7 @@
 > Registo do que foi feito, para quem pegar no projeto a seguir (pessoa ou chat) saber o ponto de situação.
 > Atualizar este ficheiro sempre que houver mudanças.
 
-3 e 4 de outubro de 2026 · repo `gustavobiazini97/Portfolio`
+3 a 6 de outubro de 2026 · repo `gustavobiazini97/Portfolio`
 
 ---
 
@@ -145,7 +145,37 @@ O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/an
 
 ---
 
-## 3. O que falta
+## 3. API REST + app Flutter (6 de outubro)
+
+Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a usa. Ramo `feat/anime-a-dois-api`.
+
+### API (`public/api.php`)
+
+- Ponto de entrada próprio, separado do site: `api.php/<rota>` (ou `/api/<rota>` com o `.htaccess`).
+- Responde sempre JSON: `{ ok, ... }` ou `{ ok: false, mensagem }`, com 401/403/404/405/422/500.
+- **Login com token** em vez de sessão: `POST /auth/login` devolve um token; os pedidos levam `Authorization: Bearer <token>`.
+  - Tabela nova `tokens` (só o sha256 do token), Model `Token`. Expira ao fim de 90 dias sem uso.
+  - Mudar a palavra-passe pela API termina as sessões dos outros telemóveis.
+- Rotas: conta, início, séries, marcar vistos, estatísticas, comentários, perfil, foto e notificações.
+- Controllers em `app/api/` (`AuthApi`, `SeriesApi`, `ComentariosApi`, `PerfilApi`); a lógica continua nos Models.
+- A frase do Vs passou do `HomeController` para `Serie::resumoVs()`, para o site e a API usarem a mesma. Cada série tem `Serie::cor()`.
+- Documentação completa em `docs/API.md`. Testada com MariaDB local e curl em todas as rotas.
+
+### App Flutter (`projetos/anime-a-dois-flutter`)
+
+- Login/registo, Início, página da série com a pista de cartões, comentários, estatísticas e perfil.
+- Mesmo visual do site (vidro, sálvia + alperce, acento por série, tema claro/escuro).
+- O APK é compilado pelo workflow **APK Anime a Dois** e publicado na release `anime-a-dois-apk`.
+
+### Falta confirmar
+
+- A app só funciona depois de a API estar no alwaysdata (fazer merge do ramo para o `main`, que corre o deploy e cria a tabela `tokens`).
+- Testar o APK no telemóvel.
+- Notificações nativas na app (precisaria de Firebase); por agora chegam pela app do site e por email.
+
+---
+
+## 4. O que falta
 
 - Confirmar no telemóvel o arranque sem quadrado. Para ver já, desinstala e volta a instalar a app.
 - Confirmar no telemóvel a entrega real das notificações. Só foi testada com um servidor falso, e o email depende do `mail()` do alwaysdata.

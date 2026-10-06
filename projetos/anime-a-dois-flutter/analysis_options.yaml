@@ -1,0 +1,7 @@
+# Regras do analisador (flutter analyze): as recomendadas para projetos Flutter.
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    prefer_single_quotes: true          # aspas simples em todo o código
+    prefer_const_constructors: true

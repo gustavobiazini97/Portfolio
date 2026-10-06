@@ -1,0 +1,117 @@
+# Compila a app Flutter do Anime a Dois (APK Android) no GitHub, sem precisar do Flutter instalado.
+# Corre a cada push que mexa na pasta da app (ou à mão, no separador Actions).
+#
+# Resultado:
+#   1. o APK fica nos "Artifacts" da execução;
+#   2. e na release "anime-a-dois-apk", com um link fixo para descarregar no telemóvel:
+#      https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk
+#
+# Secret opcional: ANDROID_KEYSTORE_B64 (keystore em base64, ver o README da app).
+# Sem ele, cada APK é assinado com uma chave diferente e, para atualizar, é preciso desinstalar primeiro.
+
+name: APK Anime a Dois
+
+on:
+  push:
+    paths:
+      - 'projetos/anime-a-dois-flutter/**'
+      - '.github/workflows/anime-a-dois-flutter.yml'
+  workflow_dispatch:
+
+# Uma compilação de cada vez por ramo; uma nova cancela a anterior
+concurrency:
+  group: apk-anime-a-dois-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write            # para criar/atualizar a release com o APK
+
+env:
+  API_URL: https://animeadois.alwaysdata.net/api.php
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projetos/anime-a-dois-flutter
+    steps:
+      - uses: actions/checkout@v4
+
+      # O Gradle do Android precisa do Java 17
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # A pasta android/ não está no Git: o "flutter create" gera-a (não mexe no lib/ nem no pubspec)
+      - name: Gerar a pasta android
+        run: |
+          flutter create --platforms android --org pt.gustavobiazini --project-name anime_a_dois .
+          # O modelo traz um teste de exemplo (contador) que não existe nesta app
+          rm -f test/widget_test.dart
+
+      # Permissão de internet (o modelo só a põe nas builds de debug) e nome visível da app
+      - name: Ajustar o AndroidManifest
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.INTERNET' "$M" || \
+            sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' "$M"
+          sed -i 's|android:label="anime_a_dois"|android:label="Anime a Dois"|' "$M"
+          grep -n 'INTERNET\|android:label' "$M"
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Ícone da app
+        run: dart run flutter_launcher_icons
+
+      # Erros de código param aqui; avisos de estilo só aparecem no log
+      - name: Analisar o código
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Testes
+        run: flutter test
+
+      # Chave fixa de assinatura (se o secret existir): permite atualizar a app sem desinstalar
+      - name: Chave de assinatura
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            mkdir -p ~/.android
+            echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+            echo "Chave fixa instalada."
+          else
+            echo "::notice::Sem ANDROID_KEYSTORE_B64 — o APK usa uma chave temporária."
+          fi
+
+      # Número da build = número da execução (o Android exige que suba a cada versão)
+      - name: Compilar o APK
+        run: |
+          flutter build apk --release \
+            --dart-define=API_URL="$API_URL" \
+            --build-number=${{ github.run_number }}
+          cp build/app/outputs/flutter-apk/app-release.apk anime-a-dois.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anime-a-dois-apk
+          path: projetos/anime-a-dois-flutter/anime-a-dois.apk
+
+      # Release com link fixo (o APK é substituído a cada compilação)
+      - name: Publicar na release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=anime-a-dois-apk
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
+              --title "Anime a Dois (APK)" \
+              --notes "APK da app Flutter do Anime a Dois. Atualizado automaticamente a cada compilação."
+          gh release upload "$TAG" anime-a-dois.apk --clobber

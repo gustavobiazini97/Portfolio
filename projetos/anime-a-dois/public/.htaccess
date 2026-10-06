@@ -1,0 +1,13 @@
+# Apache (alwaysdata): ajustes para a API REST.
+# Tudo está dentro de <IfModule>: se o mod_rewrite faltar, o site continua a funcionar.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # O PHP-FPM costuma esconder o cabeçalho Authorization; isto passa-o ao PHP
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # URLs bonitos: /api/series/naruto → api.php/series/naruto
+    RewriteRule ^api/(.*)$ api.php/$1 [QSA,L]
+</IfModule>

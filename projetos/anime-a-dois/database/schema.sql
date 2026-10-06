@@ -83,6 +83,20 @@ CREATE TABLE IF NOT EXISTS preferencias (
   CONSTRAINT fk_pref_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Sessões da API (app Flutter): um token por telemóvel com sessão iniciada.
+-- Só se guarda o sha256 do token; o token em si fica apenas no telemóvel.
+CREATE TABLE IF NOT EXISTS tokens (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT UNSIGNED NOT NULL,
+  token_hash  CHAR(64)     NOT NULL UNIQUE,        -- sha256 do token enviado no Authorization
+  dispositivo VARCHAR(80)  NULL,                   -- nome do telemóvel (opcional, para o perfil)
+  criado_em   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  usado_em    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expira_em   DATETIME     NOT NULL,               -- renovado sempre que o token é usado
+  KEY idx_tokens_user (user_id),
+  CONSTRAINT fk_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- Telemóveis/browsers com notificações ativas (uma pessoa pode ter vários)
 CREATE TABLE IF NOT EXISTS subscricoes (
   id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

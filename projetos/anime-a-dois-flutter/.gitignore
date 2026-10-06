@@ -1,0 +1,27 @@
+# Ficheiros gerados pelo Flutter/Dart (não vão para o Git)
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# Pastas de plataforma: geradas com "flutter create" (ver README)
+/android/
+/ios/
+/web/
+/linux/
+/macos/
+/windows/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Chaves de assinatura do APK (nunca no Git)
+*.jks
+*.keystore
+key.properties
