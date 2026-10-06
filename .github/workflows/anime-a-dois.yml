@@ -6,7 +6,7 @@ name: Deploy Anime a Dois
 
 on:
   push:
-    branches: [main, feat/anime-a-dois]
+    branches: [main]   # só o main: dois ramos a fazer deploy para o mesmo servidor sobrepunham-se
     paths:
       - 'projetos/anime-a-dois/**'
       - 'projetos/naruto-fillers/data/fillers.json'

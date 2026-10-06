@@ -1,5 +1,6 @@
 <?php
-// API: comentários de um episódio (ler, escrever, apagar os teus).
+// API: comentários de um episódio. Como no site, só para séries da tua biblioteca, e cada pessoa
+// só vê os seus comentários e os de quem vê essa série com ela (comentários isolados).
 
 class ComentariosApi extends ApiController
 {
@@ -7,7 +8,7 @@ class ComentariosApi extends ApiController
     public function lista(string $id): void
     {
         $user = $this->exigirToken();
-        $episodio = $this->episodioOu404((int) $id);
+        $episodio = $this->episodioDaBiblioteca((int) $id, $user);
         $this->responderLista($episodio, $user);
     }
 
@@ -15,11 +16,11 @@ class ComentariosApi extends ApiController
     public function criar(string $id): void
     {
         $user = $this->exigirToken();
-        $episodio = $this->episodioOu404((int) $id);
+        $episodio = $this->episodioDaBiblioteca((int) $id, $user);
 
         // Comentario::escrever valida (vazio, tamanho) e lança InvalidArgumentException → 422
         $comentario = Comentario::escrever($user, $episodio, (string) $this->campo('texto', ''));
-        Notificador::comentario($user, $comentario);   // avisa o par, conforme as preferências dele
+        Notificador::comentario($user, $comentario);   // avisa os companheiros da série, conforme as preferências deles
 
         $this->responderLista($episodio, $user, 201);
     }
@@ -43,11 +44,13 @@ class ComentariosApi extends ApiController
         $this->responderLista($episodio, $user);
     }
 
-    // Lista de comentários do episódio, do mais antigo para o mais recente
+    // Lista do episódio: só os teus e os dos teus companheiros nesta série, do mais antigo para o mais recente
     private function responderLista(Episodio $episodio, User $user, int $estado = 200): never
     {
+        $autores = array_merge([$user->id], $episodio->serie->companheirosDe($user)->pluck('id')->all());
         $lista = Comentario::with('autor')
             ->where('episodio_id', $episodio->id)
+            ->whereIn('user_id', $autores)
             ->orderBy('criado_em')->orderBy('id')
             ->get();
 
@@ -59,12 +62,15 @@ class ComentariosApi extends ApiController
         ], $estado);
     }
 
-    // Episódio pelo id, ou 404 em JSON
-    private function episodioOu404(int $id): Episodio
+    // Episódio pelo id, de uma série da tua biblioteca (404 / 403 em JSON)
+    private function episodioDaBiblioteca(int $id, User $user): Episodio
     {
         $episodio = Episodio::find($id);
-        if ($episodio === null) {
+        if ($episodio === null || $episodio->serie === null) {
             $this->erro('Esse episódio não existe.', 404);
+        }
+        if (!$episodio->serie->naBibliotecaDe($user)) {
+            $this->erro('Essa série não está na tua biblioteca.', 403);
         }
         return $episodio;
     }

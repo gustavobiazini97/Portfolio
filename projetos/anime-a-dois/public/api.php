@@ -28,32 +28,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // [método, padrão, classe, ação]. {nome} apanha um pedaço do URL e passa-o à ação.
 $rotas = [
     // Conta
-    ['GET',    '/auth/estado',                 AuthApi::class,       'estado'],
-    ['POST',   '/auth/login',                  AuthApi::class,       'login'],
-    ['POST',   '/auth/registo',                AuthApi::class,       'registo'],
-    ['POST',   '/auth/logout',                 AuthApi::class,       'logout'],
-    ['GET',    '/eu',                          AuthApi::class,       'eu'],
+    ['GET',    '/auth/estado',                        AuthApi::class,        'estado'],
+    ['POST',   '/auth/login',                         AuthApi::class,        'login'],
+    ['POST',   '/auth/registo',                       AuthApi::class,        'registo'],
+    ['POST',   '/auth/logout',                        AuthApi::class,        'logout'],
+    ['GET',    '/eu',                                 AuthApi::class,        'eu'],
 
-    // Séries, episódios e vistos
-    ['GET',    '/inicio',                      SeriesApi::class,     'inicio'],
-    ['GET',    '/series',                      SeriesApi::class,     'lista'],
-    ['GET',    '/series/{slug}',               SeriesApi::class,     'ver'],
-    ['POST',   '/series/{slug}/vistos',        SeriesApi::class,     'marcar'],
-    ['GET',    '/series/{slug}/estatisticas',  SeriesApi::class,     'estatisticas'],
+    // Início, séries da tua biblioteca, vistos e estatísticas
+    ['GET',    '/inicio',                             SeriesApi::class,      'inicio'],
+    ['GET',    '/series',                             SeriesApi::class,      'lista'],
+    ['GET',    '/series/{slug}',                      SeriesApi::class,      'ver'],
+    ['POST',   '/series/{slug}/vistos',               SeriesApi::class,      'marcar'],
+    ['GET',    '/series/{slug}/estatisticas',         SeriesApi::class,      'estatisticas'],
 
-    // Comentários
-    ['GET',    '/episodios/{id}/comentarios',  ComentariosApi::class, 'lista'],
-    ['POST',   '/episodios/{id}/comentarios',  ComentariosApi::class, 'criar'],
-    ['DELETE', '/comentarios/{id}',            ComentariosApi::class, 'apagar'],
+    // Biblioteca: adicionar, estado, convites "Quero ver contigo", juntar, separar, tirar
+    ['POST',   '/biblioteca',                         BibliotecaApi::class,  'adicionar'],
+    ['PUT',    '/series/{slug}/estado',               BibliotecaApi::class,  'estado'],
+    ['POST',   '/series/{slug}/convites',             BibliotecaApi::class,  'convidar'],
+    ['POST',   '/series/{slug}/convites/aceitar',     BibliotecaApi::class,  'aceitar'],
+    ['DELETE', '/series/{slug}/convites/{id}',        BibliotecaApi::class,  'recusar'],
+    ['POST',   '/series/{slug}/juntar',               BibliotecaApi::class,  'juntar'],
+    ['DELETE', '/series/{slug}/juntos/{id}',          BibliotecaApi::class,  'separar'],
+    ['DELETE', '/series/{slug}',                      BibliotecaApi::class,  'remover'],
+
+    // Comentários (só os teus e os de quem vê a série contigo)
+    ['GET',    '/episodios/{id}/comentarios',         ComentariosApi::class, 'lista'],
+    ['POST',   '/episodios/{id}/comentarios',         ComentariosApi::class, 'criar'],
+    ['DELETE', '/comentarios/{id}',                   ComentariosApi::class, 'apagar'],
+
+    // Amigos e perfis de outras pessoas
+    ['GET',    '/amigos',                             AmigosApi::class,      'lista'],
+    ['POST',   '/amigos/convite',                     AmigosApi::class,      'criarConvite'],
+    ['POST',   '/amigos/pedidos',                     AmigosApi::class,      'pedir'],
+    ['POST',   '/amigos/pedidos/{id}/aceitar',        AmigosApi::class,      'aceitar'],
+    ['DELETE', '/amigos/pedidos/{id}',                AmigosApi::class,      'recusar'],
+    ['DELETE', '/amigos/{id}',                        AmigosApi::class,      'remover'],
+    ['GET',    '/pessoas/{id}',                       AmigosApi::class,      'pessoa'],
 
     // Perfil
-    ['PUT',    '/perfil',                      PerfilApi::class,     'guardar'],
-    ['PUT',    '/perfil/password',             PerfilApi::class,     'password'],
-    ['POST',   '/perfil/foto',                 PerfilApi::class,     'enviarFoto'],
-    ['DELETE', '/perfil/foto',                 PerfilApi::class,     'removerFoto'],
-    ['GET',    '/perfil/notificacoes',         PerfilApi::class,     'notificacoes'],
-    ['PUT',    '/perfil/notificacoes',         PerfilApi::class,     'guardarNotificacoes'],
-    ['GET',    '/utilizadores/{id}/foto',      PerfilApi::class,     'foto'],
+    ['PUT',    '/perfil',                             PerfilApi::class,      'guardar'],
+    ['PUT',    '/perfil/password',                    PerfilApi::class,      'password'],
+    ['PUT',    '/perfil/paleta',                      PerfilApi::class,      'paleta'],
+    ['PUT',    '/perfil/privacidade',                 PerfilApi::class,      'privacidade'],
+    ['POST',   '/perfil/apagar',                      PerfilApi::class,      'apagarConta'],
+    ['POST',   '/perfil/foto',                        PerfilApi::class,      'enviarFoto'],
+    ['DELETE', '/perfil/foto',                        PerfilApi::class,      'removerFoto'],
+    ['GET',    '/perfil/notificacoes',                PerfilApi::class,      'notificacoes'],
+    ['PUT',    '/perfil/notificacoes',                PerfilApi::class,      'guardarNotificacoes'],
+    ['GET',    '/utilizadores/{id}/foto',             PerfilApi::class,      'foto'],
 ];
 
 // Rota pedida: PATH_INFO (api.php/series) ou ?rota= (alojamentos sem PATH_INFO)
@@ -74,7 +96,7 @@ if ($rota === '/') {
     echo json_encode([
         'ok'     => true,
         'api'    => 'Anime a Dois',
-        'versao' => 1,
+        'versao' => 2,
         'rotas'  => array_map(fn ($r) => $r[0] . ' ' . $r[1], $rotas),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;

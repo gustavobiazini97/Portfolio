@@ -1,5 +1,5 @@
 <?php
-// API: perfil (nome, utilizador, palavra-passe, foto) e preferências de notificações.
+// API: perfil (nome, utilizador, palavra-passe, foto, cores, privacidade, apagar conta) e notificações.
 
 class PerfilApi extends ApiController
 {
@@ -25,10 +25,35 @@ class PerfilApi extends ApiController
             (string) $this->campo('confirmar', '')
         );
 
-        // Credenciais novas: os outros telemóveis têm de entrar outra vez (este continua)
+        // Credenciais novas: os outros telemóveis e browsers têm de entrar outra vez (este continua)
         Token::revogarOutros($user, $this->tokenAtual());
+        SessaoLonga::terminarTodas($user);   // sessões mantidas no site
 
         $this->json(['ok' => true, 'mensagem' => 'Palavra-passe alterada.']);
+    }
+
+    // PUT /perfil/paleta  { paleta: 0–5 } — as cores da app (só para ti; as mesmas do site)
+    public function paleta(): void
+    {
+        $user = $this->exigirToken();
+        $user->alterarPaleta((int) $this->campo('paleta', 0));   // paleta inexistente → 422
+        $this->ok('Cores guardadas.', ['paleta' => (int) $user->paleta]);
+    }
+
+    // PUT /perfil/privacidade  { so_juntos: bool } — os amigos só veem as séries que vês com eles (o par vê sempre tudo)
+    public function privacidade(): void
+    {
+        $user = $this->exigirToken();
+        $user->alterarSoJuntos((bool) $this->campo('so_juntos', false));
+        $this->ok('Privacidade guardada.', ['soJuntos' => (bool) $user->so_juntos]);
+    }
+
+    // POST /perfil/apagar  { password } — apaga a conta e tudo o que lhe pertence (os tokens vão com ela)
+    public function apagarConta(): void
+    {
+        $user = $this->exigirToken();
+        $user->apagarConta((string) $this->campo('password', ''));   // palavra-passe errada → 422
+        $this->ok('A tua conta foi apagada.');
     }
 
     // POST /perfil/foto  (multipart, campo "foto")
