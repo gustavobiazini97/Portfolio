@@ -8,6 +8,7 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # URLs bonitos: /api/series/naruto → api.php/series/naruto
-    RewriteRule ^api/(.*)$ api.php/$1 [QSA,L]
+    # URLs bonitos: /api/series/naruto → api.php?rota=/series/naruto
+    # (com ?rota= e não api.php/…: depois de um rewrite o alojamento não passa o PATH_INFO)
+    RewriteRule ^api/(.*)$ api.php?rota=/$1 [QSA,L]
 </IfModule>
