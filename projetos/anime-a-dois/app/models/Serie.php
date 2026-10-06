@@ -35,6 +35,35 @@ class Serie extends Model
         return $this->slug === 'shippuden' ? 'Shippuden' : $this->nome;
     }
 
+    // Cor de acento da série (a mesma do app.css), em hexadecimal; usada pela app Flutter.
+    // Séries novas sem cor definida ficam com um lilás neutro.
+    public function cor(): string
+    {
+        return [
+            'naruto'    => '#F7C59F',
+            'shippuden' => '#F2A7A0',
+            'boruto'    => '#A9C4EE',
+        ][$this->slug] ?? '#C9C2E0';
+    }
+
+    // Frase do Vs: quem vai à frente e por quantos episódios.
+    // $meu e $dele são o resultado de progressoDe(); $parceiro null = ainda sem conta
+    public static function resumoVs(array $meu, array $dele, ?User $parceiro): string
+    {
+        if ($parceiro === null) {
+            return 'Quando o teu par criar conta, aparece aqui ao teu lado.';
+        }
+
+        $dif = $meu['posicao'] - $dele['posicao'];
+        if ($dif > 0) {
+            return 'Vais ' . plural($dif, 'episódio', 'episódios') . ' à frente.';
+        }
+        if ($dif < 0) {
+            return $parceiro->nome . ' vai ' . plural(-$dif, 'episódio', 'episódios') . ' à frente.';
+        }
+        return 'Estão os dois no mesmo episódio.';
+    }
+
     // Arcos da série, de 1 ao último episódio, sem buracos: os canónicos vêm de database/arcos.json
     // e os intervalos entre eles viram "Filler" (se a maioria for filler) ou "Episódios avulsos".
     // Devolve [] se a série não tiver arcos no ficheiro (ex.: Boruto).

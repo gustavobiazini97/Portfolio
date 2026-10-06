@@ -1,0 +1,38 @@
+# App Flutter do Anime a Dois: os mesmos dados do site, através da API REST (public/api.php).
+name: anime_a_dois
+description: Registo dos episódios vistos a dois, lado a lado (app Android).
+publish_to: 'none'          # não é um pacote para o pub.dev
+
+# versão visível (1.0.0) + número da build (1); subir a cada APK novo
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2                  # pedidos à API
+  shared_preferences: ^2.3.2    # guarda o token e o tema no telemóvel
+  google_fonts: ^6.2.1          # M PLUS Rounded 1c, a mesma letra do site
+  image_picker: ^1.1.2          # escolher/tirar a foto de perfil
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1   # gera o ícone Android a partir de assets/icon
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/
+
+# Ícone da app (corre-se com: dart run flutter_launcher_icons)
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#F5F3F8"            # o mesmo fundo claro do site
+  adaptive_icon_foreground: "assets/icon/icon-frente.png"
+  min_sdk_android: 21

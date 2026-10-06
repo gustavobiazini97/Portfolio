@@ -39,24 +39,7 @@ class HomeController extends Controller
             'ultimoPar' => $ultimoPar,
             'meu'       => $meu,
             'dele'      => $dele,
-            'resumo'    => $this->resumoVs($meu, $dele, $parceiro),
+            'resumo'    => Serie::resumoVs($meu, $dele, $parceiro),   // frase do Vs (vive no Model)
         ]);
-    }
-
-    // Frase por baixo das barras: quem vai à frente e por quantos episódios
-    private function resumoVs(array $meu, array $dele, ?User $parceiro): string
-    {
-        if ($parceiro === null) {
-            return 'Quando o teu par criar conta, aparece aqui ao teu lado.';
-        }
-
-        $dif = $meu['posicao'] - $dele['posicao'];
-        if ($dif > 0) {
-            return 'Vais ' . plural($dif, 'episódio', 'episódios') . ' à frente.';
-        }
-        if ($dif < 0) {
-            return $parceiro->nome . ' vai ' . plural(-$dif, 'episódio', 'episódios') . ' à frente.';
-        }
-        return 'Estão os dois no mesmo episódio.';
     }
 }

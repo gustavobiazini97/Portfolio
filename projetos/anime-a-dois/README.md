@@ -20,6 +20,7 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 - [x] Notificações ao par (episódios e comentários) por telemóvel (Web Push) e/ou email, escolhidas no perfil
 - [x] Estatísticas por série: números dos dois, ritmo semanal com previsão, arcos (`database/arcos.json`) e curiosidades
 - [x] Títulos de todos os episódios (`database/titulos.py`, workflow "Títulos Anime a Dois")
+- [x] API REST com login por token (`public/api.php`, documentada em `docs/API.md`), usada pela app Flutter em `../anime-a-dois-flutter`
 
 ## Online (alwaysdata)
 
@@ -61,12 +62,14 @@ A primeira pessoa a abrir cria a conta 1, e a segunda cria a conta 2. A partir d
 app/
   bootstrap.php     autoload, helpers e ligação ao Eloquent
   core/             Controller base, Database, helpers das views
+  api/              controllers da API REST (AuthApi, SeriesApi, ComentariosApi, PerfilApi)
   controllers/      AuthController, HomeController, SerieController, PerfilController, EstatisticasController
-  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas (a lógica vive aqui)
+  models/           User, Serie, Episodio, Foto, Comentario, Preferencia, Subscricao, Notificador, Estatisticas, Token (a lógica vive aqui)
   views/            layout, auth, home, serie, perfil
 config/             config.example.php (o config.php fica fora do Git)
 database/           schema.sql, migrate.php e seed.php
-public/             index.php (front controller), css/ e js/
+docs/API.md         documentação da API REST
+public/             index.php (site), api.php (API), css/ e js/
 ```
 
 Rotas no formato `index.php?c=<controller>&a=<ação>`; só as que estão listadas em `public/index.php` existem.
