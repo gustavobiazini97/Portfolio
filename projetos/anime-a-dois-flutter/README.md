@@ -7,7 +7,7 @@ os dados são os mesmos, por isso o que marcas na app aparece no site e vice-ver
 ## Descarregar o APK
 
 Cada push que mexa nesta pasta compila o APK no GitHub Actions (workflow **APK Anime a Dois**).
-O APK mais recente (debug, arm64) fica sempre no mesmo link:
+O APK mais recente (release, arm64) fica sempre no mesmo link:
 
 **https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk**
 

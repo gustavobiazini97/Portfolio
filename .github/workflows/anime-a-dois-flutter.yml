@@ -5,7 +5,7 @@
 #   1. o APK fica nos "Artifacts" da execução;
 #   2. e na release "anime-a-dois-apk", com um link fixo para descarregar no telemóvel:
 #      https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk
-# O APK é de debug e só arm64 (telemóveis atuais), para compilar mais depressa.
+# O APK é de release e só arm64 (telemóveis atuais).
 #
 # Secret opcional: ANDROID_KEYSTORE_B64 (keystore em base64, ver o README da app).
 # Sem ele, cada APK é assinado com uma chave diferente e, para atualizar, é preciso desinstalar primeiro.
@@ -102,13 +102,13 @@ jobs:
           fi
 
       # Número da build = número da execução (o Android exige que suba a cada versão).
-      # Debug e só arm64: compila mais depressa (sem AOT) e uma única vez
-      - name: Compilar o APK (debug)
+      # Release só para arm64 (quase todos os telemóveis atuais): uma compilação, APK pequeno
+      - name: Compilar o APK (release)
         run: |
-          flutter build apk --debug --target-platform android-arm64 \
+          flutter build apk --release --split-per-abi --target-platform android-arm64 \
             --dart-define=API_URL="$API_URL" \
             --build-number=${{ github.run_number }}
-          cp build/app/outputs/flutter-apk/app-debug.apk anime-a-dois.apk
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk anime-a-dois.apk
           ls -la anime-a-dois.apk
 
       - uses: actions/upload-artifact@v4
