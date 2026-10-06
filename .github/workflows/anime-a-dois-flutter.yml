@@ -101,18 +101,40 @@ jobs:
           fi
           tail -2 testes.txt
 
-      # Chave fixa de assinatura (se o secret existir): permite atualizar a app sem desinstalar
+      # Chave fixa de assinatura (se o secret existir): permite atualizar a app sem desinstalar.
+      # Fica em android/app/anime.keystore e o build.gradle.kts passa a usá-la explicitamente no release.
       - name: Chave de assinatura
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
-          if [ -n "$KEYSTORE_B64" ]; then
-            mkdir -p ~/.android
-            echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
-            echo "Chave fixa instalada."
-          else
+          if [ -z "$KEYSTORE_B64" ]; then
             echo "::notice::Sem ANDROID_KEYSTORE_B64 — o APK usa uma chave temporária."
+            exit 0
           fi
+          echo "$KEYSTORE_B64" | base64 -d > android/app/anime.keystore
+          keytool -list -keystore android/app/anime.keystore -storepass android | grep -i "SHA-256"
+          python3 - <<'PY'
+          import re, pathlib
+          g = pathlib.Path("android/app/build.gradle.kts")
+          s = g.read_text()
+          bloco = """    signingConfigs {
+                  create("fixa") {
+                      storeFile = file("anime.keystore")
+                      storePassword = "android"
+                      keyAlias = "androiddebugkey"
+                      keyPassword = "android"
+                  }
+              }
+
+              buildTypes {"""
+          if "buildTypes {" not in s or 'signingConfigs.getByName("debug")' not in s:
+              raise SystemExit("build.gradle.kts com um formato inesperado")
+          s = s.replace("    buildTypes {", bloco, 1)
+          s = s.replace('signingConfig = signingConfigs.getByName("debug")', 'signingConfig = signingConfigs.getByName("fixa")')
+          g.write_text(s)
+          print("Assinatura fixa configurada.")
+          PY
+          grep -n 'signingConfig\|anime.keystore' android/app/build.gradle.kts
 
       # Número da build = número da execução (o Android exige que suba a cada versão).
       # Release só para arm64 (quase todos os telemóveis atuais): uma compilação, APK pequeno
