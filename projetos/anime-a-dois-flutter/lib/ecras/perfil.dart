@@ -9,6 +9,8 @@ import '../api/modelos.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import 'medalhas.dart';
+import 'retrospetiva.dart';
 
 class EcraPerfil extends StatefulWidget {
   const EcraPerfil({super.key});
@@ -253,7 +255,8 @@ class _EcraPerfilState extends State<EcraPerfil> {
                 padding: const EdgeInsets.fromLTRB(4, 6, 8, 0),
                 child: Row(
                   children: [
-                    const BackButton(),
+                    // Nos separadores da barra de baixo não há para onde voltar
+                    if (Navigator.of(context).canPop()) const BackButton() else const SizedBox(width: 16),
                     Text('Perfil', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   ],
                 ),
@@ -385,6 +388,44 @@ class _EcraPerfilState extends State<EcraPerfil> {
           ),
           const SizedBox(height: 14),
         ],
+
+        // ---------- Conquistas: medalhas e retrospetivas ----------
+        Row(
+          children: [
+            Expanded(
+              child: Vidro(
+                padding: const EdgeInsets.all(16),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EcraMedalhas())),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('🏅', style: TextStyle(fontSize: 28)),
+                    SizedBox(height: 6),
+                    Text('Medalhas', style: TextStyle(fontWeight: FontWeight.w700)),
+                    Text('as tuas conquistas', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Vidro(
+                padding: const EdgeInsets.all(16),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EcraRetrospetivas())),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('📼', style: TextStyle(fontSize: 28)),
+                    SizedBox(height: 6),
+                    Text('Retrospetivas', style: TextStyle(fontWeight: FontWeight.w700)),
+                    Text('mês a mês e o ano', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
 
         // ---------- Cores (só para ti; as mesmas do site) ----------
         Vidro(

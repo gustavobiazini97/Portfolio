@@ -1,10 +1,10 @@
 // Anime a Dois — app Flutter.
-// Lê o token guardado e abre o Início (com sessão) ou o Login (sem sessão).
+// Lê o token guardado e abre o ecrã principal (com a barra de baixo) ou o Login (sem sessão).
 
 import 'package:flutter/material.dart';
 
 import 'config.dart';
-import 'ecras/inicio.dart';
+import 'ecras/principal.dart';
 import 'ecras/login.dart';
 import 'estado/sessao.dart';
 import 'tema/tema.dart';
@@ -34,7 +34,7 @@ class AnimeADois extends StatelessWidget {
         themeMode: sessao.tema,
         // A chave força um ecrã novo ao entrar/sair (sem restos da sessão anterior)
         home: sessao.autenticado
-            ? const EcraInicio(key: ValueKey('inicio'))
+            ? const EcraPrincipal(key: ValueKey('principal'))
             : const EcraLogin(key: ValueKey('login')),
       ),
     );

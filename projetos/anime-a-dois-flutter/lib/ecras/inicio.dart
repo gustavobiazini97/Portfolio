@@ -1,5 +1,6 @@
 // Início, igual ao do site:
-//   topo (logótipo, estatísticas, amigos, tema, o teu avatar), último episódio do par (com o número grande),
+//   topo (logótipo, estatísticas, tema; amigos e perfil estão na barra de baixo), último episódio do par,
+//   o cartão da retrospetiva do mês,
 //   a tua biblioteca em capas, a série aberta (placar com o episódio de cada um e a frase do Vs),
 //   o teu estado, "Vês com… · Deixar de ver juntos", "Continuar · episódio N",
 //   os convites "Quero ver contigo" e a fila "<par> está a ver".
@@ -12,10 +13,10 @@ import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 import 'adicionar.dart';
-import 'amigos.dart';
 import 'estatisticas.dart';
-import 'perfil.dart';
+import 'medalhas.dart';
 import 'pessoa.dart';
+import 'retrospetiva.dart';
 import 'serie.dart';
 
 // Resumo da série aberta (GET /series/{slug}?episodios=0): o placar do Início
@@ -51,7 +52,6 @@ class _EcraInicioState extends State<EcraInicio> {
   List<ConviteSerie> _convites = [];
   List<Utilizador> _ligados = [];
   Map<String, dynamic> _jaCa = {};
-  int _pedidosAmigos = 0;
 
   String? _selecionada; // slug da série aberta
   _Aberta? _aberta; // o resumo dela
@@ -64,6 +64,7 @@ class _EcraInicioState extends State<EcraInicio> {
     super.initState();
     _carregar();
     Sessao.instancia.carregarEu().catchError((_) {}); // paleta e definições (falhar aqui não faz mal)
+    _verMedalhasNovas();
   }
 
   Future<void> _carregar() async {
@@ -80,7 +81,8 @@ class _EcraInicioState extends State<EcraInicio> {
         _convites = ((d['convites'] as List?) ?? []).map((c) => ConviteSerie.deJson(c as Map<String, dynamic>)).toList();
         _ligados = Utilizador.lista(d['ligados']);
         _jaCa = (d['jaCa'] as Map<String, dynamic>?) ?? {};
-        _pedidosAmigos = (d['pedidosAmigos'] as num?)?.toInt() ?? 0;
+        // Pedidos de amizade: a bolinha está no separador Amigos da barra de baixo
+        Sessao.instancia.pedidosAmigos = (d['pedidosAmigos'] as num?)?.toInt() ?? 0;
         // Mantém a série escolhida se ainda estiver na biblioteca; senão a sugerida pela API
         if (_selecionada == null || !_biblioteca.any((i) => i.serie.slug == _selecionada)) {
           _selecionada = d['serieAtual'] as String? ?? (_biblioteca.isEmpty ? null : _biblioteca.first.serie.slug);
@@ -214,34 +216,10 @@ class _EcraInicioState extends State<EcraInicio> {
           onTap: atual == null ? null : () => _abrir(EcraEstatisticas(slug: atual.serie.slug)),
         ),
         const SizedBox(width: 8),
-        Badge(
-          isLabelVisible: _pedidosAmigos > 0,
-          smallSize: 10,
-          backgroundColor: p.parTxt,
-          child: BotaoRedondo(
-            tooltip: 'Amigos',
-            icone: const Icon(Icons.people_outline_rounded),
-            onTap: () => _abrir(const EcraAmigos()),
-          ),
-        ),
-        const SizedBox(width: 8),
         BotaoRedondo(
           tooltip: escuro ? 'Tema claro' : 'Tema escuro',
           icone: Icon(escuro ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
           onTap: Sessao.instancia.alternarTema,
-        ),
-        const SizedBox(width: 8),
-        // O teu avatar abre o perfil
-        GestureDetector(
-          onTap: () => _abrir(const EcraPerfil()),
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: p.vidroBorda, width: 2),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .12), blurRadius: 16, offset: const Offset(0, 6))],
-            ),
-            child: Avatar(user: _user, cor: p.tu, tamanho: 42),
-          ),
         ),
       ],
     );
@@ -261,6 +239,10 @@ class _EcraInicioState extends State<EcraInicio> {
         ),
         const SizedBox(height: 14),
       ],
+
+      // ---------- Retrospetiva (do mês; do mês anterior nos primeiros dias; do ano em dezembro) ----------
+      _cartaoRetrospetiva(p),
+      const SizedBox(height: 14),
 
       // ---------- A tua biblioteca ----------
       Padding(
@@ -310,6 +292,69 @@ class _EcraInicioState extends State<EcraInicio> {
         _fila(p, _doPar, (i) => _folhaJuntar(p, i, _par!), dono: _par),
       ],
     ];
+  }
+
+  // Cartão que abre a retrospetiva: o mês atual; nos primeiros 7 dias, a do mês que acabou;
+  // a partir de 20 de dezembro, a do ano
+  Widget _cartaoRetrospetiva(Paleta p) {
+    final hoje = DateTime.now();
+    late final int ano;
+    int? mes;
+    late final String titulo;
+    late final String texto;
+    if (hoje.month == 12 && hoje.day >= 20) {
+      ano = hoje.year;
+      titulo = 'O teu ${hoje.year} em anime';
+      texto = 'A retrospetiva do ano está pronta';
+    } else if (hoje.day <= 7) {
+      final antes = DateTime(hoje.year, hoje.month - 1);
+      ano = antes.year;
+      mes = antes.month;
+      titulo = 'O teu ${nomeMes(antes.month)}';
+      texto = 'A retrospetiva do mês está pronta';
+    } else {
+      ano = hoje.year;
+      mes = hoje.month;
+      titulo = 'O teu ${nomeMes(hoje.month)} até agora';
+      texto = 'Episódios, maratonas e quem vai à frente';
+    }
+    return Vidro(
+      padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
+      onTap: () => _abrir(EcraRetrospetiva(ano: ano, mes: mes)),
+      tinta: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [p.tu.withValues(alpha: .45), p.par.withValues(alpha: .45)],
+      ),
+      child: Row(
+        children: [
+          const Text('📼', style: TextStyle(fontSize: 28)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titulo, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                Text(texto, style: TextStyle(fontSize: 12.5, color: p.tinta.withValues(alpha: .7))),
+              ],
+            ),
+          ),
+          Icon(Icons.play_circle_fill_rounded, size: 30, color: p.tinta),
+        ],
+      ),
+    );
+  }
+
+  // Medalhas novas desde a última vez: aviso em baixo com "Ver"
+  Future<void> _verMedalhasNovas() async {
+    final novas = await medalhasNovas();
+    if (!mounted || novas.isEmpty) return;
+    final texto = novas.length == 1 ? '🏅 Nova medalha: ${novas.first}' : '🏅 ${novas.length} medalhas novas!';
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(texto),
+      duration: const Duration(seconds: 5),
+      action: SnackBarAction(label: 'Ver', onPressed: () => _abrir(const EcraMedalhas())),
+    ));
   }
 
   // "Andreia viu há 2 dias / Naruto · episódio 4" com o número grande à direita

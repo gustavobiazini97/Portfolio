@@ -13,10 +13,12 @@ import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 
 class EcraAdicionar extends StatefulWidget {
-  final List<Utilizador> ligados; // par + amigos (a quem se pode propor a série)
-  final Map<String, dynamic> jaCa; // mal_id → 'biblioteca' | 'convite'
+  // Par + amigos (a quem se pode propor a série) e mal_id → 'biblioteca' | 'convite'.
+  // Vindo do "+" da barra de baixo não há estes dados: o ecrã vai buscá-los ao GET /inicio.
+  final List<Utilizador>? ligados;
+  final Map<String, dynamic>? jaCa;
 
-  const EcraAdicionar({super.key, required this.ligados, required this.jaCa});
+  const EcraAdicionar({super.key, this.ligados, this.jaCa});
 
   @override
   State<EcraAdicionar> createState() => _EcraAdicionarState();
@@ -33,6 +35,29 @@ class _EcraAdicionarState extends State<EcraAdicionar> {
 
   int? _aAdicionar; // mal_id a ser adicionado (mostra o progresso nesse cartão)
   String _progresso = '';
+
+  late List<Utilizador> _ligados = widget.ligados ?? [];
+  late Map<String, dynamic> _jaCa = widget.jaCa ?? {};
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.ligados == null || widget.jaCa == null) _carregarContexto();
+  }
+
+  // A quem se pode propor e o que já está na biblioteca (para marcar os resultados)
+  Future<void> _carregarContexto() async {
+    try {
+      final d = await Api.instancia.get('/inicio');
+      if (!mounted) return;
+      setState(() {
+        _ligados = Utilizador.lista(d['ligados']);
+        _jaCa = (d['jaCa'] as Map<String, dynamic>?) ?? {};
+      });
+    } on ApiErro {
+      // sem isto a pesquisa funciona na mesma (só sem o "Ver com…" e as marcas)
+    }
+  }
 
   @override
   void dispose() {
@@ -122,7 +147,7 @@ class _EcraAdicionarState extends State<EcraAdicionar> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text('Ver ${r.nome} com…', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
             ),
-            for (final u in widget.ligados)
+            for (final u in _ligados)
               ListTile(
                 leading: Avatar(user: u, cor: p.par),
                 title: Text(u.nome),
@@ -189,7 +214,7 @@ class _EcraAdicionarState extends State<EcraAdicionar> {
   // Um resultado: capa, nome, resumo e os botões (ou "já está na tua biblioteca")
   Widget _cartao(Paleta p, ResultadoAnime r) {
     final textos = Theme.of(context).textTheme;
-    final situacao = widget.jaCa['${r.malId}'] as String?;
+    final situacao = _jaCa['${r.malId}'] as String?;
     final esteAAdicionar = _aAdicionar == r.malId;
     final serieFalsa = Serie(slug: '', nome: r.nome, nomeCurto: r.nome, totalEpisodios: r.episodios ?? 0, capa: r.capa, cor: p.par);
 
@@ -228,7 +253,7 @@ class _EcraAdicionarState extends State<EcraAdicionar> {
                         onPressed: _aAdicionar == null ? () => _adicionar(r) : null,
                         child: const Text('Adicionar'),
                       ),
-                      if (widget.ligados.isNotEmpty)
+                      if (_ligados.isNotEmpty)
                         OutlinedButton(
                           onPressed: _aAdicionar == null ? () => _escolherCom(r) : null,
                           child: const Text('Ver com…'),

@@ -115,7 +115,8 @@ class _EcraAmigosState extends State<EcraAmigos> {
                 padding: const EdgeInsets.fromLTRB(4, 6, 8, 0),
                 child: Row(
                   children: [
-                    const BackButton(),
+                    // Nos separadores da barra de baixo não há para onde voltar
+                    if (Navigator.of(context).canPop()) const BackButton() else const SizedBox(width: 16),
                     Text('Amigos', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   ],
                 ),

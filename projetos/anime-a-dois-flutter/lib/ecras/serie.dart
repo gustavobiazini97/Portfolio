@@ -6,12 +6,14 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../widgets/menu_radial.dart';
 import 'comentarios.dart';
 
 class EcraSerie extends StatefulWidget {
@@ -40,6 +42,8 @@ class _EcraSerieState extends State<EcraSerie> {
   bool _aGuardar = false;
   String? _erro;
 
+  final _menu = MenuRadial(); // toque longo num cartão
+
   // Largura de um cartão + espaço (172 + 12, como no site)
   static const _larguraCartao = 172.0;
   static const _espaco = 12.0;
@@ -52,6 +56,7 @@ class _EcraSerieState extends State<EcraSerie> {
 
   @override
   void dispose() {
+    _menu.fechar(executar: false);
     _pista?.dispose();
     super.dispose();
   }
@@ -190,6 +195,56 @@ class _EcraSerieState extends State<EcraSerie> {
     } else if (i != _atual) {
       _pista?.animateToPage(i, duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
     }
+  }
+
+  // Opções do menu radial de um cartão: marcar/desmarcar, comentar, marcar até aqui, partilhar, selecionar vários
+  List<OpcaoRadial> _opcoesMenu(Episodio e, int i) {
+    final porVerAntes = _eps.sublist(0, i + 1).where((x) => !x.tu).toList();
+    return [
+      OpcaoRadial(
+        icone: e.tu ? Icons.undo_rounded : Icons.check_rounded,
+        texto: e.tu ? 'Desmarcar o ${e.numero}' : 'Vi o ${e.numero}',
+        destaque: true,
+        acao: () => _marcar([e], visto: !e.tu, avancar: !e.tu),
+      ),
+      OpcaoRadial(icone: Icons.chat_bubble_outline_rounded, texto: 'Comentários', acao: () => _comentarios(e)),
+      if (porVerAntes.length > 1)
+        OpcaoRadial(
+          icone: Icons.fast_forward_rounded,
+          texto: 'Marcar até aqui (${porVerAntes.length})',
+          acao: () => _marcarAteAqui(e, porVerAntes),
+        ),
+      OpcaoRadial(icone: Icons.share_rounded, texto: 'Partilhar', acao: () => _partilharEpisodio(e)),
+      OpcaoRadial(
+        icone: Icons.checklist_rounded,
+        texto: 'Selecionar vários',
+        acao: () => setState(() {
+          _multiplo = true;
+          _selecionados
+            ..clear()
+            ..add(e.id);
+        }),
+      ),
+    ];
+  }
+
+  // Marca todos os episódios por ver até este (inclusive), com confirmação
+  Future<void> _marcarAteAqui(Episodio e, List<Episodio> porVer) async {
+    final sim = await confirmar(
+      context,
+      'Marcar até ao episódio ${e.numero}?',
+      'Ficam vistos ${porVer.length} episódios que ainda não tinhas marcado.',
+      sim: 'Marcar ${porVer.length}',
+    );
+    if (sim) _marcar(porVer, visto: true);
+  }
+
+  // Partilha o episódio (menu do Android)
+  void _partilharEpisodio(Episodio e) {
+    final s = _serie;
+    if (s == null) return;
+    final titulo = (e.titulo ?? '').isEmpty ? '' : ' — "${e.titulo}"';
+    Share.share('${e.tu ? 'Vi' : 'Vou ver'} o episódio ${e.numero} de ${s.nome}$titulo 📺\nNo Anime a Dois: animeadois.alwaysdata.net');
   }
 
   // Abre a folha de comentários e atualiza o número no cartão
@@ -505,10 +560,17 @@ class _EcraSerieState extends State<EcraSerie> {
       duration: const Duration(milliseconds: 250),
       child: GestureDetector(
         onTap: () => _tocar(i),
-        onLongPress: () => setState(() {
-          _multiplo = true;
-          _selecionados.add(e.id);
-        }),
+        // Toque longo: menu radial (no modo de seleção, escolhe o cartão)
+        onLongPressStart: (d) {
+          if (_multiplo) {
+            setState(() => _selecionados.contains(e.id) ? _selecionados.remove(e.id) : _selecionados.add(e.id));
+            return;
+          }
+          if (i != _atual) _pista?.animateToPage(i, duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
+          _menu.abrir(context, d.globalPosition, _opcoesMenu(e, i));
+        },
+        onLongPressMoveUpdate: (d) => _menu.mover(d.globalPosition),
+        onLongPressEnd: (_) => _menu.fechar(),
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(

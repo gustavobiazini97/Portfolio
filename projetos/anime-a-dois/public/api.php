@@ -65,6 +65,12 @@ $rotas = [
     ['DELETE', '/amigos/{id}',                        AmigosApi::class,      'remover'],
     ['GET',    '/pessoas/{id}',                       AmigosApi::class,      'pessoa'],
 
+    // Retrospetivas (mensal e anual) e medalhas
+    ['GET',    '/resumos',                            ResumoApi::class,      'periodos'],
+    ['GET',    '/resumos/{ano}',                      ResumoApi::class,      'ano'],
+    ['GET',    '/resumos/{ano}/{mes}',                ResumoApi::class,      'mes'],
+    ['GET',    '/medalhas',                           ResumoApi::class,      'medalhas'],
+
     // Perfil
     ['PUT',    '/perfil',                             PerfilApi::class,      'guardar'],
     ['PUT',    '/perfil/password',                    PerfilApi::class,      'password'],
