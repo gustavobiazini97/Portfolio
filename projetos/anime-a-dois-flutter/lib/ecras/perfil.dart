@@ -9,6 +9,7 @@ import '../api/modelos.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../estado/atualizacoes.dart';
 import 'medalhas.dart';
 import 'retrospetiva.dart';
 
@@ -38,10 +39,15 @@ class _EcraPerfilState extends State<EcraPerfil> {
   bool _aGuardarNotif = false;
   bool _aGuardarFoto = false;
   bool _soJuntos = false; // privacidade: os amigos só veem as séries que vês com eles
+  String _versao = ''; // versão instalada (ex.: "1.3.0 (build 45)")
+  bool _aProcurar = false;
 
   @override
   void initState() {
     super.initState();
+    Atualizacoes.versaoInstalada().then((v) {
+      if (mounted) setState(() => _versao = v);
+    });
     _carregar();
   }
 
@@ -206,6 +212,19 @@ class _EcraPerfilState extends State<EcraPerfil> {
       if (mounted) aviso(context, 'Cores guardadas.');
     } on ApiErro catch (e) {
       if (mounted) aviso(context, e.mensagem, erro: true);
+    }
+  }
+
+  // Procurar atualizações à mão: popup se houver, aviso se não
+  Future<void> _procurarAtualizacoes() async {
+    setState(() => _aProcurar = true);
+    final nova = await Atualizacoes.procurar();
+    if (!mounted) return;
+    setState(() => _aProcurar = false);
+    if (nova == null) {
+      aviso(context, 'Tens a versão mais recente. ✨');
+    } else {
+      await Atualizacoes.mostrar(context, nova);
     }
   }
 
@@ -486,6 +505,16 @@ class _EcraPerfilState extends State<EcraPerfil> {
                 title: const Text('Tema escuro'),
                 value: escuro,
                 onChanged: (_) => Sessao.instancia.alternarTema(),
+              ),
+              const Divider(height: 1),
+              // Versão instalada e procurar atualizações
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.system_update_rounded),
+                title: const Text('Procurar atualizações'),
+                subtitle: Text(_versao.isEmpty ? '' : 'Versão $_versao'),
+                trailing: _aProcurar ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : null,
+                onTap: _aProcurar ? null : _procurarAtualizacoes,
               ),
               const Divider(height: 1),
               ListTile(

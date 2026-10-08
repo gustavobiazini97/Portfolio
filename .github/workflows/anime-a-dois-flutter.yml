@@ -156,6 +156,26 @@ jobs:
           name: anime-a-dois-apk
           path: projetos/anime-a-dois-flutter/anime-a-dois.apk
 
+      # versao.json: a app lê-o ao abrir e, se o build for maior do que o dela, avisa que há versão nova.
+      # As notas vêm do novidades.json (entrada com a mesma versão do pubspec).
+      - name: Gerar versao.json
+        run: |
+          python3 - <<'PY'
+          import json, re, datetime, pathlib
+          versao = re.search(r'^version:\s*([0-9.]+)', pathlib.Path('pubspec.yaml').read_text(), re.M).group(1)
+          novidades = json.loads(pathlib.Path('novidades.json').read_text(encoding='utf-8'))
+          notas = next((n['notas'] for n in novidades if n['versao'] == versao), [])
+          dados = {
+              'versao': versao,
+              'build': int('${{ github.run_number }}'),
+              'data': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
+              'notas': notas,
+              'apk': 'https://animeadois.alwaysdata.net/app',
+          }
+          pathlib.Path('versao.json').write_text(json.dumps(dados, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(json.dumps(dados, ensure_ascii=False))
+          PY
+
       # Release com link fixo (o APK é substituído a cada compilação)
       - name: Publicar na release
         env:
@@ -166,6 +186,6 @@ jobs:
             gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
               --title "Anime a Dois (APK)" \
               --notes "APK da app Flutter do Anime a Dois. Atualizado automaticamente a cada compilação."
-          gh release upload "$TAG" anime-a-dois.apk --clobber
+          gh release upload "$TAG" anime-a-dois.apk versao.json --clobber
           # Remove o APK arm64 antigo (deixou de ser gerado; o anime-a-dois.apk já é arm64)
           gh release delete-asset "$TAG" anime-a-dois-arm64.apk -y 2>/dev/null || true

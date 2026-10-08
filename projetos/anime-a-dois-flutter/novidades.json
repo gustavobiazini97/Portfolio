@@ -1,0 +1,25 @@
+[
+  {
+    "versao": "1.3.0",
+    "notas": [
+      "Avisos de versão nova: a app avisa quando sai uma atualização, com o que mudou",
+      "Perfil: versão instalada e botão \"Procurar atualizações\""
+    ]
+  },
+  {
+    "versao": "1.2.0",
+    "notas": [
+      "Barra de navegação em baixo, com o + ao centro e o ecrã Biblioteca",
+      "Retrospetiva do mês e do ano, com imagem para partilhar",
+      "Medalhas com animação de desbloqueio",
+      "Menu radial no episódio: toque longo e arrasta"
+    ]
+  },
+  {
+    "versao": "1.1.0",
+    "notas": [
+      "App igual ao site novo: amigos, bibliotecas e convites",
+      "Atualizações instalam-se por cima (chave fixa)"
+    ]
+  }
+]

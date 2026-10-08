@@ -3,8 +3,8 @@ name: anime_a_dois
 description: Registo dos episódios vistos a dois, lado a lado (app Android).
 publish_to: 'none'          # não é um pacote para o pub.dev
 
-# versão visível (1.1.0 = app do site novo, com chave fixa) + número da build (o workflow usa o nº da execução)
-version: 1.2.0+1
+# versão visível (subir a cada lançamento e escrever as notas em novidades.json) + build (o workflow usa o nº da execução)
+version: 1.3.0+1
 
 environment:
   sdk: ^3.5.0
@@ -17,6 +17,8 @@ dependencies:
   google_fonts: ^6.2.1          # M PLUS Rounded 1c, a mesma letra do site
   image_picker: ^1.1.2          # escolher/tirar a foto de perfil
   share_plus: ^10.1.4           # partilhar o convite (menu do Android: WhatsApp, SMS…)
+  package_info_plus: ^8.0.2     # versão e build instalados (para saber se há atualização)
+  url_launcher: ^6.3.0          # abrir o link do APK novo no browser
 
 dev_dependencies:
   flutter_test:

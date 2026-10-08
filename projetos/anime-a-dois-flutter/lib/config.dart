@@ -14,3 +14,6 @@ const String appNome = 'Anime a Dois';
 // Link curto para instalar a app (o .htaccess do site redireciona para o APK mais recente).
 // Vai nos convites partilhados em Amigos.
 const String linkApp = 'https://animeadois.alwaysdata.net/app';
+
+// Ficheiro com a última versão publicada (gerado pelo workflow do APK, na release do GitHub)
+const String linkVersao = 'https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/versao.json';

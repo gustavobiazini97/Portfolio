@@ -8,6 +8,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../estado/atualizacoes.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import 'adicionar.dart';
@@ -28,6 +29,15 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
 
   // Versão de cada separador: mudar a chave faz o ecrã recarregar os dados
   final List<int> _versoes = [0, 0, 0, 0];
+
+  @override
+  void initState() {
+    super.initState();
+    // Versão nova publicada? Pergunta logo depois do primeiro ecrã aparecer
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Atualizacoes.verificarAoAbrir(context);
+    });
+  }
 
   // Separadores (o "+" não é um separador: está entre o 2.º e o 3.º)
   static const _itens = [
