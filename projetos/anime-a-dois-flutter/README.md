@@ -36,10 +36,14 @@ Os mesmos do site (API v2): cada pessoa tem a sua biblioteca e cada série pode 
 
 | Ecrã | O que faz |
 |---|---|
+| Barra de baixo | Início · Biblioteca · + (adicionar) · Amigos · Perfil |
+| Biblioteca | Todas as tuas séries em grelha, por estado, com filtro |
+| Retrospetiva | Stories do mês ou do ano, com cartão final partilhável em imagem |
+| Medalhas | 21 medalhas com progresso e animação de desbloqueio |
 | Entrar / Criar conta | Token guardado no telemóvel; "Criar conta" enquanto há lugar para o casal; "Tenho um convite" para amigos |
 | Início | Último episódio do par, biblioteca em capas, série escolhida com o Vs e o estado, ver com…, deixar de ver juntos, tirar, convites "Quero ver contigo" e a fila do par |
 | Adicionar | Pesquisa no AniList (pelo telemóvel) e episódios do Jikan/Kitsu; "Adicionar" ou "Ver com…" |
-| Série | Mapa com todos os companheiros, pista de cartões, régua, marcar com um toque, seleção múltipla com toque longo |
+| Série | Mapa com todos os companheiros, pista de cartões, painel do episódio, menu radial com toque longo (marcar, comentários, marcar até aqui, partilhar, selecionar vários) |
 | Comentários | Só os teus e os de quem vê a série contigo |
 | Estatísticas | Tu e cada companheiro, ritmo semanal, previsão, arcos, curiosidades |
 | Amigos | Pedidos, link de convite (copiar), pedir por utilizador, desfazer amizade |
@@ -58,8 +62,9 @@ lib/
   estado/sessao.dart   sessão (token) e tema, partilhados pela app
   tema/                cores (as mesmas do app.css) e ThemeData
   widgets/comum.dart   Fundo, Vidro, Avatar, BarraProgresso, LinhaPessoa…
-  ecras/               login, registo, inicio, adicionar, serie, comentarios, estatisticas,
-                       amigos, pessoa, perfil
+  ecras/               principal (barra de baixo), login, registo, inicio, biblioteca, adicionar,
+                       serie, comentarios, estatisticas, amigos, pessoa, perfil, retrospetiva, medalhas
+  widgets/menu_radial.dart  menu em arco do toque longo
 test/modelos_test.dart testes da conversão do JSON
 assets/icon/           ícone (o mesmo da PWA)
 ```

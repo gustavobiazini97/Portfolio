@@ -255,6 +255,16 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - Compilada no GitHub Actions (workflow **APK Anime a Dois**, release, só arm64) e publicada na release `anime-a-dois-apk`.
 - Ainda sem notificações nativas (precisaria de Firebase): os avisos chegam pela app do site e por email.
 
+### Novidades da app (8 de outubro, versão 1.2.0)
+
+- **Barra de navegação** em baixo: Início · Biblioteca · **+** · Amigos · Perfil (ecrã Biblioteca novo, em grelha por estado).
+- **Retrospetiva** mensal e anual em stories: episódios e horas, série do período, mês a mês (ano), melhor dia,
+  hora preferida, sequência de dias, tu vs par, extras e um cartão final que se partilha como imagem.
+  Cartão no Início (o mês atual; o anterior nos primeiros 7 dias; o ano a partir de 20 de dezembro) e lista no Perfil.
+- **Medalhas** (21, em 5 grupos), com progresso e animação de desbloqueio; aviso no Início quando há uma nova.
+- **Menu radial** no cartão do episódio (toque longo e arrastar): marcar, comentários, marcar até aqui, partilhar, selecionar vários.
+- API: `/resumos` e `/medalhas` (Models `Resumo` e `Conquistas`). Por agora só na app; o site ainda não as mostra.
+
 ---
 
 ## 4. O que falta

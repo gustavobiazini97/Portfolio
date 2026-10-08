@@ -94,6 +94,20 @@ o servidor valida tudo em `DadosAnime`.
 | DELETE | `/amigos/{id}` | 🔒 | | desfaz a amizade |
 | GET | `/pessoas/{id}` | 🔒 | | perfil do par ou de um amigo (`ultimo`, `biblioteca` com `naTua`/`vesCom`) |
 
+### Retrospetivas e medalhas
+
+| Método | Rota | | Resposta |
+|---|---|---|---|
+| GET | `/resumos` | 🔒 | `meses[]` e `anos[]` com episódios (para escolher) |
+| GET | `/resumos/{ano}` | 🔒 | `resumo` do ano (inclui `porMes` e `melhorMes`) |
+| GET | `/resumos/{ano}/{mes}` | 🔒 | `resumo` do mês |
+| GET | `/medalhas` | 🔒 | `medalhas[]` (`id`, `emoji`, `nome`, `descricao`, `grupo`, `meta`, `atual`, `obtida`), `obtidas`, `total` |
+
+O `resumo` traz: `periodo`, `episodios`, `minutos`, `horas`, `fillers`, `diasAtivos`, `sequencia` (dias seguidos),
+`melhorDia`, `hora` e `momento` preferidos, `diaSemana`, `comentarios`, `top` (3 séries), `acabadas`,
+`anterior` (`episodios`, `variacao` %), `par` (`user`, `episodios`) e `primeiro` episódio do período.
+As medalhas são calculadas a partir dos dados que já existem (Model `Conquistas`): não há tabela própria.
+
 ### Perfil
 
 | Método | Rota | | Corpo |
