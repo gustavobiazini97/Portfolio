@@ -6,7 +6,7 @@
 build/
 .flutter-plugins
 .flutter-plugins-dependencies
-pubspec.lock
+# pubspec.lock VAI para o Git: fixa as versões dos pacotes (sem ele, a 1.4.0 saiu com pacotes novos e rebentou)
 
 # Pastas de plataforma: geradas com "flutter create" (ver README)
 /android/
