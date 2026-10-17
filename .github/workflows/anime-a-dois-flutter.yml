@@ -158,6 +158,8 @@ jobs:
 
       # versao.json: a app lê-o ao abrir e, se o build for maior do que o dela, avisa que há versão nova.
       # As notas vêm do novidades.json (entrada com a mesma versão do pubspec).
+      # O build é 2000 + run_number: com --split-per-abi o Flutter soma 2000 ao versionCode do APK arm64,
+      # e é esse número que a app instalada lê (ex.: run 15 → build 2015).
       - name: Gerar versao.json
         run: |
           python3 - <<'PY'
@@ -167,7 +169,7 @@ jobs:
           notas = next((n['notas'] for n in novidades if n['versao'] == versao), [])
           dados = {
               'versao': versao,
-              'build': int('${{ github.run_number }}'),
+              'build': 2000 + int('${{ github.run_number }}'),   # igual ao versionCode do APK arm64
               'data': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
               'notas': notas,
               'apk': 'https://animeadois.alwaysdata.net/app',
