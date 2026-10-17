@@ -6,6 +6,8 @@
 #   2. e na release "anime-a-dois-apk", com um link fixo para descarregar no telemóvel:
 #      https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk
 # O APK é de release e só arm64 (telemóveis atuais).
+# Antes de publicar, o passo "Verificar o APK" confirma que nada do que a app chama por JNI foi apagado pelo R8.
+# Ramos que não são o main publicam na release de teste "anime-a-dois-teste" (link /app-teste do site).
 #
 # Secret opcional: ANDROID_KEYSTORE_B64 (keystore em base64, ver o README da app).
 # Sem ele, cada APK é assinado com uma chave diferente e, para atualizar, é preciso desinstalar primeiro.
@@ -75,8 +77,16 @@ jobs:
           sed -i 's|android:label="anime_a_dois"|android:label="Anime a Dois"|' "$M"
           grep -n 'INTERNET\|android:label' "$M"
 
+      # Com o pubspec.lock no Git, usa exatamente essas versões (nada muda por baixo entre compilações).
+      # Sem ele (ou desatualizado), resolve e avisa.
       - name: Dependências
-        run: flutter pub get
+        run: |
+          if [ -f pubspec.lock ] && flutter pub get --enforce-lockfile; then
+            echo "Versões fixas do pubspec.lock."
+          else
+            echo "::warning title=pubspec.lock::Sem lockfile válido: versões resolvidas agora (podem mudar entre compilações)."
+            flutter pub get
+          fi
 
       - name: Ícone da app
         run: dart run flutter_launcher_icons
@@ -172,6 +182,46 @@ jobs:
           name: anime-a-dois-apk
           path: projetos/anime-a-dois-flutter/anime-a-dois.apk
 
+      # Verificação do APK antes de publicar: tudo o que o Dart chama no Java/Kotlin por JNI tem de existir
+      # no APK com o nome certo (o R8 apagava/renomeava e a 1.4.0 rebentava ao abrir). Falha → não publica.
+      - name: Verificar o APK
+        run: |
+          pip install -q --break-system-packages androguard >/dev/null 2>&1 || pip install -q androguard
+          mkdir -p /tmp/apk && unzip -q -o anime-a-dois.apk -d /tmp/apk
+          python3 - <<'PY'
+          import re, subprocess, glob
+          from androguard.core.dex import DEX
+          classes, descritores = set(), set()
+          for f in glob.glob('/tmp/apk/classes*.dex'):
+              for c in DEX(open(f, 'rb').read()).get_classes():
+                  classes.add(c.get_name()[1:-1])
+                  for m in c.get_methods():
+                      descritores.add(m.get_descriptor().replace(' ', ''))
+          linhas = subprocess.run(['strings', '-n', '6', '/tmp/apk/lib/arm64-v8a/libapp.so'],
+                                  capture_output=True, text=True).stdout.split('\n')
+          refs, assinaturas = set(), set()
+          for l in map(str.strip, linhas):
+              if re.fullmatch(r'(io/flutter|com/github|kotlin|kotlinx|androidx)/[\w/$]+', l):
+                  refs.add(l)
+              if re.fullmatch(r'\([\w/$;\[]*\)[\w/$;\[]+', l):
+                  refs.update(re.findall(r'L([\w/$]+);', l))
+                  if re.search(r'L(io/flutter|com/github|kotlin)/', l):
+                      assinaturas.add(l)
+          falta = sorted(r for r in refs if not r.startswith(('java/', 'android/', 'dalvik/')) and r not in classes)
+          falta += sorted('método ' + a for a in assinaturas if a not in descritores)
+          print(f'{len(refs)} classes e {len(assinaturas)} assinaturas chamadas por JNI')
+          if falta:
+              print('::error title=APK partido::Em falta no APK (a app ia rebentar): ' + ', '.join(falta))
+              raise SystemExit(1)
+          print('Tudo presente.')
+          PY
+
+      # Versões usadas (Flutter e pacotes): publicadas junto ao APK, para fixar no repo
+      - name: Guardar as versões usadas
+        run: |
+          flutter --version --machine > ferramentas.json
+          cat ferramentas.json
+
       # versao.json: a app lê-o ao abrir e, se o build for maior do que o dela, avisa que há versão nova.
       # As notas vêm do novidades.json (entrada com a mesma versão do pubspec).
       # O build é 2000 + run_number: com --split-per-abi o Flutter soma 2000 ao versionCode do APK arm64,
@@ -194,16 +244,20 @@ jobs:
           print(json.dumps(dados, ensure_ascii=False))
           PY
 
-      # Release com link fixo (o APK é substituído a cada compilação)
+      # main → release oficial "anime-a-dois-apk" (com versao.json: as apps avisam que há versão nova).
+      # Outro ramo → release de teste "anime-a-dois-teste" (link /app-teste; ninguém é avisado).
       - name: Publicar na release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG=anime-a-dois-apk
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            TAG=anime-a-dois-apk; TITULO="Anime a Dois (APK)"; FICHEIROS="anime-a-dois.apk versao.json pubspec.lock ferramentas.json"
+          else
+            TAG=anime-a-dois-teste; TITULO="Anime a Dois (APK de teste)"; FICHEIROS="anime-a-dois.apk pubspec.lock ferramentas.json"
+          fi
           gh release view "$TAG" >/dev/null 2>&1 || \
             gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
-              --title "Anime a Dois (APK)" \
+              --title "$TITULO" \
               --notes "APK da app Flutter do Anime a Dois. Atualizado automaticamente a cada compilação."
-          gh release upload "$TAG" anime-a-dois.apk versao.json --clobber
-          # Remove o APK arm64 antigo (deixou de ser gerado; o anime-a-dois.apk já é arm64)
-          gh release delete-asset "$TAG" anime-a-dois-arm64.apk -y 2>/dev/null || true
+          gh release upload "$TAG" $FICHEIROS --clobber
+          echo "Publicado em $TAG (ramo ${GITHUB_REF#refs/heads/})."

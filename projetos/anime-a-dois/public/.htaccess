@@ -11,6 +11,8 @@
     # Link curto para instalar a app Android: /app → o APK mais recente (release do GitHub).
     # É o link que vai nos convites partilhados pela app.
     RewriteRule ^app/?$ https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/anime-a-dois.apk [R=302,L]
+    # Link para o APK de teste (compilado a partir de um ramo que não é o main): experimenta-se antes de publicar
+    RewriteRule ^app-teste/?$ https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-teste/anime-a-dois.apk [R=302,L]
 
     # URLs bonitos: /api/series/naruto → api.php?rota=/series/naruto
     # (com ?rota= e não api.php/…: depois de um rewrite o alojamento não passa o PATH_INFO)
