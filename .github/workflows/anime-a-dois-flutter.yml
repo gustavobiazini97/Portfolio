@@ -142,14 +142,12 @@ jobs:
       - name: Regras do R8
         run: |
           cat > android/app/proguard-rules.pro <<'PRO'
-          # Plugins do Flutter e a ponte JNI: chamados a partir do Dart, não se podem apagar nem renomear
+          # Plugins do Flutter e a ponte JNI (jni e jni_flutter): chamados a partir do Dart, não se podem apagar nem renomear
           -keep class io.flutter.plugins.** { *; }
           -keep class dev.flutter.** { *; }
-          -keep class com.github.dart_lang.jni.** { *; }
-          # Tipos do Kotlin que aparecem nas assinaturas chamadas por JNI (ex.: Continuation virava "j5")
-          -keep class kotlin.coroutines.** { *; }
-          -keep class kotlin.jvm.functions.** { *; }
-          -keep class kotlin.Unit { *; }
+          -keep class com.github.dart_lang.** { *; }
+          # Tipos do Kotlin que aparecem nas chamadas por JNI (Continuation virava "j5", Result desaparecia)
+          -keep class kotlin.** { *; }
           -keep class kotlinx.coroutines.** { *; }
           PRO
           cat android/app/proguard-rules.pro
