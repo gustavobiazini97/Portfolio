@@ -1,5 +1,7 @@
 // Perfil (igual ao site): foto, nome e utilizador, palavra-passe, cores (6 paletas), privacidade,
 // notificações, tema, terminar sessão e apagar conta.
+// Os dados aparecem como texto (lápis para editar) e a palavra-passe muda-se numa folha que sobe de baixo:
+// nada de campos sempre abertos.
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,7 +37,7 @@ class _EcraPerfilState extends State<EcraPerfil> {
 
   // Botões a rodar (um por secção)
   bool _aGuardarNome = false;
-  bool _aGuardarPass = false;
+  bool _aEditarDados = false; // "Os teus dados" em modo de edição (lápis)
   bool _aGuardarNotif = false;
   bool _aGuardarFoto = false;
   bool _soJuntos = false; // privacidade: os amigos só veem as séries que vês com eles
@@ -90,7 +92,10 @@ class _EcraPerfilState extends State<EcraPerfil> {
     try {
       final d = await Api.instancia.put('/perfil', {'nome': _nome.text, 'username': _username.text});
       if (!mounted) return;
-      setState(() => _definirUser(Utilizador.deJson(d['user'] as Map<String, dynamic>)));
+      setState(() {
+        _definirUser(Utilizador.deJson(d['user'] as Map<String, dynamic>));
+        _aEditarDados = false; // guardou: volta a mostrar como texto
+      });
       aviso(context, d['mensagem'] as String);
     } on ApiErro catch (e) {
       if (mounted) aviso(context, e.mensagem, erro: true);
@@ -99,24 +104,113 @@ class _EcraPerfilState extends State<EcraPerfil> {
     }
   }
 
-  Future<void> _guardarPassword() async {
-    setState(() => _aGuardarPass = true);
-    try {
-      final d = await Api.instancia.put('/perfil/password', {
-        'atual': _atual.text,
-        'nova': _nova.text,
-        'confirmar': _confirmar.text,
-      });
-      if (!mounted) return;
-      _atual.clear();
-      _nova.clear();
-      _confirmar.clear();
-      aviso(context, d['mensagem'] as String);
-    } on ApiErro catch (e) {
-      if (mounted) aviso(context, e.mensagem, erro: true);
-    } finally {
-      if (mounted) setState(() => _aGuardarPass = false);
-    }
+  // Cancela a edição dos dados: repõe o nome e o utilizador guardados
+  void _cancelarDados() {
+    setState(() {
+      _definirUser(_user!);
+      _aEditarDados = false;
+    });
+  }
+
+  // Mudar a palavra-passe: folha que sobe de baixo com os 3 campos (cada um com o olho para mostrar).
+  // Erros aparecem dentro da folha; se correr bem, fecha e avisa.
+  Future<void> _mudarPassword() async {
+    _atual.clear();
+    _nova.clear();
+    _confirmar.clear();
+    final ver = [false, false, false]; // olho de cada campo (atual, nova, confirmar)
+    var aGuardar = false;
+    String? erro;
+
+    final mensagem = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true, // sobe por cima do teclado
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, definir) {
+          final p = Paleta.de(ctx);
+          final textos = Theme.of(ctx).textTheme;
+
+          // Campo de palavra-passe com o olho
+          Widget campo(int i, TextEditingController c, String rotulo, {bool ultimo = false}) => TextField(
+                controller: c,
+                obscureText: !ver[i],
+                autocorrect: false,
+                enableSuggestions: false,
+                textInputAction: ultimo ? TextInputAction.done : TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: rotulo,
+                  suffixIcon: IconButton(
+                    tooltip: ver[i] ? 'Esconder' : 'Mostrar',
+                    icon: Icon(ver[i] ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+                    onPressed: () => definir(() => ver[i] = !ver[i]),
+                  ),
+                ),
+              );
+
+          Future<void> guardar() async {
+            definir(() {
+              aGuardar = true;
+              erro = null;
+            });
+            try {
+              final d = await Api.instancia.put('/perfil/password', {
+                'atual': _atual.text,
+                'nova': _nova.text,
+                'confirmar': _confirmar.text,
+              });
+              if (ctx.mounted) Navigator.pop(ctx, d['mensagem'] as String? ?? 'Palavra-passe mudada.');
+            } on ApiErro catch (e) {
+              if (ctx.mounted) {
+                definir(() {
+                  aGuardar = false;
+                  erro = e.mensagem;
+                });
+              }
+            }
+          }
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(ctx).bottom),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Mudar palavra-passe', style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 14),
+                  campo(0, _atual, 'Atual'),
+                  const SizedBox(height: 10),
+                  campo(1, _nova, 'Nova (mín. 8)'),
+                  const SizedBox(height: 10),
+                  campo(2, _confirmar, 'Confirmar a nova', ultimo: true),
+                  const SizedBox(height: 6),
+                  Text('Os outros telemóveis com sessão iniciada vão ter de entrar outra vez.',
+                      style: textos.labelSmall?.copyWith(color: p.suave)),
+                  if (erro != null) ...[
+                    const SizedBox(height: 8),
+                    Text(erro!, style: textos.bodySmall?.copyWith(color: p.erro, fontWeight: FontWeight.w700)),
+                  ],
+                  const SizedBox(height: 14),
+                  FilledButton(
+                    onPressed: aGuardar ? null : guardar,
+                    child: aGuardar
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('Mudar palavra-passe'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // Nunca deixar a palavra-passe em memória nos campos
+    _atual.clear();
+    _nova.clear();
+    _confirmar.clear();
+    if (mensagem != null && mounted) aviso(context, mensagem);
+  }
   }
 
   Future<void> _guardarNotificacoes() async {
@@ -325,50 +419,65 @@ class _EcraPerfilState extends State<EcraPerfil> {
         ),
         const SizedBox(height: 10),
 
-        // ---------- Nome ----------
+        // ---------- Os teus dados: texto com lápis; ao editar, os campos e Cancelar/Guardar ----------
         Vidro(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const TituloSecao('Os teus dados'),
-              TextField(controller: _nome, decoration: const InputDecoration(labelText: 'Nome na app')),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _username,
-                autocorrect: false,
-                decoration: const InputDecoration(labelText: 'Utilizador (para entrar)'),
+              Row(
+                children: [
+                  const Expanded(child: TituloSecao('Os teus dados')),
+                  if (!_aEditarDados)
+                    IconButton(
+                      tooltip: 'Editar',
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(Icons.edit_rounded, size: 20, color: p.suave),
+                      onPressed: () => setState(() => _aEditarDados = true),
+                    ),
+                ],
               ),
-              const SizedBox(height: 14),
-              FilledButton(onPressed: _aGuardarNome ? null : _guardarNome, child: const Text('Guardar')),
+              if (!_aEditarDados) ...[
+                _dado(p, 'Nome na app', _user!.nome),
+                const SizedBox(height: 10),
+                _dado(p, 'Utilizador (para entrar)', '@${_user!.username}'),
+              ] else ...[
+                TextField(controller: _nome, autofocus: true, decoration: const InputDecoration(labelText: 'Nome na app')),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _username,
+                  autocorrect: false,
+                  decoration: const InputDecoration(labelText: 'Utilizador (para entrar)'),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _aGuardarNome ? null : _cancelarDados,
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton(onPressed: _aGuardarNome ? null : _guardarNome, child: const Text('Guardar')),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 14),
 
-        // ---------- Palavra-passe ----------
+        // ---------- Palavra-passe: só uma linha; os campos abrem numa folha ----------
         Vidro(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const TituloSecao('Palavra-passe'),
-              TextField(controller: _atual, obscureText: true, decoration: const InputDecoration(labelText: 'Atual')),
-              const SizedBox(height: 10),
-              TextField(controller: _nova, obscureText: true, decoration: const InputDecoration(labelText: 'Nova (mín. 8)')),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _confirmar,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Confirmar a nova'),
-              ),
-              const SizedBox(height: 6),
-              Text('Os outros telemóveis com sessão iniciada vão ter de entrar outra vez.',
-                  style: textos.labelSmall?.copyWith(color: p.suave)),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: _aGuardarPass ? null : _guardarPassword,
-                child: const Text('Mudar palavra-passe'),
-              ),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.lock_rounded),
+            title: const Text('Mudar palavra-passe'),
+            trailing: Icon(Icons.chevron_right_rounded, color: p.suave),
+            onTap: _mudarPassword,
           ),
         ),
         const SizedBox(height: 14),
@@ -533,6 +642,19 @@ class _EcraPerfilState extends State<EcraPerfil> {
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  // Um dado em modo de leitura: legenda pequena e o valor por baixo
+  Widget _dado(Paleta p, String legenda, String valor) {
+    final textos = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(legenda, style: textos.labelSmall?.copyWith(color: p.suave)),
+        const SizedBox(height: 2),
+        Text(valor, style: textos.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
       ],
     );
   }

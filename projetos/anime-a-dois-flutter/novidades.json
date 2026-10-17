@@ -1,5 +1,12 @@
 [
   {
+    "versao": "1.4.3",
+    "notas": [
+      "Perfil mais arrumado: os teus dados aparecem como texto, com um lápis para editar",
+      "Mudar a palavra-passe abre numa folha à parte, com o olho para mostrar o que escreves"
+    ]
+  },
+  {
     "versao": "1.4.2",
     "notas": [
       "Corrige a app que não abria depois da 1.4.0"
