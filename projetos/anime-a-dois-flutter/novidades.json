@@ -1,5 +1,14 @@
 [
   {
+    "versao": "1.4.0",
+    "notas": [
+      "Perfil do par e dos amigos com números: episódios, horas, séries e o que já viram juntos",
+      "Medalhas em destaque no perfil de cada pessoa, com \"Ver todas\"",
+      "Biblioteca da pessoa arrumada por estado, com a tua % ao lado da dela",
+      "Botões mais compactos: \"Ver com…\" e \"Só para mim\" no menu ⋯"
+    ]
+  },
+  {
     "versao": "1.3.0",
     "notas": [
       "Avisos de versão nova: a app avisa quando sai uma atualização, com o que mudou",

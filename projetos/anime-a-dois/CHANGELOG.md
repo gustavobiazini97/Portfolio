@@ -265,6 +265,15 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - **Menu radial** no cartão do episódio (toque longo e arrastar): marcar, comentários, marcar até aqui, partilhar, selecionar vários.
 - API: `/resumos` e `/medalhas` (Models `Resumo` e `Conquistas`). Por agora só na app; o site ainda não as mostra.
 
+### Perfil de outra pessoa (17 de outubro, versão 1.4.0)
+
+- **Números** no perfil do par/amigo: episódios, horas, séries e acabadas, mais um bloco "Tu e …" com os episódios
+  vistos pelos dois e as séries que vêem juntos. Com "só juntos", os números dele contam só as séries que vê contigo.
+- **Medalhas em destaque** (as 3 melhores obtidas) e "Ver todas" numa folha por grupo. Com "só juntos" ficam privadas.
+- **Biblioteca arrumada** por estado (A ver · Em pausa · Acabado), com a tua barra por baixo da dele nas séries que
+  também tens, e o "Só para mim" passou para um menu ⋯.
+- API: `/pessoas/{id}` passa a devolver `numeros`, `medalhas` e `teuPct` em cada série. Só na app; o site fica igual.
+
 ---
 
 ## 4. O que falta

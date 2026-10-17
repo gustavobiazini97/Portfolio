@@ -92,7 +92,7 @@ o servidor valida tudo em `DadosAnime`.
 | POST | `/amigos/pedidos/{id}/aceitar` | 🔒 | | aceita |
 | DELETE | `/amigos/pedidos/{id}` | 🔒 | | recusa ou cancela |
 | DELETE | `/amigos/{id}` | 🔒 | | desfaz a amizade |
-| GET | `/pessoas/{id}` | 🔒 | | perfil do par ou de um amigo (`ultimo`, `biblioteca` com `naTua`/`vesCom`) |
+| GET | `/pessoas/{id}` | 🔒 | | perfil do par ou de um amigo (`ultimo`, `numeros`, `medalhas`, `biblioteca` com `naTua`/`vesCom`/`teuPct`) |
 
 ### Retrospetivas e medalhas
 
@@ -106,6 +106,8 @@ o servidor valida tudo em `DadosAnime`.
 O `resumo` traz: `periodo`, `episodios`, `minutos`, `horas`, `fillers`, `diasAtivos`, `sequencia` (dias seguidos),
 `melhorDia`, `hora` e `momento` preferidos, `diaSemana`, `comentarios`, `top` (3 séries), `acabadas`,
 `anterior` (`episodios`, `variacao` %), `par` (`user`, `episodios`) e `primeiro` episódio do período.
+No `/pessoas/{id}`: `numeros` = `episodios`, `horas`, `series`, `acabadas`, `seriesJuntos`, `episodiosJuntos`
+(com "só juntos", os dele contam só as séries que vê contigo); `medalhas` = `{ obtidas, total, medalhas[] }`, ou `null` com "só juntos".
 As medalhas são calculadas a partir dos dados que já existem (Model `Conquistas`): não há tabela própria.
 
 ### Perfil

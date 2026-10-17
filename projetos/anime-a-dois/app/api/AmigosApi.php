@@ -2,6 +2,8 @@
 // API: amigos — a lista, o link de convite (para quem ainda não tem conta), pedidos pelo utilizador exato,
 // aceitar/recusar/desfazer e o perfil do par ou de um amigo (com a biblioteca dele, respeitando a privacidade).
 
+use Illuminate\Database\Capsule\Manager as Capsule;
+
 class AmigosApi extends ApiController
 {
     // GET /amigos — amigos, pedidos recebidos e enviados, e o link de convite em circulação
@@ -95,12 +97,25 @@ class AmigosApi extends ApiController
         }
 
         // Para cada série dele: já a tens? vês com ele? (decide os botões "Juntar-me")
+        // Se também a tens, vai a tua % (para a barra "tu vs ele")
         $itens = array_map(function ($i) use ($user, $pessoa) {
             $j = $this->itemBibliotecaJson($i);
             $j['naTua']   = $i['serie']->naBibliotecaDe($user);
             $j['vesCom']  = $i['serie']->verCom($user, $pessoa);
+            $j['teuPct']  = $j['naTua'] ? $i['serie']->progressoDe($user)['pct'] : null;
             return $j;
         }, $biblioteca);
+
+        // Medalhas dele: só se mostra tudo (com "só juntos" ficam privadas)
+        $medalhas = null;
+        if (!$soJuntos) {
+            $lista = (new Conquistas($pessoa))->lista();
+            $medalhas = [
+                'obtidas'  => count(array_filter($lista, fn ($m) => $m['obtida'])),
+                'total'    => count($lista),
+                'medalhas' => $lista,
+            ];
+        }
 
         $this->json([
             'ok'         => true,
@@ -108,8 +123,51 @@ class AmigosApi extends ApiController
             'ehPar'      => $par?->id === $pessoa->id,
             'ultimo'     => $this->ultimoJson($pessoa->ultimoVistoPara($user)),
             'soJuntos'   => $soJuntos,
+            'numeros'    => $this->numeros($pessoa, $user, $itens, $soJuntos),
+            'medalhas'   => $medalhas,
             'biblioteca' => $itens,
         ]);
+    }
+
+    // Números do perfil: episódios, horas, séries e acabadas dele + o que vêem juntos.
+    // Com "só juntos", os números dele contam só as séries que se veem (as que vê contigo).
+    private function numeros(User $pessoa, User $user, array $itens, bool $soJuntos): array
+    {
+        // Slugs das séries que se veem e das que vêem juntos (os itens da API não levam o id)
+        $visiveis = array_map(fn ($i) => $i['serie']['slug'], $itens);
+        $slugsJuntos = array_values(array_map(fn ($i) => $i['serie']['slug'], array_filter($itens, fn ($i) => $i['vesCom'])));
+
+        // Episódios e minutos vistos por ele (todos, ou só nas séries visíveis)
+        $q = Capsule::table('vistos')
+            ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
+            ->join('series', 'series.id', '=', 'episodios.serie_id')
+            ->where('vistos.user_id', $pessoa->id);
+        if ($soJuntos) {
+            $q->whereIn('series.slug', $visiveis === [] ? [''] : $visiveis);   // [''] = nenhuma
+        }
+        $linha = $q->selectRaw('COUNT(*) AS n, COALESCE(SUM(COALESCE(series.minutos_ep, ' . Resumo::MINUTOS_EP . ')), 0) AS m')->first();
+
+        // Episódios que os dois já viram nas séries que vêem juntos
+        $juntos = 0;
+        if ($slugsJuntos !== []) {
+            $juntos = Capsule::table('vistos AS a')
+                ->join('vistos AS b', 'b.episodio_id', '=', 'a.episodio_id')
+                ->join('episodios', 'episodios.id', '=', 'a.episodio_id')
+                ->join('series', 'series.id', '=', 'episodios.serie_id')
+                ->where('a.user_id', $pessoa->id)
+                ->where('b.user_id', $user->id)
+                ->whereIn('series.slug', $slugsJuntos)
+                ->count();
+        }
+
+        return [
+            'episodios'       => (int) $linha->n,
+            'horas'           => intdiv((int) $linha->m, 60),
+            'series'          => count($itens),
+            'acabadas'        => count(array_filter($itens, fn ($i) => $i['estado'] === 'acabado')),
+            'seriesJuntos'    => count($slugsJuntos),
+            'episodiosJuntos' => $juntos,
+        ];
     }
 
     // Lista de Users → lista de pessoas da API
