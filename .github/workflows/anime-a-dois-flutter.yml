@@ -56,9 +56,11 @@ jobs:
           key: gradle-anime-a-dois-${{ hashFiles('projetos/anime-a-dois-flutter/pubspec.yaml') }}
           restore-keys: gradle-anime-a-dois-
 
+      # Flutter fixo (versão com que a 1.4.2 foi verificada); subir só de propósito, testando no ramo primeiro
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.47.7
           cache: true
 
       # A pasta android/ não está no Git: o "flutter create" gera-a (não mexe no lib/ nem no pubspec)
