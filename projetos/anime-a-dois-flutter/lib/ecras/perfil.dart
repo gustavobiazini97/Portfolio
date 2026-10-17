@@ -211,7 +211,6 @@ class _EcraPerfilState extends State<EcraPerfil> {
     _confirmar.clear();
     if (mensagem != null && mounted) aviso(context, mensagem);
   }
-  }
 
   Future<void> _guardarNotificacoes() async {
     final pref = _pref;
