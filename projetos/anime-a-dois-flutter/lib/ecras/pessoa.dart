@@ -10,7 +10,7 @@ import '../api/api.dart';
 import '../api/modelos.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
-import 'medalhas.dart' show Medalha;
+import 'medalhas.dart' show Medalha, EmblemaMedalha, corDoNivel;
 import 'serie.dart';
 
 // Números do perfil, como a API os envia (GET /pessoas/{id} → numeros)
@@ -248,8 +248,9 @@ class _EcraPessoaState extends State<EcraPessoa> {
   Widget _blocoMedalhas(Paleta p, List<Medalha> lista, Utilizador u) {
     final textos = Theme.of(context).textTheme;
     final obtidas = lista.where((m) => m.obtida).toList();
-    // Dentro de cada grupo a lista vai da mais fácil à mais difícil: as últimas obtidas são as melhores
-    final destaque = obtidas.reversed.take(3).toList();
+    // As 3 melhores obtidas: ouro primeiro, depois prata; empate → a mais difícil (mais abaixo na lista)
+    final destaque = obtidas.reversed.toList()..sort((a, b) => b.peso.compareTo(a.peso));
+    if (destaque.length > 3) destaque.removeRange(3, destaque.length);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -278,7 +279,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
                       onTap: () => _detalheMedalha(p, m),
                       child: Column(
                         children: [
-                          _circuloMedalha(p, m, 52),
+                          EmblemaMedalha(medalha: m, tamanho: 56),
                           const SizedBox(height: 8),
                           Text(m.nome,
                               textAlign: TextAlign.center,
@@ -295,35 +296,6 @@ class _EcraPessoaState extends State<EcraPessoa> {
             ],
           ),
       ],
-    );
-  }
-
-  // Círculo com o emoji: com gradiente se obtida, a cinzento se não (como no ecrã Medalhas)
-  Widget _circuloMedalha(Paleta p, Medalha m, double tamanho) {
-    return Container(
-      width: tamanho,
-      height: tamanho,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: m.obtida ? LinearGradient(colors: [p.tu, p.par], begin: Alignment.topLeft, end: Alignment.bottomRight) : null,
-        color: m.obtida ? null : p.trilho,
-        boxShadow: m.obtida ? [BoxShadow(color: p.par.withValues(alpha: .4), blurRadius: 12)] : null,
-      ),
-      child: Opacity(
-        opacity: m.obtida ? 1 : .35,
-        child: ColorFiltered(
-          colorFilter: m.obtida
-              ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
-              : const ColorFilter.matrix(<double>[
-                  0.2126, 0.7152, 0.0722, 0, 0,
-                  0.2126, 0.7152, 0.0722, 0, 0,
-                  0.2126, 0.7152, 0.0722, 0, 0,
-                  0, 0, 0, 1, 0,
-                ]),
-          child: Text(m.emoji, style: TextStyle(fontSize: tamanho * .46)),
-        ),
-      ),
     );
   }
 
@@ -353,9 +325,9 @@ class _EcraPessoaState extends State<EcraPessoa> {
                 crossAxisCount: 3,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: .9,
+                mainAxisSpacing: 6,
+                crossAxisSpacing: 8,
+                childAspectRatio: 1.05,
                 children: [
                   for (final m in g.value)
                     InkWell(
@@ -363,7 +335,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
                       onTap: () => _detalheMedalha(p, m),
                       child: Column(
                         children: [
-                          _circuloMedalha(p, m, 48),
+                          EmblemaMedalha(medalha: m, tamanho: 52),
                           const SizedBox(height: 6),
                           Text(m.nome,
                               textAlign: TextAlign.center,
@@ -393,14 +365,14 @@ class _EcraPessoaState extends State<EcraPessoa> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(m.emoji, style: const TextStyle(fontSize: 48)),
-              const SizedBox(height: 8),
+              EmblemaMedalha(medalha: m, tamanho: 84),
+              const SizedBox(height: 10),
               Text(m.nome, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
               Text(m.descricao, textAlign: TextAlign.center, style: TextStyle(color: p.suave)),
               const SizedBox(height: 16),
               if (m.obtida)
-                Text('Obtida', style: TextStyle(color: p.parTxt, fontWeight: FontWeight.w800))
+                Text('Obtida · ${m.nivelTexto}', style: TextStyle(color: corDoNivel(m.nivel), fontWeight: FontWeight.w800))
               else ...[
                 BarraProgresso(pct: m.pct, cor: p.par, altura: 10),
                 const SizedBox(height: 6),

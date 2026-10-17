@@ -101,7 +101,7 @@ o servidor valida tudo em `DadosAnime`.
 | GET | `/resumos` | 🔒 | `meses[]` e `anos[]` com episódios (para escolher) |
 | GET | `/resumos/{ano}` | 🔒 | `resumo` do ano (inclui `porMes` e `melhorMes`) |
 | GET | `/resumos/{ano}/{mes}` | 🔒 | `resumo` do mês |
-| GET | `/medalhas` | 🔒 | `medalhas[]` (`id`, `emoji`, `nome`, `descricao`, `grupo`, `meta`, `atual`, `obtida`), `obtidas`, `total` |
+| GET | `/medalhas` | 🔒 | `medalhas[]` (`id`, `emoji`, `nome`, `descricao`, `grupo`, `nivel` bronze/prata/ouro, `meta`, `atual`, `obtida`), `obtidas`, `total` |
 
 O `resumo` traz: `periodo`, `episodios`, `minutos`, `horas`, `fillers`, `diasAtivos`, `sequencia` (dias seguidos),
 `melhorDia`, `hora` e `momento` preferidos, `diaSemana`, `comentarios`, `top` (3 séries), `acabadas`,

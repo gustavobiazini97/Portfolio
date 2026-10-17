@@ -1,5 +1,8 @@
-// Medalhas: vitrine agrupada (Episódios, Tempo, Ritmo, Séries, Juntos), com o progresso das que faltam.
-// As novas desde a última visita aparecem com uma animação de desbloqueio; tocar numa já obtida repete-a.
+// Medalhas: vitrine agrupada (Episódios, Tempo, Ritmo, Séries, Juntos, Especiais), com o progresso das que faltam.
+// Cada medalha é um emblema bronze, prata ou ouro (as de ouro têm um brilho a passar); as que faltam
+// aparecem escuras com cadeado e a barra de progresso.
+// As novas desde a última visita aparecem com uma animação de desbloqueio (no máximo 3 seguidas, as melhores);
+// tocar numa já obtida repete-a.
 
 import 'dart:math' as math;
 
@@ -14,6 +17,7 @@ import '../widgets/comum.dart';
 // Uma medalha como a API a envia (GET /medalhas)
 class Medalha {
   final String id, emoji, nome, descricao, grupo;
+  final String nivel; // bronze | prata | ouro
   final int meta, atual;
   final bool obtida;
 
@@ -23,6 +27,7 @@ class Medalha {
         nome = j['nome'] as String,
         descricao = j['descricao'] as String,
         grupo = j['grupo'] as String,
+        nivel = j['nivel'] as String? ?? 'bronze', // API antiga: sem nível
         meta = (j['meta'] as num).toInt(),
         atual = (j['atual'] as num).toInt(),
         obtida = j['obtida'] == true;
@@ -32,6 +37,131 @@ class Medalha {
 
   // "99 de 100" (o tempo em horas)
   String get progressoTexto => id.startsWith('horas') ? '${atual ~/ 60} de ${meta ~/ 60} h' : '$atual de $meta';
+
+  // Ordem dos níveis (para escolher as melhores): ouro > prata > bronze
+  int get peso => const {'ouro': 3, 'prata': 2}[nivel] ?? 1;
+
+  // "Bronze", "Prata", "Ouro"
+  String get nivelTexto => const {'ouro': 'Ouro', 'prata': 'Prata'}[nivel] ?? 'Bronze';
+}
+
+// Cores de cada nível: [clara, escura, aro]
+const _coresNivel = {
+  'bronze': [Color(0xFFF2C29B), Color(0xFFA9612F), Color(0xFF6E3A1C)],
+  'prata': [Color(0xFFF4F6F9), Color(0xFFA3AAB4), Color(0xFF66707C)],
+  'ouro': [Color(0xFFFFE58F), Color(0xFFD9A21B), Color(0xFF946400)],
+};
+
+// Cor de destaque de um nível (texto "Ouro", raios do desbloqueio…)
+Color corDoNivel(String nivel) => (_coresNivel[nivel] ?? _coresNivel['bronze']!)[1];
+
+// Emblema de uma medalha: obtida → disco metálico do nível com aro e o emoji (ouro com brilho a passar);
+// por obter → disco escuro com cadeado.
+class EmblemaMedalha extends StatefulWidget {
+  final Medalha medalha;
+  final double tamanho;
+
+  const EmblemaMedalha({super.key, required this.medalha, this.tamanho = 60});
+
+  @override
+  State<EmblemaMedalha> createState() => _EmblemaMedalhaState();
+}
+
+class _EmblemaMedalhaState extends State<EmblemaMedalha> with SingleTickerProviderStateMixin {
+  // Brilho das de ouro: uma faixa de luz a atravessar a cada 3 s
+  AnimationController? _brilho;
+
+  bool get _comBrilho => widget.medalha.obtida && widget.medalha.nivel == 'ouro';
+
+  @override
+  void initState() {
+    super.initState();
+    if (_comBrilho) _brilho = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _brilho?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Paleta.de(context);
+    final m = widget.medalha;
+    final t = widget.tamanho;
+
+    // Por obter: disco escuro, aro tracejado ao de leve e cadeado
+    if (!m.obtida) {
+      return Container(
+        width: t,
+        height: t,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: p.trilho,
+          border: Border.all(color: p.suave.withValues(alpha: .35), width: t * .05),
+        ),
+        child: Icon(Icons.lock_rounded, size: t * .38, color: p.suave.withValues(alpha: .7)),
+      );
+    }
+
+    final c = _coresNivel[m.nivel] ?? _coresNivel['bronze']!;
+    final disco = Container(
+      width: t,
+      height: t,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        // Metal: claro em cima à esquerda, escuro em baixo à direita
+        gradient: LinearGradient(colors: [c[0], c[1]], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        border: Border.all(color: c[2], width: t * .07),
+        boxShadow: [BoxShadow(color: c[1].withValues(alpha: m.nivel == 'ouro' ? .6 : .35), blurRadius: t * .25)],
+      ),
+      // Anel interior fino (dá o ar de moeda cunhada)
+      child: Container(
+        width: t * .72,
+        height: t * .72,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withValues(alpha: .45), width: 1.2),
+        ),
+        child: Text(m.emoji, style: TextStyle(fontSize: t * .4)),
+      ),
+    );
+
+    if (_brilho == null) return disco;
+
+    // Ouro: faixa de luz diagonal por cima do disco
+    return AnimatedBuilder(
+      animation: _brilho!,
+      child: disco,
+      builder: (_, filho) {
+        final x = _brilho!.value * 3 - 1; // -1 → 2: entra pela esquerda, sai pela direita e descansa fora
+        return ClipOval(
+          child: Stack(
+            children: [
+              filho!,
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(x - .4, -1),
+                        end: Alignment(x + .4, 1),
+                        colors: [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: .55), Colors.white.withValues(alpha: 0)],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 // Chave no telemóvel com os ids das medalhas já mostradas
@@ -87,7 +217,9 @@ class _EcraMedalhasState extends State<EcraMedalhas> {
         _erro = null;
       });
       if (vistas != null) {
-        for (final m in obtidas.where((m) => !vistas.contains(m.id))) {
+        // Muitas de uma vez (ex.: medalhas novas numa atualização): só as 3 melhores têm animação
+        final novas = obtidas.where((m) => !vistas.contains(m.id)).toList()..sort((a, b) => b.peso.compareTo(a.peso));
+        for (final m in novas.take(3)) {
           if (!mounted) return;
           await celebrar(m);
         }
@@ -201,31 +333,7 @@ class _EcraMedalhasState extends State<EcraMedalhas> {
       onTap: () => m.obtida ? celebrar(m) : _detalhe(p, m),
       child: Column(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: m.obtida ? LinearGradient(colors: [p.tu, p.par], begin: Alignment.topLeft, end: Alignment.bottomRight) : null,
-              color: m.obtida ? null : p.trilho,
-              boxShadow: m.obtida ? [BoxShadow(color: p.par.withValues(alpha: .45), blurRadius: 14)] : null,
-            ),
-            child: Opacity(
-              opacity: m.obtida ? 1 : .35,
-              child: ColorFiltered(
-                colorFilter: m.obtida
-                    ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
-                    : const ColorFilter.matrix(<double>[
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0, 0, 0, 1, 0,
-                      ]),
-                child: Text(m.emoji, style: const TextStyle(fontSize: 26)),
-              ),
-            ),
-          ),
+          EmblemaMedalha(medalha: m, tamanho: 60),
           const SizedBox(height: 8),
           Text(m.nome,
               textAlign: TextAlign.center,
@@ -234,7 +342,7 @@ class _EcraMedalhasState extends State<EcraMedalhas> {
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: m.obtida ? p.tinta : p.suave)),
           const Spacer(),
           if (m.obtida)
-            Text('obtida', style: TextStyle(fontSize: 11, color: p.tuTxt, fontWeight: FontWeight.w700))
+            Text(m.nivelTexto, style: TextStyle(fontSize: 11, color: corDoNivel(m.nivel), fontWeight: FontWeight.w800))
           else ...[
             BarraProgresso(pct: m.pct, cor: p.par, altura: 4),
             const SizedBox(height: 3),
@@ -255,8 +363,8 @@ class _EcraMedalhasState extends State<EcraMedalhas> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(m.emoji, style: const TextStyle(fontSize: 48)),
-              const SizedBox(height: 8),
+              EmblemaMedalha(medalha: m, tamanho: 84),
+              const SizedBox(height: 10),
               Text(m.nome, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
               Text(m.descricao, textAlign: TextAlign.center, style: TextStyle(color: p.suave)),
@@ -295,7 +403,6 @@ class _DesbloqueioState extends State<_Desbloqueio> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-    final p = Paleta.de(context);
     final m = widget.medalha;
     final escala = CurvedAnimation(parent: _entrada, curve: Curves.elasticOut);
     final volta = CurvedAnimation(parent: _entrada, curve: const Interval(0, .6, curve: Curves.easeOutBack));
@@ -317,7 +424,7 @@ class _DesbloqueioState extends State<_Desbloqueio> with TickerProviderStateMixi
                     // Raios de luz a girar devagar
                     RotationTransition(
                       turns: _raios,
-                      child: CustomPaint(size: const Size(260, 260), painter: _Raios(p.par.withValues(alpha: .35))),
+                      child: CustomPaint(size: const Size(260, 260), painter: _Raios(corDoNivel(m.nivel).withValues(alpha: .4))),
                     ),
                     // A medalha: entra a crescer com mola e dá uma volta
                     AnimatedBuilder(
@@ -326,18 +433,7 @@ class _DesbloqueioState extends State<_Desbloqueio> with TickerProviderStateMixi
                         angle: (1 - volta.value) * math.pi,
                         child: Transform.scale(
                           scale: escala.value,
-                          child: Container(
-                            width: 140,
-                            height: 140,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(colors: [p.tu, p.par], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                              border: Border.all(color: Colors.white.withValues(alpha: .8), width: 4),
-                              boxShadow: [BoxShadow(color: p.par.withValues(alpha: .7), blurRadius: 40)],
-                            ),
-                            child: Text(m.emoji, style: const TextStyle(fontSize: 64)),
-                          ),
+                          child: EmblemaMedalha(medalha: m, tamanho: 140),
                         ),
                       ),
                     ),
@@ -348,8 +444,8 @@ class _DesbloqueioState extends State<_Desbloqueio> with TickerProviderStateMixi
                 opacity: CurvedAnimation(parent: _entrada, curve: const Interval(.5, 1)),
                 child: Column(
                   children: [
-                    const Text('MEDALHA DESBLOQUEADA',
-                        style: TextStyle(color: Colors.white70, fontSize: 12, letterSpacing: 2.4, fontWeight: FontWeight.w700)),
+                    Text('MEDALHA DE ${m.nivelTexto.toUpperCase()}',
+                        style: TextStyle(color: corDoNivel(m.nivel), fontSize: 12, letterSpacing: 2.4, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 6),
                     Text(m.nome, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 4),

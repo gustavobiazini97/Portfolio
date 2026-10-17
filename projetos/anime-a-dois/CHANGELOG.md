@@ -274,6 +274,20 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
   também tens, e o "Só para mim" passou para um menu ⋯.
 - API: `/pessoas/{id}` passa a devolver `numeros`, `medalhas` e `teuPct` em cada série. Só na app; o site fica igual.
 
+### Medalhas novas (17 de outubro, versão 1.5.0)
+
+- **57 medalhas** (eram 21) em 6 grupos: Episódios (até 3000), Tempo (até 1000 h), Ritmo, Séries, Juntos e Especiais
+  (1 de janeiro, 24 de dezembro, fim de semana, dia de anos da conta, explorador). Os ids antigos mantêm-se.
+- Cada medalha tem `nivel` (bronze/prata/ouro). Na app: emblema metálico do nível, as de ouro com brilho;
+  as que faltam com cadeado e progresso. Muitas novas de uma vez → só as 3 melhores têm animação.
+
+### Processo de lançamento (17 de outubro)
+
+- A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow
+  e um passo **"Verificar o APK"** que chumba a publicação se faltar alguma classe/método chamado por JNI.
+- Flutter fixo (3.47.7) e `pubspec.lock` no Git (`--enforce-lockfile`).
+- Ramos que não são o `main` publicam um **APK de teste** (`/app-teste`); só o `main` publica para todos.
+
 ---
 
 ## 4. O que falta
