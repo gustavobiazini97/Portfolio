@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.4.2",
+    "notas": [
+      "Corrige a app que não abria depois da 1.4.0"
+    ]
+  },
+  {
     "versao": "1.4.1",
     "notas": [
       "Corrige o ecrã preto ao abrir: se o arranque falhar, mostra o erro e deixa continuar"

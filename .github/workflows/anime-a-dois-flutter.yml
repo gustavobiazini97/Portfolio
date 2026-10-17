@@ -136,6 +136,19 @@ jobs:
           PY
           grep -n 'signingConfig\|anime.keystore' android/app/build.gradle.kts
 
+      # Regras do R8 (o "emagrecer" do release): o shared_preferences novo é chamado do Dart por JNI,
+      # que o R8 não vê, e ele apagava métodos (ex.: getAll) → a app rebentava ao abrir (1.4.0).
+      # O plugin do Flutter junta sozinho o android/app/proguard-rules.pro ao release.
+      - name: Regras do R8
+        run: |
+          cat > android/app/proguard-rules.pro <<'PRO'
+          # Plugins do Flutter e a ponte JNI: chamados a partir do Dart, não se podem apagar nem renomear
+          -keep class io.flutter.plugins.** { *; }
+          -keep class dev.flutter.** { *; }
+          -keep class com.github.dart_lang.jni.** { *; }
+          PRO
+          cat android/app/proguard-rules.pro
+
       # Número da build = número da execução (o Android exige que suba a cada versão).
       # Release só para arm64 (quase todos os telemóveis atuais): uma compilação, APK pequeno
       - name: Compilar o APK (release)
