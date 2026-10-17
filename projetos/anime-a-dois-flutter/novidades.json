@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.4.1",
+    "notas": [
+      "Corrige o ecrã preto ao abrir: se o arranque falhar, mostra o erro e deixa continuar"
+    ]
+  },
+  {
     "versao": "1.4.0",
     "notas": [
       "Perfil do par e dos amigos com números: episódios, horas, séries e o que já viram juntos",
