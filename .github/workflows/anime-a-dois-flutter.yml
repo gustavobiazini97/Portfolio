@@ -146,6 +146,11 @@ jobs:
           -keep class io.flutter.plugins.** { *; }
           -keep class dev.flutter.** { *; }
           -keep class com.github.dart_lang.jni.** { *; }
+          # Tipos do Kotlin que aparecem nas assinaturas chamadas por JNI (ex.: Continuation virava "j5")
+          -keep class kotlin.coroutines.** { *; }
+          -keep class kotlin.jvm.functions.** { *; }
+          -keep class kotlin.Unit { *; }
+          -keep class kotlinx.coroutines.** { *; }
           PRO
           cat android/app/proguard-rules.pro
 
