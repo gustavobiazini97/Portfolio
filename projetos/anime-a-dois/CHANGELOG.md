@@ -340,6 +340,10 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 
 - `Notificacoes::amizades()`: as amizades dos últimos 30 dias aparecem como "X e tu são agora amigos" (tipo `amigo`: mesmo filtro e destino dos pedidos). Antes, ao aceitar um pedido ele saía do sininho sem deixar rasto. O par não conta. Serve à app e ao site sem atualizar a app.
 
+### Hora certa nos registos automáticos (19 de outubro)
+
+- A MariaDB do alojamento está no fuso de Paris: as colunas com `DEFAULT CURRENT_TIMESTAMP` (amizades, pedidos, convites) ficavam 1 h à frente. `Database::boot()` passa a ligar com `timezone` = fuso do PHP (Europe/Lisbon). Vistos e comentários já eram gravados pelo PHP e estavam certos. As linhas antigas criadas pela BD continuam 1 h à frente.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

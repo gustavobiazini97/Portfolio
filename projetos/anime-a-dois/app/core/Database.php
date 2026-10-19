@@ -25,7 +25,12 @@ class Database
     public static function boot(): void
     {
         $capsule = new Capsule();
-        $capsule->addConnection(self::config()['db']);
+        $db = self::config()['db'];
+        // A MariaDB do alojamento está noutro fuso (Paris) e as colunas com DEFAULT CURRENT_TIMESTAMP
+        // (amizades, pedidos, convites…) ficavam 1 h à frente da hora de Portugal. Cada ligação passa
+        // a usar o mesmo fuso do PHP (Europe/Lisbon, definido no bootstrap), incluindo a hora de verão.
+        $db['timezone'] ??= date('P');
+        $capsule->addConnection($db);
         $capsule->setAsGlobal();   // permite usar Capsule::table(...) em qualquer lado
         $capsule->bootEloquent();  // ativa os Models
     }
