@@ -185,7 +185,7 @@ class _EcraNotificacoesState extends State<EcraNotificacoes> with AutoAtualizar 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       itemCount: lista.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, i) => _linha(p, lista[i]),
     );
   }

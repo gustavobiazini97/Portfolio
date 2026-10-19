@@ -228,7 +228,7 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
         // 🔔 com a bolinha das novidades por ver
         ValueListenableBuilder<int>(
           valueListenable: Sino.naoVistas,
-          builder: (_, n, _) => BotaoRedondo(
+          builder: (_, n, __) => BotaoRedondo(
             tooltip: 'Notificações',
             icone: Badge(
               isLabelVisible: n > 0,
