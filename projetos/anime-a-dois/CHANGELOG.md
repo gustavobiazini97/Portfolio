@@ -294,6 +294,12 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - API: `GET /pessoas/eu` devolve o teu perfil no mesmo formato (`proprio: true`, sem `teuPct`/`teuUltimo`).
 - Voltar (Android) num separador que não é o Início volta ao Início, em vez de fechar a app (`PopScope` no `EcraPrincipal`).
 
+### Atualização automática (19 de outubro, versão 1.6.1)
+
+- Mixin `AutoAtualizar` (`lib/estado/auto_atualizar.dart`): enquanto o ecrã está à vista, volta a pedir os dados de 15 em 15 s e ao voltar do fundo. Só com a app em primeiro plano, ecrã no topo, separador aberto e sem ações a meio; falhas ficam caladas.
+- Usado no Início, na Série (mantém o cartão ao centro), nos Comentários e no perfil do par/amigo. Sem mudanças no servidor.
+- Nas novidades da app aparece só "Melhorias de desempenho": o Gustavo não quer detalhes técnicos nas notas para o utilizador.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

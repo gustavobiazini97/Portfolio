@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
@@ -26,7 +27,7 @@ class EcraSerie extends StatefulWidget {
   State<EcraSerie> createState() => _EcraSerieState();
 }
 
-class _EcraSerieState extends State<EcraSerie> {
+class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
   // Dados do GET /series/{slug}
   Serie? _serie;
   Utilizador? _user;
@@ -52,6 +53,28 @@ class _EcraSerieState extends State<EcraSerie> {
   void initState() {
     super.initState();
     _carregar();
+    iniciarAutoAtualizar(); // os ✓ e a barra do par atualizam-se sozinhos
+  }
+
+  // Não atualiza a meio de uma marcação, da seleção de vários ou com o menu de toque longo aberto
+  @override
+  bool get podeAtualizar => _serie != null && !_aGuardar && !_multiplo && !_menu.aberto;
+
+  // Só troca os episódios e o progresso: o cartão ao centro fica onde está
+  @override
+  Future<void> atualizarEmSilencio() async {
+    final d = await Api.instancia.get('/series/${widget.slug}');
+    if (!mounted || !podeAtualizar) return;
+    final comp = ((d['companheiros'] as List?) ?? []).map((c) => c as Map<String, dynamic>).toList();
+    final eps = (d['episodios'] as List).map((e) => Episodio.deJson(e as Map<String, dynamic>)).toList();
+    setState(() {
+      _serie = Serie.deJson(d['serie'] as Map<String, dynamic>);
+      _meu = Progresso.deJson(d['tu'] as Map<String, dynamic>);
+      _companheiros = comp.map((c) => Utilizador.deJson(c['user'] as Map<String, dynamic>)).toList();
+      _progressoCom = comp.map((c) => Progresso.deJson(c['progresso'] as Map<String, dynamic>)).toList();
+      _eps = eps;
+      _atual = _atual.clamp(0, eps.isEmpty ? 0 : eps.length - 1).toInt();
+    });
   }
 
   @override

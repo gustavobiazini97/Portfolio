@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../estado/auto_atualizar.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 
@@ -18,7 +19,7 @@ class FolhaComentarios extends StatefulWidget {
   State<FolhaComentarios> createState() => _FolhaComentariosState();
 }
 
-class _FolhaComentariosState extends State<FolhaComentarios> {
+class _FolhaComentariosState extends State<FolhaComentarios> with AutoAtualizar {
   final _texto = TextEditingController();
   List<Comentario> _lista = [];
   int _max = 500; // limite de caracteres (vem da API)
@@ -32,6 +33,17 @@ class _FolhaComentariosState extends State<FolhaComentarios> {
   void initState() {
     super.initState();
     _carregar();
+    iniciarAutoAtualizar(); // comentários novos do par aparecem sozinhos
+  }
+
+  @override
+  bool get podeAtualizar => !_aEnviar && !_aCarregar;
+
+  // Sem erro no ecrã: se falhar, ficam os comentários que já estão
+  @override
+  Future<void> atualizarEmSilencio() async {
+    final d = await Api.instancia.get(_rota);
+    if (mounted && !_aEnviar) _aplicar(d);
   }
 
   @override

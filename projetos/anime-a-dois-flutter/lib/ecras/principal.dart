@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../estado/atualizacoes.dart';
+import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import 'adicionar.dart';
@@ -34,6 +35,7 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
   @override
   void initState() {
     super.initState();
+    separadorAtual.value = 0; // abre sempre no Início (também depois de voltar a entrar)
     // Versão nova publicada? Pergunta logo depois do primeiro ecrã aparecer
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) Atualizacoes.verificarAoAbrir(context);
@@ -54,6 +56,7 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
       if (i != _atual) _versoes[i]++; // ao voltar a um separador, dados frescos
       _atual = i;
     });
+    separadorAtual.value = i; // a atualização automática só corre no separador aberto
   }
 
   // "+": pesquisa de séries; ao voltar, o Início e a Biblioteca recarregam

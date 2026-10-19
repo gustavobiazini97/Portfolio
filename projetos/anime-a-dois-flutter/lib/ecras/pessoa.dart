@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../estado/auto_atualizar.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 import 'medalhas.dart' show Medalha, EmblemaMedalha, EcraMedalhas, corDoNivel;
@@ -46,7 +47,7 @@ class EcraPessoa extends StatefulWidget {
   State<EcraPessoa> createState() => _EcraPessoaState();
 }
 
-class _EcraPessoaState extends State<EcraPessoa> {
+class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
   Utilizador? _pessoa;
   bool _ehPar = false;
   bool _soJuntos = false;
@@ -64,9 +65,18 @@ class _EcraPessoaState extends State<EcraPessoa> {
   void initState() {
     super.initState();
     _carregar();
+    // Perfil do par/amigo: as barras e as datas dele atualizam-se sozinhas (o teu não muda sem ti)
+    if (!widget.proprio) iniciarAutoAtualizar();
   }
 
-  Future<void> _carregar() async {
+  @override
+  bool get podeAtualizar => !_ocupado && _pessoa != null;
+
+  @override
+  Future<void> atualizarEmSilencio() => _carregar(silencioso: true);
+
+  // silencioso: se falhar, fica o que já está no ecrã (sem mensagem de erro)
+  Future<void> _carregar({bool silencioso = false}) async {
     try {
       final d = await Api.instancia.get(widget.proprio ? '/pessoas/eu' : '/pessoas/${widget.id}');
       if (!mounted) return;
@@ -94,7 +104,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
         _erro = null;
       });
     } on ApiErro catch (e) {
-      if (mounted) setState(() => _erro = e.mensagem);
+      if (mounted && !silencioso) setState(() => _erro = e.mensagem);
     }
   }
 

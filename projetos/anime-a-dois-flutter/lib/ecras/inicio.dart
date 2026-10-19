@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
@@ -41,7 +42,7 @@ class EcraInicio extends StatefulWidget {
   State<EcraInicio> createState() => _EcraInicioState();
 }
 
-class _EcraInicioState extends State<EcraInicio> {
+class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
   // Dados do GET /inicio
   Utilizador? _user;
   Utilizador? _par;
@@ -63,11 +64,23 @@ class _EcraInicioState extends State<EcraInicio> {
   void initState() {
     super.initState();
     _carregar();
+    iniciarAutoAtualizar(); // a barra do par mexe sozinha enquanto o Início está aberto
     Sessao.instancia.carregarEu().catchError((_) {}); // paleta e definições (falhar aqui não faz mal)
     _verMedalhasNovas();
   }
 
-  Future<void> _carregar() async {
+  // Atualização automática (de 15 em 15 s): só no separador Início e sem ações a meio
+  @override
+  int? get separador => 0;
+
+  @override
+  bool get podeAtualizar => !_ocupado && !_aCarregar;
+
+  @override
+  Future<void> atualizarEmSilencio() => _carregar(silencioso: true);
+
+  // silencioso: se falhar, fica o que já está no ecrã (sem mensagem de erro)
+  Future<void> _carregar({bool silencioso = false}) async {
     try {
       final d = await Api.instancia.get('/inicio');
       if (!mounted) return;
@@ -92,7 +105,7 @@ class _EcraInicioState extends State<EcraInicio> {
       });
       await _carregarAberta();
     } on ApiErro catch (e) {
-      if (!mounted) return;
+      if (!mounted || silencioso) return;
       setState(() {
         _erro = e.mensagem;
         _aCarregar = false;

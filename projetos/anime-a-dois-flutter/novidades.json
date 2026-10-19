@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.6.1",
+    "notas": [
+      "Melhorias de desempenho"
+    ]
+  },
+  {
     "versao": "1.6.0",
     "notas": [
       "O Perfil mostra agora os teus números, medalhas e a tua biblioteca com o dia de cada registo",
