@@ -1,5 +1,12 @@
 [
   {
+    "versao": "1.7.0",
+    "notas": [
+      "Novo 🔔 no Início: episódios e comentários de quem vê contigo, convites e pedidos de amizade",
+      "Toca numa notificação para ir direto ao episódio"
+    ]
+  },
+  {
     "versao": "1.6.1",
     "notas": [
       "Melhorias de desempenho"

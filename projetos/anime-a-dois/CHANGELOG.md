@@ -300,6 +300,13 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - Usado no Início, na Série (mantém o cartão ao centro), nos Comentários e no perfil do par/amigo. Sem mudanças no servidor.
 - Nas novidades da app aparece só "Melhorias de desempenho": o Gustavo não quer detalhes técnicos nas notas para o utilizador.
 
+### Sininho (19 de outubro, versão 1.7.0)
+
+- API: `GET /notificacoes` (`NotificacoesApi`) — últimos 30 dias, calculado dos dados existentes (sem tabela): episódios e comentários de quem vê a série contigo (marcações com menos de 3 h de intervalo juntam-se: "viu os episódios 12 a 14"), convites de série e pedidos de amizade por responder. Mesmas regras do `Notificador`.
+- App: 🔔 no topo do Início com bolinha de não vistas (`Sino.naoVistas`); `EcraNotificacoes` com as novas destacadas; tocar leva à série no episódio, ao Início (convites) ou a Amigos. O "já vi" fica no telemóvel (`shared_preferences`, por conta). Atualiza com a atualização automática.
+- `EcraPrincipal` ouve `separadorAtual` para outros ecrãs poderem pedir um separador.
+- Só com a app aberta; notificações com a app fechada (Firebase) ficam para depois e podem usar a mesma lista.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

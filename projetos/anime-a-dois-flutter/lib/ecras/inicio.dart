@@ -15,6 +15,7 @@ import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 import 'adicionar.dart';
 import 'estatisticas.dart';
+import 'notificacoes.dart';
 import 'medalhas.dart';
 import 'pessoa.dart';
 import 'retrospetiva.dart';
@@ -103,6 +104,7 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
         _erro = null;
         _aCarregar = false;
       });
+      Sino.carregar().catchError((_) => <Notificacao>[]); // número do 🔔 (falhar aqui não faz mal)
       await _carregarAberta();
     } on ApiErro catch (e) {
       if (!mounted || silencioso) return;
@@ -223,6 +225,21 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
         Image.asset('assets/icon/icon.png', width: 34, height: 34),
         const SizedBox(width: 10),
         const Expanded(child: Text('anime a dois', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+        // 🔔 com a bolinha das novidades por ver
+        ValueListenableBuilder<int>(
+          valueListenable: Sino.naoVistas,
+          builder: (_, n, _) => BotaoRedondo(
+            tooltip: 'Notificações',
+            icone: Badge(
+              isLabelVisible: n > 0,
+              label: Text(n > 9 ? '9+' : '$n'),
+              backgroundColor: p.parTxt,
+              child: Icon(n > 0 ? Icons.notifications_rounded : Icons.notifications_none_rounded),
+            ),
+            onTap: () => _abrir(const EcraNotificacoes()),
+          ),
+        ),
+        const SizedBox(width: 8),
         BotaoRedondo(
           tooltip: 'Estatísticas',
           icone: const Icon(Icons.bar_chart_rounded),

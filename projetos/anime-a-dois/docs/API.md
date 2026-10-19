@@ -94,6 +94,14 @@ o servidor valida tudo em `DadosAnime`.
 | DELETE | `/amigos/{id}` | 🔒 | | desfaz a amizade |
 | GET | `/pessoas/{id}` | 🔒 | | perfil do par ou de um amigo; `/pessoas/eu` = o teu (`proprio: true`, sem `teuPct`/`teuUltimo`) (`ultimo`, `numeros`, `medalhas`, `biblioteca` com `naTua`/`vesCom`/`teuPct`/`ultimo`/`teuUltimo`) |
 
+### Sininho (🔔)
+
+| Método | Rota | | Resposta |
+|---|---|---|---|
+| GET | `/notificacoes` | 🔒 | `notificacoes[]` dos últimos 30 dias, mais recentes primeiro (máx. 60): `id`, `tipo` (`ep`/`com`/`convite`/`amigo`), `em` (ISO 8601), `quem` (user), `texto` ("Andreia viu os episódios 12 a 14"), `detalhe`, `serie` (slug ou `null`), `episodio` (número ou `null`) |
+
+Calculado dos dados existentes (sem tabela): episódios e comentários de quem vê a série contigo (marcações com menos de 3 h de intervalo juntam-se), convites de série e pedidos de amizade por responder. O "já vi" fica guardado na app.
+
 ### Retrospetivas e medalhas
 
 | Método | Rota | | Resposta |

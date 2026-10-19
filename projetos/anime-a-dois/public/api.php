@@ -65,6 +65,9 @@ $rotas = [
     ['DELETE', '/amigos/{id}',                        AmigosApi::class,      'remover'],
     ['GET',    '/pessoas/{id}',                       AmigosApi::class,      'pessoa'],
 
+    // Sininho (🔔): o que aconteceu à tua volta nos últimos 30 dias
+    ['GET',    '/notificacoes',                       NotificacoesApi::class, 'lista'],
+
     // Retrospetivas (mensal e anual) e medalhas
     ['GET',    '/resumos',                            ResumoApi::class,      'periodos'],
     ['GET',    '/resumos/{ano}',                      ResumoApi::class,      'ano'],

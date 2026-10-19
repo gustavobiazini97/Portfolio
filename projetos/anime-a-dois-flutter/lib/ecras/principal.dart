@@ -36,6 +36,7 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
   void initState() {
     super.initState();
     separadorAtual.value = 0; // abre sempre no Início (também depois de voltar a entrar)
+    separadorAtual.addListener(_mudouSeparador); // outro ecrã pode pedir um separador (ex.: 🔔 → Amigos)
     // Versão nova publicada? Pergunta logo depois do primeiro ecrã aparecer
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) Atualizacoes.verificarAoAbrir(context);
@@ -49,6 +50,23 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
     (Icons.people_outline_rounded, Icons.people_rounded, 'Amigos'),
     (Icons.person_outline_rounded, Icons.person_rounded, 'Perfil'),
   ];
+
+  @override
+  void dispose() {
+    separadorAtual.removeListener(_mudouSeparador);
+    super.dispose();
+  }
+
+  // Alguém mudou o separadorAtual de fora (ex.: o 🔔 num pedido de amizade): abre esse separador
+  void _mudouSeparador() {
+    final i = separadorAtual.value;
+    if (i != _atual && mounted) {
+      setState(() {
+        _versoes[i]++;
+        _atual = i;
+      });
+    }
+  }
 
   void _escolher(int i) {
     HapticFeedback.selectionClick();
