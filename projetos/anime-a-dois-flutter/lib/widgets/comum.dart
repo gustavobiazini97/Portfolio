@@ -233,12 +233,100 @@ class LinhaPessoa extends StatelessWidget {
 
 // ---------- Estados de carregamento ----------
 
-class Carregando extends StatelessWidget {
+// Esqueleto a brilhar (no lugar da rodinha): a forma de um ecrã típico — foto, títulos e cartões —
+// com um reflexo que passa por cima. Corta-se a si próprio se o espaço for pequeno.
+class Carregando extends StatefulWidget {
   const Carregando({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      const Center(child: CircularProgressIndicator(strokeWidth: 2.5));
+  State<Carregando> createState() => _CarregandoState();
+}
+
+class _CarregandoState extends State<Carregando> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1300))..repeat();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Paleta.de(context);
+    final base = p.tinta.withValues(alpha: .07);
+    final brilho = p.tinta.withValues(alpha: .16);
+
+    // Um bloco arredondado do esqueleto
+    Widget bloco(double? largura, double altura, {double raio = 14, bool circulo = false}) => Container(
+          width: largura,
+          height: altura,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: circulo ? BoxShape.circle : BoxShape.rectangle,
+            borderRadius: circulo ? null : BorderRadius.circular(raio),
+          ),
+        );
+
+    final esqueleto = Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              bloco(52, 52, circulo: true),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [bloco(140, 14), const SizedBox(height: 8), bloco(90, 10)],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          bloco(double.infinity, 92, raio: 26),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              for (var i = 0; i < 3; i++) ...[
+                if (i > 0) const SizedBox(width: 12),
+                Expanded(child: bloco(null, 130, raio: 18)),
+              ],
+            ],
+          ),
+          const SizedBox(height: 14),
+          bloco(double.infinity, 70, raio: 22),
+          const SizedBox(height: 14),
+          bloco(double.infinity, 70, raio: 22),
+        ],
+      ),
+    );
+
+    return ClipRect(
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(), // só para não transbordar em espaços pequenos
+        child: AnimatedBuilder(
+          animation: _c,
+          child: esqueleto,
+          builder: (_, filho) {
+            // Reflexo diagonal que atravessa o esqueleto da esquerda para a direita
+            final x = -1.5 + 3 * _c.value;
+            return ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (r) => LinearGradient(
+                begin: Alignment(x - .6, -.3),
+                end: Alignment(x + .6, .3),
+                colors: [base, brilho, base],
+              ).createShader(r),
+              child: filho,
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
 
 // Mensagem de erro com botão para tentar outra vez
@@ -307,8 +395,12 @@ class Capa extends StatelessWidget {
   final Serie serie;
   final double largura;
   final double raio;
+  final bool voa; // true: a capa "voa" até ao ecrã da série (Hero com a etiqueta tagCapa)
 
-  const Capa({super.key, required this.serie, this.largura = 110, this.raio = 18});
+  const Capa({super.key, required this.serie, this.largura = 110, this.raio = 18, this.voa = false});
+
+  // Etiqueta partilhada entre a capa nas listas e a do topo do ecrã da série
+  static String tagCapa(String slug) => 'capa-$slug';
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +423,7 @@ class Capa extends StatelessWidget {
       ),
     );
 
-    return ClipRRect(
+    final capa = ClipRRect(
       borderRadius: BorderRadius.circular(raio),
       child: serie.capa == null
           ? semCapa
@@ -343,6 +435,7 @@ class Capa extends StatelessWidget {
               errorBuilder: (_, __, ___) => semCapa,
             ),
     );
+    return voa ? Hero(tag: tagCapa(serie.slug), child: capa) : capa;
   }
 }
 

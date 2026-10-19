@@ -13,6 +13,7 @@ import '../api/modelos.dart';
 import '../estado/auto_atualizar.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../widgets/efeitos.dart';
 import 'medalhas.dart' show Medalha, EmblemaMedalha, EcraMedalhas, corDoNivel;
 import 'perfil.dart';
 import 'retrospetiva.dart' show EcraRetrospetivas;
@@ -176,7 +177,8 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
       onRefresh: _carregar,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
+        // Os blocos entram um a um, a deslizar de baixo
+        children: emCascata([
           // Cabeçalho: foto, nome e o último episódio que viu
           Center(child: Avatar(user: u, cor: widget.proprio ? p.tu : p.par, tamanho: 88)),
           const SizedBox(height: 8),
@@ -234,7 +236,7 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
             Text('Nada para mostrar por agora.', style: TextStyle(color: p.suave))
           else
             for (final e in _estados.entries) ..._secao(p, e.key, e.value, u),
-        ],
+        ]),
       ),
     );
   }
@@ -261,7 +263,11 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
     return Expanded(
       child: Column(
         children: [
-          Text('$valor', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: widget.proprio ? p.tuTxt : p.parTxt)),
+          // O número sobe de 0 até ao valor
+          NumeroAContar(
+            valor: valor,
+            estilo: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: widget.proprio ? p.tuTxt : p.parTxt),
+          ),
           const SizedBox(height: 2),
           Text(legenda, style: TextStyle(fontSize: 11.5, color: p.suave)),
         ],
@@ -473,12 +479,12 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
     return Vidro(
       padding: const EdgeInsets.all(12),
       onTap: i.naTua
-          ? () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => EcraSerie(slug: s.slug)))
+          ? () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => EcraSerie(slug: s.slug, serie: s)))
           : null,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Capa(serie: s, largura: 56, raio: 12),
+          Capa(serie: s, largura: 56, raio: 12, voa: i.naTua), // voa só se abre a série
           const SizedBox(width: 12),
           Expanded(
             child: Column(

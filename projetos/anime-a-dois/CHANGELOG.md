@@ -312,6 +312,15 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - `/notificacoes` passa a trazer os episódios do par, dos amigos e de quem vê séries contigo (com "só juntos", só as séries em comum), cada um com `juntos` e `relacao` (`par`/`amigo`).
 - App: ícone de filtro no ecrã do 🔔 (`FiltrosSino`, no telemóvel): séries juntos ✓, outras do par ✓, outras dos amigos ✗, comentários ✓, convites e pedidos ✓. A bolinha conta só o que está ligado. Tocar num episódio de uma série que não vês com a pessoa abre o perfil dela.
 
+### "Uau" (19 de outubro, versão 1.8.0)
+
+- `lib/widgets/efeitos.dart`: `ViraCartao` (o cartão do episódio vira ao marcar), `explosao()` (partículas na cor da série), `coracao()` (❤️ quando os companheiros já viram), `NumeroAContar`, `PistaCorrida` (foto a correr na barra, ⚡ em quem vai à frente), `Cascata`/`emCascata` (entrada um a um), `Confettis`.
+- Série: vibração + partículas + ❤️ ao marcar; capa pequena no topo que "voa" da lista (`Capa(voa: true)` → Hero `capa-<slug>`; `EcraSerie(serie:)` para a capa aparecer logo).
+- Ao marcar o último episódio que faltava: `EcraCelebracao` (confettis, cartão 9:16 com capa, fotos de quem acabou e números a contar, partilha como PNG). Uma vez por pessoa e série (`celebrou_<user>_<slug>` no telemóvel).
+- Início: placar em corrida; blocos em cascata. Perfil: números a contar. Biblioteca e 🔔: cascata.
+- `Carregando` passou de rodinha a esqueleto a brilhar.
+- Modelo `Serie` ganhou `minutosEp` (para as horas da celebração; sem valor, 24 min).
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

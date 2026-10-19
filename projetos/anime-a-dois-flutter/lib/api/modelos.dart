@@ -74,6 +74,7 @@ class Serie {
   final bool emEmissao;
   final int totalFillers; // só vem na página da série
   final Color cor; // acento da série
+  final int? minutosEp; // duração de um episódio (null = não se sabe)
 
   const Serie({
     required this.slug,
@@ -86,6 +87,7 @@ class Serie {
     this.emEmissao = false,
     this.totalFillers = 0,
     required this.cor,
+    this.minutosEp,
   });
 
   factory Serie.deJson(Map<String, dynamic> j) => Serie(
@@ -99,6 +101,7 @@ class Serie {
         emEmissao: j['emEmissao'] == true,
         totalFillers: _int(j['totalFillers']),
         cor: corDeHex(j['cor'] as String?),
+        minutosEp: (j['minutosEp'] as num?)?.toInt(),
       );
 }
 

@@ -6,6 +6,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../api/api.dart';
@@ -14,14 +16,17 @@ import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../widgets/efeitos.dart';
 import '../widgets/menu_radial.dart';
+import 'celebracao.dart';
 import 'comentarios.dart';
 
 class EcraSerie extends StatefulWidget {
   final String slug;
   final int? episodio; // número a abrir ao centro (ex.: o seguinte ao teu, ou o último que o par viu)
+  final Serie? serie; // se já se sabe (listas), o topo mostra logo a capa e ela "voa" da lista
 
-  const EcraSerie({super.key, required this.slug, this.episodio});
+  const EcraSerie({super.key, required this.slug, this.episodio, this.serie});
 
   @override
   State<EcraSerie> createState() => _EcraSerieState();
@@ -44,6 +49,7 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
   String? _erro;
 
   final _menu = MenuRadial(); // toque longo num cartão
+  final _chavePista = GlobalKey(); // para saber onde rebentam as partículas (centro da pista)
 
   // Largura de um cartão + espaço (172 + 12, como no site)
   static const _larguraCartao = 172.0;
@@ -163,6 +169,8 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
   Future<void> _marcar(List<Episodio> eps, {required bool visto, bool avancar = false}) async {
     if (eps.isEmpty || _aGuardar) return;
     final antes = {for (final e in eps) e.id: e.tu}; // para desfazer
+    final vistosAntes = _meu.vistos; // para saber se a série acabou agora
+    if (visto) _festejar(eps);
     setState(() {
       _aGuardar = true;
       for (final e in eps) {
@@ -181,6 +189,12 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
       setState(() => _meu = Progresso.deJson(d['progresso'] as Map<String, dynamic>));
       aviso(context, d['mensagem'] as String);
 
+      // Acabaste a série com esta marcação? Ecrã de celebração (uma vez por série)
+      final total = _serie?.totalEpisodios ?? 0;
+      if (visto && total > 0 && _meu.vistos >= total && vistosAntes < total) {
+        _celebrar();
+      }
+
       // Depois de marcar o episódio do centro, desliza para o seguinte (como no site)
       if (avancar && _atual < _eps.length - 1) {
         _pista?.animateToPage(_atual + 1, duration: const Duration(milliseconds: 380), curve: Curves.easeOutCubic);
@@ -196,6 +210,49 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
     } finally {
       if (mounted) setState(() => _aGuardar = false);
     }
+  }
+
+  // Marcar com impacto: vibração e partículas no centro da pista (cor da série e a tua);
+  // se os teus companheiros já tinham visto o episódio, um ❤️ por cima
+  void _festejar(List<Episodio> eps) {
+    final caixa = _chavePista.currentContext?.findRenderObject() as RenderBox?;
+    if (caixa == null || !caixa.hasSize) return;
+    final centro = caixa.localToGlobal(caixa.size.center(Offset.zero));
+    final p = Paleta.de(context);
+    HapticFeedback.mediumImpact();
+    explosao(context, centro, [_serie?.cor ?? p.par, p.tu, p.tuTxt], quantas: eps.length > 1 ? 40 : 26);
+    if (eps.length == 1 && eps.first.algumCom) {
+      Future.delayed(const Duration(milliseconds: 260), () {
+        if (!mounted) return;
+        HapticFeedback.heavyImpact();
+        coracao(context, centro);
+      });
+    }
+  }
+
+  // Ecrã de celebração ao acabar a série (só a primeira vez que se acaba, por pessoa e série)
+  Future<void> _celebrar() async {
+    final s = _serie;
+    if (s == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final chave = 'celebrou_${_user?.id ?? 0}_${s.slug}';
+    if (prefs.getBool(chave) == true || !mounted) return;
+    await prefs.setBool(chave, true);
+    if (!mounted) return;
+    await Navigator.of(context).push(PageRouteBuilder(
+      opaque: false,
+      transitionDuration: const Duration(milliseconds: 450),
+      pageBuilder: (_, __, ___) => EcraCelebracao(
+        serie: s,
+        eu: _user,
+        companheiros: [
+          for (var i = 0; i < _companheiros.length; i++)
+            (_companheiros[i], i < _progressoCom.length ? _progressoCom[i] : const Progresso()),
+        ],
+        fillers: _eps.where((e) => e.filler).length,
+      ),
+      transitionsBuilder: (_, a, __, filho) => FadeTransition(opacity: a, child: filho),
+    ));
   }
 
   // Botão principal: o episódio do centro, ou os escolhidos no modo de seleção
@@ -308,13 +365,24 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
                       icone: const Icon(Icons.chevron_left_rounded),
                       onTap: () => Navigator.of(context).maybePop(),
                     ),
+                    // Capa pequena + nome ao centro; a capa "voa" da lista de onde vieste
                     Expanded(
-                      child: Text(
-                        serie?.nome ?? '',
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if ((serie ?? widget.serie) != null) ...[
+                            Capa(serie: (serie ?? widget.serie)!, largura: 26, raio: 7, voa: true),
+                            const SizedBox(width: 10),
+                          ],
+                          Flexible(
+                            child: Text(
+                              (serie ?? widget.serie)?.nome ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     BotaoRedondo(
@@ -358,6 +426,7 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
 
         // ---------- Pista: cartões que deslizam e encaixam ao centro ----------
         Expanded(
+          key: _chavePista,
           child: LayoutBuilder(
             builder: (context, c) {
               final controlador = _controlador(MediaQuery.sizeOf(context).width);
@@ -581,7 +650,9 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
     return AnimatedScale(
       scale: ativo || selecionado ? 1 : .94,
       duration: const Duration(milliseconds: 250),
-      child: GestureDetector(
+      child: ViraCartao(
+        virado: e.tu, // ao marcar, o cartão vira
+        child: GestureDetector(
         onTap: () => _tocar(i),
         // Toque longo: menu radial (no modo de seleção, escolhe o cartão)
         onLongPressStart: (d) {
@@ -662,6 +733,7 @@ class _EcraSerieState extends State<EcraSerie> with AutoAtualizar {
           ),
         ),
       ),
+      ), // ViraCartao
     );
   }
 

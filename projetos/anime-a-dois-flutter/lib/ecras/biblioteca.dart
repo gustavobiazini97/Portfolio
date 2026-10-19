@@ -7,6 +7,7 @@ import '../api/api.dart';
 import '../api/modelos.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../widgets/efeitos.dart';
 import 'serie.dart';
 
 class EcraBiblioteca extends StatefulWidget {
@@ -47,7 +48,7 @@ class _EcraBibliotecaState extends State<EcraBiblioteca> {
   }
 
   Future<void> _abrir(Serie s) async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => EcraSerie(slug: s.slug)));
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => EcraSerie(slug: s.slug, serie: s)));
     if (mounted) _carregar();
   }
 
@@ -127,7 +128,7 @@ class _EcraBibliotecaState extends State<EcraBiblioteca> {
                   childAspectRatio: 0.52,
                 ),
                 delegate: SliverChildBuilderDelegate(
-                  (context, n) => _capa(p, doGrupo[n]),
+                  (context, n) => Cascata(indice: n, child: _capa(p, doGrupo[n])), // capas entram uma a uma
                   childCount: doGrupo.length,
                 ),
               ),
@@ -149,7 +150,7 @@ class _EcraBibliotecaState extends State<EcraBiblioteca> {
           children: [
             Stack(
               children: [
-                Opacity(opacity: i.estado == 'acabado' ? .8 : 1, child: Capa(serie: i.serie, largura: c.maxWidth, raio: 16)),
+                Opacity(opacity: i.estado == 'acabado' ? .8 : 1, child: Capa(serie: i.serie, largura: c.maxWidth, raio: 16, voa: true)),
                 if (i.companheiros.isNotEmpty)
                   Positioned(
                     top: 6,

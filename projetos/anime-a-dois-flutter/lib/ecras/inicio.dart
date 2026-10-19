@@ -13,6 +13,7 @@ import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../widgets/efeitos.dart';
 import 'adicionar.dart';
 import 'estatisticas.dart';
 import 'notificacoes.dart';
@@ -208,7 +209,7 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
                         children: [
                           _topo(p, escuro),
                           const SizedBox(height: 14),
-                          ..._conteudo(p, atual),
+                          ...emCascata(_conteudo(p, atual)), // os blocos entram um a um
                         ],
                       ),
                     ),
@@ -455,7 +456,7 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
                       children: [
                         Opacity(
                           opacity: i.estado == 'acabado' ? .8 : 1, // acabadas: mais apagadas
-                          child: Capa(serie: i.serie, largura: largura - 9, raio: doPar ? 14 : 18),
+                          child: Capa(serie: i.serie, largura: largura - 9, raio: doPar ? 14 : 18, voa: !doPar),
                         ),
                         // Vista com alguém: o teu avatar e o do primeiro companheiro (+N) no canto de cima
                         if (!doPar && i.companheiros.isNotEmpty)
@@ -550,7 +551,7 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
       else if (a.comecou)
         Vidro(
           padding: const EdgeInsets.all(20),
-          onTap: () => _abrir(EcraSerie(slug: s.slug)),
+          onTap: () => _abrir(EcraSerie(slug: s.slug, serie: s)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -564,10 +565,10 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
                 ],
               ),
               const SizedBox(height: 18),
-              _linhaVs(p, 'Tu', a.tu, true),
-              for (final c in comp) ...[
+              _linhaVs(p, _user, 'Tu', a.tu, true, _lider(a) == -1),
+              for (final (n, c) in comp.indexed) ...[
                 const SizedBox(height: 16),
-                _linhaVs(p, c.$1.nome, c.$2, false),
+                _linhaVs(p, c.$1, c.$1.nome, c.$2, false, _lider(a) == n),
               ],
               const SizedBox(height: 18),
               Divider(height: 1, color: p.linha),
@@ -665,7 +666,7 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
       SizedBox(
         height: 52,
         child: FilledButton(
-          onPressed: () => _abrir(EcraSerie(slug: s.slug, episodio: seguinte)),
+          onPressed: () => _abrir(EcraSerie(slug: s.slug, episodio: seguinte, serie: s)),
           style: FilledButton.styleFrom(padding: EdgeInsets.zero),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -682,7 +683,15 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
   }
 
   // Uma linha do placar: "Tu" à esquerda, "50 · 23%" à direita (o número a negrito na cor da pessoa), barra por baixo
-  Widget _linhaVs(Paleta p, String nome, Progresso pr, bool ehTu) {
+  // Quem vai à frente no placar: -1 = tu, 0.. = índice do companheiro, null = empate ou ninguém começou
+  int? _lider(_Aberta a) {
+    final posicoes = [a.tu.posicao, for (final c in a.companheiros) c.$2.posicao];
+    final maior = posicoes.reduce((x, y) => x > y ? x : y);
+    if (maior == 0 || posicoes.where((x) => x == maior).length > 1) return null;
+    return posicoes.indexOf(maior) - 1;
+  }
+
+  Widget _linhaVs(Paleta p, Utilizador? u, String nome, Progresso pr, bool ehTu, bool lider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -698,8 +707,9 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
             )),
           ],
         ),
-        const SizedBox(height: 8),
-        BarraProgresso(pct: pr.pct, cor: ehTu ? p.tu : p.par, altura: 6),
+        const SizedBox(height: 6),
+        // Corrida: a foto de cada um anda pela pista até onde vai; ⚡ em quem vai à frente
+        PistaCorrida(user: u, pct: pr.pct, cor: ehTu ? p.tu : p.par, lider: lider),
       ],
     );
   }

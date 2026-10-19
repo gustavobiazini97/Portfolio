@@ -14,6 +14,7 @@ import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import '../widgets/efeitos.dart';
 import 'pessoa.dart';
 import 'serie.dart';
 
@@ -285,7 +286,7 @@ class _EcraNotificacoesState extends State<EcraNotificacoes> with AutoAtualizar 
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       itemCount: lista.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) => _linha(p, lista[i]),
+      itemBuilder: (_, i) => Cascata(indice: i, child: _linha(p, lista[i])),
     );
   }
 
