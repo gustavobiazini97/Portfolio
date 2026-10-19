@@ -129,51 +129,10 @@ class AmigosApi extends ApiController
             'proprio'    => $proprio,
             'ultimo'     => $this->ultimoJson($pessoa->ultimoVistoPara($user)),
             'soJuntos'   => $soJuntos,
-            'numeros'    => $this->numeros($pessoa, $user, $itens, $soJuntos),
+            'numeros'    => Perfil::numeros($pessoa, $user, $biblioteca, $soJuntos, $proprio),
             'medalhas'   => $medalhas,
             'biblioteca' => $itens,
         ]);
-    }
-
-    // Números do perfil: episódios, horas, séries e acabadas dele + o que vêem juntos.
-    // Com "só juntos", os números dele contam só as séries que se veem (as que vê contigo).
-    private function numeros(User $pessoa, User $user, array $itens, bool $soJuntos): array
-    {
-        // Slugs das séries que se veem e das que vêem juntos (os itens da API não levam o id)
-        $visiveis = array_map(fn ($i) => $i['serie']['slug'], $itens);
-        $slugsJuntos = array_values(array_map(fn ($i) => $i['serie']['slug'], array_filter($itens, fn ($i) => $i['vesCom'])));
-
-        // Episódios e minutos vistos por ele (todos, ou só nas séries visíveis)
-        $q = Capsule::table('vistos')
-            ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
-            ->join('series', 'series.id', '=', 'episodios.serie_id')
-            ->where('vistos.user_id', $pessoa->id);
-        if ($soJuntos) {
-            $q->whereIn('series.slug', $visiveis === [] ? [''] : $visiveis);   // [''] = nenhuma
-        }
-        $linha = $q->selectRaw('COUNT(*) AS n, COALESCE(SUM(COALESCE(series.minutos_ep, ' . Resumo::MINUTOS_EP . ')), 0) AS m')->first();
-
-        // Episódios que os dois já viram nas séries que vêem juntos
-        $juntos = 0;
-        if ($slugsJuntos !== []) {
-            $juntos = Capsule::table('vistos AS a')
-                ->join('vistos AS b', 'b.episodio_id', '=', 'a.episodio_id')
-                ->join('episodios', 'episodios.id', '=', 'a.episodio_id')
-                ->join('series', 'series.id', '=', 'episodios.serie_id')
-                ->where('a.user_id', $pessoa->id)
-                ->where('b.user_id', $user->id)
-                ->whereIn('series.slug', $slugsJuntos)
-                ->count();
-        }
-
-        return [
-            'episodios'       => (int) $linha->n,
-            'horas'           => intdiv((int) $linha->m, 60),
-            'series'          => count($itens),
-            'acabadas'        => count(array_filter($itens, fn ($i) => $i['estado'] === 'acabado')),
-            'seriesJuntos'    => count($slugsJuntos),
-            'episodiosJuntos' => $juntos,
-        ];
     }
 
     // Lista de Users → lista de pessoas da API

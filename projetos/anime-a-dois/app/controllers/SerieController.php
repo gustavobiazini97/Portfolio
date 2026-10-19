@@ -100,12 +100,28 @@ class SerieController extends Controller
 
             if ($this->querJson()) {
                 $progresso = $serie->progressoDe($user);
+                $total = (int) $serie->total_episodios;
+
+                // Acabaste a série com esta marcação? (todos vistos agora e não antes) → celebração no browser
+                $acabou = $visto && $total > 0 && $progresso['vistos'] >= $total && $progresso['vistos'] - count($mudaram) < $total;
+                $comigo = [];
+                if ($acabou) {
+                    // Quem vê a série contigo e também já a acabou (o cartão diz "Acabámos")
+                    foreach ($serie->companheirosDe($user) as $c) {
+                        if ($serie->progressoDe($c)['vistos'] >= $total) {
+                            $comigo[] = ['nome' => $c->nome, 'foto' => $c->fotoUrl(), 'inicial' => $c->inicial()];
+                        }
+                    }
+                }
+
                 $this->json([
                     'ok'       => true,
                     'visto'    => $visto,
                     'numeros'  => $episodios->pluck('numero')->map(fn ($x) => (int) $x)->all(),
                     'pct'      => $progresso['pct'],
                     'mensagem' => $mensagem,
+                    'acabou'   => $acabou,
+                    'comigo'   => $comigo,
                 ]);
             }
 

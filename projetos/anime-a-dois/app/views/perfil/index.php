@@ -1,9 +1,10 @@
-<?php /* Perfil. Variáveis: $user, $pref (Preferencia), $vapidPublica, $telemoveis, $antigo, $flash */ ?>
+<?php /* Definições do perfil (abre na ⚙️ do teu perfil). Variáveis: $user, $pref (Preferencia), $vapidPublica, $telemoveis, $antigo, $flash */ ?>
 <div class="topo">
-  <a class="btn-redondo vidro" href="<?= e(url('home')) ?>" aria-label="Voltar ao início">
+  <!-- As definições abrem na ⚙️ do teu perfil: voltar leva lá -->
+  <a class="btn-redondo vidro" href="<?= e(url('perfil', 'pessoa', ['id' => $user->id])) ?>" aria-label="Voltar ao perfil">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
   </a>
-  <h1 class="topo-meio">Perfil</h1>
+  <h1 class="topo-meio">Definições</h1>
   <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
 </div>
 

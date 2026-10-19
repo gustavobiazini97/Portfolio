@@ -211,6 +211,10 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
         if (!resposta.ok) { mostrarAviso(resposta.mensagem || 'Não foi possível guardar.', true); return; }
         aplicar(resposta);
         mostrarAviso(resposta.mensagem);
+        // Marcar com impacto: os cartões viram, partículas, vibração e ❤️ se os companheiros já tinham visto
+        if (resposta.visto) festejarCartoes(resposta.numeros.map(function (n) { return porNumero[n]; }).filter(Boolean), atual);
+        // Acabaste a série agora? Celebração com o cartão para partilhar
+        if (resposta.acabou) celebrarSerie(form.dataset.celebrar, resposta.comigo || []);
         if (multiplo) definirModo(false);
       })
       .catch(function () { mostrarAviso('Sem ligação. Tenta outra vez.', true); })
@@ -1039,4 +1043,455 @@ if ('serviceWorker' in navigator) {
 // ---------- Cores: tocar numa amostra do perfil mostra logo a paleta (só grava com "Guardar cores") ----------
 document.querySelectorAll('#form-paleta input[name="paleta"]').forEach(function (r) {
   r.addEventListener('change', function () { document.documentElement.setAttribute('data-paleta', r.value); });
+});
+
+// =====================================================================================
+// "Uau" (como na app 1.8.0): números a contar, corrida, entradas em cascata, marcar com
+// impacto, celebração ao acabar uma série, medalhas, stories da retrospetiva e capas que voam.
+// Todo o texto vindo do servidor é inserido como texto (textContent), nunca como HTML.
+// =====================================================================================
+
+// Quem pediu menos movimento no sistema fica sem animações (só o resultado final)
+var poucoMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Cor de uma variável do CSS (ex.: '--tu'), com uma de reserva
+function corCss(nome, reserva) {
+  var v = getComputedStyle(document.body).getPropertyValue(nome).trim();
+  return v || reserva;
+}
+
+// ---------- Números que sobem de 0 até ao valor ([data-contar]) ----------
+function contarNumero(el, duracao) {
+  var alvo = parseInt(el.dataset.contar, 10) || 0;
+  if (poucoMovimento || alvo === 0) { el.textContent = alvo; return; }
+  var inicio = null;
+  function passo(t) {
+    if (inicio === null) inicio = t;
+    var p = Math.min(1, (t - inicio) / (duracao || 900));
+    var suave = 1 - Math.pow(1 - p, 3);              // easeOutCubic
+    el.textContent = Math.round(alvo * suave);
+    if (p < 1) requestAnimationFrame(passo);
+  }
+  el.textContent = '0';
+  requestAnimationFrame(passo);
+}
+document.querySelectorAll('[data-contar]').forEach(function (el) { contarNumero(el); });
+
+// ---------- Corrida no placar do Início: a foto corre até à % de cada um ----------
+document.querySelectorAll('.corrida[data-pct]').forEach(function (pista) {
+  var foto = pista.querySelector('.corrida-foto');
+  if (!foto) return;
+  var pct = Math.max(0, Math.min(100, parseInt(pista.dataset.pct, 10) || 0));
+  // Começa no 0 e, no frame seguinte, vai até à % (a transição está no CSS)
+  foto.style.left = '0px';
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      foto.style.left = 'calc((100% - ' + foto.offsetWidth + 'px) * ' + (pct / 100) + ')';
+      pista.classList.add('a-correr');
+    });
+  });
+});
+
+// ---------- Entrada em cascata: blocos e listas aparecem um a um ----------
+(function () {
+  var blocos = document.querySelectorAll('.cascata, .pagina-inicio .inicio .painel, .pagina-inicio .biblioteca, .capa-item');
+  blocos.forEach(function (el, i) {
+    if (poucoMovimento) return;
+    el.style.animationDelay = (Math.min(i, 8) * 55) + 'ms';
+    el.classList.add('entra');
+  });
+})();
+
+// ---------- Partículas a saltar de um ponto do ecrã ----------
+function explosao(x, y, cores, quantas) {
+  if (poucoMovimento) return;
+  var tela = document.createElement('canvas');
+  tela.className = 'efeito-tela';
+  var escala = window.devicePixelRatio || 1;
+  tela.width = innerWidth * escala;
+  tela.height = innerHeight * escala;
+  document.body.appendChild(tela);
+  var ctx = tela.getContext('2d');
+  ctx.scale(escala, escala);
+
+  var particulas = [];
+  for (var i = 0; i < (quantas || 26); i++) {
+    particulas.push({
+      a: Math.random() * Math.PI * 2, v: 140 + Math.random() * 220, t: 4 + Math.random() * 6,
+      r: (Math.random() - .5) * 10, c: cores[Math.floor(Math.random() * cores.length)], redonda: Math.random() < .5
+    });
+  }
+  var inicio = null;
+  function passo(agora) {
+    if (inicio === null) inicio = agora;
+    var t = Math.min(1, (agora - inicio) / 850);
+    var s = 1 - Math.pow(1 - t, 3);
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    particulas.forEach(function (p) {
+      var px = x + Math.cos(p.a) * p.v * s;
+      var py = y + Math.sin(p.a) * p.v * s + 120 * t * t;   // sai, abranda e cai um pouco
+      ctx.save();
+      ctx.globalAlpha = 1 - t;
+      ctx.fillStyle = p.c;
+      ctx.translate(px, py);
+      ctx.rotate(p.r * t);
+      if (p.redonda) { ctx.beginPath(); ctx.arc(0, 0, p.t / 2, 0, Math.PI * 2); ctx.fill(); }
+      else ctx.fillRect(-p.t / 2, -p.t * .27, p.t, p.t * .55);
+      ctx.restore();
+    });
+    if (t < 1) requestAnimationFrame(passo); else tela.remove();
+  }
+  requestAnimationFrame(passo);
+}
+
+// ❤️ que cresce num ponto, sobe e desaparece
+function coracao(x, y) {
+  if (poucoMovimento) return;
+  var c = document.createElement('span');
+  c.className = 'coracao-voa';
+  c.textContent = '❤️';
+  c.style.left = x + 'px';
+  c.style.top = y + 'px';
+  document.body.appendChild(c);
+  c.addEventListener('animationend', function () { c.remove(); });
+}
+
+// Marcar com impacto: os cartões marcados viram; partículas no do centro; ❤️ se os companheiros já o tinham visto
+function festejarCartoes(cartoes, centro) {
+  cartoes.forEach(function (c) {
+    c.classList.remove('virar');
+    void c.offsetWidth;                              // reinicia a animação se se repetir
+    c.classList.add('virar');
+    c.addEventListener('animationend', function fim() { c.classList.remove('virar'); c.removeEventListener('animationend', fim); });
+  });
+  var alvo = centro && cartoes.indexOf(centro) >= 0 ? centro : cartoes[0];
+  if (!alvo) return;
+  if (navigator.vibrate) navigator.vibrate(25);
+  var r = alvo.getBoundingClientRect();
+  var x = r.left + r.width / 2, y = r.top + r.height / 2;
+  explosao(x, y, [corCss('--acento', '#F5C89A'), corCss('--tu', '#B9D3B0'), corCss('--tu-txt', '#4E7A43')], cartoes.length > 1 ? 40 : 26);
+  if (cartoes.length === 1 && (alvo.dataset.com || '').indexOf('1') >= 0) {
+    setTimeout(function () { if (navigator.vibrate) navigator.vibrate([0, 40]); coracao(x, y); }, 260);
+  }
+}
+
+// ---------- Chuva de confettis (por cima de um elemento) ----------
+function confettis(dentro, cores) {
+  if (poucoMovimento) return;
+  var tela = document.createElement('canvas');
+  tela.className = 'confettis';
+  dentro.appendChild(tela);
+  var escala = window.devicePixelRatio || 1;
+  var L = dentro.clientWidth, A = dentro.clientHeight;
+  tela.width = L * escala; tela.height = A * escala;
+  var ctx = tela.getContext('2d');
+  ctx.scale(escala, escala);
+  var papeis = [];
+  for (var i = 0; i < 140; i++) {
+    papeis.push({ x: Math.random(), atraso: Math.random() * .35, v: .55 + Math.random() * .6, b: 10 + Math.random() * 26,
+                  r: (Math.random() - .5) * 14, l: 6 + Math.random() * 6, c: cores[Math.floor(Math.random() * cores.length)] });
+  }
+  var inicio = null;
+  function passo(agora) {
+    if (inicio === null) inicio = agora;
+    var t = Math.min(1, (agora - inicio) / 3600);
+    ctx.clearRect(0, 0, L, A);
+    papeis.forEach(function (p) {
+      var local = Math.max(0, Math.min(1, (t - p.atraso) / (1 - p.atraso)));
+      if (local <= 0) return;
+      var y = -20 + (A + 40) * local * p.v * 1.4;
+      if (y > A + 20) return;
+      var x = L * p.x + Math.sin(local * 10 + p.x * 6) * p.b;
+      ctx.save();
+      ctx.globalAlpha = local > .85 ? (1 - local) / .15 : 1;
+      ctx.fillStyle = p.c;
+      ctx.translate(x, y);
+      ctx.rotate(p.r * local);
+      ctx.fillRect(-p.l / 2, -p.l / 4, p.l, p.l / 2);
+      ctx.restore();
+    });
+    if (t < 1) requestAnimationFrame(passo); else tela.remove();
+  }
+  requestAnimationFrame(passo);
+}
+
+// ---------- Partilhar uma imagem (canvas): folha de partilha do telemóvel ou descarregar ----------
+function partilharTela(tela, nomeFicheiro, texto) {
+  return new Promise(function (ok) {
+    try {
+      tela.toBlob(function (blob) {
+        if (!blob) { ok(false); return; }
+        var ficheiro = new File([blob], nomeFicheiro, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [ficheiro] })) {
+          navigator.share({ files: [ficheiro], text: texto }).then(function () { ok(true); }, function () { ok(true); });
+        } else {
+          // Sem partilha de ficheiros (computador): descarrega a imagem
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = nomeFicheiro;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          ok(true);
+        }
+      }, 'image/png');
+    } catch (e) { ok(false); }   // imagem de outro site sem CORS: o canvas fica "sujo" e não exporta
+  });
+}
+
+// Carrega uma imagem para desenhar no canvas (null se falhar ou se o site não deixar)
+function carregarImagem(url) {
+  return new Promise(function (ok) {
+    if (!url) { ok(null); return; }
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.referrerPolicy = 'no-referrer';
+    img.onload = function () { ok(img); };
+    img.onerror = function () { ok(null); };
+    img.src = url;
+  });
+}
+
+// Texto partido em linhas que caibam numa largura (para o canvas)
+function linhasDeTexto(ctx, texto, largura) {
+  var palavras = texto.split(' '), linhas = [], atual = '';
+  palavras.forEach(function (p) {
+    var tenta = atual ? atual + ' ' + p : p;
+    if (ctx.measureText(tenta).width > largura && atual) { linhas.push(atual); atual = p; } else atual = tenta;
+  });
+  if (atual) linhas.push(atual);
+  return linhas;
+}
+
+// ---------- Celebração ao acabar uma série (página da série) ----------
+function celebrarSerie(json, comigo) {
+  var d;
+  try { d = JSON.parse(json || '{}'); } catch (e) { return; }
+  var juntos = comigo.length > 0;
+  var acento = corCss('--acento', '#F5C89A');
+
+  // Uma pessoa: foto, ou a inicial num círculo
+  function avatar(p, cor) {
+    var s = document.createElement('span');
+    s.className = 'avatar avatar-' + cor + ' cel-avatar';
+    if (p.foto) { var img = document.createElement('img'); img.src = p.foto; img.alt = ''; s.appendChild(img); }
+    else s.textContent = p.inicial || '?';
+    return s;
+  }
+  function el(tag, classe, texto) {
+    var e = document.createElement(tag);
+    if (classe) e.className = classe;
+    if (texto !== undefined) e.textContent = texto;
+    return e;
+  }
+
+  // Ecrã por cima de tudo
+  var fundo = el('div', 'celebracao');
+  var cartao = el('div', 'cel-cartao');
+  if (d.capa) { var desf = el('img', 'cel-fundo'); desf.src = d.capa; desf.alt = ''; desf.referrerPolicy = 'no-referrer'; cartao.appendChild(desf); }
+  var dentro = el('div', 'cel-dentro');
+  dentro.appendChild(el('p', 'cel-titulo', '🎉  ' + (juntos ? 'ACABÁMOS' : 'ACABEI')));
+  if (d.capa) { var capa = el('img', 'cel-capa'); capa.src = d.capa; capa.alt = ''; capa.referrerPolicy = 'no-referrer'; dentro.appendChild(capa); }
+  dentro.appendChild(el('p', 'cel-nome', d.nome));
+  var fotos = el('div', 'cel-fotos');
+  fotos.appendChild(avatar(d.eu, 'tu'));
+  comigo.forEach(function (p) { fotos.appendChild(avatar(p, 'par')); });
+  dentro.appendChild(fotos);
+  if (juntos) dentro.appendChild(el('p', 'cel-quem', d.eu.nome + ' e ' + comigo.map(function (p) { return p.nome; }).join(' e ')));
+  var nums = el('div', 'cel-numeros');
+  [[d.total, 'episódios'], [d.horas, 'horas']].concat(d.fillers > 0 ? [[d.fillers, 'fillers']] : []).forEach(function (n) {
+    var bloco = el('div');
+    var b = el('b', '', '0'); b.dataset.contar = n[0];
+    bloco.appendChild(b);
+    bloco.appendChild(el('span', '', n[1]));
+    nums.appendChild(bloco);
+  });
+  dentro.appendChild(nums);
+  var hoje = new Date();
+  var meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  dentro.appendChild(el('p', 'cel-rodape', 'anime a dois · ' + hoje.getDate() + ' ' + meses[hoje.getMonth()] + ' ' + hoje.getFullYear()));
+  cartao.appendChild(dentro);
+  fundo.appendChild(cartao);
+
+  var botoes = el('div', 'cel-botoes');
+  var fechar = el('button', 'btn btn-secundario', 'Fechar'); fechar.type = 'button';
+  var partilhar = el('button', 'btn', 'Partilhar'); partilhar.type = 'button';
+  botoes.appendChild(fechar); botoes.appendChild(partilhar);
+  fundo.appendChild(botoes);
+  document.body.appendChild(fundo);
+
+  fundo.querySelectorAll('[data-contar]').forEach(function (b) { contarNumero(b, 1500); });
+  confettis(fundo, [acento, corCss('--tu', '#B9D3B0'), corCss('--par', '#F5C89A'), '#FFD66B', '#FFFFFF']);
+  if (navigator.vibrate) navigator.vibrate([0, 60, 40, 60]);
+  fechar.addEventListener('click', function () { fundo.remove(); });
+
+  // Partilhar: o cartão desenhado à mão num canvas 1080×1920 (formato stories)
+  partilhar.addEventListener('click', function () {
+    partilhar.disabled = true;
+    carregarImagem(d.capa).then(function (img) {
+      var L = 1080, A = 1920, tela = document.createElement('canvas');
+      tela.width = L; tela.height = A;
+      var ctx = tela.getContext('2d');
+      var grad = ctx.createLinearGradient(0, 0, 0, A);
+      grad.addColorStop(0, acento); grad.addColorStop(.62, '#14161E'); grad.addColorStop(1, '#0B0C10');
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, L, A);
+      ctx.textAlign = 'center'; ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 42px "M PLUS Rounded 1c", sans-serif';
+      ctx.fillText('🎉  ' + (juntos ? 'ACABÁMOS' : 'ACABEI'), L / 2, 170);
+      var y = 240;
+      if (img) {                                    // capa ao centro (se o site da imagem deixar)
+        var cw = 450, ch = cw * 1.42;
+        ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 30;
+        ctx.drawImage(img, (L - cw) / 2, y, cw, ch); ctx.restore();
+        y += ch + 90;
+      } else y += 120;
+      ctx.font = '800 72px "M PLUS Rounded 1c", sans-serif';
+      linhasDeTexto(ctx, d.nome, L - 160).slice(0, 2).forEach(function (l) { ctx.fillText(l, L / 2, y); y += 86; });
+      if (juntos) { ctx.font = '500 40px "M PLUS Rounded 1c", sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.75)';
+        ctx.fillText(d.eu.nome + ' e ' + comigo.map(function (p) { return p.nome; }).join(' e '), L / 2, y + 10); }
+      var numeros = [[d.total, 'episódios'], [d.horas, 'horas']].concat(d.fillers > 0 ? [[d.fillers, 'fillers']] : []);
+      numeros.forEach(function (n, i) {
+        var x = L / (numeros.length * 2) * (i * 2 + 1);
+        ctx.fillStyle = '#FFFFFF'; ctx.font = '800 96px "M PLUS Rounded 1c", sans-serif'; ctx.fillText(String(n[0]), x, A - 330);
+        ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.font = '500 38px "M PLUS Rounded 1c", sans-serif'; ctx.fillText(n[1], x, A - 270);
+      });
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '500 34px "M PLUS Rounded 1c", sans-serif';
+      ctx.fillText('anime a dois · ' + hoje.getDate() + ' ' + meses[hoje.getMonth()] + ' ' + hoje.getFullYear(), L / 2, A - 120);
+      return partilharTela(tela, 'anime-a-dois-' + (form_slug() || 'serie') + '.png', (juntos ? 'Acabámos ' : 'Acabei ') + d.nome + ' no Anime a Dois 🎉');
+    }).then(function () { partilhar.disabled = false; });
+  });
+
+  // Slug da série (para o nome do ficheiro)
+  function form_slug() { var f = document.getElementById('form-marcar'); return f ? f.dataset.serie : ''; }
+}
+
+// ---------- Medalhas: tocar numa abre o detalhe ----------
+(function () {
+  var folha = document.getElementById('folha-medalha');
+  if (!folha || !folha.showModal) return;
+  document.querySelectorAll('[data-medalha]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var obtida = b.dataset.obtida === '1';
+      var emblema = document.getElementById('md-emblema');
+      emblema.className = 'emblema emblema-grande emblema-' + b.dataset.nivel + (obtida ? '' : ' bloqueada');
+      document.getElementById('md-emoji').textContent = b.dataset.emoji;
+      document.getElementById('md-nome').textContent = b.dataset.nome;
+      document.getElementById('md-descricao').textContent = b.dataset.descricao;
+      var estado = document.getElementById('md-obtida');
+      estado.textContent = obtida ? 'Obtida · ' + b.dataset.nivelTexto : '';
+      estado.className = 'md-nivel nivel-' + b.dataset.nivel;
+      var barra = document.getElementById('md-barra');
+      barra.hidden = obtida;
+      barra.value = parseInt(b.dataset.pct, 10) || 0;
+      document.getElementById('md-progresso').textContent = obtida ? '' : b.dataset.progresso + ' · ' + b.dataset.pct + '%';
+      folha.showModal();
+    });
+  });
+})();
+
+// ---------- Retrospetiva: stories ----------
+(function () {
+  var raiz = document.getElementById('stories');
+  if (!raiz) return;
+  var slides = Array.prototype.slice.call(raiz.querySelectorAll('.story'));
+  var barras = document.getElementById('stories-barras');
+  if (!slides.length) return;
+  var DURACAO = 5000;          // cada slide (menos o último) avança sozinho ao fim de 5 s
+  var atual = 0, inicio = 0, gasto = 0, pausa = false, relogio = null;
+
+  // Uma barrinha por slide
+  var enchimentos = slides.map(function () {
+    var b = document.createElement('span'); var i = document.createElement('i');
+    b.appendChild(i); barras.appendChild(b); return i;
+  });
+
+  // Gráfico do ano: alturas a partir de data-valor
+  raiz.querySelectorAll('.story-meses').forEach(function (g) {
+    var max = parseInt(g.dataset.maximo, 10) || 1;
+    g.querySelectorAll('i[data-valor]').forEach(function (i) {
+      i.style.height = Math.max(4, Math.round((parseInt(i.dataset.valor, 10) || 0) / max * 100)) + '%';
+    });
+  });
+
+  function mostrar(n) {
+    atual = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, i) { s.hidden = i !== atual; });
+    enchimentos.forEach(function (e, i) { e.style.width = i < atual ? '100%' : '0%'; });
+    gasto = 0; inicio = performance.now();
+    slides[atual].classList.remove('entra-story'); void slides[atual].offsetWidth; slides[atual].classList.add('entra-story');
+    if (atual === slides.length - 1) enchimentos[atual].style.width = '100%';
+    if (navigator.vibrate) navigator.vibrate(8);
+  }
+  function seguinte() { if (atual < slides.length - 1) mostrar(atual + 1); }
+  function anterior() { mostrar(atual - 1); }
+
+  // O tempo do slide atual (para a barrinha e o avanço automático)
+  function passo(agora) {
+    if (!pausa && atual < slides.length - 1) {
+      var t = gasto + (agora - inicio);
+      enchimentos[atual].style.width = Math.min(100, t / DURACAO * 100) + '%';
+      if (t >= DURACAO) seguinte();
+    }
+    relogio = requestAnimationFrame(passo);
+  }
+
+  // Toque: à direita avança, à esquerda recua; manter carregado pausa
+  var palco = document.getElementById('stories-palco');
+  var carregado = 0;
+  palco.addEventListener('pointerdown', function () { carregado = performance.now(); pausa = true; gasto += performance.now() - inicio; });
+  palco.addEventListener('pointerup', function (ev) {
+    pausa = false; inicio = performance.now();
+    if (performance.now() - carregado > 300) return;           // foi um "manter": só pausa
+    if (ev.target.closest('button, a')) return;                // botões do cartão final
+    var r = palco.getBoundingClientRect();
+    if (ev.clientX < r.left + r.width * .33) anterior(); else seguinte();
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowRight') seguinte();
+    if (ev.key === 'ArrowLeft') anterior();
+    if (ev.key === 'Escape') location.href = raiz.dataset.sair;
+  });
+
+  mostrar(0);
+  relogio = requestAnimationFrame(passo);
+
+  // Cartão final → imagem desenhada à mão (texto só: não depende de imagens de outros sites)
+  var btn = document.getElementById('retro-partilhar');
+  var cartao = document.getElementById('retro-cartao');
+  if (btn && cartao) {
+    btn.addEventListener('click', function () {
+      var d; try { d = JSON.parse(cartao.dataset.cartao); } catch (e) { return; }
+      btn.disabled = true;
+      var L = 1080, A = 1350, tela = document.createElement('canvas');
+      tela.width = L; tela.height = A;
+      var ctx = tela.getContext('2d');
+      var grad = ctx.createLinearGradient(0, 0, L, A);
+      grad.addColorStop(0, corCss('--tu', '#B9D3B0')); grad.addColorStop(1, corCss('--par', '#F5C89A'));
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, L, A);
+      var tinta = '#2A2433';
+      ctx.fillStyle = tinta; ctx.textAlign = 'left';
+      ctx.font = '800 44px "M PLUS Rounded 1c", sans-serif'; ctx.fillText('anime a dois', 90, 140);
+      ctx.font = '800 84px "M PLUS Rounded 1c", sans-serif';
+      var y = 280;
+      linhasDeTexto(ctx, d.titulo, L - 180).forEach(function (l) { ctx.fillText(l, 90, y); y += 96; });
+      y += 40;
+      d.linhas.forEach(function (l) {
+        ctx.textAlign = 'left'; ctx.font = '500 44px "M PLUS Rounded 1c", sans-serif'; ctx.globalAlpha = .7; ctx.fillText(l[0], 90, y);
+        ctx.textAlign = 'right'; ctx.font = '800 52px "M PLUS Rounded 1c", sans-serif'; ctx.globalAlpha = 1; ctx.fillText(l[1], L - 90, y);
+        y += 110;
+      });
+      partilharTela(tela, 'anime-a-dois-retrospetiva.png', d.titulo + ' no Anime a Dois 📼').then(function () { btn.disabled = false; });
+    });
+  }
+})();
+
+// ---------- Capas que voam (View Transitions entre páginas, nos browsers que as têm) ----------
+// A capa tocada na fila do Início ganha o mesmo nome que a capa do topo da página da série:
+// o browser faz a animação de uma para a outra. Sem suporte, a página abre como sempre.
+document.querySelectorAll('.capa-item[href]').forEach(function (a) {
+  a.addEventListener('click', function () {
+    document.querySelectorAll('.capa-voa').forEach(function (x) { x.classList.remove('capa-voa'); });
+    var capa = a.querySelector('.capa');
+    if (capa) capa.classList.add('capa-voa');
+  });
 });

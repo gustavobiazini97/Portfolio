@@ -92,3 +92,43 @@ function depois(callable $tarefa): void
         }
     });
 }
+
+// Dia de um registo, à portuguesa: "hoje, 22:10", "ontem, 22:10", "sábado, 21:00", "17 out", "17 out 2025"
+// (igual ao da app: diaDoRegisto em widgets/comum.dart)
+function dia_do_registo(?string $data): string
+{
+    if ($data === null || $data === '') {
+        return '';
+    }
+    $quando = strtotime($data);
+    $dias   = (int) floor((strtotime('today') - strtotime(date('Y-m-d', $quando))) / 86400);
+    $hora   = date('H:i', $quando);
+    $semana = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+    $meses  = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+    if ($dias <= 0) return 'hoje, ' . $hora;
+    if ($dias === 1) return 'ontem, ' . $hora;
+    if ($dias < 7) return $semana[(int) date('N', $quando) - 1] . ', ' . $hora;
+    $dataCurta = (int) date('j', $quando) . ' ' . $meses[(int) date('n', $quando) - 1];
+    return date('Y', $quando) === date('Y') ? $dataCurta : $dataCurta . ' ' . date('Y', $quando);
+}
+
+// "Ep. 14 · ontem, 22:10" a partir de Serie::ultimoDe() ({numero, vistoEm}); '' se não há registo
+function texto_ultimo_registo(?array $ultimo): string
+{
+    return $ultimo === null ? '' : 'Ep. ' . $ultimo['numero'] . ' · ' . dia_do_registo($ultimo['vistoEm']);
+}
+
+// Progresso de uma medalha: "99 de 100" (as de tempo em horas: "12 de 24 h")
+function medalha_progresso(array $m): string
+{
+    return str_starts_with($m['id'], 'horas')
+        ? intdiv($m['atual'], 60) . ' de ' . intdiv($m['meta'], 60) . ' h'
+        : $m['atual'] . ' de ' . $m['meta'];
+}
+
+// Percentagem de uma medalha (0–100)
+function medalha_pct(array $m): int
+{
+    return $m['meta'] > 0 ? (int) min(100, floor($m['atual'] * 100 / $m['meta'])) : 0;
+}

@@ -326,6 +326,16 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - Tocar numa capa da tua biblioteca no Início escolhe-a no placar e abre a série (antes só a escolhia; na já escolhida não fazia nada).
 - O cartão "Andreia viu…" de uma série que não tens abre o perfil dela (antes não fazia nada).
 
+### Site ao nível da app (19 de outubro)
+
+- **Modelos partilhados**: `Notificacoes` (a lógica do 🔔, antes só na `NotificacoesApi`) e `Perfil` (`numeros()` e `medalhas()`, antes privados na `AmigosApi`). A API passou a usá-los.
+- **🔔 no site**: botão no topo do Início com o número por ver; página `notificacoes` com a lista e os filtros (folha "O que mostrar"). O "já vi" e os filtros ficam em cookies HttpOnly por conta (`sino_visto_<id>`, `sino_filtros_<id>`).
+- **Perfil**: `perfil/pessoa` serve também o teu (o avatar do Início leva lá; a ⚙️ abre as definições, agora "Definições"); números a contar, "Tu e …", 3 medalhas, atalho da retrospetiva, biblioteca por estado com o último episódio e o dia (`dia_do_registo()`), tua barra por baixo da dele, "Ver com …".
+- **Medalhas**: `perfil/medalhas` (tuas ou de quem mostra tudo), por grupo, emblemas bronze/prata/ouro com brilho no ouro e cadeado nas que faltam; toque abre o detalhe.
+- **Retrospetivas**: `retrospetiva` (lista) e `retrospetiva/ver` (stories com barrinhas, toque/teclas, pausa ao manter; cartão final partilhado como PNG desenhado num canvas).
+- **"Uau"**: corrida no placar com ⚡, cartões que viram + partículas + ❤️ ao marcar, celebração ao acabar uma série (o `serie/marcar` devolve `acabou` e `comigo`), entradas em cascata, capas que voam (View Transitions) e capa no topo da série. Tudo respeita "reduzir movimento".
+- Capas da fila do Início e o cartão do par passam a abrir a série / o perfil (como na app 1.8.1). Service worker v9.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

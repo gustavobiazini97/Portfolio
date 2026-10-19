@@ -1,5 +1,6 @@
 <?php
-// Zona de perfil: foto, nome, palavra-passe e terminar sessão.
+// Zona de perfil: o perfil (o teu, do par ou de um amigo), as medalhas e as definições
+// (foto, nome, palavra-passe, cores, notificações, terminar sessão).
 
 class PerfilController extends Controller
 {
@@ -18,39 +19,84 @@ class PerfilController extends Controller
         ]);
     }
 
-    // GET ?id=<user>: perfil do teu par ou de um amigo (foto, último episódio e as séries dele). De mais ninguém.
+    // GET ?id=<user>: perfil do teu par, de um amigo ou o teu (como na app): foto, último episódio,
+    // números, medalhas em destaque e a biblioteca com o último episódio e o dia de cada um.
+    // Se ele escolheu "só o que vemos juntos", aparecem só as séries que vê contigo e as medalhas ficam privadas.
     public function pessoa(): void
     {
         $user = $this->exigirLogin();
         $par  = $user->parceiro();
         $id   = (int) ($_GET['id'] ?? 0);
+        $proprio = $id === $user->id;
 
-        // O teu próprio perfil é a página de definições
-        if ($id === $user->id) {
-            $this->redirect('perfil');
-        }
-        // Null guard: só se vê o perfil do par e dos amigos
-        $pessoa = User::find($id);
-        if ($pessoa === null || ($par?->id !== $id && !Amizade::sao($user, $pessoa))) {
+        // Null guard: só se vê o teu perfil, o do par e o dos amigos
+        $pessoa = $proprio ? $user : User::find($id);
+        if ($pessoa === null || (!$proprio && $par?->id !== $id && !Amizade::sao($user, $pessoa))) {
             http_response_code(404);
             exit('Página não encontrada.');
         }
-        $ehPar = $par?->id === $id;
+        $ehPar    = !$proprio && $par?->id === $id;
+        $soJuntos = !$pessoa->veTudo($user);   // ele só mostra o que vê contigo
 
-        // A biblioteca dele (cada item diz com quem a vê); se ele só mostra o que vê contigo, ficam só essas
+        // A biblioteca dele (cada item diz com quem a vê); com "só juntos" ficam só as que vê contigo
         $biblioteca = Serie::biblioteca($pessoa);
-        if (!$pessoa->veTudo($user)) {
+        if ($soJuntos) {
             $biblioteca = array_values(array_filter($biblioteca, fn ($i) => in_array($user->id, array_map(fn ($c) => $c['user']->id, $i['companheiros']), true)));
         }
 
+        // Para cada série: o último episódio dele e o dia; e, se também a tens, a tua % e o teu último
+        foreach ($biblioteca as &$item) {
+            $s = $item['serie'];
+            $item['naTua']     = $s->naBibliotecaDe($user);
+            $item['vesCom']    = !$proprio && $s->verCom($user, $pessoa);
+            $item['ultimo']    = $s->ultimoDe($pessoa);
+            $item['teuPct']    = $item['naTua'] && !$proprio ? $s->progressoDe($user)['pct'] : null;
+            $item['teuUltimo'] = $item['naTua'] && !$proprio ? $s->ultimoDe($user) : null;
+        }
+        unset($item);
+
         $this->render('perfil/pessoa', [
-            'titulo'     => $pessoa->nome,
+            'titulo'     => $proprio ? 'Perfil' : $pessoa->nome,
             'user'       => $user,
             'pessoa'     => $pessoa,
+            'proprio'    => $proprio,
             'ehPar'      => $ehPar,
-            'ultimo'     => $pessoa->ultimoVistoPara($user),
+            'ultimo'     => $proprio ? $user->ultimoVisto() : $pessoa->ultimoVistoPara($user),
             'biblioteca' => $biblioteca,
-            'soJuntos'   => !$pessoa->veTudo($user),   // ele só mostra o que vê contigo
+            'soJuntos'   => $soJuntos,
+            'numeros'    => Perfil::numeros($pessoa, $user, $biblioteca, $soJuntos, $proprio),
+            'medalhas'   => $soJuntos ? null : Perfil::medalhas($pessoa),
+        ]);
+    }
+
+    // GET [?id=<user>]: todas as medalhas (as tuas, ou as do par/amigo se ele mostra tudo), por grupo
+    public function medalhas(): void
+    {
+        $user = $this->exigirLogin();
+        $id   = (int) ($_GET['id'] ?? $user->id);
+        $proprio = $id === $user->id;
+        $pessoa  = $proprio ? $user : User::find($id);
+
+        // Null guard: tu, o par ou um amigo — e só se ele não tiver "só o que vemos juntos"
+        if ($pessoa === null || (!$proprio && $user->parceiro()?->id !== $id && !Amizade::sao($user, $pessoa)) || !$pessoa->veTudo($user)) {
+            http_response_code(404);
+            exit('Página não encontrada.');
+        }
+
+        // Por grupo, pela ordem em que aparecem
+        $medalhas = Perfil::medalhas($pessoa);
+        $grupos = [];
+        foreach ($medalhas['lista'] as $m) {
+            $grupos[$m['grupo']][] = $m;
+        }
+
+        $this->render('perfil/medalhas', [
+            'titulo'   => $proprio ? 'As tuas medalhas' : 'Medalhas de ' . $pessoa->nome,
+            'user'     => $user,
+            'pessoa'   => $pessoa,
+            'proprio'  => $proprio,
+            'medalhas' => $medalhas,
+            'grupos'   => $grupos,
         ]);
     }
 

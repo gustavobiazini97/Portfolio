@@ -25,11 +25,13 @@ $rotas = [
     'auth'  => ['login', 'entrar', 'registo', 'registar', 'sair'],
     'home'  => ['index', 'novidadesVistas'],
     'estatisticas' => ['index'],
+    'notificacoes' => ['index', 'filtrar'],
+    'retrospetiva' => ['index', 'ver'],
     'amigos' => ['index', 'criarConvite', 'pedir', 'aceitar', 'recusar', 'remover'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],
     'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'juntar', 'aceitar', 'recusar', 'separar', 'remover'],
     'admin' => ['index', 'novo', 'criar', 'editar', 'guardar', 'apagar'],
-    'perfil' => ['index', 'pessoa', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword', 'guardarPaleta', 'guardarPrivacidade', 'apagarConta',
+    'perfil' => ['index', 'pessoa', 'medalhas', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword', 'guardarPaleta', 'guardarPrivacidade', 'apagarConta',
                  'guardarNotificacoes', 'subscrever', 'desubscrever', 'testarNotificacao'],
 ];
 

@@ -974,3 +974,248 @@ html { scroll-behavior: smooth; }
 @media (min-width: 1280px) {
   .pagina-inicio .capa-item { flex-basis: 140px; }
 }
+
+/* =====================================================================================
+   O que faltava no site (como na app 1.5–1.8): 🔔, perfil com dados, medalhas,
+   retrospetivas e as animações ("uau"). Tudo em classes; posições dinâmicas só via JS.
+   ===================================================================================== */
+
+/* ---------- Animações partilhadas ---------- */
+@keyframes entra-sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }   /* entrada em cascata */
+.entra { animation: entra-sobe .42s cubic-bezier(.22, .9, .3, 1) both; }   /* o atraso vem do JS (um a um) */
+@media (prefers-reduced-motion: reduce) { .entra { animation: none; } }
+
+/* ---------- 🔔 Botão do topo com o número das que faltam ver ---------- */
+.sino-numero {
+  position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--par-txt); color: var(--btn-txt);
+  font-size: 11px; font-weight: 700; line-height: 18px; text-align: center;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* ---------- 🔔 Lista das notificações ---------- */
+.sino-lista { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.sino-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 22px; color: inherit; text-decoration: none; }
+.sino-nova { background: linear-gradient(90deg, color-mix(in srgb, var(--par) 22%, transparent), var(--vidro)); }   /* as novas com o tom do par */
+.sino-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sino-titulo { font-size: 14.5px; font-weight: 700; }
+.sino-detalhe { font-size: 13px; color: var(--suave); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sino-quando { margin-top: 2px; font-size: 12px; color: var(--suave); }
+.sino-ponto { flex-shrink: 0; width: 9px; height: 9px; margin-top: 6px; border-radius: 50%; background: var(--par-txt); }
+.sino-filtros { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- Perfil (o teu, do par ou de um amigo) ---------- */
+.perfil-blocos { display: flex; flex-direction: column; gap: 14px; }
+.pessoa-nome { font-size: 20px; font-weight: 700; }
+.cor-tu  { color: var(--tu-txt); }
+.cor-par { color: var(--par-txt); }
+
+/* Faixa com 4 números grandes */
+.numeros-faixa { display: grid; grid-template-columns: repeat(4, 1fr); padding: 14px 6px; text-align: center; }
+.numero b { display: block; font-size: 20px; font-weight: 800; }
+.numero span { font-size: 11.5px; color: var(--suave); }
+.numeros-tu b  { color: var(--tu-txt); }
+.numeros-par b { color: var(--par-txt); }
+
+/* "Tu e …": episódios vistos pelos dois */
+.juntos-bloco { display: flex; align-items: center; gap: 12px; padding: 14px; background: linear-gradient(90deg, color-mix(in srgb, var(--tu) 20%, transparent), color-mix(in srgb, var(--par) 20%, transparent)); }
+.juntos-coracao { font-size: 22px; color: var(--par-txt); }
+.juntos-titulo { font-size: 14.5px; font-weight: 700; }
+
+/* Medalhas em destaque (3 cartões) */
+.medalhas-destaque { display: flex; flex-direction: column; gap: 10px; }
+.medalhas-tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.medalha-cartao { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 6px 10px; border-radius: 22px; color: inherit; text-decoration: none; text-align: center; }
+.medalha-nome { font-size: 12px; font-weight: 600; line-height: 1.25; }
+
+/* Emblema: disco metálico (bronze, prata ou ouro) com aro; o ouro tem um brilho a passar */
+.emblema {
+  position: relative; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%;
+  font-size: 26px; overflow: hidden;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .35), 0 6px 14px var(--sombra);
+}
+.emblema > span { position: relative; z-index: 1; }
+.emblema-bronze { background: radial-gradient(circle at 35% 30%, #F3C49A, #B9774A 60%, #7E4A2A); }
+.emblema-prata  { background: radial-gradient(circle at 35% 30%, #FFFFFF, #C4CAD3 55%, #8A929E); }
+.emblema-ouro   { background: radial-gradient(circle at 35% 30%, #FFF4C2, #E9B949 55%, #A87A12); }
+.emblema-ouro::after {                                       /* brilho que atravessa o ouro */
+  content: ""; position: absolute; inset: -20%; transform: translateX(-120%) rotate(20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .7), transparent);
+  animation: brilho-ouro 3.2s ease-in-out infinite;
+}
+@keyframes brilho-ouro { 0%, 55% { transform: translateX(-120%) rotate(20deg); } 85%, 100% { transform: translateX(120%) rotate(20deg); } }
+.emblema.bloqueada { filter: grayscale(1); opacity: .45; }
+.emblema.bloqueada::after { display: none; }
+.cadeado { position: absolute; z-index: 2; right: 2px; bottom: 0; font-size: 14px; font-style: normal; filter: none; }
+.emblema-grande { width: 92px; height: 92px; font-size: 42px; margin: 0 auto; }
+@media (prefers-reduced-motion: reduce) { .emblema-ouro::after { animation: none; } }
+
+/* Atalho (Retrospetiva) */
+.atalho { display: flex; align-items: center; gap: 12px; padding: 14px 18px; color: inherit; text-decoration: none; }
+.atalho span:nth-child(2) { flex: 1; font-size: 15px; }
+.atalho-emoji { font-size: 22px; }
+
+/* Biblioteca do perfil: um cartão por série, com as barras e o dia do último registo */
+.estado-titulo { margin: 6px 4px 8px; font-size: 13.5px; font-weight: 700; color: var(--suave); }
+.pessoa-serie-cartao { padding: 12px; border-radius: 22px; display: flex; flex-direction: column; gap: 10px; }
+.linha-pct { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; }
+.linha-pct b { font-weight: 800; }
+.registo { font-size: 11.5px; color: var(--suave); margin-top: -2px; }
+.pessoa-etiqueta { font-size: 13px; font-weight: 600; color: var(--suave); }
+.pessoa-juntar { align-self: stretch; }
+
+/* ---------- Página das medalhas ---------- */
+.medalhas-total { display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.medalhas-total p { font-size: 15px; color: var(--suave); }
+.medalhas-total b { font-size: 30px; font-weight: 800; color: var(--tinta); }
+.medalhas-grupo { display: flex; flex-direction: column; }
+.medalhas-grelha { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 8px; }
+.medalha {                                                   /* botão sem aspeto de botão */
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 2px;
+  background: none; border: 0; color: inherit; font: inherit; text-align: center; cursor: pointer; border-radius: 16px;
+}
+.medalha .medalha-nome { color: var(--suave); }
+.medalha.obtida .medalha-nome { color: var(--tinta); }
+.medalha .barra { width: 70%; }
+.medalha-progresso { font-size: 10.5px; color: var(--suave); }
+.folha-medalha[open] { align-items: center; text-align: center; gap: 8px; }
+.folha-medalha .folha-cima { align-self: stretch; }
+.folha-medalha h2 { font-size: 18px; font-weight: 700; }
+.folha-medalha .barra { width: 100%; }
+.md-nivel { font-weight: 800; }
+.nivel-bronze { color: #B9774A; }
+.nivel-prata  { color: #8A929E; }
+.nivel-ouro   { color: #C99A1E; }
+
+/* ---------- Corrida no placar do Início ---------- */
+.corrida { position: relative; height: 32px; display: flex; align-items: center; }
+.corrida .barra { width: 100%; }
+.corrida-foto {
+  position: absolute; top: 50%; left: 0; transform: translateY(-50%);
+  padding: 2px; border-radius: 50%; background: var(--tu); line-height: 0;
+  transition: left 1.1s cubic-bezier(.22, .9, .3, 1);
+}
+.vs-par .corrida-foto { background: var(--par); }
+.avatar-corrida { width: 26px; height: 26px; font-size: 11px; }
+.corrida.lider .corrida-foto::after { content: "⚡"; position: absolute; top: -12px; right: -10px; font-size: 15px; line-height: 1; }
+@media (prefers-reduced-motion: reduce) { .corrida-foto { transition: none; } }
+
+/* ---------- Página da série: capa no topo e cartões que viram ---------- */
+.topo-serie { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; }
+.topo-serie span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topo-capa { width: 26px; height: 37px; flex-shrink: 0; border-radius: 7px; object-fit: cover; }
+
+@keyframes ep-virar {                                         /* meia-volta sem ficar ao espelho, com um pequeno salto */
+  0%   { transform: perspective(700px) rotateY(0) scale(1); }
+  49%  { transform: perspective(700px) rotateY(90deg) scale(1.07); }
+  51%  { transform: perspective(700px) rotateY(-90deg) scale(1.07); }
+  100% { transform: perspective(700px) rotateY(0) scale(1); }
+}
+.ep.virar { animation: ep-virar .52s ease-in-out; }
+@media (prefers-reduced-motion: reduce) { .ep.virar { animation: none; } }
+
+/* Partículas e ❤️ (por cima de tudo, sem apanhar toques) */
+.efeito-tela { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 60; }
+@keyframes coracao-sobe {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0); }
+  35%  { opacity: 1; transform: translate(-50%, -50%) scale(1.6); }
+  60%  { opacity: 1; transform: translate(-50%, -80%) scale(1.5); }
+  100% { opacity: 0; transform: translate(-50%, -150%) scale(1.4); }
+}
+.coracao-voa { position: fixed; z-index: 61; font-size: 44px; pointer-events: none; animation: coracao-sobe 1.1s ease-out forwards; }
+
+/* ---------- Celebração ao acabar uma série ---------- */
+.celebracao {
+  position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  padding: calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));
+  background: rgba(0, 0, 0, .88); animation: entra-sobe .4s ease-out;
+}
+.confettis { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cel-cartao {
+  position: relative; overflow: hidden; width: min(100%, calc((100dvh - 140px) * 9 / 16)); aspect-ratio: 9 / 16;
+  border-radius: 28px; color: #fff;
+  background: linear-gradient(180deg, var(--acento, #F5C89A), #14161E 62%, #0B0C10);
+  animation: cel-pula .7s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes cel-pula { from { transform: scale(.82); } to { transform: scale(1); } }
+.cel-fundo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; filter: blur(22px); }
+.cel-dentro {
+  position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 7% 7% 6%; background: linear-gradient(180deg, transparent 35%, rgba(11, 12, 16, .8));
+}
+.cel-titulo { font-size: 14px; font-weight: 800; letter-spacing: 3px; }
+.cel-capa { width: 42%; aspect-ratio: 1 / 1.42; object-fit: cover; border-radius: 18px; margin-top: 18px; box-shadow: 0 14px 30px rgba(0, 0, 0, .55); }
+.cel-nome { margin-top: 16px; font-size: 22px; font-weight: 800; line-height: 1.15; }
+.cel-fotos { display: flex; justify-content: center; margin-top: 12px; }
+.cel-avatar { width: 42px; height: 42px; box-shadow: 0 0 0 3px rgba(255, 255, 255, .85); }
+.cel-avatar + .cel-avatar { margin-left: -10px; }
+.cel-quem { margin-top: 6px; font-size: 12.5px; opacity: .75; }
+.cel-numeros { margin-top: auto; display: flex; width: 100%; }
+.cel-numeros > div { flex: 1; display: flex; flex-direction: column; }
+.cel-numeros b { font-size: 30px; font-weight: 800; }
+.cel-numeros span { font-size: 12px; opacity: .6; }
+.cel-rodape { margin-top: 16px; font-size: 11.5px; opacity: .55; }
+.cel-botoes { position: relative; display: flex; gap: 12px; width: min(100%, 420px); }
+.cel-botoes .btn { flex: 1; }
+
+/* ---------- Retrospetivas: lista ---------- */
+.retro-lista { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.retro-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-radius: 22px; color: inherit; text-decoration: none; }
+.retro-nome { font-size: 15px; font-weight: 600; }
+.retro-ano { background: linear-gradient(90deg, color-mix(in srgb, var(--tu) 30%, transparent), color-mix(in srgb, var(--par) 30%, transparent)); }
+
+/* ---------- Retrospetivas: stories em ecrã inteiro ---------- */
+body.pagina-stories { overflow: hidden; }
+.pagina-stories .ecra { padding: 0; max-width: none; }
+.stories {
+  position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column;
+  background: linear-gradient(160deg, #1B2A22, #0E1116 45%, #2A1D14);   /* verde do "tu" → alperce do par, em escuro */
+  color: #fff; user-select: none; -webkit-user-select: none;
+}
+.stories-topo { display: flex; align-items: center; gap: 12px; padding: calc(12px + env(safe-area-inset-top)) 16px 8px; }
+.stories-barras { flex: 1; display: flex; gap: 4px; }
+.stories-barras span { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, .25); overflow: hidden; }
+.stories-barras i { display: block; height: 100%; width: 0; background: #fff; }
+.stories-fechar { color: #fff; text-decoration: none; font-size: 20px; padding: 4px 8px; }
+.stories-palco { position: relative; flex: 1; display: flex; max-width: 480px; width: 100%; margin: 0 auto; }
+.story {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 24px 28px calc(28px + env(safe-area-inset-bottom)); text-align: center;
+}
+.story[hidden] { display: none; }
+.entra-story { animation: entra-sobe .45s cubic-bezier(.22, .9, .3, 1); }
+.story-emoji { font-size: 56px; }
+.story-pequeno { font-size: 16px; opacity: .8; }
+.story-grande { font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+.story-sub { font-size: 18px; font-weight: 600; opacity: .9; }
+.story-medio { font-size: 26px; font-weight: 800; }
+.story-texto { font-size: 15px; opacity: .8; max-width: 320px; }
+.story-outra { font-size: 13.5px; opacity: .6; }
+.story-capa { width: 46%; aspect-ratio: 1 / 1.42; object-fit: cover; border-radius: 20px; box-shadow: 0 16px 34px rgba(0, 0, 0, .5); display: grid; place-items: center; font-size: 28px; }
+.story-meses { display: flex; align-items: flex-end; gap: 6px; width: 100%; height: 180px; margin: 10px 0; }
+.story-mes { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }
+.story-mes i { width: 100%; border-radius: 6px 6px 3px 3px; background: rgba(255, 255, 255, .35); }
+.story-mes.melhor i { background: #F5C89A; }
+.story-mes span { font-size: 11px; opacity: .7; }
+.story-vs { display: flex; gap: 40px; margin: 10px 0; }
+.story-vs div { display: flex; flex-direction: column; }
+.story-vs b { font-size: 56px; font-weight: 800; }
+.story-vs .cor-tu { color: #CDE0C6; }
+.story-vs .cor-par { color: #F8D7B4; }
+.story-final { justify-content: center; gap: 20px; }
+.retro-cartao {                                              /* o que se vê; a imagem partilhada é desenhada pelo JS */
+  width: 100%; max-width: 320px; padding: 24px; border-radius: 32px; text-align: left; color: #2A2433;
+  background: linear-gradient(135deg, var(--tu), var(--par));
+}
+.retro-cartao-marca { font-weight: 800; }
+.retro-cartao-titulo { margin: 14px 0 10px; font-size: 24px; font-weight: 800; line-height: 1.1; }
+.retro-cartao-linha { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; font-size: 14px; }
+.retro-cartao-linha span { opacity: .7; }
+.retro-cartao-linha b { font-size: 16px; font-weight: 800; }
+.retro-partilhar { width: 100%; max-width: 320px; background: #fff; color: #1A1F2B; }
+
+/* ---------- Capas que voam (View Transitions entre páginas) ---------- */
+@view-transition { navigation: auto; }
+.capa-voa, .topo-capa { view-transition-name: capa-serie; }   /* só a capa tocada no Início e a do topo da série */
+::view-transition-group(capa-serie) { animation-duration: .45s; animation-timing-function: cubic-bezier(.22, .9, .3, 1); }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }

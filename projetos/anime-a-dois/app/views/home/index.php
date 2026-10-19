@@ -4,7 +4,8 @@
               $biblioteca (a tua: ['serie','estado','conjunta','companheiros'=>[['user','pct']],'tu']), $doPar (só do par, mesmo formato),
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
               $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $resumo,
-              $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar, $flash */
+              $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar,
+              $sinoPorVer (notificações por ver), $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || array_sum(array_column($deles, 'vistos')) > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
 
@@ -30,6 +31,11 @@ $selo = fn (array $item) => match ($item['estado']) {
     anime a dois
   </a>
   <div class="topo-acoes">
+    <!-- 🔔 Notificações (número das que ainda não viste neste browser) -->
+    <a class="btn-redondo vidro" href="<?= e(url('notificacoes')) ?>" aria-label="Notificações<?= $sinoPorVer ? ' (' . $sinoPorVer . ' por ver)' : '' ?>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+      <?php if ($sinoPorVer): ?><span class="sino-numero" aria-hidden="true"><?= $sinoPorVer > 9 ? '9+' : $sinoPorVer ?></span><?php endif; ?>
+    </a>
     <?php if ($serie): ?>
       <!-- Estatísticas da série aberta -->
       <a class="btn-redondo vidro" href="<?= e(url('estatisticas', 'index', ['serie' => $serie->slug])) ?>" aria-label="Ver estatísticas">
@@ -42,8 +48,8 @@ $selo = fn (array $item) => match ($item['estado']) {
       <?php if ($pedidosAmigos): ?><span class="ponto-aviso" aria-hidden="true"></span><?php endif; ?>
     </a>
     <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
-    <!-- O teu avatar abre o perfil (foto, nome, palavra-passe, sair) -->
-    <a class="avatar-link" href="<?= e(url('perfil')) ?>" aria-label="Abrir o teu perfil">
+    <!-- O teu avatar abre o teu perfil (números, medalhas, biblioteca); as definições estão na ⚙️ de lá -->
+    <a class="avatar-link" href="<?= e(url('perfil', 'pessoa', ['id' => $user->id])) ?>" aria-label="Abrir o teu perfil">
       <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-topo'; require __DIR__ . '/../layout/avatar.php'; ?>
     </a>
   </div>
@@ -58,21 +64,21 @@ $selo = fn (array $item) => match ($item['estado']) {
 <div class="inicio-principal">
 <?php if ($parceiro && $ultimoPar): ?>
   <!-- Último episódio que o par viu (em qualquer série). Se a série também está na tua biblioteca,
-       o cartão abre-a nesse episódio; se é só dele, é só para espreitar. -->
+       o cartão abre-a nesse episódio; se é só dele, abre o perfil dele (lá dá para te juntares). -->
   <?php $abre = $ultimoPar->serie->naBibliotecaDe($user); ?>
-  <div class="painel vidro ultimo<?= $abre ? ' painel-link' : '' ?>">
+  <div class="painel vidro ultimo painel-link">
     <!-- A foto abre o perfil do par -->
     <a class="avatar-link" href="<?= e(url('perfil', 'pessoa', ['id' => $parceiro->id])) ?>" aria-label="Ver o perfil de <?= e($parceiro->nome) ?>">
       <?php $avatarUser = $parceiro; $avatarCor = 'par'; $avatarExtra = ''; require __DIR__ . '/../layout/avatar.php'; ?>
     </a>
     <!-- O resto do cartão abre o episódio (se a série for tua); display: contents mantém o layout -->
-    <<?= $abre ? 'a' : 'div' ?> class="ultimo-link"<?= $abre ? ' href="' . e(url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero])) . '"' : '' ?>>
+    <a class="ultimo-link" href="<?= e($abre ? url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero]) : url('perfil', 'pessoa', ['id' => $parceiro->id])) ?>">
       <div class="ultimo-texto">
         <p><?= e($parceiro->nome . ' viu ' . tempo_relativo($ultimoPar->pivot->visto_em)) ?></p>
         <p><?= e($ultimoPar->serie->nomeCurto() . ' · episódio ' . $ultimoPar->numero) ?></p>
       </div>
       <span class="ultimo-num"><?= $ultimoPar->numero ?></span>
-    </<?= $abre ? 'a' : 'div' ?>>
+    </a>
   </div>
 <?php elseif ($parceiro): ?>
   <section class="painel vidro vazio">
@@ -97,7 +103,7 @@ $selo = fn (array $item) => match ($item['estado']) {
 <?php endif; ?>
 
 <!-- A tua biblioteca: fila de capas que desliza para os lados. As séries dos dois têm duas barrinhas
-     (tu e o par); as só tuas, uma. A ver → em pausa → acabado; tocar numa capa abre-a aqui em baixo. -->
+     (tu e o par); as só tuas, uma. A ver → em pausa → acabado; tocar numa capa abre a série. -->
 <section class="biblioteca" aria-labelledby="biblioteca-titulo">
   <div class="secao-cima">
     <h2 id="biblioteca-titulo">A tua biblioteca</h2>
@@ -124,7 +130,8 @@ $selo = fn (array $item) => match ($item['estado']) {
     <div class="fila" id="fila" data-sem-capa="<?= e(json_encode($semCapa)) ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>">
       <?php foreach ($biblioteca as $item): $s = $item['serie']; ?>
         <!-- data-serie/data-acento dão a cor da série só a este cartão (aro da capa e fundo sem imagem) -->
-        <a class="capa-item capa-<?= e($item['estado']) ?>" href="<?= e(url('home', 'index', ['serie' => $s->slug])) ?>"
+        <!-- Tocar na capa abre a série (como na app) -->
+        <a class="capa-item capa-<?= e($item['estado']) ?>" href="<?= e(url('serie', 'ver', ['serie' => $s->slug])) ?>"
            data-serie="<?= e($s->slug) ?>" data-acento="<?= e((string) $s->acento) ?>"
            <?= $serie && $s->id === $serie->id ? 'aria-current="page"' : '' ?>>
           <span class="capa-moldura">
@@ -219,14 +226,27 @@ $selo = fn (array $item) => match ($item['estado']) {
       </div>
 
       <div class="vs-linhas">
+        <?php
+        // Corrida: quem vai à frente leva ⚡ (empate ou ninguém começou → ninguém)
+        $posicoes = array_merge([$meu['posicao']], array_map(fn ($d) => $d['posicao'], $deles));
+        $maior = max($posicoes);
+        $lider = ($maior > 0 && count(array_keys($posicoes, $maior)) === 1) ? array_search($maior, $posicoes, true) : null;   // 0 = tu
+        ?>
         <div class="vs-linha vs-tu">
           <div class="vs-rotulo"><span>Tu</span><span><b><?= $meu['posicao'] ?></b> · <?= $meu['pct'] ?>%</span></div>
-          <progress class="barra" max="100" value="<?= $meu['pct'] ?>" aria-label="Progresso: <?= $meu['pct'] ?>%"></progress>
+          <!-- A barra continua lá (acessível); o JS põe a tua foto a correr até à tua % -->
+          <div class="corrida<?= $lider === 0 ? ' lider' : '' ?>" data-pct="<?= $meu['pct'] ?>">
+            <progress class="barra" max="100" value="<?= $meu['pct'] ?>" aria-label="Progresso: <?= $meu['pct'] ?>%"></progress>
+            <span class="corrida-foto"><?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-corrida'; require __DIR__ . '/../layout/avatar.php'; ?></span>
+          </div>
         </div>
         <?php foreach ($companheiros as $i => $c): ?>
           <div class="vs-linha vs-par">
             <div class="vs-rotulo"><span><?= e($c->nome) ?></span><span><b><?= $deles[$i]['posicao'] ?></b> · <?= $deles[$i]['pct'] ?>%</span></div>
-            <progress class="barra" max="100" value="<?= $deles[$i]['pct'] ?>" aria-label="<?= e($c->nome) ?>: <?= $deles[$i]['pct'] ?>%"></progress>
+            <div class="corrida<?= $lider === $i + 1 ? ' lider' : '' ?>" data-pct="<?= $deles[$i]['pct'] ?>">
+              <progress class="barra" max="100" value="<?= $deles[$i]['pct'] ?>" aria-label="<?= e($c->nome) ?>: <?= $deles[$i]['pct'] ?>%"></progress>
+              <span class="corrida-foto"><?php $avatarUser = $c; $avatarCor = 'par'; $avatarExtra = 'avatar-corrida'; require __DIR__ . '/../layout/avatar.php'; ?></span>
+            </div>
           </div>
         <?php endforeach; ?>
       </div>

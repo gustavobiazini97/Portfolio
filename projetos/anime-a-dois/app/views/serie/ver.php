@@ -35,7 +35,11 @@ $temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a leg
   <a class="btn-redondo vidro" href="<?= e(url('home', 'index', ['serie' => $serie->slug])) ?>" aria-label="Voltar ao início">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
   </a>
-  <h1 class="topo-meio"><?= e($serie->nome) ?></h1>
+  <!-- Capa pequena + nome; a capa "voa" da fila do Início até aqui (View Transitions, quando o browser deixa) -->
+  <h1 class="topo-meio topo-serie">
+    <?php if ($serie->capa): ?><img class="topo-capa" src="<?= e($serie->capa) ?>" alt="" referrerpolicy="no-referrer"><?php endif; ?>
+    <span><?= e($serie->nome) ?></span>
+  </h1>
   <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
 </div>
 
@@ -136,7 +140,19 @@ $temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a leg
 </section>
 
 <!-- Ações: um episódio (o do centro) ou vários (modo seleção) -->
-<form id="form-marcar" class="acoes" method="post" action="<?= e(url('serie', 'marcar')) ?>" data-serie="<?= e($serie->slug) ?>">
+<?php
+// Dados do cartão da celebração (quando acabas a série): o JS usa-os para desenhar o ecrã e a imagem
+$celebrar = [
+    'nome'    => $serie->nome,
+    'capa'    => $serie->capa,
+    'total'   => (int) $serie->total_episodios,
+    'horas'   => (int) round(((int) ($serie->minutos_ep ?: Resumo::MINUTOS_EP)) * (int) $serie->total_episodios / 60),
+    'fillers' => (int) $fillers,
+    'eu'      => ['nome' => $user->nome, 'foto' => $user->fotoUrl(), 'inicial' => $user->inicial()],
+];
+?>
+<form id="form-marcar" class="acoes" method="post" action="<?= e(url('serie', 'marcar')) ?>" data-serie="<?= e($serie->slug) ?>"
+      data-celebrar="<?= e(json_encode($celebrar, JSON_UNESCAPED_UNICODE)) ?>">
   <?= csrf_campo() ?>
   <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
   <input type="hidden" name="acao" value="alternar">

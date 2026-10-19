@@ -62,6 +62,7 @@ class HomeController extends Controller
             'jaCa'        => Serie::situacaoNaPesquisa($user),
             'novidades'   => Novidade::porVer($user),
             'pedidosAmigos' => Amizade::pedidosRecebidos($user)->count(),   // bolinha no ícone dos amigos
+            'sinoPorVer'  => NotificacoesController::porVer($user),         // número no 🔔
             'esperaPar'   => $user->esperaPar(),   // o que mudou na app desde a última vez que viste
         ]);
     }
