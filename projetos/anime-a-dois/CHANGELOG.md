@@ -281,6 +281,12 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - Cada medalha tem `nivel` (bronze/prata/ouro). Na app: emblema metálico do nível, as de ouro com brilho;
   as que faltam com cadeado e progresso. Muitas novas de uma vez → só as 3 melhores têm animação.
 
+### Dia dos registos no perfil (19 de outubro, versão 1.5.1)
+
+- No perfil do par/amigo, cada série mostra por baixo de cada barra o último episódio e o dia: "Ep. 14 · ontem, 22:10".
+- API: cada item da `biblioteca` do `/pessoas/{id}` traz `ultimo` e `teuUltimo` (`{ numero, vistoEm }`), lidos de `vistos.visto_em` (Model `Serie::ultimoDe`).
+- App: `LinhaPct` ganhou `detalhe`; `diaDoRegisto()` formata hoje/ontem/dia da semana/data.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

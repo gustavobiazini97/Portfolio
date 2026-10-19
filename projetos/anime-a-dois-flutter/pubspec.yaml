@@ -4,7 +4,7 @@ description: Registo dos episódios vistos a dois, lado a lado (app Android).
 publish_to: 'none'          # não é um pacote para o pub.dev
 
 # versão visível (subir a cada lançamento e escrever as notas em novidades.json) + build (o workflow usa o nº da execução)
-version: 1.5.0+1
+version: 1.5.1+1
 
 environment:
   sdk: ^3.5.0

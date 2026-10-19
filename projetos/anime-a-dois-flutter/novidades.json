@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.5.1",
+    "notas": [
+      "No perfil do par e dos amigos, cada série mostra o último episódio e o dia: \"Ep. 14 · ontem, 22:10\""
+    ]
+  },
+  {
     "versao": "1.5.0",
     "notas": [
       "57 medalhas (eram 21): degraus até 3000 episódios e 1000 horas, ritmo, séries, juntos e especiais",

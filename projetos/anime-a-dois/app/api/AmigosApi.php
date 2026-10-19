@@ -98,11 +98,14 @@ class AmigosApi extends ApiController
 
         // Para cada série dele: já a tens? vês com ele? (decide os botões "Juntar-me")
         // Se também a tens, vai a tua % (para a barra "tu vs ele")
+        // Em cada barra vai também o último episódio e o dia em que foi marcado
         $itens = array_map(function ($i) use ($user, $pessoa) {
             $j = $this->itemBibliotecaJson($i);
             $j['naTua']   = $i['serie']->naBibliotecaDe($user);
             $j['vesCom']  = $i['serie']->verCom($user, $pessoa);
             $j['teuPct']  = $j['naTua'] ? $i['serie']->progressoDe($user)['pct'] : null;
+            $j['ultimo']    = $i['serie']->ultimoDe($pessoa);                        // último dele: {numero, vistoEm}
+            $j['teuUltimo'] = $j['naTua'] ? $i['serie']->ultimoDe($user) : null;    // o teu, se também a tens
             return $j;
         }, $biblioteca);
 

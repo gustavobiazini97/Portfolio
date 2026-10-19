@@ -47,6 +47,8 @@ class _EcraPessoaState extends State<EcraPessoa> {
   List<Medalha>? _medalhas; // null = privadas ("só juntos") ou API antiga
   List<ItemBiblioteca> _biblioteca = [];
   Map<String, int?> _teuPct = {}; // slug → a tua % (só nas séries que também tens)
+  Map<String, String?> _ultimoDele = {}; // slug → "Ep. 14 · ontem, 22:10" (último registo dele)
+  Map<String, String?> _teuUltimo = {}; // slug → o mesmo, mas teu (só nas séries que também tens)
   String? _erro;
   bool _ocupado = false;
 
@@ -74,6 +76,12 @@ class _EcraPessoaState extends State<EcraPessoa> {
         _biblioteca = ItemBiblioteca.lista(itens);
         _teuPct = {
           for (final i in itens) (i['serie'] as Map<String, dynamic>)['slug'] as String: (i['teuPct'] as num?)?.toInt(),
+        };
+        _ultimoDele = {
+          for (final i in itens) (i['serie'] as Map<String, dynamic>)['slug'] as String: textoUltimoRegisto(i['ultimo']),
+        };
+        _teuUltimo = {
+          for (final i in itens) (i['serie'] as Map<String, dynamic>)['slug'] as String: textoUltimoRegisto(i['teuUltimo']),
         };
         _erro = null;
       });
@@ -428,11 +436,11 @@ class _EcraPessoaState extends State<EcraPessoa> {
                     overflow: TextOverflow.ellipsis,
                     style: textos.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 8),
-                LinhaPct(nome: u.nome, pct: i.pct, ehTu: false),
+                LinhaPct(nome: u.nome, pct: i.pct, ehTu: false, detalhe: _ultimoDele[s.slug]),
                 // Também a tens: a tua barra por baixo da dele
                 if (teu != null) ...[
                   const SizedBox(height: 8),
-                  LinhaPct(nome: 'Tu', pct: teu, ehTu: true),
+                  LinhaPct(nome: 'Tu', pct: teu, ehTu: true, detalhe: _teuUltimo[s.slug]),
                 ],
                 const SizedBox(height: 10),
                 if (i.vesCom)

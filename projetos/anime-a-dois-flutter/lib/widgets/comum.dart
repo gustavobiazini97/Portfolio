@@ -351,8 +351,9 @@ class LinhaPct extends StatelessWidget {
   final String nome;
   final int pct;
   final bool ehTu;
+  final String? detalhe; // linha pequena por baixo da barra (ex.: "Ep. 14 · ontem, 22:10")
 
-  const LinhaPct({super.key, required this.nome, required this.pct, required this.ehTu});
+  const LinhaPct({super.key, required this.nome, required this.pct, required this.ehTu, this.detalhe});
 
   @override
   Widget build(BuildContext context) {
@@ -371,9 +372,43 @@ class LinhaPct extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         BarraProgresso(pct: pct, cor: ehTu ? p.tu : p.par),
+        if (detalhe != null) ...[
+          const SizedBox(height: 4),
+          Text(detalhe!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: p.suave)),
+        ],
       ],
     );
   }
+}
+
+const _diasSemana = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+const _meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+// Dia de um registo, à portuguesa: "hoje, 22:10", "ontem, 22:10", "sábado, 22:10", "17 out", "17 out 2025"
+String diaDoRegisto(DateTime quando, {DateTime? agora}) {
+  final local = quando.toLocal();
+  final hoje = agora ?? DateTime.now();
+  final dia = DateTime(local.year, local.month, local.day);
+  final diasAtras = DateTime(hoje.year, hoje.month, hoje.day).difference(dia).inDays;
+  final hora = '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+
+  if (diasAtras <= 0) return 'hoje, $hora';
+  if (diasAtras == 1) return 'ontem, $hora';
+  if (diasAtras < 7) return '${_diasSemana[local.weekday - 1]}, $hora';
+  final data = '${local.day} ${_meses[local.month - 1]}';
+  return local.year == hoje.year ? data : '$data ${local.year}';
+}
+
+// "Ep. 14 · ontem, 22:10" a partir do {numero, vistoEm} da API; null se não há registo
+String? textoUltimoRegisto(dynamic j) {
+  if (j is! Map) return null;
+  final numero = (j['numero'] as num?)?.toInt();
+  final quando = DateTime.tryParse(j['vistoEm'] as String? ?? '');
+  if (numero == null || quando == null) return null;
+  return 'Ep. $numero · ${diaDoRegisto(quando)}';
 }
 
 // Pede confirmação antes de uma ação (tirar série, desfazer amizade…); devolve true se a pessoa confirmou

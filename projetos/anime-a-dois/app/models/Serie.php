@@ -615,6 +615,32 @@ class Serie extends Model
         ];
     }
 
+    // Último episódio que a pessoa marcou nesta série e quando (para "Ep. 14 · ontem, 22:10").
+    // Desempate pelo número, como no "último visto" do perfil. null se ainda não viu nada.
+    public function ultimoDe(?User $user): ?array
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        $linha = Capsule::table('vistos')
+            ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
+            ->where('vistos.user_id', $user->id)
+            ->where('episodios.serie_id', $this->id)
+            ->orderBy('vistos.visto_em', 'desc')
+            ->orderBy('episodios.numero', 'desc')
+            ->select(['episodios.numero', 'vistos.visto_em'])
+            ->first();
+
+        if ($linha === null) {
+            return null;
+        }
+        return [
+            'numero'  => (int) $linha->numero,
+            'vistoEm' => date(DATE_ATOM, strtotime($linha->visto_em)),   // ISO 8601, com fuso
+        ];
+    }
+
     // Episódios para a página da série, já com quem viu cada um:
     // cada item tem id, numero, titulo, filler, recap, tu (bool), com (bool por companheiro, na ordem de $companheiros) e coment
     public function episodiosPara(User $tu, $companheiros): array   // $companheiros = Users que vêem esta série contigo
