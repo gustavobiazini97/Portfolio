@@ -6,6 +6,7 @@
 //   - comentários nas séries que vês com alguém
 //   - convites "Quero ver contigo" por responder
 //   - pedidos de amizade por responder
+//   - amizades novas (pedido aceite ou conta criada por convite), para os dois lados
 // Quem tem "só o que vemos juntos" só aparece nas séries em comum.
 // O "já vi" e os filtros ficam em quem mostra a lista (a app no telemóvel; o site em cookies).
 
@@ -37,7 +38,8 @@ class Notificacoes
             self::episodios($user, $desde),
             self::comentarios($user, $desde),
             self::convites($user),
-            self::pedidos($user)
+            self::pedidos($user),
+            self::amizades($user, $desde)
         );
 
         // Mais recentes primeiro (datas 'Y-m-d H:i:s' comparam-se como texto)
@@ -241,6 +243,28 @@ class Notificacoes
             '_quem'    => (int) $p->de_id,
             'texto'    => 'quer ser teu amigo',
             'detalhe'  => 'Responde em Amigos',
+            'serie'    => null,
+            'episodio' => null,
+        ])->all();
+    }
+
+    // Amizades novas (pedido aceite ou conta criada pelo teu convite): "nês e tu são agora amigos".
+    // A tabela tem uma linha por sentido, por isso cada um vê a sua. O par não conta (não é uma amizade).
+    private static function amizades(User $user, string $desde): array
+    {
+        $linhas = Capsule::table('amizades')
+            ->where('user_id', $user->id)
+            ->where('desde', '>=', $desde)
+            ->when($user->par_id, fn ($q) => $q->where('amigo_id', '!=', $user->par_id))
+            ->get(['amigo_id', 'desde']);
+
+        return $linhas->map(fn ($a) => [
+            'id'       => 'amizade-' . $a->amigo_id,
+            'tipo'     => 'amigo',            // mesmo filtro e destino dos pedidos (Amigos)
+            '_ts'      => $a->desde,
+            '_quem'    => (int) $a->amigo_id,
+            'texto'    => 'e tu são agora amigos',
+            'detalhe'  => 'Já podem ver o perfil um do outro',
             'serie'    => null,
             'episodio' => null,
         ])->all();

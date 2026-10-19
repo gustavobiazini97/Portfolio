@@ -100,7 +100,7 @@ o servidor valida tudo em `DadosAnime`.
 |---|---|---|---|
 | GET | `/notificacoes` | 🔒 | `notificacoes[]` dos últimos 30 dias, mais recentes primeiro (máx. 60): `id`, `tipo` (`ep`/`com`/`convite`/`amigo`), `em` (ISO 8601), `quem` (user), `texto` ("Andreia viu os episódios 12 a 14"), `detalhe`, `serie` (slug ou `null`), `episodio` (número ou `null`), `juntos` (série vista contigo), `relacao` (`par`/`amigo`, nos episódios) |
 
-Calculado dos dados existentes (sem tabela): episódios do par, dos amigos e de quem vê séries contigo (com "só juntos", só as séries em comum), comentários nas séries que vês com alguém (marcações com menos de 3 h de intervalo juntam-se), convites de série e pedidos de amizade por responder. O "já vi" fica guardado na app.
+Calculado dos dados existentes (sem tabela): episódios do par, dos amigos e de quem vê séries contigo (com "só juntos", só as séries em comum), comentários nas séries que vês com alguém (marcações com menos de 3 h de intervalo juntam-se), convites de série e pedidos de amizade por responder, e amizades novas ("X e tu são agora amigos", tipo `amigo`). O "já vi" fica guardado na app.
 
 ### Retrospetivas e medalhas
 

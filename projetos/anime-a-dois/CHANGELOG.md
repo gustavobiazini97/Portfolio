@@ -336,6 +336,10 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - **"Uau"**: corrida no placar com ⚡, cartões que viram + partículas + ❤️ ao marcar, celebração ao acabar uma série (o `serie/marcar` devolve `acabou` e `comigo`), entradas em cascata, capas que voam (View Transitions) e capa no topo da série. Tudo respeita "reduzir movimento".
 - Capas da fila do Início e o cartão do par passam a abrir a série / o perfil (como na app 1.8.1). Service worker v9.
 
+### 🔔 com amizades novas (19 de outubro, só servidor)
+
+- `Notificacoes::amizades()`: as amizades dos últimos 30 dias aparecem como "X e tu são agora amigos" (tipo `amigo`: mesmo filtro e destino dos pedidos). Antes, ao aceitar um pedido ele saía do sininho sem deixar rasto. O par não conta. Serve à app e ao site sem atualizar a app.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow
