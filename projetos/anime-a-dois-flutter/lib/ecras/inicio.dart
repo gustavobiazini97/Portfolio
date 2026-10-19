@@ -145,13 +145,16 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
   }
 
   // Escolher outra capa: muda já o realce e vai buscar o placar dela
+  // Tocar numa capa: fica escolhida no placar e abre logo a série (a capa voa até lá)
   void _escolher(ItemBiblioteca i) {
-    if (i.serie.slug == _selecionada) return;
-    setState(() {
-      _selecionada = i.serie.slug;
-      _aberta = null;
-    });
-    _carregarAberta();
+    if (i.serie.slug != _selecionada) {
+      setState(() {
+        _selecionada = i.serie.slug;
+        _aberta = null;
+      });
+      _carregarAberta();
+    }
+    _abrir(EcraSerie(slug: i.serie.slug, serie: i.serie));
   }
 
   // Abre um ecrã e, ao voltar, recarrega (pode ter havido episódios marcados, séries novas, …)
@@ -394,8 +397,8 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
     final nomeCurto = _biblioteca.where((i) => i.serie.slug == u.serie).map((i) => i.serie.nomeCurto).firstOrNull ?? u.serieNome;
     return Vidro(
       padding: const EdgeInsets.all(20),
-      // Se a série também é tua, abre-a nesse episódio; senão é só para espreitar (a foto abre o perfil)
-      onTap: tens ? () => _abrir(EcraSerie(slug: u.serie, episodio: u.numero)) : null,
+      // Se a série também é tua, abre-a nesse episódio; senão abre o perfil dele (lá dá para te juntares)
+      onTap: tens ? () => _abrir(EcraSerie(slug: u.serie, episodio: u.numero)) : () => _abrir(EcraPessoa(id: par.id)),
       child: Row(
         children: [
           GestureDetector(

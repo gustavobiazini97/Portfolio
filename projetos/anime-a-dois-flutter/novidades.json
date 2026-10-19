@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.8.1",
+    "notas": [
+      "No Início, tocar numa capa abre a série"
+    ]
+  },
+  {
     "versao": "1.8.0",
     "notas": [
       "Marcar um episódio agora tem impacto: o cartão vira e há ❤️ quando os dois já viram",

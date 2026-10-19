@@ -321,6 +321,11 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - `Carregando` passou de rodinha a esqueleto a brilhar.
 - Modelo `Serie` ganhou `minutosEp` (para as horas da celebração; sem valor, 24 min).
 
+### Capas do Início abrem a série (19 de outubro, versão 1.8.1)
+
+- Tocar numa capa da tua biblioteca no Início escolhe-a no placar e abre a série (antes só a escolhia; na já escolhida não fazia nada).
+- O cartão "Andreia viu…" de uma série que não tens abre o perfil dela (antes não fazia nada).
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow
