@@ -307,6 +307,11 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - `EcraPrincipal` ouve `separadorAtual` para outros ecrãs poderem pedir um separador.
 - Só com a app aberta; notificações com a app fechada (Firebase) ficam para depois e podem usar a mesma lista.
 
+### Filtros do sininho (19 de outubro, versão 1.7.1)
+
+- `/notificacoes` passa a trazer os episódios do par, dos amigos e de quem vê séries contigo (com "só juntos", só as séries em comum), cada um com `juntos` e `relacao` (`par`/`amigo`).
+- App: ícone de filtro no ecrã do 🔔 (`FiltrosSino`, no telemóvel): séries juntos ✓, outras do par ✓, outras dos amigos ✗, comentários ✓, convites e pedidos ✓. A bolinha conta só o que está ligado. Tocar num episódio de uma série que não vês com a pessoa abre o perfil dela.
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

@@ -38,4 +38,25 @@ void main() {
     expect(n.episodio, isNull);
     expect(n.emoji, '👋');
   });
+
+  test('filtros: outras séries do par sim, dos amigos não (por omissão)', () {
+    Notificacao ep({required bool juntos, required String relacao}) => Notificacao.deJson({
+          'id': 'x',
+          'tipo': 'ep',
+          'em': '2026-10-18T10:00:00+01:00',
+          'quem': {'id': 2, 'nome': 'A', 'username': 'a', 'inicial': 'A', 'foto': null},
+          'texto': '',
+          'detalhe': '',
+          'serie': 's',
+          'episodio': 1,
+          'juntos': juntos,
+          'relacao': relacao,
+        });
+    final f = FiltrosSino();
+    expect(f.deixa(ep(juntos: true, relacao: 'amigo')), isTrue);
+    expect(f.deixa(ep(juntos: false, relacao: 'par')), isTrue);
+    expect(f.deixa(ep(juntos: false, relacao: 'amigo')), isFalse);
+    f.outrasPar = false;
+    expect(f.deixa(ep(juntos: false, relacao: 'par')), isFalse);
+  });
 }

@@ -2,6 +2,8 @@
 // episódios e comentários de quem vê séries contigo, convites de série e pedidos de amizade.
 // O número na bolinha são as que chegaram depois da última vez que abriste a lista
 // (guardado no telemóvel). Tocar numa linha leva ao sítio certo.
+// O ícone de filtro escolhe o que aparece (séries juntos, outras do par, dos amigos, comentários,
+// convites e pedidos); a escolha fica no telemóvel e a bolinha conta só o que está ligado.
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +14,7 @@ import '../estado/auto_atualizar.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
+import 'pessoa.dart';
 import 'serie.dart';
 
 // Uma linha do sininho, como a API a envia
@@ -24,6 +27,8 @@ class Notificacao {
   final String detalhe; // nome da série, pedaço do comentário…
   final String? serie; // slug (null nos convites e pedidos)
   final int? episodio;
+  final bool juntos; // episódios: série que vês com esta pessoa?
+  final String? relacao; // episódios: par | amigo
 
   Notificacao.deJson(Map<String, dynamic> j)
       : id = j['id'] as String? ?? '',
@@ -33,7 +38,9 @@ class Notificacao {
         texto = j['texto'] as String? ?? '',
         detalhe = j['detalhe'] as String? ?? '',
         serie = j['serie'] as String?,
-        episodio = (j['episodio'] as num?)?.toInt();
+        episodio = (j['episodio'] as num?)?.toInt(),
+        juntos = j['juntos'] != false,
+        relacao = j['relacao'] as String?;
 
   // Emoji pequeno ao lado da hora, para se perceber o tipo de relance
   String get emoji => switch (tipo) {
@@ -42,6 +49,44 @@ class Notificacao {
         'convite' => '🎬',
         'amigo' => '👋',
         _ => '🔔',
+      };
+}
+
+// O que aparece no 🔔 (guardado no telemóvel)
+class FiltrosSino {
+  bool juntos = true; // episódios das séries que vês juntos
+  bool outrasPar = true; // outras séries do teu par
+  bool outrasAmigos = false; // outras séries dos amigos
+  bool comentarios = true;
+  bool convites = true; // convites de série e pedidos de amizade
+
+  static const _chave = 'sino_filtros';
+
+  static Future<FiltrosSino> ler() async {
+    final f = FiltrosSino();
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getStringList(_chave);
+    if (v != null && v.length == 5) {
+      f.juntos = v[0] == '1';
+      f.outrasPar = v[1] == '1';
+      f.outrasAmigos = v[2] == '1';
+      f.comentarios = v[3] == '1';
+      f.convites = v[4] == '1';
+    }
+    return f;
+  }
+
+  Future<void> guardar() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_chave, [juntos, outrasPar, outrasAmigos, comentarios, convites].map((b) => b ? '1' : '0').toList());
+  }
+
+  // Esta notificação passa nos filtros?
+  bool deixa(Notificacao n) => switch (n.tipo) {
+        'ep' => n.juntos ? juntos : (n.relacao == 'par' ? outrasPar : outrasAmigos),
+        'com' => comentarios,
+        'convite' || 'amigo' => convites,
+        _ => true,
       };
 }
 
@@ -60,11 +105,13 @@ class Sino {
     return DateTime.tryParse(prefs.getString(_chave) ?? '');
   }
 
-  // Vai buscar a lista e atualiza o número da bolinha
+  // Vai buscar a lista (já filtrada) e atualiza o número da bolinha
   static Future<List<Notificacao>> carregar() async {
     final d = await Api.instancia.get('/notificacoes');
+    final filtros = await FiltrosSino.ler();
     final lista = ((d['notificacoes'] as List?) ?? [])
         .map((n) => Notificacao.deJson(n as Map<String, dynamic>))
+        .where(filtros.deixa)
         .toList();
     final visto = await vistoEm();
     naoVistas.value = lista.where((n) => visto == null || n.em.isAfter(visto)).length;
@@ -122,9 +169,52 @@ class _EcraNotificacoesState extends State<EcraNotificacoes> with AutoAtualizar 
   @override
   Future<void> atualizarEmSilencio() => _carregar();
 
+  // Folha com os interruptores; cada mudança guarda e volta a carregar a lista
+  Future<void> _filtros() async {
+    final f = await FiltrosSino.ler();
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, mudar) {
+          Widget linha(String texto, bool valor, void Function(bool) definir) => SwitchListTile(
+                title: Text(texto),
+                value: valor,
+                onChanged: (v) {
+                  mudar(() => definir(v));
+                  f.guardar().then((_) => _carregar());
+                },
+              );
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                  child: Text('O que mostrar',
+                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                ),
+                linha('Séries que vês juntos', f.juntos, (v) => f.juntos = v),
+                linha('Outras séries do teu par', f.outrasPar, (v) => f.outrasPar = v),
+                linha('Outras séries dos amigos', f.outrasAmigos, (v) => f.outrasAmigos = v),
+                linha('Comentários', f.comentarios, (v) => f.comentarios = v),
+                linha('Convites e pedidos de amizade', f.convites, (v) => f.convites = v),
+                const SizedBox(height: 12),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   // Leva ao sítio de cada notificação
   void _abrir(Notificacao n) {
-    if (n.serie != null) {
+    if (n.tipo == 'ep' && !n.juntos) {
+      // Série que não vês com ela: abre o perfil dela (lá dá para te juntares)
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => EcraPessoa(id: n.quem.id)));
+    } else if (n.serie != null) {
       // Episódio ou comentário: a série, já no episódio certo
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => EcraSerie(slug: n.serie!, episodio: n.episodio)));
     } else if (n.tipo == 'amigo') {
@@ -150,7 +240,16 @@ class _EcraNotificacoesState extends State<EcraNotificacoes> with AutoAtualizar 
                 child: Row(
                   children: [
                     const BackButton(),
-                    Text('Notificações', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    Expanded(
+                      child: Text('Notificações',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    ),
+                    // Escolher o que aparece
+                    IconButton(
+                      tooltip: 'O que mostrar',
+                      icon: const Icon(Icons.tune_rounded),
+                      onPressed: _filtros,
+                    ),
                   ],
                 ),
               ),

@@ -1,11 +1,12 @@
 <?php
 // API: o sininho da app (🔔). Lista do que aconteceu nos últimos 30 dias à tua volta, calculada
 // a partir dos dados que já existem (não há tabela própria):
-//   - episódios que alguém marcou numa série que vê contigo (marcações seguidas juntam-se numa linha)
+//   - episódios marcados pelo par, amigos e quem vê séries contigo (marcações seguidas juntam-se numa linha);
+//     cada um diz se a série é vista contigo (juntos), para os filtros da app
 //   - comentários nessas séries
 //   - convites "Quero ver contigo" por responder
 //   - pedidos de amizade por responder
-// Segue as mesmas regras do Notificador: só o que vês COM alguém te é avisado.
+// Comentários, convites e pedidos seguem as regras do Notificador. Quem tem "só juntos" só aparece nas séries em comum.
 // O "já vi" fica guardado na própria app (só conta como novo o que for mais recente).
 
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -52,45 +53,69 @@ class NotificacoesApi extends ApiController
                 'detalhe'  => $i['detalhe'],                            // nome da série, comentário…
                 'serie'    => $i['serie'],                              // slug, ou null
                 'episodio' => $i['episodio'],                           // número, ou null
+                'juntos'   => $i['juntos'] ?? true,                     // ep: série vista contigo?
+                'relacao'  => $i['relacao'] ?? null,                    // ep: par | amigo
             ];
         }
 
         $this->json(['ok' => true, 'notificacoes' => $saida]);
     }
 
-    // Episódios que outras pessoas marcaram nas séries que vêem contigo, juntos por sessão
+    // Episódios marcados pelo teu par, pelos amigos e por quem vê séries contigo, juntos por sessão.
+    // Cada linha diz se a série é vista contigo (juntos) e quem é a pessoa (relacao: par | amigo);
+    // os filtros do 🔔 são escolhidos na app. Privacidade: quem tem "só o que vemos juntos" só
+    // aparece nas séries que vê contigo (como no perfil).
     private function episodios(User $user, string $desde): array
     {
+        // Círculo: par + amigos + quem vê alguma série contigo
+        $parId   = $user->par_id ? (int) $user->par_id : null;
+        $amigos  = Capsule::table('amizades')->where('user_id', $user->id)->pluck('amigo_id')->map(fn ($i) => (int) $i)->all();
+        $comigo  = Capsule::table('series_juntos')->where('user_id', $user->id)->pluck('com_id')->map(fn ($i) => (int) $i)->all();
+        $ids     = array_values(array_unique(array_filter(array_merge([$parId], $amigos, $comigo))));
+        if ($ids === []) {
+            return [];
+        }
+
+        // Quem te deixa ver tudo (sem "só juntos" ou é o teu par)
+        $veTudo = User::whereIn('id', $ids)->get()->mapWithKeys(fn ($u) => [(int) $u->id => $u->veTudo($user)])->all();
+
         $linhas = Capsule::table('vistos')
             ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
             ->join('series', 'series.id', '=', 'episodios.serie_id')
-            // Só séries que tu vês com quem marcou
-            ->join('series_juntos', function ($j) use ($user) {
+            // Vês esta série com quem marcou? (left join: as outras séries também vêm)
+            ->leftJoin('series_juntos', function ($j) use ($user) {
                 $j->on('series_juntos.serie_id', '=', 'episodios.serie_id')
                   ->on('series_juntos.com_id', '=', 'vistos.user_id')
                   ->where('series_juntos.user_id', '=', $user->id);
             })
+            ->whereIn('vistos.user_id', $ids)
             ->where('vistos.visto_em', '>=', $desde)
             ->orderBy('vistos.user_id')->orderBy('episodios.serie_id')
             ->orderBy('vistos.visto_em')->orderBy('episodios.numero')
-            ->limit(3000)   // travão de segurança
-            ->get(['vistos.user_id', 'episodios.serie_id', 'series.slug', 'series.nome', 'episodios.numero', 'vistos.visto_em']);
+            ->limit(5000)   // travão de segurança
+            ->get(['vistos.user_id', 'episodios.serie_id', 'series.slug', 'series.nome', 'episodios.numero', 'vistos.visto_em',
+                   'series_juntos.com_id AS juntos']);
 
         // Agrupa: mesma pessoa, mesma série e sem pausas grandes entre marcações
         $grupos = [];
         $atual  = null;
         foreach ($linhas as $l) {
+            $uid    = (int) $l->user_id;
+            $juntos = $l->juntos !== null;
+            if (!$juntos && !($veTudo[$uid] ?? false)) {
+                continue;   // "só juntos": as outras séries dele são privadas
+            }
             $ts = strtotime($l->visto_em);
             $continua = $atual !== null
-                && $atual['user'] === (int) $l->user_id
+                && $atual['user'] === $uid
                 && $atual['serie_id'] === (int) $l->serie_id
                 && $ts - $atual['fim'] <= self::PAUSA_SEG;
             if (!$continua) {
                 if ($atual !== null) {
                     $grupos[] = $atual;
                 }
-                $atual = ['user' => (int) $l->user_id, 'serie_id' => (int) $l->serie_id, 'slug' => $l->slug,
-                          'nome' => $l->nome, 'numeros' => [], 'fim' => $ts, 'fimTexto' => $l->visto_em];
+                $atual = ['user' => $uid, 'serie_id' => (int) $l->serie_id, 'slug' => $l->slug, 'nome' => $l->nome,
+                          'juntos' => $juntos, 'numeros' => [], 'fim' => $ts, 'fimTexto' => $l->visto_em];
             }
             $atual['numeros'][] = (int) $l->numero;
             $atual['fim'] = $ts;
@@ -100,7 +125,7 @@ class NotificacoesApi extends ApiController
             $grupos[] = $atual;
         }
 
-        return array_map(function ($g) {
+        return array_map(function ($g) use ($parId) {
             $numeros = array_values(array_unique($g['numeros']));
             sort($numeros);
             $n = count($numeros);
@@ -123,6 +148,8 @@ class NotificacoesApi extends ApiController
                 'detalhe'  => $g['nome'],
                 'serie'    => $g['slug'],
                 'episodio' => $numeros[$n - 1],   // abre no último que viu
+                'juntos'   => $g['juntos'],                                   // série vista contigo?
+                'relacao'  => $g['user'] === $parId ? 'par' : 'amigo',
             ];
         }, $grupos);
     }
