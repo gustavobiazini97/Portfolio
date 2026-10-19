@@ -78,14 +78,16 @@ class AmigosApi extends ApiController
 
     // GET /pessoas/{id} — perfil do teu par ou de um amigo: último episódio e biblioteca dele.
     // Se ele escolheu "só o que vemos juntos", aparecem só as séries que vê contigo (como no site).
+    // GET /pessoas/eu — o teu próprio perfil (separador Perfil da app), com o mesmo formato.
     public function pessoa(string $id): void
     {
-        $user   = $this->exigirToken();
-        $par    = $user->parceiro();
-        $pessoa = User::find((int) $id);
+        $user    = $this->exigirToken();
+        $par     = $user->parceiro();
+        $proprio = $id === 'eu' || (int) $id === $user->id;     // o teu perfil: vês tudo, sem "tu vs ele"
+        $pessoa  = $proprio ? $user : User::find((int) $id);
 
-        // Null guard: só se vê o perfil do par e dos amigos (de mais ninguém)
-        if ($pessoa === null || $pessoa->id === $user->id || ($par?->id !== $pessoa->id && !Amizade::sao($user, $pessoa))) {
+        // Null guard: só se vê o teu perfil, o do par e o dos amigos (de mais ninguém)
+        if ($pessoa === null || (!$proprio && $par?->id !== $pessoa->id && !Amizade::sao($user, $pessoa))) {
             $this->erro('Não encontrei essa pessoa.', 404);
         }
 
@@ -99,13 +101,13 @@ class AmigosApi extends ApiController
         // Para cada série dele: já a tens? vês com ele? (decide os botões "Juntar-me")
         // Se também a tens, vai a tua % (para a barra "tu vs ele")
         // Em cada barra vai também o último episódio e o dia em que foi marcado
-        $itens = array_map(function ($i) use ($user, $pessoa) {
+        $itens = array_map(function ($i) use ($user, $pessoa, $proprio) {
             $j = $this->itemBibliotecaJson($i);
             $j['naTua']   = $i['serie']->naBibliotecaDe($user);
-            $j['vesCom']  = $i['serie']->verCom($user, $pessoa);
-            $j['teuPct']  = $j['naTua'] ? $i['serie']->progressoDe($user)['pct'] : null;
-            $j['ultimo']    = $i['serie']->ultimoDe($pessoa);                        // último dele: {numero, vistoEm}
-            $j['teuUltimo'] = $j['naTua'] ? $i['serie']->ultimoDe($user) : null;    // o teu, se também a tens
+            $j['vesCom']  = !$proprio && $i['serie']->verCom($user, $pessoa);
+            $j['teuPct']  = $j['naTua'] && !$proprio ? $i['serie']->progressoDe($user)['pct'] : null;   // no teu perfil não se repete
+            $j['ultimo']    = $i['serie']->ultimoDe($pessoa);                                     // último dele: {numero, vistoEm}
+            $j['teuUltimo'] = $j['naTua'] && !$proprio ? $i['serie']->ultimoDe($user) : null;    // o teu, se também a tens
             return $j;
         }, $biblioteca);
 
@@ -123,7 +125,8 @@ class AmigosApi extends ApiController
         $this->json([
             'ok'         => true,
             'pessoa'     => $this->userJson($pessoa),
-            'ehPar'      => $par?->id === $pessoa->id,
+            'ehPar'      => !$proprio && $par?->id === $pessoa->id,
+            'proprio'    => $proprio,
             'ultimo'     => $this->ultimoJson($pessoa->ultimoVistoPara($user)),
             'soJuntos'   => $soJuntos,
             'numeros'    => $this->numeros($pessoa, $user, $itens, $soJuntos),

@@ -92,7 +92,7 @@ o servidor valida tudo em `DadosAnime`.
 | POST | `/amigos/pedidos/{id}/aceitar` | 🔒 | | aceita |
 | DELETE | `/amigos/pedidos/{id}` | 🔒 | | recusa ou cancela |
 | DELETE | `/amigos/{id}` | 🔒 | | desfaz a amizade |
-| GET | `/pessoas/{id}` | 🔒 | | perfil do par ou de um amigo (`ultimo`, `numeros`, `medalhas`, `biblioteca` com `naTua`/`vesCom`/`teuPct`/`ultimo`/`teuUltimo`) |
+| GET | `/pessoas/{id}` | 🔒 | | perfil do par ou de um amigo; `/pessoas/eu` = o teu (`proprio: true`, sem `teuPct`/`teuUltimo`) (`ultimo`, `numeros`, `medalhas`, `biblioteca` com `naTua`/`vesCom`/`teuPct`/`ultimo`/`teuUltimo`) |
 
 ### Retrospetivas e medalhas
 

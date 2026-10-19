@@ -1,5 +1,13 @@
 [
   {
+    "versao": "1.6.0",
+    "notas": [
+      "O Perfil mostra agora os teus números, medalhas e a tua biblioteca com o dia de cada registo",
+      "As definições passaram para a ⚙️ no canto do Perfil",
+      "O botão de voltar já não fecha a app: volta ao Início"
+    ]
+  },
+  {
     "versao": "1.5.1",
     "notas": [
       "No perfil do par e dos amigos, cada série mostra o último episódio e o dia: \"Ep. 14 · ontem, 22:10\""

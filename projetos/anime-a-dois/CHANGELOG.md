@@ -287,6 +287,13 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 - API: cada item da `biblioteca` do `/pessoas/{id}` traz `ultimo` e `teuUltimo` (`{ numero, vistoEm }`), lidos de `vistos.visto_em` (Model `Serie::ultimoDe`).
 - App: `LinhaPct` ganhou `detalhe`; `diaDoRegisto()` formata hoje/ontem/dia da semana/data.
 
+### Perfil próprio com dados (19 de outubro, versão 1.6.0)
+
+- O separador Perfil usa o mesmo ecrã do perfil do par/amigo (`EcraPessoa.proprio()`): último episódio, números, medalhas, retrospetiva e a tua biblioteca com "Ep. 14 · ontem, 22:10".
+- As definições (o antigo `EcraPerfil`, agora com o título "Definições") abrem na ⚙️ do canto.
+- API: `GET /pessoas/eu` devolve o teu perfil no mesmo formato (`proprio: true`, sem `teuPct`/`teuUltimo`).
+- Voltar (Android) num separador que não é o Início volta ao Início, em vez de fechar a app (`PopScope` no `EcraPrincipal`).
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow

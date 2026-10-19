@@ -1,4 +1,4 @@
-// Perfil (igual ao site): foto, nome e utilizador, palavra-passe, cores (6 paletas), privacidade,
+// Definições do perfil (abre na ⚙️ do separador Perfil): foto, nome e utilizador, palavra-passe, cores (6 paletas), privacidade,
 // notificações, tema, terminar sessão e apagar conta.
 // Os dados aparecem como texto (lápis para editar) e a palavra-passe muda-se numa folha que sobe de baixo:
 // nada de campos sempre abertos.
@@ -369,7 +369,7 @@ class _EcraPerfilState extends State<EcraPerfil> {
                   children: [
                     // Nos separadores da barra de baixo não há para onde voltar
                     if (Navigator.of(context).canPop()) const BackButton() else const SizedBox(width: 16),
-                    Text('Perfil', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    Text('Definições', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   ],
                 ),
               ),

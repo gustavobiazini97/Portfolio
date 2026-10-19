@@ -3,6 +3,8 @@
 // Se ele escolheu "só o que vemos juntos": aparecem só as séries que vê contigo, os números contam só essas
 // e as medalhas ficam privadas.
 // Nas séries que ainda não tens dá para te juntares: "Ver com ele" (botão) ou "Só para mim" (menu ⋯).
+// Com EcraPessoa.proprio() é o separador Perfil: os teus números, medalhas e biblioteca (com o dia de cada
+// registo), sem botão de voltar e com a ⚙️ que abre as definições (EcraPerfil).
 
 import 'package:flutter/material.dart';
 
@@ -10,7 +12,9 @@ import '../api/api.dart';
 import '../api/modelos.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
-import 'medalhas.dart' show Medalha, EmblemaMedalha, corDoNivel;
+import 'medalhas.dart' show Medalha, EmblemaMedalha, EcraMedalhas, corDoNivel;
+import 'perfil.dart';
+import 'retrospetiva.dart' show EcraRetrospetivas;
 import 'serie.dart';
 
 // Números do perfil, como a API os envia (GET /pessoas/{id} → numeros)
@@ -30,9 +34,13 @@ class _Numeros {
 const _estados = {'a_ver': 'A ver', 'pausa': 'Em pausa', 'acabado': 'Acabado'};
 
 class EcraPessoa extends StatefulWidget {
-  final int id;
+  final int id; // 0 no teu perfil
+  final bool proprio; // true = separador Perfil (o teu)
 
-  const EcraPessoa({super.key, required this.id});
+  const EcraPessoa({super.key, required this.id}) : proprio = false;
+  const EcraPessoa.proprio({super.key})
+      : id = 0,
+        proprio = true;
 
   @override
   State<EcraPessoa> createState() => _EcraPessoaState();
@@ -60,7 +68,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
 
   Future<void> _carregar() async {
     try {
-      final d = await Api.instancia.get('/pessoas/${widget.id}');
+      final d = await Api.instancia.get(widget.proprio ? '/pessoas/eu' : '/pessoas/${widget.id}');
       if (!mounted) return;
       final itens = (d['biblioteca'] as List? ?? []).cast<Map<String, dynamic>>();
       final med = d['medalhas'] as Map<String, dynamic>?;
@@ -105,6 +113,12 @@ class _EcraPessoaState extends State<EcraPessoa> {
     }
   }
 
+  // ⚙️ Definições (o antigo ecrã do Perfil); ao voltar recarrega (nome, foto ou cores podem ter mudado)
+  Future<void> _abrirDefinicoes() async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EcraPerfil()));
+    if (mounted) await _carregar();
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Paleta.de(context);
@@ -117,11 +131,19 @@ class _EcraPessoaState extends State<EcraPessoa> {
                 padding: const EdgeInsets.fromLTRB(4, 6, 8, 0),
                 child: Row(
                   children: [
-                    const BackButton(),
+                    // No separador Perfil não há para onde voltar
+                    if (widget.proprio) const SizedBox(width: 16) else const BackButton(),
                     Expanded(
-                      child: Text(_pessoa?.nome ?? '',
+                      child: Text(widget.proprio ? 'Perfil' : (_pessoa?.nome ?? ''),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                     ),
+                    // O teu perfil: ⚙️ abre as definições (dados, palavra-passe, cores, notificações…)
+                    if (widget.proprio)
+                      IconButton(
+                        tooltip: 'Definições',
+                        icon: const Icon(Icons.settings_rounded),
+                        onPressed: _abrirDefinicoes,
+                      ),
                   ],
                 ),
               ),
@@ -146,7 +168,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           // Cabeçalho: foto, nome e o último episódio que viu
-          Center(child: Avatar(user: u, cor: p.par, tamanho: 88)),
+          Center(child: Avatar(user: u, cor: widget.proprio ? p.tu : p.par, tamanho: 88)),
           const SizedBox(height: 8),
           Center(child: Text(u.nome, style: textos.titleLarge?.copyWith(fontWeight: FontWeight.w800))),
           Center(child: Text(_ehPar ? 'o teu par' : '@${u.username}', style: textos.bodySmall?.copyWith(color: p.suave))),
@@ -154,7 +176,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
           if (_ultimo != null)
             Vidro(
               child: Text(
-                'Viu o episódio ${_ultimo!.numero} de ${_ultimo!.serieNome}'
+                '${widget.proprio ? 'Viste' : 'Viu'} o episódio ${_ultimo!.numero} de ${_ultimo!.serieNome}'
                 '${_ultimo!.quando.isNotEmpty ? ' · ${_ultimo!.quando}' : ''}',
               ),
             ),
@@ -167,7 +189,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
           if (_numeros != null) ...[
             const SizedBox(height: 14),
             _blocoNumeros(p, _numeros!),
-            if (_numeros!.seriesJuntos > 0) ...[
+            if (_numeros!.seriesJuntos > 0 && !widget.proprio) ...[
               const SizedBox(height: 10),
               _blocoJuntos(p, _numeros!, u),
             ],
@@ -179,9 +201,24 @@ class _EcraPessoaState extends State<EcraPessoa> {
             _blocoMedalhas(p, _medalhas!, u),
           ],
 
+          // O teu perfil: atalho para a retrospetiva (mês/ano)
+          if (widget.proprio) ...[
+            const SizedBox(height: 12),
+            Vidro(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Text('📅', style: TextStyle(fontSize: 22)),
+                title: const Text('Retrospetiva'),
+                trailing: Icon(Icons.chevron_right_rounded, color: p.suave),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EcraRetrospetivas())),
+              ),
+            ),
+          ],
+
           // Biblioteca, por estado
           const SizedBox(height: 18),
-          Text('A biblioteca de ${u.nome}', style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          Text(widget.proprio ? 'A tua biblioteca' : 'A biblioteca de ${u.nome}', style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
           if (_biblioteca.isEmpty)
             Text('Nada para mostrar por agora.', style: TextStyle(color: p.suave))
@@ -214,7 +251,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
     return Expanded(
       child: Column(
         children: [
-          Text('$valor', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: p.parTxt)),
+          Text('$valor', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: widget.proprio ? p.tuTxt : p.parTxt)),
           const SizedBox(height: 2),
           Text(legenda, style: TextStyle(fontSize: 11.5, color: p.suave)),
         ],
@@ -268,12 +305,18 @@ class _EcraPessoaState extends State<EcraPessoa> {
               child: Text('Medalhas · ${obtidas.length}/${lista.length}',
                   style: textos.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
             ),
-            TextButton(onPressed: () => _todasMedalhas(p, lista, u), child: const Text('Ver todas')),
+            // As tuas: abre a página das medalhas; as dele: folha que sobe de baixo
+            TextButton(
+              onPressed: () => widget.proprio
+                  ? Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EcraMedalhas()))
+                  : _todasMedalhas(p, lista, u),
+              child: const Text('Ver todas'),
+            ),
           ],
         ),
         const SizedBox(height: 4),
         if (destaque.isEmpty)
-          Text('${u.nome} ainda não tem medalhas.', style: TextStyle(color: p.suave))
+          Text(widget.proprio ? 'Ainda não tens medalhas.' : '${u.nome} ainda não tem medalhas.', style: TextStyle(color: p.suave))
         else
           Row(
             children: [
@@ -436,12 +479,19 @@ class _EcraPessoaState extends State<EcraPessoa> {
                     overflow: TextOverflow.ellipsis,
                     style: textos.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 8),
-                LinhaPct(nome: u.nome, pct: i.pct, ehTu: false, detalhe: _ultimoDele[s.slug]),
+                LinhaPct(
+                  nome: widget.proprio ? 'Tu' : u.nome,
+                  pct: i.pct,
+                  ehTu: widget.proprio,
+                  detalhe: _ultimoDele[s.slug],
+                ),
                 // Também a tens: a tua barra por baixo da dele
                 if (teu != null) ...[
                   const SizedBox(height: 8),
                   LinhaPct(nome: 'Tu', pct: teu, ehTu: true, detalhe: _teuUltimo[s.slug]),
                 ],
+                // O teu perfil: só a tua barra (os botões de juntar não fazem sentido)
+                if (!widget.proprio) ...[
                 const SizedBox(height: 10),
                 if (i.vesCom)
                   _etiqueta(p, Icons.favorite_rounded, 'Vês com ${u.nome}', p.tuTxt)
@@ -449,6 +499,7 @@ class _EcraPessoaState extends State<EcraPessoa> {
                   _etiqueta(p, Icons.bookmark_rounded, 'Também está na tua biblioteca', p.suave)
                 else
                   _botoesJuntar(p, s, u),
+                ],
               ],
             ),
           ),

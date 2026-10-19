@@ -2,6 +2,7 @@
 //   Início · Biblioteca · [ + ] · Amigos · Perfil
 // O "+" ao centro (flutuante) abre a pesquisa para adicionar uma série.
 // Cada separador mantém-se vivo (IndexedStack); ao voltar a um separador ele recarrega os dados.
+// O Perfil mostra os teus números e a biblioteca (EcraPessoa.proprio); as definições abrem na ⚙️.
 
 import 'dart:ui' show ImageFilter;
 
@@ -15,7 +16,7 @@ import 'adicionar.dart';
 import 'amigos.dart';
 import 'biblioteca.dart';
 import 'inicio.dart';
-import 'perfil.dart';
+import 'pessoa.dart';
 
 class EcraPrincipal extends StatefulWidget {
   const EcraPrincipal({super.key});
@@ -72,12 +73,19 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
       EcraInicio(key: ValueKey('inicio-${_versoes[0]}')),
       EcraBiblioteca(key: ValueKey('biblioteca-${_versoes[1]}')),
       EcraAmigos(key: ValueKey('amigos-${_versoes[2]}')),
-      EcraPerfil(key: ValueKey('perfil-${_versoes[3]}')),
+      EcraPessoa.proprio(key: ValueKey('perfil-${_versoes[3]}')),
     ];
 
-    return Scaffold(
-      body: IndexedStack(index: _atual, children: ecras),
-      bottomNavigationBar: _barra(context),
+    // Voltar (botão/gesto do Android): noutro separador volta ao Início; só no Início fecha a app
+    return PopScope(
+      canPop: _atual == 0,
+      onPopInvokedWithResult: (fechou, _) {
+        if (!fechou) _escolher(0);
+      },
+      child: Scaffold(
+        body: IndexedStack(index: _atual, children: ecras),
+        bottomNavigationBar: _barra(context),
+      ),
     );
   }
 
