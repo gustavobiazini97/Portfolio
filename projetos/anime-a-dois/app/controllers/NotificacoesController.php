@@ -44,14 +44,14 @@ class NotificacoesController extends Controller
         $this->redirect('notificacoes');
     }
 
-    // ---------- Para o resto do site (a bolinha no Início) ----------
+    // ---------- Para o resto do site (a bolinha e o resumo no Início) ----------
 
-    // Quantas notificações por ver (respeitando os filtros)
-    public static function porVer(User $user): int
+    // Notificações por ver (respeitando os filtros), mais recentes primeiro
+    public static function porVer(User $user): array
     {
         $filtros = self::filtros($user);
         $visto   = self::vistoEm($user);
-        return count(array_filter(Notificacoes::lista($user),
+        return array_values(array_filter(Notificacoes::lista($user),
             fn ($n) => Notificacoes::deixa($n, $filtros) && ($visto === null || strtotime($n['ts']) > $visto)));
     }
 

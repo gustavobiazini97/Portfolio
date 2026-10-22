@@ -36,6 +36,9 @@ class HomeController extends Controller
         $meu      = $serie ? $serie->progressoDe($user) : null;
         $deles    = $companheiros->map(fn ($c) => $serie->progressoDe($c))->all();   // na ordem dos companheiros
 
+        // Notificações por ver (uma só vez: dão o número do 🔔 e o resumo do topo)
+        $porVer = NotificacoesController::porVer($user);
+
         $this->render('home/index', [
             'titulo'      => 'Início',
             'classeBody'  => 'pagina-inicio',   // no computador o Início fica em duas colunas (app.css)
@@ -62,7 +65,8 @@ class HomeController extends Controller
             'jaCa'        => Serie::situacaoNaPesquisa($user),
             'novidades'   => Novidade::porVer($user),
             'pedidosAmigos' => Amizade::pedidosRecebidos($user)->count(),   // bolinha no ícone dos amigos
-            'sinoPorVer'  => NotificacoesController::porVer($user),         // número no 🔔
+            'sinoPorVer'  => count($porVer),                                // número no 🔔
+            'sinoResumo'  => Notificacoes::resumo($porVer),                 // linha por baixo do "Olá" (ou null)
             'esperaPar'   => $user->esperaPar(),   // o que mudou na app desde a última vez que viste
         ]);
     }

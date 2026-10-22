@@ -4,7 +4,7 @@
 
 class NotificacoesApi extends ApiController
 {
-    // GET /notificacoes — { ok, notificacoes: [ {id, tipo, em, quem, texto, detalhe, serie, episodio, juntos, relacao} ] }
+    // GET /notificacoes — { ok, notificacoes: [ {id, tipo, em, quem, texto, detalhe, serie, episodio, juntos, relacao, quantos} ] }
     public function lista(): void
     {
         $user = $this->exigirToken();
@@ -20,6 +20,7 @@ class NotificacoesApi extends ApiController
             'episodio' => $n['episodio'],                           // número, ou null
             'juntos'   => $n['juntos'],                             // ep: série vista contigo?
             'relacao'  => $n['relacao'],                            // ep: par | amigo
+            'quantos'  => $n['quantos'],                            // ep: episódios nesta sessão (resumo do Início)
         ], Notificacoes::lista($user));
 
         $this->json(['ok' => true, 'notificacoes' => $saida]);

@@ -1,5 +1,5 @@
 // Início, igual ao do site:
-//   topo (logótipo, estatísticas, tema; amigos e perfil estão na barra de baixo), último episódio do par,
+//   topo ("Olá, <nome>" com a tua foto e o resumo das novidades do 🔔; à direita 🔔, estatísticas e tema), último episódio do par,
 //   o cartão da retrospetiva do mês,
 //   a tua biblioteca em capas, a série aberta (placar com o episódio de cada um e a frase do Vs),
 //   o teu estado, "Vês com… · Deixar de ver juntos", "Continuar · episódio N",
@@ -221,14 +221,51 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
     );
   }
 
-  // Topo: logótipo e "anime a dois"; à direita estatísticas, amigos, tema e o teu avatar
+  // Topo: a tua foto e "Olá, <nome>", com o resumo do que ainda não viste no 🔔 por baixo
+  // (só aparece quando há novidades); à direita 🔔, estatísticas e tema
   Widget _topo(Paleta p, bool escuro) {
     final atual = _itemAtual;
+    final primeiroNome = (_user?.nome ?? '').trim().split(' ').first;
     return Row(
       children: [
-        Image.asset('assets/icon/icon.png', width: 34, height: 34),
-        const SizedBox(width: 10),
-        const Expanded(child: Text('anime a dois', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+        // Foto (ou inicial com a tua cor): tocar abre o teu Perfil
+        GestureDetector(
+          onTap: () => separadorAtual.value = 3,
+          child: Avatar(user: _user, cor: p.tu, tamanho: 42),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(primeiroNome.isEmpty ? 'Olá!' : 'Olá, $primeiroNome',
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+              // Resumo das novidades: tocar abre o 🔔
+              ValueListenableBuilder<String?>(
+                valueListenable: Sino.resumo,
+                builder: (_, resumo, __) => AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  alignment: Alignment.topLeft,
+                  child: resumo == null
+                      ? const SizedBox(width: double.infinity)
+                      : GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _abrir(const EcraNotificacoes()),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(resumo,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 12.5, color: p.parTxt, fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
         // 🔔 com a bolinha das novidades por ver
         ValueListenableBuilder<int>(
           valueListenable: Sino.naoVistas,

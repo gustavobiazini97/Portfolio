@@ -30,6 +30,7 @@ class Notificacao {
   final int? episodio;
   final bool juntos; // episódios: série que vês com esta pessoa?
   final String? relacao; // episódios: par | amigo
+  final int quantos; // episódios: quantos viu nesta sessão (1 nos outros tipos)
 
   Notificacao.deJson(Map<String, dynamic> j)
       : id = j['id'] as String? ?? '',
@@ -41,7 +42,21 @@ class Notificacao {
         serie = j['serie'] as String?,
         episodio = (j['episodio'] as num?)?.toInt(),
         juntos = j['juntos'] != false,
-        relacao = j['relacao'] as String?;
+        relacao = j['relacao'] as String?,
+        quantos = (j['quantos'] as num?)?.toInt() ?? _contarNoTexto(j['texto'] as String? ?? '');
+
+  // Servidores antigos não mandam "quantos": tira-se do texto
+  // ("viu o episódio 12" = 1, "viu os episódios 12 a 14" = 3, "viu 5 episódios" = 5)
+  static int _contarNoTexto(String texto) {
+    final intervalo = RegExp(r'episódios (\d+) a (\d+)').firstMatch(texto);
+    if (intervalo != null) {
+      final n = int.parse(intervalo.group(2)!) - int.parse(intervalo.group(1)!) + 1;
+      return n > 0 ? n : 1;
+    }
+    final total = RegExp(r'viu (\d+) episódios').firstMatch(texto);
+    if (total != null) return int.parse(total.group(1)!);
+    return 1;
+  }
 
   // Emoji pequeno ao lado da hora, para se perceber o tipo de relance
   String get emoji => switch (tipo) {
@@ -91,11 +106,32 @@ class FiltrosSino {
       };
 }
 
+// Resumo para o topo do Início, a partir do que ainda não viste no 🔔 (null = nada de novo):
+//   só episódios de uma pessoa → "Andreia viu 3 episódios desde ontem"
+//   uma só novidade de outro tipo → o texto dela ("nês quer ser teu amigo")
+//   o resto → "4 novidades"
+String? resumoDoSino(List<Notificacao> novas, {DateTime? agora}) {
+  if (novas.isEmpty) return null;
+
+  final quem = novas.first.quem.id;
+  final soEpisodiosDeUm = novas.every((n) => n.tipo == 'ep' && n.quem.id == quem);
+  if (soEpisodiosDeUm) {
+    final total = novas.fold<int>(0, (soma, n) => soma + n.quantos);
+    // A lista vem das mais recentes para as mais antigas: a última é a primeira sessão
+    final desde = desdeQuando(novas.last.em, agora: agora);
+    return '${novas.first.quem.nome} viu $total ${total == 1 ? 'episódio' : 'episódios'} $desde';
+  }
+
+  if (novas.length == 1) return novas.first.texto;
+  return '${novas.length} novidades';
+}
+
 // Estado do sininho partilhado pela app: a lista e quantas há por ver
 class Sino {
   Sino._();
 
   static final naoVistas = ValueNotifier<int>(0); // a bolinha do Início ouve isto
+  static final resumo = ValueNotifier<String?>(null); // a linha por baixo do "Olá" no Início
 
   // Chave por pessoa (se outra conta entrar no mesmo telemóvel, começa do zero)
   static String get _chave => 'sino_visto_em_${Sessao.instancia.eu?.id ?? 0}';
@@ -115,7 +151,9 @@ class Sino {
         .where(filtros.deixa)
         .toList();
     final visto = await vistoEm();
-    naoVistas.value = lista.where((n) => visto == null || n.em.isAfter(visto)).length;
+    final novas = lista.where((n) => visto == null || n.em.isAfter(visto)).toList();
+    naoVistas.value = novas.length;
+    resumo.value = resumoDoSino(novas);
     return lista;
   }
 
@@ -126,6 +164,7 @@ class Sino {
       await prefs.setString(_chave, lista.first.em.toIso8601String()); // a mais recente
     }
     naoVistas.value = 0;
+    resumo.value = null;
   }
 }
 

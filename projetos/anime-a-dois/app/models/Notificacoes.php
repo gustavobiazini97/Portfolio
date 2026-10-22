@@ -67,9 +67,63 @@ class Notificacoes
                 'episodio' => $i['episodio'],
                 'juntos'   => $i['juntos'] ?? true,
                 'relacao'  => $i['relacao'] ?? null,
+                'quantos'  => $i['quantos'] ?? 1,   // episódios vistos nesta sessão (1 nos outros tipos)
             ];
         }
         return $saida;
+    }
+
+    // Resumo para o topo do Início, a partir das notificações por ver (mais recentes primeiro); null = nada de novo.
+    //   só episódios de uma pessoa → "Andreia viu 3 episódios desde ontem"
+    //   uma só novidade de outro tipo → o texto dela ("nês quer ser teu amigo")
+    //   o resto → "4 novidades"
+    // (a app faz o mesmo em resumoDoSino, em lib/ecras/notificacoes.dart)
+    public static function resumo(array $novas): ?string
+    {
+        if ($novas === []) {
+            return null;
+        }
+
+        $quem = $novas[0]['quem']->id;
+        $soEpisodiosDeUm = true;
+        foreach ($novas as $n) {
+            if ($n['tipo'] !== 'ep' || $n['quem']->id !== $quem) {
+                $soEpisodiosDeUm = false;
+                break;
+            }
+        }
+
+        if ($soEpisodiosDeUm) {
+            $total = array_sum(array_map(fn ($n) => (int) ($n['quantos'] ?? 1), $novas));
+            $desde = self::desde($novas[count($novas) - 1]['ts']);   // a mais antiga é a última da lista
+            return $novas[0]['quem']->nome . ' viu ' . $total . ' ' . ($total === 1 ? 'episódio' : 'episódios') . ' ' . $desde;
+        }
+
+        if (count($novas) === 1) {
+            return $novas[0]['texto'];
+        }
+        return count($novas) . ' novidades';
+    }
+
+    // "hoje", "desde ontem", "desde sábado", "desde 17 out" (a partir de 'Y-m-d H:i:s')
+    private static function desde(string $ts): string
+    {
+        $dia       = strtotime(substr($ts, 0, 10));
+        $diasAtras = (int) round((strtotime(date('Y-m-d')) - $dia) / 86400);
+        $semana    = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+        $meses     = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+        if ($diasAtras <= 0) {
+            return 'hoje';
+        }
+        if ($diasAtras === 1) {
+            return 'desde ontem';
+        }
+        if ($diasAtras < 7) {
+            return 'desde ' . $semana[(int) date('N', $dia) - 1];
+        }
+        $data = (int) date('j', $dia) . ' ' . $meses[(int) date('n', $dia) - 1];
+        return 'desde ' . (date('Y', $dia) === date('Y') ? $data : $data . ' ' . date('Y', $dia));
     }
 
     // Esta notificação passa nos filtros? ($filtros: nome → bool, como em FILTROS)
@@ -172,6 +226,7 @@ class Notificacoes
                 'episodio' => $numeros[$n - 1],   // abre no último que viu
                 'juntos'   => $g['juntos'],                                   // série vista contigo?
                 'relacao'  => $g['user'] === $parId ? 'par' : 'amigo',
+                'quantos'  => $n,                                             // para o resumo do topo do Início
             ];
         }, $grupos);
     }

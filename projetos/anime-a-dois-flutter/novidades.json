@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.9.0",
+    "notas": [
+      "Novo topo do Início: \"Olá\" com a tua foto e um resumo do que há de novo (toca para abrir o 🔔)"
+    ]
+  },
+  {
     "versao": "1.8.1",
     "notas": [
       "No Início, tocar numa capa abre a série"

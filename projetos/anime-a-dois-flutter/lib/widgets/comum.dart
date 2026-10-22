@@ -495,6 +495,20 @@ String diaDoRegisto(DateTime quando, {DateTime? agora}) {
   return local.year == hoje.year ? data : '$data ${local.year}';
 }
 
+// Desde quando, para o resumo do topo do Início: "hoje", "desde ontem", "desde sábado", "desde 17 out"
+String desdeQuando(DateTime quando, {DateTime? agora}) {
+  final local = quando.toLocal();
+  final hoje = agora ?? DateTime.now();
+  final dia = DateTime(local.year, local.month, local.day);
+  final diasAtras = DateTime(hoje.year, hoje.month, hoje.day).difference(dia).inDays;
+
+  if (diasAtras <= 0) return 'hoje';
+  if (diasAtras == 1) return 'desde ontem';
+  if (diasAtras < 7) return 'desde ${_diasSemana[local.weekday - 1]}';
+  final data = '${local.day} ${_meses[local.month - 1]}';
+  return 'desde ${local.year == hoje.year ? data : '$data ${local.year}'}';
+}
+
 // "Ep. 14 · ontem, 22:10" a partir do {numero, vistoEm} da API; null se não há registo
 String? textoUltimoRegisto(dynamic j) {
   if (j is! Map) return null;

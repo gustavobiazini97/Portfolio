@@ -5,7 +5,7 @@
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
               $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $resumo,
               $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar,
-              $sinoPorVer (notificações por ver), $flash */
+              $sinoPorVer (notificações por ver), $sinoResumo (resumo delas para o topo, ou null), $flash */
 $comecou = $serie && ($meu['vistos'] > 0 || array_sum(array_column($deles, 'vistos')) > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
 
@@ -26,10 +26,18 @@ $selo = fn (array $item) => match ($item['estado']) {
 };
 ?>
 <div class="topo">
-  <a class="marca" href="<?= e(url('home')) ?>">
-    <img class="logo" src="img/logo.svg" alt="" width="34" height="34">
-    anime a dois
-  </a>
+  <!-- Saudação: a tua foto (abre o teu perfil), "Olá, <nome>" e, quando há novidades no 🔔, o resumo delas -->
+  <div class="saudacao">
+    <a class="avatar-link" href="<?= e(url('perfil', 'pessoa', ['id' => $user->id])) ?>" aria-label="Abrir o teu perfil">
+      <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-saudacao'; require __DIR__ . '/../layout/avatar.php'; ?>
+    </a>
+    <div class="saudacao-texto">
+      <h1 class="saudacao-ola">Olá, <?= e(explode(' ', trim($user->nome))[0]) ?></h1>
+      <?php if ($sinoResumo): ?>
+        <a class="saudacao-resumo" href="<?= e(url('notificacoes')) ?>"><?= e($sinoResumo) ?></a>
+      <?php endif; ?>
+    </div>
+  </div>
   <div class="topo-acoes">
     <!-- 🔔 Notificações (número das que ainda não viste neste browser) -->
     <a class="btn-redondo vidro" href="<?= e(url('notificacoes')) ?>" aria-label="Notificações<?= $sinoPorVer ? ' (' . $sinoPorVer . ' por ver)' : '' ?>">
@@ -48,10 +56,6 @@ $selo = fn (array $item) => match ($item['estado']) {
       <?php if ($pedidosAmigos): ?><span class="ponto-aviso" aria-hidden="true"></span><?php endif; ?>
     </a>
     <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
-    <!-- O teu avatar abre o teu perfil (números, medalhas, biblioteca); as definições estão na ⚙️ de lá -->
-    <a class="avatar-link" href="<?= e(url('perfil', 'pessoa', ['id' => $user->id])) ?>" aria-label="Abrir o teu perfil">
-      <?php $avatarUser = $user; $avatarCor = 'tu'; $avatarExtra = 'avatar-topo'; require __DIR__ . '/../layout/avatar.php'; ?>
-    </a>
   </div>
 </div>
 

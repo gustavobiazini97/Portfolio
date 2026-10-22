@@ -149,6 +149,15 @@
       "itens": [
         "Já não tens de entrar de cada vez que a app fica fechada muito tempo: o ecrã de entrar tem \"Manter sessão iniciada\" (ligado por defeito) e a sessão dura 90 dias neste telemóvel. \"Terminar sessão\" apaga-a."
       ]
+    },
+    {
+      "id": 18,
+      "data": "2026-10-22",
+      "titulo": "Novo topo do Início",
+      "itens": [
+        "Agora o Início diz-te olá, com a tua foto.",
+        "Por baixo aparece o que há de novo (ex.: quantos episódios o teu par viu); toca para abrir o 🔔."
+      ]
     }
   ]
 }
