@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.10.0",
+    "notas": [
+      "Toca numa medalha que já ganhaste para ver o dia em que a conseguiste"
+    ]
+  },
+  {
     "versao": "1.9.0",
     "notas": [
       "Novo topo do Início: \"Olá\" com a tua foto e um resumo do que há de novo (toca para abrir o 🔔)"

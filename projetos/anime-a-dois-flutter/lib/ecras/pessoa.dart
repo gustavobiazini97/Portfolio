@@ -438,9 +438,14 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
               const SizedBox(height: 4),
               Text(m.descricao, textAlign: TextAlign.center, style: TextStyle(color: p.suave)),
               const SizedBox(height: 16),
-              if (m.obtida)
-                Text('Obtida · ${m.nivelTexto}', style: TextStyle(color: corDoNivel(m.nivel), fontWeight: FontWeight.w800))
-              else ...[
+              if (m.obtida) ...[
+                Text('Obtida · ${m.nivelTexto}', style: TextStyle(color: corDoNivel(m.nivel), fontWeight: FontWeight.w800)),
+                // Dia em que foi conseguida
+                if (m.quandoTexto() != null) ...[
+                  const SizedBox(height: 4),
+                  Text(m.quandoTexto()!, style: TextStyle(fontSize: 13, color: p.suave)),
+                ],
+              ] else ...[
                 BarraProgresso(pct: m.pct, cor: p.par, altura: 10),
                 const SizedBox(height: 6),
                 Text('${m.progressoTexto} · ${m.pct}%', style: TextStyle(fontSize: 13, color: p.suave)),
