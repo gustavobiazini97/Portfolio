@@ -127,6 +127,31 @@ function medalha_progresso(array $m): string
         : $m['atual'] . ' de ' . $m['meta'];
 }
 
+// Dia em que uma medalha foi conseguida: "Conseguida a 14 out 2026" / "Conseguida hoje" / "Conseguida ontem" /
+// "Conseguida antes de 22 out 2026" (quando não deu para saber o dia); '' se não tem data ou está por obter.
+// (A app faz o mesmo em Medalha.quandoTexto, em lib/ecras/medalhas.dart.)
+function medalha_quando(array $m): string
+{
+    if (empty($m['obtida']) || empty($m['obtidaEm'])) {
+        return '';
+    }
+    $quando = strtotime($m['obtidaEm']);
+    $meses  = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    $data   = (int) date('j', $quando) . ' ' . $meses[(int) date('n', $quando) - 1] . ' ' . date('Y', $quando);
+
+    if (!empty($m['obtidaAprox'])) {
+        return 'Conseguida antes de ' . $data;
+    }
+    $dias = (int) round((strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', $quando))) / 86400);
+    if ($dias <= 0) {
+        return 'Conseguida hoje';
+    }
+    if ($dias === 1) {
+        return 'Conseguida ontem';
+    }
+    return 'Conseguida a ' . $data;
+}
+
 // Percentagem de uma medalha (0–100)
 function medalha_pct(array $m): int
 {

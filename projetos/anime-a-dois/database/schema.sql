@@ -213,3 +213,16 @@ CREATE TABLE IF NOT EXISTS sessoes_longas (
   KEY idx_sl_user (user_id),
   CONSTRAINT fk_sl_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Dia em que cada medalha foi conseguida (as medalhas em si são calculadas em Conquistas, sem tabela).
+-- Uma linha por pessoa e medalha, criada da primeira vez que a medalha aparece obtida: a data é calculada
+-- a partir dos registos (ex.: o 100.º episódio); se não der, fica o momento em que se viu obtida.
+-- aprox = 1: medalha que já existia antes de haver datas e que não deu para calcular ("antes de <dia>").
+CREATE TABLE IF NOT EXISTS medalhas_obtidas (
+  user_id    INT UNSIGNED NOT NULL,
+  medalha_id VARCHAR(30)  NOT NULL,                 -- o id em Conquistas (ex.: 'ep-100')
+  obtida_em  DATETIME     NOT NULL,
+  aprox      TINYINT(1)   NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, medalha_id),
+  CONSTRAINT fk_mo_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

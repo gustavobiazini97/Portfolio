@@ -98,7 +98,7 @@ o servidor valida tudo em `DadosAnime`.
 
 | Método | Rota | | Resposta |
 |---|---|---|---|
-| GET | `/notificacoes` | 🔒 | `notificacoes[]` dos últimos 30 dias, mais recentes primeiro (máx. 60): `id`, `tipo` (`ep`/`com`/`convite`/`amigo`), `em` (ISO 8601), `quem` (user), `texto` ("Andreia viu os episódios 12 a 14"), `detalhe`, `serie` (slug ou `null`), `episodio` (número ou `null`), `juntos` (série vista contigo), `relacao` (`par`/`amigo`, nos episódios) |
+| GET | `/notificacoes` | 🔒 | `notificacoes[]` dos últimos 30 dias, mais recentes primeiro (máx. 60): `id`, `tipo` (`ep`/`com`/`convite`/`amigo`), `em` (ISO 8601), `quem` (user), `texto` ("Andreia viu os episódios 12 a 14"), `detalhe`, `serie` (slug ou `null`), `episodio` (número ou `null`), `juntos` (série vista contigo), `relacao` (`par`/`amigo`, nos episódios), `quantos` (episódios dessa sessão; 1 nos outros tipos) |
 
 Calculado dos dados existentes (sem tabela): episódios do par, dos amigos e de quem vê séries contigo (com "só juntos", só as séries em comum), comentários nas séries que vês com alguém (marcações com menos de 3 h de intervalo juntam-se), convites de série e pedidos de amizade por responder, e amizades novas ("X e tu são agora amigos", tipo `amigo`). O "já vi" fica guardado na app.
 
@@ -109,7 +109,7 @@ Calculado dos dados existentes (sem tabela): episódios do par, dos amigos e de 
 | GET | `/resumos` | 🔒 | `meses[]` e `anos[]` com episódios (para escolher) |
 | GET | `/resumos/{ano}` | 🔒 | `resumo` do ano (inclui `porMes` e `melhorMes`) |
 | GET | `/resumos/{ano}/{mes}` | 🔒 | `resumo` do mês |
-| GET | `/medalhas` | 🔒 | `medalhas[]` (`id`, `emoji`, `nome`, `descricao`, `grupo`, `nivel` bronze/prata/ouro, `meta`, `atual`, `obtida`), `obtidas`, `total` |
+| GET | `/medalhas` | 🔒 | `medalhas[]` (`id`, `emoji`, `nome`, `descricao`, `grupo`, `nivel` bronze/prata/ouro, `meta`, `atual`, `obtida`, `obtidaEm` (ISO 8601 ou `null`), `obtidaAprox` (true = "antes de" esse dia)), `obtidas`, `total` |
 
 O `resumo` traz: `periodo`, `episodios`, `minutos`, `horas`, `fillers`, `diasAtivos`, `sequencia` (dias seguidos),
 `melhorDia`, `hora` e `momento` preferidos, `diaSemana`, `comentarios`, `top` (3 séries), `acabadas`,

@@ -1093,6 +1093,8 @@ html { scroll-behavior: smooth; }
 .folha-medalha h2 { font-size: 18px; font-weight: 700; }
 .folha-medalha .barra { width: 100%; }
 .md-nivel { font-weight: 800; }
+/* "Conseguida a 14 out 2026", logo por baixo do nível */
+.md-quando { margin-top: -4px; font-size: 13px; }
 .nivel-bronze { color: #B9774A; }
 .nivel-prata  { color: #8A929E; }
 .nivel-ouro   { color: #C99A1E; }

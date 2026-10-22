@@ -1,7 +1,10 @@
 <?php
 // Medalhas de uma pessoa: calculadas a partir do que já existe na base de dados (vistos, comentários,
-// amizades, bibliotecas), por isso não há tabela própria e contam desde o primeiro dia.
-// Cada medalha: id, emoji, nome, descrição, grupo, nível (bronze/prata/ouro), meta, atual (progresso) e obtida.
+// amizades, bibliotecas), por isso contam desde o primeiro dia.
+// Cada medalha: id, emoji, nome, descrição, grupo, nível (bronze/prata/ouro), meta, atual (progresso), obtida,
+// obtidaEm (ISO 8601 ou null) e obtidaAprox (true = "antes de <obtidaEm>": não deu para calcular o dia).
+// O dia em que cada uma foi conseguida fica na tabela medalhas_obtidas: da primeira vez que uma medalha
+// aparece obtida, o dia é calculado a partir dos registos (ex.: o 100.º episódio) e guardado.
 // Os ids das medalhas antigas não mudam (a app guarda os ids já vistos para anunciar só as novas).
 
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -169,7 +172,244 @@ class Conquistas
         $add('aniversario', '🎂', 'Parabéns!',            'Vê um episódio no dia em que a tua conta faz anos.', 'Especiais', 'ouro', 1, $aniversario);
         $add('explorador',  '🧭', 'Explorador',           'Vê 5 séries diferentes no mesmo mês.', 'Especiais', 'prata', 5, $explorador);
 
+        return $this->comDatas($m);
+    }
+
+    // ---------- Dia em que cada medalha foi conseguida ----------
+
+    // Acrescenta obtidaEm/obtidaAprox a cada medalha; as obtidas sem data guardada ganham uma agora
+    private function comDatas(array $m): array
+    {
+        $uid = $this->user->id;
+        try {
+            $guardadas = Capsule::table('medalhas_obtidas')->where('user_id', $uid)->get()->keyBy('medalha_id');
+        } catch (Throwable) {
+            // Tabela ainda não criada (deploy a meio): as medalhas aparecem como antes, sem datas
+            return array_map(fn ($x) => $x + ['obtidaEm' => null, 'obtidaAprox' => false], $m);
+        }
+
+        // Medalhas que já existiam antes de haver datas: se o dia não der para calcular, fica "antes de hoje".
+        // (Primeira vez que se guardam datas desta pessoa e a conta é de antes de hoje.)
+        $antigas = $guardadas->isEmpty()
+            && $this->user->criado_em !== null
+            && date('Y-m-d', strtotime((string) $this->user->criado_em)) < date('Y-m-d');
+
+        $agora = date('Y-m-d H:i:s');
+        $novas = [];
+        foreach ($m as &$medalha) {
+            $g = $guardadas->get($medalha['id']);
+            if ($medalha['obtida'] && $g === null) {
+                try {
+                    $dia = $this->calcularDia($medalha['id'], (int) $medalha['meta']);
+                } catch (Throwable) {
+                    $dia = null;   // uma conta que falhe não pode estragar a página das medalhas
+                }
+                $g = (object) [
+                    'obtida_em' => $dia ?? $agora,
+                    'aprox'     => ($dia === null && $antigas) ? 1 : 0,
+                ];
+                $novas[] = ['user_id' => $uid, 'medalha_id' => $medalha['id'], 'obtida_em' => $g->obtida_em, 'aprox' => $g->aprox];
+            }
+            // Só as obtidas mostram data (uma que se perdeu e volta a ganhar mantém a data da primeira vez)
+            $medalha['obtidaEm']    = ($medalha['obtida'] && $g) ? date(DATE_ATOM, strtotime($g->obtida_em)) : null;
+            $medalha['obtidaAprox'] = ($medalha['obtida'] && $g) ? (bool) $g->aprox : false;
+        }
+        unset($medalha);
+
+        if ($novas !== []) {
+            try {
+                Capsule::table('medalhas_obtidas')->insertOrIgnore($novas);   // ignora se outro pedido já as guardou
+            } catch (Throwable) {
+                // não guardou: volta a tentar no próximo pedido
+            }
+        }
         return $m;
+    }
+
+    // Dia ('Y-m-d H:i:s') em que esta medalha foi conseguida, calculado dos registos; null se não der
+    private function calcularDia(string $id, int $meta): ?string
+    {
+        $uid = $this->user->id;
+        $grupo = preg_replace('/-\d+$/', '', $id);   // 'ep-100' → 'ep'; 'madrugada-50' → 'madrugada'
+
+        // A N.ª data de uma lista ordenada (ou null se não chegar lá)
+        $nth = fn (array $datas, int $n) => $datas[$n - 1] ?? null;
+
+        return match ($grupo) {
+            // Contas que vêm dos episódios vistos (resolvidas na função pura, que tem testes)
+            'ep', 'horas', 'fillers', 'maratona', 'seguidos', 'madrugada', 'cedo', 'fim-semana',
+            'ano-novo', 'natal', 'aniversario', 'explorador'
+                => self::diaNosVistos($grupo, $meta, $this->linhasVistos(),
+                    $this->user->criado_em ? (string) $this->user->criado_em : null),
+
+            // Séries acabadas: o dia em que se viu o último episódio de cada uma
+            'acabada' => $nth(array_column($this->acabadasComFim(), 'fim'), $meta),
+            'longa'   => $nth(array_column(array_filter($this->acabadasComFim(), fn ($s) => $s['total'] >= 500), 'fim'), 1),
+            'folego'  => $nth(array_column(array_filter($this->acabadasComFim(),
+                            fn ($s) => $s['total'] <= 13 && substr($s['inicio'], 0, 10) === substr($s['fim'], 0, 10)), 'fim'), 1),
+
+            // Biblioteca: quando cada série entrou
+            'biblio' => $nth(Capsule::table('bibliotecas')->where('user_id', $uid)->orderBy('desde')->pluck('desde')->all(), $meta),
+
+            // Séries vistas com alguém: quando essas séries entraram na tua biblioteca
+            'juntos' => $nth(Capsule::table('series_juntos AS sj')
+                ->join('bibliotecas AS b', fn ($j) => $j->on('b.serie_id', '=', 'sj.serie_id')->on('b.user_id', '=', 'sj.user_id'))
+                ->where('sj.user_id', $uid)
+                ->groupBy('sj.serie_id')
+                ->selectRaw('MIN(b.desde) AS desde')
+                ->orderBy('desde')->pluck('desde')->all(), $meta),
+
+            // Episódios vistos pelos dois: cada um conta quando o segundo o viu
+            'eps-juntos' => Capsule::table('vistos AS a')
+                ->join('episodios', 'episodios.id', '=', 'a.episodio_id')
+                ->join('series_juntos AS sj', fn ($j) => $j->on('sj.serie_id', '=', 'episodios.serie_id')->on('sj.user_id', '=', 'a.user_id'))
+                ->join('vistos AS b', fn ($j) => $j->on('b.episodio_id', '=', 'a.episodio_id')->on('b.user_id', '=', 'sj.com_id'))
+                ->where('a.user_id', $uid)
+                ->groupBy('a.episodio_id')
+                ->selectRaw('MIN(GREATEST(a.visto_em, b.visto_em)) AS quando')
+                ->orderBy('quando')->offset($meta - 1)->limit(1)->value('quando'),
+
+            // Amigos e comentários: o N.º
+            'amigos' => $nth(Capsule::table('amizades')->where('user_id', $uid)->orderBy('desde')->pluck('desde')->all(), $meta),
+            'coment' => Capsule::table('comentarios')->where('user_id', $uid)->orderBy('criado_em')
+                ->offset($meta - 1)->limit(1)->value('criado_em'),
+
+            // Sincronizados (e qualquer medalha nova sem regra): não dá para saber o dia
+            default => null,
+        };
+    }
+
+    // Episódios vistos desta pessoa, do primeiro ao último: [em, serie, filler, minutos] (lido uma vez só)
+    private ?array $linhas = null;
+
+    private function linhasVistos(): array
+    {
+        return $this->linhas ??= Capsule::table('vistos')
+            ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
+            ->join('series', 'series.id', '=', 'episodios.serie_id')
+            ->where('vistos.user_id', $this->user->id)
+            ->orderBy('vistos.visto_em')->orderBy('episodios.numero')
+            ->selectRaw('vistos.visto_em AS em, episodios.serie_id AS serie, '
+                . '(episodios.filler = 1 OR episodios.recap = 1) AS filler, '
+                . 'COALESCE(series.minutos_ep, ' . Resumo::MINUTOS_EP . ') AS minutos')
+            ->get()
+            ->map(fn ($l) => ['em' => (string) $l->em, 'serie' => (int) $l->serie, 'filler' => (bool) $l->filler, 'minutos' => (int) $l->minutos])
+            ->all();
+    }
+
+    // Séries acabadas com o primeiro e o último registo, pela ordem em que foram acabadas
+    private ?array $acabadas = null;
+
+    private function acabadasComFim(): array
+    {
+        return $this->acabadas ??= Capsule::table('vistos')
+            ->join('episodios', 'episodios.id', '=', 'vistos.episodio_id')
+            ->join('series', 'series.id', '=', 'episodios.serie_id')
+            ->where('vistos.user_id', $this->user->id)
+            ->where('series.total_episodios', '>', 0)
+            ->groupBy('series.id', 'series.total_episodios')
+            ->havingRaw('COUNT(*) >= series.total_episodios')
+            ->selectRaw('series.total_episodios AS total, MIN(vistos.visto_em) AS inicio, MAX(vistos.visto_em) AS fim')
+            ->orderBy('fim')
+            ->get()
+            ->map(fn ($s) => ['total' => (int) $s->total, 'inicio' => (string) $s->inicio, 'fim' => (string) $s->fim])
+            ->all();
+    }
+
+    // Função pura (sem base de dados, tem testes em tests/medalhas_datas_test.php): o momento em que a
+    // meta foi atingida, a percorrer os episódios vistos por ordem. $linhas: [['em','serie','filler','minutos'], …]
+    public static function diaNosVistos(string $grupo, int $meta, array $linhas, ?string $criadaEm): ?string
+    {
+        // A N.ª linha que cumpre uma condição
+        $nesima = function (callable $cumpre, int $n) use ($linhas): ?string {
+            foreach ($linhas as $l) {
+                if ($cumpre($l) && --$n === 0) {
+                    return $l['em'];
+                }
+            }
+            return null;
+        };
+        $hora = fn (array $l) => (int) substr($l['em'], 11, 2);
+        $diaMes = fn (array $l) => substr($l['em'], 5, 5);   // 'm-d'
+
+        switch ($grupo) {
+            case 'ep':
+                return $nesima(fn () => true, $meta);
+
+            case 'fillers':
+                return $nesima(fn ($l) => $l['filler'], $meta);
+
+            case 'madrugada':   // 0h–5h
+                return $nesima(fn ($l) => $hora($l) < 5, $meta);
+
+            case 'cedo':        // 5h–8h
+                return $nesima(fn ($l) => $hora($l) >= 5 && $hora($l) < 8, $meta);
+
+            case 'fim-semana':  // sábado ou domingo
+                return $nesima(fn ($l) => (int) date('N', strtotime($l['em'])) >= 6, $meta);
+
+            case 'ano-novo':
+                return $nesima(fn ($l) => $diaMes($l) === '01-01', 1);
+
+            case 'natal':
+                return $nesima(fn ($l) => $diaMes($l) === '12-24', 1);
+
+            case 'aniversario': // no dia de anos da conta, a partir do 2.º ano
+                if ($criadaEm === null) {
+                    return null;
+                }
+                return $nesima(fn ($l) => $diaMes($l) === substr($criadaEm, 5, 5) && substr($l['em'], 0, 4) > substr($criadaEm, 0, 4), 1);
+
+            case 'horas':       // a meta está em minutos
+                $soma = 0;
+                foreach ($linhas as $l) {
+                    $soma += $l['minutos'];
+                    if ($soma >= $meta) {
+                        return $l['em'];
+                    }
+                }
+                return null;
+
+            case 'maratona':    // a N.ª do primeiro dia que chegou a N episódios
+                $porDia = [];
+                foreach ($linhas as $l) {
+                    $d = substr($l['em'], 0, 10);
+                    $porDia[$d] = ($porDia[$d] ?? 0) + 1;
+                    if ($porDia[$d] === $meta) {
+                        return $l['em'];
+                    }
+                }
+                return null;
+
+            case 'seguidos':    // o primeiro episódio do dia em que a sequência chegou a N dias
+                $sequencia = 0;
+                $antes = null;
+                foreach ($linhas as $l) {
+                    $d = substr($l['em'], 0, 10);
+                    if ($d === $antes) {
+                        continue;   // mesmo dia: já foi contado
+                    }
+                    $seguido = $antes !== null && strtotime($d) - strtotime($antes) <= 90000;   // 25 h (mudança de hora)
+                    $sequencia = $seguido ? $sequencia + 1 : 1;
+                    $antes = $d;
+                    if ($sequencia === $meta) {
+                        return $l['em'];
+                    }
+                }
+                return null;
+
+            case 'explorador':  // a N.ª série diferente no mesmo mês
+                $porMes = [];
+                foreach ($linhas as $l) {
+                    $mes = substr($l['em'], 0, 7);
+                    $porMes[$mes][$l['serie']] = true;
+                    if (count($porMes[$mes]) === $meta) {
+                        return $l['em'];
+                    }
+                }
+                return null;
+        }
+        return null;
     }
 
     // Há alguma série vista com alguém em que estão os dois no mesmo episódio mais avançado (> 0)?

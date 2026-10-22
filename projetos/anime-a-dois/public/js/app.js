@@ -1380,6 +1380,10 @@ function celebrarSerie(json, comigo) {
       var estado = document.getElementById('md-obtida');
       estado.textContent = obtida ? 'Obtida · ' + b.dataset.nivelTexto : '';
       estado.className = 'md-nivel nivel-' + b.dataset.nivel;
+      // Dia em que foi conseguida ("Conseguida a 14 out 2026"); vazio nas por obter
+      var quando = document.getElementById('md-quando');
+      quando.textContent = obtida ? (b.dataset.quando || '') : '';
+      quando.hidden = !quando.textContent;
       var barra = document.getElementById('md-barra');
       barra.hidden = obtida;
       barra.value = parseInt(b.dataset.pct, 10) || 0;

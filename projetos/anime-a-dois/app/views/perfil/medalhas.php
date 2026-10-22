@@ -27,7 +27,8 @@ $niveis = ['bronze' => 'Bronze', 'prata' => 'Prata', 'ouro' => 'Ouro'];
         <button type="button" class="medalha<?= $m['obtida'] ? ' obtida' : '' ?>" data-medalha
                 data-emoji="<?= e($m['emoji']) ?>" data-nome="<?= e($m['nome']) ?>" data-descricao="<?= e($m['descricao']) ?>"
                 data-nivel="<?= e($m['nivel']) ?>" data-nivel-texto="<?= e($niveis[$m['nivel']] ?? 'Bronze') ?>"
-                data-obtida="<?= $m['obtida'] ? '1' : '0' ?>" data-progresso="<?= e(medalha_progresso($m)) ?>" data-pct="<?= medalha_pct($m) ?>">
+                data-obtida="<?= $m['obtida'] ? '1' : '0' ?>" data-progresso="<?= e(medalha_progresso($m)) ?>" data-pct="<?= medalha_pct($m) ?>"
+                data-quando="<?= e(medalha_quando($m)) ?>">
           <span class="emblema emblema-<?= e($m['nivel']) ?><?= $m['obtida'] ? '' : ' bloqueada' ?>">
             <span><?= e($m['emoji']) ?></span>
             <?php if (!$m['obtida']): ?><i class="cadeado" aria-hidden="true">🔒</i><?php endif; ?>
@@ -55,6 +56,8 @@ $niveis = ['bronze' => 'Bronze', 'prata' => 'Prata', 'ouro' => 'Ouro'];
   <h2 id="md-nome"></h2>
   <p class="pessoa-legenda" id="md-descricao"></p>
   <p class="md-nivel" id="md-obtida"></p>
+  <!-- Dia em que foi conseguida (só nas obtidas) -->
+  <p class="pessoa-legenda md-quando" id="md-quando"></p>
   <progress class="barra vs-par-cor" id="md-barra" max="100" value="0"></progress>
   <p class="pessoa-legenda" id="md-progresso"></p>
 </dialog>
