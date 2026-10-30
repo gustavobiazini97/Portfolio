@@ -684,8 +684,15 @@ class _EcraInicioState extends State<EcraInicio> with AutoAtualizar {
                 }
               }),
             ],
-            for (final e in enviados)
+            // Convite enviado por engano? Cancela-se aqui mesmo, ao lado do aviso
+            for (final e in enviados) ...[
               Text('Convite enviado · à espera de ${e.para.nome}', style: TextStyle(fontSize: 12.5, color: p.parTxt)),
+              _linkSuave(p, 'Cancelar convite', () async {
+                if (await confirmar(context, 'Cancelar o convite?', 'Cancelar o convite de ${s.nomeCurto} a ${e.para.nome}?', sim: 'Cancelar convite')) {
+                  _acao(() => Api.instancia.delete('/series/${s.slug}/convites/${e.para.id}'));
+                }
+              }),
+            ],
             if (convidaveis.length == 1)
               _botaoPequeno(p, 'Ver com ${convidaveis.first.nome}',
                   () => _acao(() => Api.instancia.post('/series/${s.slug}/convites', {'com': convidaveis.first.id})))

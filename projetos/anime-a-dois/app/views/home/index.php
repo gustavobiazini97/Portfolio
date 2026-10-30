@@ -294,6 +294,13 @@ $selo = fn (array $item) => match ($item['estado']) {
       <?php endforeach; ?>
       <?php foreach ($enviadosSerie as $env): ?>
         <span class="proposta-espera">Convite enviado · à espera de <?= e($env['para']->nome) ?></span>
+        <!-- Convite enviado por engano? Cancela-se aqui mesmo (mesma ação do "Agora não" / "Cancelar" lá de cima) -->
+        <form method="post" action="<?= e(url('biblioteca', 'recusar')) ?>" data-confirmar="Cancelar o convite de <?= e($serie->nomeCurto()) ?> a <?= e($env['para']->nome) ?>?">
+          <?= csrf_campo() ?>
+          <input type="hidden" name="serie" value="<?= e($serie->slug) ?>">
+          <input type="hidden" name="outro" value="<?= (int) $env['para']->id ?>">
+          <button type="submit" class="link-suave">Cancelar convite</button>
+        </form>
       <?php endforeach; ?>
       <?php if ($convidaveis->count() === 1): ?>
         <!-- Só há uma pessoa a quem convidar: botão direto -->

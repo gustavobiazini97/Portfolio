@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.9.1",
+    "notas": [
+      "Convite enviado por engano? Agora dá para o cancelar logo ao lado do \"Convite enviado\""
+    ]
+  },
+  {
     "versao": "1.9.0",
     "notas": [
       "Novo topo do Início: \"Olá\" com a tua foto e um resumo do que há de novo (toca para abrir o 🔔)"
