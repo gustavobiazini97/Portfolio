@@ -1,8 +1,14 @@
 [
   {
-    "versao": "1.9.1",
+    "versao": "1.10.1",
     "notas": [
       "Convite enviado por engano? Agora dá para o cancelar logo ao lado do \"Convite enviado\""
+    ]
+  },
+  {
+    "versao": "1.10.0",
+    "notas": [
+      "Toca numa medalha que já ganhaste para ver o dia em que a conseguiste"
     ]
   },
   {

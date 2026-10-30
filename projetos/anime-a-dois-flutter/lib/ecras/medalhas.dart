@@ -20,6 +20,8 @@ class Medalha {
   final String nivel; // bronze | prata | ouro
   final int meta, atual;
   final bool obtida;
+  final DateTime? obtidaEm; // dia em que foi conseguida (null: API antiga ou por obter)
+  final bool obtidaAprox; // true = não deu para saber o dia exato ("antes de …")
 
   Medalha.deJson(Map<String, dynamic> j)
       : id = j['id'] as String,
@@ -30,7 +32,22 @@ class Medalha {
         nivel = j['nivel'] as String? ?? 'bronze', // API antiga: sem nível
         meta = (j['meta'] as num).toInt(),
         atual = (j['atual'] as num).toInt(),
-        obtida = j['obtida'] == true;
+        obtida = j['obtida'] == true,
+        obtidaEm = DateTime.tryParse(j['obtidaEm'] as String? ?? ''),
+        obtidaAprox = j['obtidaAprox'] == true;
+
+  // "Conseguida a 14 out 2026" / "Conseguida hoje" / "Conseguida antes de 22 out 2026" (null sem data)
+  String? quandoTexto({DateTime? agora}) {
+    final d = obtidaEm;
+    if (!obtida || d == null) return null;
+    if (obtidaAprox) return 'Conseguida antes de ${dataComAno(d)}';
+    final local = d.toLocal();
+    final hoje = agora ?? DateTime.now();
+    final dias = DateTime(hoje.year, hoje.month, hoje.day).difference(DateTime(local.year, local.month, local.day)).inDays;
+    if (dias <= 0) return 'Conseguida hoje';
+    if (dias == 1) return 'Conseguida ontem';
+    return 'Conseguida a ${dataComAno(d)}';
+  }
 
   // Progresso 0–100 (para a barra das que faltam)
   int get pct => meta == 0 ? 0 : (atual * 100 / meta).floor().clamp(0, 100);
@@ -450,6 +467,11 @@ class _DesbloqueioState extends State<_Desbloqueio> with TickerProviderStateMixi
                     Text(m.nome, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 4),
                     Text(m.descricao, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                    // Dia em que foi conseguida (ao tocar numa medalha já ganha)
+                    if (m.quandoTexto() != null) ...[
+                      const SizedBox(height: 10),
+                      Text(m.quandoTexto()!, style: TextStyle(color: corDoNivel(m.nivel), fontSize: 13, fontWeight: FontWeight.w700)),
+                    ],
                     const SizedBox(height: 24),
                     const Text('toca para continuar', style: TextStyle(color: Colors.white38, fontSize: 12)),
                   ],

@@ -495,6 +495,12 @@ String diaDoRegisto(DateTime quando, {DateTime? agora}) {
   return local.year == hoje.year ? data : '$data ${local.year}';
 }
 
+// Data com o ano, para as medalhas: "14 out 2026"
+String dataComAno(DateTime quando) {
+  final local = quando.toLocal();
+  return '${local.day} ${_meses[local.month - 1]} ${local.year}';
+}
+
 // Desde quando, para o resumo do topo do Início: "hoje", "desde ontem", "desde sábado", "desde 17 out"
 String desdeQuando(DateTime quando, {DateTime? agora}) {
   final local = quando.toLocal();
