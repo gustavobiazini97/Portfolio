@@ -15,5 +15,9 @@ const String appNome = 'Anime a Dois';
 // Vai nos convites partilhados em Amigos.
 const String linkApp = 'https://animeadois.alwaysdata.net/app';
 
-// Ficheiro com a última versão publicada (gerado pelo workflow do APK, na release do GitHub)
-const String linkVersao = 'https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/versao.json';
+// Ficheiro com a última versão publicada (gerado pelo workflow do APK, na release do GitHub).
+// O APK de teste é compilado com --dart-define=VERSAO_URL=… a apontar para a release de teste.
+const String linkVersao = String.fromEnvironment(
+  'VERSAO_URL',
+  defaultValue: 'https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-apk/versao.json',
+);

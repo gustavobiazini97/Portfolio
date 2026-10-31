@@ -1,5 +1,11 @@
 [
   {
+    "versao": "1.11.0",
+    "notas": [
+      "O \"Atualizar\" agora é feito dentro da app: descarrega com barra de progresso e abre logo o instalador, sem passar pelo browser"
+    ]
+  },
+  {
     "versao": "1.10.1",
     "notas": [
       "Convite enviado por engano? Agora dá para o cancelar logo ao lado do \"Convite enviado\""

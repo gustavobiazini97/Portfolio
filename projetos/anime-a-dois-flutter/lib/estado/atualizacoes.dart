@@ -1,6 +1,6 @@
 // Avisos de versão nova: ao abrir, a app lê o versao.json da release (gerado pelo workflow do APK)
 // e, se o build publicado for maior do que o instalado, mostra um popup com as novidades e o botão
-// para descarregar. "Mais tarde" só volta a avisar no dia seguinte.
+// para atualizar (descarrega dentro da app, ver instalador.dart). "Mais tarde" só volta a avisar no dia seguinte.
 
 import 'dart:convert';
 
@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../config.dart';
 import '../tema/paleta.dart';
+import 'instalador.dart';
 
 // A última versão publicada
 class VersaoNova {
@@ -102,8 +102,8 @@ class Atualizacoes {
       ),
     );
     if (r == 'atualizar') {
-      // Abre o link no browser: descarrega o APK e o Android pergunta se quer instalar
-      await launchUrl(Uri.parse(nova.apk), mode: LaunchMode.externalApplication);
+      // Descarrega dentro da app e abre o instalador do Android (sem passar pelo browser)
+      if (context.mounted) await Instalador.atualizar(context, nova.apk);
       return false;
     }
     return true;

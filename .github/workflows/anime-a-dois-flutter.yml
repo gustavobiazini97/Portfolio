@@ -77,7 +77,18 @@ jobs:
           grep -q 'android.permission.INTERNET' "$M" || \
             sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' "$M"
           sed -i 's|android:label="anime_a_dois"|android:label="Anime a Dois"|' "$M"
-          grep -n 'INTERNET\|android:label' "$M"
+          # Atualizar dentro da app: pedir ao Android para instalar o APK descarregado
+          grep -q 'REQUEST_INSTALL_PACKAGES' "$M" || \
+            sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>\n    <application|' "$M"
+          grep -n 'INTERNET\|INSTALL_PACKAGES\|android:label' "$M"
+
+      # MainActivity com o canal do instalador (android-extra/MainActivity.kt) por cima do gerado
+      - name: MainActivity (instalar atualizações)
+        run: |
+          A=$(find android/app/src/main -name MainActivity.kt | head -1)
+          test -n "$A" || { echo "::error::MainActivity.kt não encontrado"; exit 1; }
+          cp android-extra/MainActivity.kt "$A"
+          echo "Copiado para $A"
 
       # Com o pubspec.lock no Git, usa exatamente essas versões (nada muda por baixo entre compilações).
       # Sem ele (ou desatualizado), resolve e avisa.
@@ -166,10 +177,15 @@ jobs:
 
       # Número da build = número da execução (o Android exige que suba a cada versão).
       # Release só para arm64 (quase todos os telemóveis atuais): uma compilação, APK pequeno
+      # Fora do main, a app de teste procura versões novas na release de teste (para testar o "Atualizar")
       - name: Compilar o APK (release)
         run: |
+          VERSAO_DEFINE=""
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            VERSAO_DEFINE="--dart-define=VERSAO_URL=https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-teste/versao.json"
+          fi
           if ! flutter build apk --release --split-per-abi --target-platform android-arm64 \
-                 --dart-define=API_URL="$API_URL" \
+                 --dart-define=API_URL="$API_URL" $VERSAO_DEFINE \
                  --build-number=${{ github.run_number }} > build.txt 2>&1; then
             cat build.txt
             echo "::error title=flutter build::$(grep -iE 'error|exception|failed' build.txt | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')"
@@ -240,14 +256,14 @@ jobs:
               'build': 2000 + int('${{ github.run_number }}'),   # igual ao versionCode do APK arm64
               'data': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
               'notas': notas,
-              'apk': 'https://animeadois.alwaysdata.net/app',
+              'apk': 'https://animeadois.alwaysdata.net/app' + ('' if '${{ github.ref }}' == 'refs/heads/main' else '-teste'),
           }
           pathlib.Path('versao.json').write_text(json.dumps(dados, ensure_ascii=False, indent=2), encoding='utf-8')
           print(json.dumps(dados, ensure_ascii=False))
           PY
 
       # main → release oficial "anime-a-dois-apk" (com versao.json: as apps avisam que há versão nova).
-      # Outro ramo → release de teste "anime-a-dois-teste" (link /app-teste; ninguém é avisado).
+      # Outro ramo → release de teste "anime-a-dois-teste" (link /app-teste; só as apps de teste são avisadas).
       - name: Publicar na release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -255,7 +271,7 @@ jobs:
           if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             TAG=anime-a-dois-apk; TITULO="Anime a Dois (APK)"; FICHEIROS="anime-a-dois.apk versao.json pubspec.lock ferramentas.json"
           else
-            TAG=anime-a-dois-teste; TITULO="Anime a Dois (APK de teste)"; FICHEIROS="anime-a-dois.apk pubspec.lock ferramentas.json"
+            TAG=anime-a-dois-teste; TITULO="Anime a Dois (APK de teste)"; FICHEIROS="anime-a-dois.apk versao.json pubspec.lock ferramentas.json"
           fi
           gh release view "$TAG" >/dev/null 2>&1 || \
             gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
