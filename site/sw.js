@@ -2,7 +2,7 @@
 // e permite que o Chrome o ofereça como app instalável.
 
 // Mudar a versão obriga a recriar a cache (e apaga a antiga no activate)
-const CACHE = 'portfolio-v5';
+const CACHE = 'portfolio-v6';
 
 // Ficheiros base, guardados logo na instalação
 const SHELL = [
@@ -10,13 +10,6 @@ const SHELL = [
   './index.html',
   './style.css',
   './script.js',
-  './tema.js',
-  './fontes/barlow-latin-400-normal.woff2',
-  './fontes/barlow-latin-500-normal.woff2',
-  './fontes/barlow-latin-600-normal.woff2',
-  './fontes/barlow-condensed-latin-600-normal.woff2',
-  './fontes/barlow-condensed-latin-700-normal.woff2',
-  './fontes/barlow-condensed-latin-800-normal.woff2',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
