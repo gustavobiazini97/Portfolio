@@ -3,245 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gustavo — Portfólio</title>
-<script>document.documentElement.classList.add('reveal-ready');</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Gustavo Biazini — Portfólio</title>
+<meta name="description" content="Projetos de Gustavo Biazini: aplicações web em PHP, apps Android em Flutter e programas em C#.">
+<!-- Tipografia: Barlow (texto) e Barlow Condensed (títulos), alojadas no próprio site (sem Google Fonts) -->
+<link rel="preload" href="fontes/barlow-condensed-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
+<!-- Tema guardado aplicado antes de desenhar a página (sem piscar) -->
+<script src="tema.js"></script>
 <!-- App instalável (PWA): manifest, cor da barra do sistema e ícones -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#fbf8f3" id="theme-color">
+<meta name="theme-color" content="#e4e8ec" id="theme-color">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script src="script.js" defer></script>
 </head>
 <body>
-  <header class="topbar" id="topbar">
-    <div class="brand">Gustavo<span class="deg">°</span></div>
-    <nav class="topnav">
-      <a class="lnk" href="#sobre">Sobre</a>
-      <a class="lnk" href="#projetos">Projetos</a>
-      <a class="lnk" href="#trajetoria">Trajetória</a>
+  <a class="saltar" href="#projetos">Saltar para os projetos</a>
+
+  <!-- Barra de cima: nome, secções e botões (instalar, partilhar, tema) -->
+  <header class="topo" id="topo">
+    <a class="marca" href="#inicio">Gustavo Biazini</a>
+    <nav class="nav" aria-label="Secções">
+      <a href="#projetos">Projetos</a>
+      <a href="#percurso">Percurso</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <div class="acoes">
       <!-- Instalar como app: só aparece quando o browser o permite (ver script.js) -->
-      <button class="icon-btn pill" id="install-btn" type="button" hidden>
+      <button class="botao-icone com-texto" id="instalar" type="button" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
         <span>Instalar</span>
       </button>
-      <!-- Partilhar: abre o menu de partilha do sistema, quando existe -->
-      <button class="icon-btn" id="share-btn" type="button" aria-label="Partilhar portfólio" hidden>
+      <!-- Partilhar: menu de partilha do sistema, quando existe -->
+      <button class="botao-icone" id="partilhar" type="button" aria-label="Partilhar o portfólio" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5M6 12v7h12v-7"/></svg>
       </button>
-      <button class="toggle" id="toggle" aria-label="Alternar tema"><span id="toggle-ico">☾</span></button>
-    </nav>
+      <button class="botao-icone" id="tema" type="button" aria-label="Mudar entre tema claro e escuro">
+        <svg class="so-claro" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+        <svg class="so-escuro" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
   </header>
 
-  <main class="wrap">
-    <section class="hero">
-      <div class="eyebrow reveal">Programador em formação</div>
-      <h1 class="giant reveal">Gus<em>ta</em>vo</h1>
-      <div class="hero-foot">
-        <p class="lede reveal">Estou <b>a aprender a programar</b> e este é o espaço onde reúno cada projeto que construo pelo caminho — da lógica em C aos ecrãs na web.</p>
-        <span class="avail reveal"><span class="pulse"></span>Aberto a aprender e colaborar</span>
-      </div>
-    </section>
-
-    <section class="sec" id="sobre">
-      <div class="sec-head reveal"><span class="sec-num">i</span><span class="sec-title">Sobre mim</span></div>
-      <div class="about-grid">
-        <p class="big reveal">Gosto de entender como as coisas funcionam <em>por dentro</em> — e a melhor forma que encontrei de aprender é construir.</p>
-        <div class="about-side reveal">
-          <p>Comecei pelo básico da web e hoje transito entre front-end, back-end e a lógica de baixo nível. Cada projeto aqui é um degrau na minha aprendizagem, e a curva está apenas a começar.</p>
-          <div class="stack">
-            <span class="chip"><i></i>HTML &amp; CSS</span>
-            <span class="chip learning"><i></i>PHP</span>
-            <span class="chip learning"><i></i>C#</span>
-            <span class="chip learning"><i></i>C</span>
-            <span class="chip"><i></i>Python · bases</span>
-            <span class="chip learning"><i></i>Android · PWA</span>
+  <main>
+    <!-- Início: a "etiqueta" de apresentação -->
+    <section class="inicio" id="inicio">
+      <div class="etiqueta-mestra">
+        <p class="fita">Programador em formação</p>
+        <h1 class="nome">Gustavo<br>Biazini</h1>
+        <p class="lede">Trabalho na logística e estudo programação à noite. Gosto de pegar em problemas que vejo todos os dias e transformá-los em ferramentas que funcionam.</p>
+        <!-- Campos como os de uma guia de envio: informação curta e verificável -->
+        <dl class="campos">
+          <div><dt>Estudo</dt><dd>TeSP em Programação de Sistemas de Informação, Politécnico de Leiria</dd></div>
+          <div><dt>Trabalho</dt><dd>Assistente de logística</dd></div>
+          <div><dt>Base</dt><dd>Leiria, Portugal</dd></div>
+          <div><dt>Ferramentas</dt><dd>PHP, MySQL, C# e .NET, Flutter, JavaScript</dd></div>
+        </dl>
+        <div class="inicio-rodape">
+          <div class="botoes">
+            <a class="botao" href="#projetos">Ver projetos</a>
+            <a class="botao botao-linha" href="#contacto">Falar comigo</a>
           </div>
+          <span class="barras barras-grande" data-barras="GUSTAVO-BIAZINI-LEIRIA" aria-hidden="true"></span>
         </div>
       </div>
     </section>
 
-    <section class="sec" id="projetos">
-      <div class="sec-head reveal"><span class="sec-num">ii</span><span class="sec-title">Projetos</span></div>
+    <section class="seccao" id="projetos" aria-labelledby="titulo-projetos">
+      <h2 class="titulo-seccao" id="titulo-projetos">Projetos</h2>
 
-      <div class="proj-group reveal">
-        <h3 class="group-title">Microprojetos</h3>
-        <div class="cards">
-          <article class="card" style="--h: 60">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover cover-img"><img src="../projetos/naruto-fillers/assets/background.svg" alt="" loading="lazy"><span class="cover-status done">Concluído</span></span>
-              <span class="card-body">
-                <span class="card-title">Naruto Fillers</span>
-                <span class="card-sub"><span>HTML · JS · PHP</span><span class="card-year">2026</span></span>
+      <!-- Em produção: o que estou a fazer agora (do mais complexo para o mais simples) -->
+      <div class="grupo">
+        <div class="grupo-cab">
+          <h3>Em produção</h3>
+          <p>O que estou a construir agora.</p>
+        </div>
+        <div class="etiquetas etiquetas-3">
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado estado-producao">Em produção<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">FrotaGest</span>
+                <span class="etq-origem">Projeto de grupo no Politécnico de Leiria</span>
+                <span class="etq-resumo">Gestão da frota de viaturas de uma empresa: os colaboradores pedem viaturas e o responsável aprova os pedidos e gere a frota.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>Yii2</span><span>API REST</span><span>Android</span><span>MySQL</span></span>
+                <span class="barras" data-barras="FROTAGEST" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status done">Concluído</span><span>Página web</span><span>2026</span></div>
-              <p class="info-desc">Uma página para ver rapidamente só os episódios filler de Naruto, Naruto Shippuden e Boruto — para saber o que posso saltar sem perder a história.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Carregar e mostrar dados a partir de um ficheiro JSON</li><li>Ir buscar dados a outro site com PHP e guardá-los em cache</li><li>Transformar uma página numa app instalável no telemóvel</li></ul></div>
-              <a class="info-link" href="../projetos/naruto-fillers/">Abrir projeto <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <p>Projeto da unidade curricular de Projeto em Sistemas de Informação, feito em grupo no TeSP do Politécnico de Leiria. Tem duas partes que falam com a mesma API: um site para a gestão e uma app Android.</p>
+              <ul class="lista">
+                <li>Colaborador: pede uma viatura e acompanha o pedido no site ou no telemóvel.</li>
+                <li>Responsável: aprova pedidos, gere as viaturas e recebe avisos na app.</li>
+                <li>Disponibilidade das viaturas ligada ao Google Calendar.</li>
+              </ul>
+              <h4>O que estou a aprender</h4>
+              <ul class="lista"><li>Framework MVC a sério (Yii2) com front-office e back-office</li><li>Desenhar uma API para um site e uma app ao mesmo tempo</li><li>Trabalhar em equipa com Git</li></ul>
             </template>
           </article>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado estado-producao">Em produção<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Helpdesk TI</span>
+                <span class="etq-origem">Para a empresa onde trabalho</span>
+                <span class="etq-resumo">Pedidos ao departamento de informática sem interrupções ao balcão: prioridades, prazos, avisos e uma FAQ que resolve as dúvidas repetidas.</span>
+              </span>
+              <span class="etq-rodape">
+                <span class="tags"><span>PHP 8</span><span>MySQL</span><span>JavaScript</span></span>
+                <span class="barras" data-barras="HELPDESK-TI" aria-hidden="true"></span>
+              </span>
+            </button>
+            <template class="etq-info">
+              <p>O funcionário abre um pedido em vez de ir à secretária do TI. A prioridade vem de duas perguntas simples (a quem afeta e quanto atrapalha), como nos service desks profissionais, e cada pedido tem prazos de resposta e de resolução que só contam em horário de trabalho.</p>
+              <ul class="lista">
+                <li>Filas para os técnicos, notas internas, anexos e histórico de cada pedido.</li>
+                <li>Avisos no site e por email, e alertas quando um prazo está a acabar.</li>
+                <li>Sugestões da FAQ enquanto se escreve o pedido: muitos nem chegam a ser abertos.</li>
+              </ul>
+              <h4>O que estou a aprender</h4>
+              <ul class="lista"><li>Como funcionam os service desks (matriz de prioridade ITIL e prazos)</li><li>Segurança: verificação em dois passos feita de raiz, proteção de formulários e de ficheiros</li><li>Envio de emails em segundo plano com uma fila</li></ul>
+              <a class="ligacao" href="https://github.com/gustavobiazini97/Portfolio/tree/main/projetos/helpdesk" target="_blank" rel="noopener noreferrer">Ver o código no GitHub</a>
+            </template>
+          </article>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado estado-producao">Em produção<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Encomendas digitais</span>
+                <span class="etq-origem">Para um colega de trabalho</span>
+                <span class="etq-resumo">Passar para digital o livro onde um colega regista à mão, há 15 anos, cada encomenda web e o destino para onde seguiu.</span>
+              </span>
+              <span class="etq-rodape">
+                <span class="tags"><span>App web</span><span>Tablet</span></span>
+                <span class="barras" data-barras="ENCOMENDAS" aria-hidden="true"></span>
+              </span>
+            </button>
+            <template class="etq-info">
+              <p>Hoje cada encomenda fica escrita num livro: série, número e o primeiro destino. A app substitui o papel, permite procurar logo "esta encomenda, para onde foi?" e conta as encomendas por dia, para se ver que dias da semana são os mais pesados.</p>
+              <h4>O que estou a aprender</h4>
+              <ul class="lista"><li>Levantar requisitos com quem vai usar a app</li><li>Desenhar para tablet e para uso rápido no dia a dia</li></ul>
+            </template>
+          </article>
+
         </div>
       </div>
 
-      <div class="proj-group reveal">
-        <h3 class="group-title">Outros projetos</h3>
-        <div class="cards">
-          <!-- Anime a Dois: app PHP/MySQL alojada no alwaysdata (instalável no Android) -->
-          <article class="card" style="--h: 250">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><img class="cover-logo" src="../projetos/anime-a-dois/public/img/logo.svg" alt="" loading="lazy"><span class="cover-status wip">Em progresso</span></span>
-              <span class="card-body">
-                <span class="card-title">Anime a Dois</span>
-                <span class="card-sub"><span>PHP · MySQL · PWA</span><span class="card-year">2026</span></span>
+      <!-- Concluídos: do mais complexo para o mais simples -->
+      <div class="grupo">
+        <div class="grupo-cab">
+          <h3>Concluídos</h3>
+          <p>Do mais complexo para o mais simples.</p>
+        </div>
+        <div class="etiquetas etiquetas-2">
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Anime a Dois</span>
+                <span class="etq-origem">Projeto pessoal, online</span>
+                <span class="etq-resumo">Registo dos episódios que eu e a minha namorada vemos, lado a lado: quem vai à frente, comentários, notificações e estatísticas.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>PHP</span><span>Eloquent</span><span>MySQL</span><span>PWA</span></span>
+                <span class="barras" data-barras="ANIME-A-DOIS" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status wip">Em progresso</span><span>App web instalável</span><span>2026</span></div>
-              <p class="info-desc">Uma app para mim e para a minha namorada registarmos os episódios de Naruto, Shippuden e Boruto que já vimos, lado a lado: quem vai à frente, comentários por episódio, notificações quando o outro vê um episódio e estatísticas por arco.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Organizar uma app PHP em MVC com o Eloquent</li><li>Deploy automático com GitHub Actions para um alojamento real</li><li>Notificações push e app instalável no Android (PWA)</li></ul></div>
-              <a class="info-link" href="https://animeadois.alwaysdata.net" target="_blank" rel="noopener">Abrir a app <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <p>App web instalável no Android, alojada no alwaysdata. Cada pessoa tem a sua biblioteca, as séries são partilhadas por convite e qualquer anime pode ser adicionado através do MyAnimeList.</p>
+              <ul class="lista"><li>Notificações no telemóvel (Web Push) e por email</li><li>Amigos, convites e estatísticas por arco</li><li>API REST usada pela app Android</li></ul>
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>Organizar uma app PHP em MVC com o Eloquent</li><li>Deploy automático com GitHub Actions para um alojamento real</li><li>Notificações push e app instalável (PWA)</li></ul>
+              <a class="ligacao" href="https://animeadois.alwaysdata.net" target="_blank" rel="noopener noreferrer">Abrir a app</a>
             </template>
           </article>
-          <!-- Helpdesk TI: sistema de pedidos ao departamento de informática (PHP/MySQL, sem dependências) -->
-          <article class="card" style="--h: 205">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><img class="cover-logo" src="../projetos/helpdesk/public/img/logo.svg" alt="" loading="lazy"><span class="cover-status wip">Em progresso</span></span>
-              <span class="card-body">
-                <span class="card-title">Helpdesk TI</span>
-                <span class="card-sub"><span>PHP · MySQL</span><span class="card-year">2026</span></span>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Anime a Dois para Android</span>
+                <span class="etq-origem">App nativa do projeto acima</span>
+                <span class="etq-resumo">A mesma app, feita em Flutter, igual ao site e ligada à mesma API. Atualiza-se dentro da própria app.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>Flutter</span><span>Dart</span><span>API REST</span></span>
+                <span class="barras" data-barras="ANIME-A-DOIS-APK" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status wip">Em progresso</span><span>App web</span><span>2026</span></div>
-              <p class="info-desc">Um sistema de pedidos ao departamento de informática, para acabar com as interrupções ao balcão: o funcionário abre um pedido, a prioridade sai do impacto e da urgência, o TI trabalha com prazos (SLA) em horário útil e a FAQ sugere soluções antes de o pedido ser aberto.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Como funcionam os service desks (matriz ITIL, SLA com pausas, filas)</li><li>Segurança a sério: 2FA TOTP feito à mão, CSRF, CSP, uploads seguros, bloqueio de login</li><li>Notificações por email com uma fila e um cliente SMTP sem bibliotecas</li></ul></div>
-              <a class="info-link" href="https://github.com/gustavobiazini97/Portfolio/tree/main/projetos/helpdesk" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <p>Feita por sugestão de um professor, para ter uma app Android a sério em cima da API do site. O APK é compilado automaticamente no GitHub sempre que há uma versão nova.</p>
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>Flutter e Dart</li><li>Consumir a minha própria API REST</li><li>Compilar e publicar o APK com GitHub Actions</li></ul>
+              <a class="ligacao" href="https://animeadois.alwaysdata.net/app" target="_blank" rel="noopener noreferrer">Descarregar o APK</a>
             </template>
           </article>
-          <article class="card" style="--h: 36">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><span class="glyph serif">G°</span><span class="cover-status done">Concluído</span></span>
-              <span class="card-body">
-                <span class="card-title">Portfólio pessoal</span>
-                <span class="card-sub"><span>HTML · CSS</span><span class="card-year">2026</span></span>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">iShopping</span>
+                <span class="etq-origem">Projeto de grupo no Politécnico de Leiria, nota 18</span>
+                <span class="etq-resumo">Gestão de compras em Windows Forms, com um modo de compras que avisa em tempo real quando o orçamento está a acabar.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>C#</span><span>Windows Forms</span><span>Entity Framework</span></span>
+                <span class="barras" data-barras="ISHOPPING" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status done">Concluído</span><span>Site pessoal</span><span>2026</span></div>
-              <p class="info-desc">O meu primeiro projeto pensado de ponta a ponta — do layout à tipografia. Quis algo que se parecesse comigo: calmo, mas com personalidade.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Estruturar uma página com HTML semântico</li><li>Layout responsivo com CSS Grid e Flexbox</li><li>Tema claro/escuro e microinterações</li></ul></div>
-              <a class="info-link" href="https://github.com/gustavobiazini97/Portfolio" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <p>Projeto da unidade curricular de Desenvolvimento de Aplicações, feito em grupo. Cerca de nove ecrãs, incluindo o modo de compras com alertas de orçamento e um ecrã de estatísticas. Apresentado e avaliado com 18 valores.</p>
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>Arquitetura MVC numa aplicação desktop</li><li>Entity Framework com uma base de dados local</li><li>Dividir trabalho num grupo</li></ul>
             </template>
           </article>
-          <article class="card" style="--h: 280">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><span class="glyph">&lt;?php</span><span class="cover-status wip">Em progresso</span></span>
-              <span class="card-body">
-                <span class="card-title">Sistema de login</span>
-                <span class="card-sub"><span>PHP · MySQL</span><span class="card-year">2026</span></span>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Naruto Fillers</span>
+                <span class="etq-origem">Projeto pessoal</span>
+                <span class="etq-resumo">Uma página para ver só os episódios filler de Naruto, Shippuden e Boruto e saber o que se pode saltar.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>HTML</span><span>JavaScript</span><span>PHP</span></span>
+                <span class="barras" data-barras="NARUTO-FILLERS" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status wip">Em progresso</span><span>Aplicação web</span><span>2026</span></div>
-              <p class="info-desc">Registo e autenticação de utilizadores com PHP e base de dados — o meu primeiro contacto a sério com back-end e com a ideia de guardar e proteger informação.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Ligar o PHP a uma base de dados MySQL</li><li>Operações de registo, leitura e validação</li><li>Noções de segurança e palavras-passe</li></ul></div>
-              <a class="info-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <p>Uma lista rápida de consultar, com os fillers de cada série marcados.</p>
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>Carregar e mostrar dados de um ficheiro JSON</li><li>Ir buscar dados a outro site com PHP e guardá-los em cache</li><li>Transformar uma página numa app instalável</li></ul>
+              <a class="ligacao" href="../projetos/naruto-fillers/">Abrir o projeto</a>
             </template>
           </article>
-          <article class="card" style="--h: 310">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><span class="glyph">C#</span><span class="cover-status wip">Em progresso</span></span>
-              <span class="card-body">
-                <span class="card-title">Gestor de tarefas</span>
-                <span class="card-sub"><span>C# · .NET</span><span class="card-year">2026</span></span>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Sistema de login</span>
+                <span class="etq-origem">Projeto de aprendizagem</span>
+                <span class="etq-resumo">Registo e autenticação de utilizadores com PHP e MySQL: o primeiro contacto a sério com o back-end.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>PHP</span><span>MySQL</span></span>
+                <span class="barras" data-barras="LOGIN" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status wip">Em progresso</span><span>App desktop</span><span>2026</span></div>
-              <p class="info-desc">Aplicação desktop em C# para organizar afazeres. Foi onde comecei a pensar em orientação a objetos e a separar dados, lógica e interface.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Classes, objetos e métodos em C#</li><li>Construir uma interface desktop com .NET</li><li>Organizar o código em partes reutilizáveis</li></ul></div>
-              <a class="info-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <p>Onde comecei a guardar e a proteger informação de utilizadores.</p>
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>Ligar o PHP a uma base de dados MySQL</li><li>Registo, leitura e validação de dados</li><li>Guardar palavras-passe de forma segura</li></ul>
             </template>
           </article>
-          <article class="card" style="--h: 230">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><span class="glyph">*ptr</span><span class="cover-status done">Concluído</span></span>
-              <span class="card-body">
-                <span class="card-title">Calculadora em C</span>
-                <span class="card-sub"><span>C · Console</span><span class="card-year">2025</span></span>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Gestor de tarefas</span>
+                <span class="etq-origem">Projeto de aprendizagem</span>
+                <span class="etq-resumo">Aplicação desktop para organizar afazeres, onde comecei a pensar em objetos e a separar dados, lógica e interface.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>C#</span><span>.NET</span></span>
+                <span class="barras" data-barras="TAREFAS" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status done">Concluído</span><span>Programa de console</span><span>2025</span></div>
-              <p class="info-desc">Programa de console focado em lógica pura: entrada, operações e a base de como o computador lida com memória. Pequeno, mas ensinou-me muito.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Tipos, variáveis e fluxo de controlo</li><li>Funções e ponteiros</li><li>Pensar passo a passo como a máquina</li></ul></div>
-              <a class="info-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>Classes, objetos e métodos em C#</li><li>Construir uma interface desktop com .NET</li><li>Organizar o código em partes reutilizáveis</li></ul>
             </template>
           </article>
-          <article class="card" style="--h: 150">
-            <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><span class="glyph">&gt;&gt;&gt;</span><span class="cover-status done">Concluído</span></span>
-              <span class="card-body">
-                <span class="card-title">Script de automação</span>
-                <span class="card-sub"><span>Python</span><span class="card-year">2025</span></span>
+
+          <article class="etiqueta">
+            <button class="etq-face" type="button" aria-haspopup="dialog">
+              <span class="etq-estado">Concluído<span class="etq-ano">2026</span></span>
+              <span class="etq-corpo">
+                <span class="etq-titulo">Este portfólio</span>
+                <span class="etq-origem">Projeto pessoal</span>
+                <span class="etq-resumo">O site que estás a ver: instalável como app, com tema claro e escuro, sem frameworks.</span>
               </span>
-              <span class="card-plus" aria-hidden="true"></span>
+              <span class="etq-rodape">
+                <span class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></span>
+                <span class="barras" data-barras="PORTFOLIO" aria-hidden="true"></span>
+              </span>
             </button>
-            <template class="card-info">
-              <div class="info-meta"><span class="status done">Concluído</span><span>Script / automação</span><span>2025</span></div>
-              <p class="info-desc">Um pequeno utilitário em Python para automatizar tarefas repetitivas do dia a dia. O primeiro gostinho de pôr o computador a trabalhar por mim.</p>
-              <div class="learned"><h5>O que aprendi</h5><ul><li>Sintaxe e estruturas básicas do Python</li><li>Ler e escrever ficheiros</li><li>Automatizar passos manuais</li></ul></div>
-              <a class="info-link" href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
+            <template class="etq-info">
+              <h4>O que aprendi</h4>
+              <ul class="lista"><li>HTML semântico e layout responsivo com Grid e Flexbox</li><li>Tema claro e escuro guardado no browser</li><li>PWA: service worker e instalação no Android</li></ul>
+              <a class="ligacao" href="https://github.com/gustavobiazini97/Portfolio" target="_blank" rel="noopener noreferrer">Ver o código no GitHub</a>
             </template>
           </article>
+
         </div>
       </div>
     </section>
 
-    <section class="sec" id="trajetoria">
-      <div class="sec-head reveal"><span class="sec-num">iii</span><span class="sec-title">Trajetória</span></div>
-      <div class="tl">
-        <div class="tl-row reveal"><span class="tl-year">2026</span><div class="tl-body"><h4>A aprofundar o back-end</h4><p>A estudar PHP, bases de dados e os primeiros sistemas web completos.</p></div></div>
-        <div class="tl-row reveal"><span class="tl-year">2026</span><div class="tl-body"><h4>Primeiros passos em C#</h4><p>A explorar orientação a objetos e aplicações desktop com .NET.</p></div></div>
-        <div class="tl-row reveal"><span class="tl-year">2025</span><div class="tl-body"><h4>Fundamentos com C</h4><p>Lógica de programação, ponteiros e a base de como o computador funciona.</p></div></div>
-        <div class="tl-row reveal"><span class="tl-year">2025</span><div class="tl-body"><h4>O início da jornada</h4><p>Primeiro contacto com HTML, CSS e os princípios da programação.</p></div></div>
-      </div>
+    <!-- Percurso: sequência real, por isso em linha do tempo -->
+    <section class="seccao" id="percurso" aria-labelledby="titulo-percurso">
+      <h2 class="titulo-seccao" id="titulo-percurso">Percurso</h2>
+      <ol class="percurso">
+        <li>
+          <span class="quando">2026–27</span>
+          <div><h3>2.º ano do TeSP</h3><p>FrotaGest em grupo e as primeiras ferramentas feitas para o meu trabalho: o Helpdesk TI e as encomendas digitais.</p></div>
+        </li>
+        <li>
+          <span class="quando">2026</span>
+          <div><h3>Primeiras apps completas</h3><p>iShopping em C# (18 valores), o Anime a Dois na web e no Android, e o deploy automático com GitHub Actions.</p></div>
+        </li>
+        <li>
+          <span class="quando">2025</span>
+          <div><h3>Entrada no TeSP</h3><p>Programação de Sistemas de Informação no Politécnico de Leiria, em regime pós-laboral. Fundamentos com C, primeiras páginas em HTML e CSS.</p></div>
+        </li>
+      </ol>
     </section>
   </main>
 
-  <dialog class="proj-dialog" id="proj-dialog" aria-labelledby="dlg-title">
-    <div class="dlg-cover cover"></div>
-    <button class="dlg-close" type="button" aria-label="Fechar">✕</button>
-    <div class="dlg-body">
-      <h3 class="dlg-title" id="dlg-title"></h3>
-      <p class="dlg-tags"></p>
-      <div class="dlg-info"></div>
+  <!-- Detalhes de um projeto (preenchido pelo script.js a partir do <template> da etiqueta) -->
+  <dialog class="detalhe" id="detalhe" aria-labelledby="detalhe-titulo">
+    <div class="detalhe-estado"></div>
+    <button class="detalhe-fechar" type="button" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="detalhe-corpo">
+      <h3 class="detalhe-titulo" id="detalhe-titulo"></h3>
+      <p class="detalhe-origem"></p>
+      <div class="tags detalhe-tags"></div>
+      <div class="detalhe-info"></div>
     </div>
   </dialog>
 
-  <footer id="contacto">
-    <div class="wrap">
-      <p class="foot-h reveal">Vamos<br>conversar? <a href="mailto:gustavobiazini97@gmail.com">↗</a></p>
-      <div class="foot-links reveal">
-        <a href="mailto:gustavobiazini97@gmail.com">gustavobiazini97@gmail.com</a>
-        <a href="https://github.com/gustavobiazini97" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.linkedin.com/in/gustavo-biazini-a44720261" target="_blank" rel="noopener">LinkedIn</a>
-      </div>
-      <p class="copy reveal">© 2026 Gustavo · Feito com curiosidade.</p>
+  <footer class="contacto" id="contacto">
+    <h2>Falar comigo</h2>
+    <p>Para propostas, projetos ou só para trocar ideias.</p>
+    <a class="email" href="mailto:gustavobiazini97@gmail.com">gustavobiazini97@gmail.com</a>
+    <div class="redes">
+      <a href="https://github.com/gustavobiazini97" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://www.linkedin.com/in/gustavo-biazini-a44720261" target="_blank" rel="noopener noreferrer">LinkedIn</a>
     </div>
+    <p class="copia">© 2026 Gustavo Biazini</p>
   </footer>
-
-<script src="script.js"></script>
 </body>
 </html>
