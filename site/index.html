@@ -89,7 +89,7 @@
           <!-- Helpdesk TI: sistema de pedidos ao TI (projetos/helpdesk) -->
           <article class="card" style="--h: 205">
             <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover"><img class="cover-logo logo-quadrado" src="../projetos/helpdesk/public/img/logo.svg" alt="" loading="lazy"><span class="cover-status wip">Em produção</span></span>
+              <span class="cover cover-img"><img class="cover-print" src="img/projetos/helpdesk-1.webp" alt="" loading="lazy"><span class="cover-status wip">Em produção</span></span>
               <span class="card-body">
                 <span class="card-title">Helpdesk TI</span>
                 <span class="card-sub"><span>PHP · MySQL</span><span class="card-year">2026</span></span>
@@ -99,6 +99,13 @@
             <template class="card-info">
               <div class="info-meta"><span class="status wip">Em produção</span><span>Aplicação web</span><span>2026</span></div>
               <p class="info-desc">Pedidos ao departamento de informática sem interrupções ao balcão: o funcionário abre um pedido, a prioridade sai do impacto e da urgência, o TI trabalha com prazos em horário útil e a FAQ sugere soluções antes de o pedido ser aberto.</p>
+              <!-- Prints do projeto: desliza para o lado; tocar abre em tamanho real -->
+              <div class="galeria">
+                <figure><a href="img/projetos/helpdesk-1.webp" target="_blank" rel="noopener"><img src="img/projetos/helpdesk-1.webp" alt="Painel do técnico: filas e prazos" width="1280" height="800" loading="lazy"></a><figcaption>Painel do técnico: filas e prazos</figcaption></figure>
+                <figure><a href="img/projetos/helpdesk-2.webp" target="_blank" rel="noopener"><img src="img/projetos/helpdesk-2.webp" alt="Novo pedido: a FAQ sugere a solução enquanto se escreve" width="1280" height="800" loading="lazy"></a><figcaption>Novo pedido: a FAQ sugere a solução enquanto se escreve</figcaption></figure>
+                <figure><a href="img/projetos/helpdesk-3.webp" target="_blank" rel="noopener"><img src="img/projetos/helpdesk-3.webp" alt="Um pedido: conversa, nota interna e prazos" width="1280" height="800" loading="lazy"></a><figcaption>Um pedido: conversa, nota interna e prazos</figcaption></figure>
+                <figure><a href="img/projetos/helpdesk-4.webp" target="_blank" rel="noopener"><img src="img/projetos/helpdesk-4.webp" alt="Estatísticas do administrador" width="1280" height="800" loading="lazy"></a><figcaption>Estatísticas do administrador</figcaption></figure>
+              </div>
               <div class="learned"><h5>O que estou a aprender</h5><ul><li>Como funcionam os service desks (matriz de prioridade ITIL e prazos)</li><li>Segurança: verificação em dois passos feita de raiz, proteção de formulários e de ficheiros</li><li>Envio de emails em segundo plano com uma fila</li></ul></div>
               <a class="info-link" href="https://github.com/gustavobiazini97/Portfolio/tree/main/projetos/helpdesk" target="_blank" rel="noopener">Ver no GitHub <span aria-hidden="true">→</span></a>
             </template>
@@ -176,7 +183,7 @@
           </article>
           <article class="card" style="--h: 60">
             <button class="card-face" type="button" aria-haspopup="dialog">
-              <span class="cover cover-img"><img src="../projetos/naruto-fillers/assets/background.svg" alt="" loading="lazy"><span class="cover-status done">Concluído</span></span>
+              <span class="cover cover-img"><img class="cover-print" src="img/projetos/naruto-fillers-1.webp" alt="" loading="lazy"><span class="cover-status done">Concluído</span></span>
               <span class="card-body">
                 <span class="card-title">Naruto Fillers</span>
                 <span class="card-sub"><span>HTML · JS · PHP</span><span class="card-year">2026</span></span>
@@ -186,6 +193,11 @@
             <template class="card-info">
               <div class="info-meta"><span class="status done">Concluído</span><span>Página web</span><span>2026</span></div>
               <p class="info-desc">Uma página para ver rapidamente só os episódios filler de Naruto, Naruto Shippuden e Boruto — para saber o que posso saltar sem perder a história.</p>
+              <!-- Prints do projeto: desliza para o lado; tocar abre em tamanho real -->
+              <div class="galeria">
+                <figure><a href="img/projetos/naruto-fillers-1.webp" target="_blank" rel="noopener"><img src="img/projetos/naruto-fillers-1.webp" alt="Início: escolher a série" width="1280" height="800" loading="lazy"></a><figcaption>Início: escolher a série</figcaption></figure>
+                <figure><a href="img/projetos/naruto-fillers-2.webp" target="_blank" rel="noopener"><img src="img/projetos/naruto-fillers-2.webp" alt="Fillers agrupados por arco" width="1280" height="800" loading="lazy"></a><figcaption>Fillers agrupados por arco</figcaption></figure>
+              </div>
               <div class="learned"><h5>O que aprendi</h5><ul><li>Carregar e mostrar dados a partir de um ficheiro JSON</li><li>Ir buscar dados a outro site com PHP e guardá-los em cache</li><li>Transformar uma página numa app instalável</li></ul></div>
               <a class="info-link" href="../projetos/naruto-fillers/">Abrir projeto <span aria-hidden="true">→</span></a>
             </template>
@@ -253,12 +265,15 @@
   </main>
 
   <dialog class="proj-dialog" id="proj-dialog" aria-labelledby="dlg-title">
-    <div class="dlg-cover cover"></div>
+    <!-- O botão de fechar fica fora da parte que faz scroll, por isso está sempre visível -->
     <button class="dlg-close" type="button" aria-label="Fechar">✕</button>
-    <div class="dlg-body">
-      <h3 class="dlg-title" id="dlg-title"></h3>
-      <p class="dlg-tags"></p>
-      <div class="dlg-info"></div>
+    <div class="dlg-scroll">
+      <div class="dlg-cover cover"></div>
+      <div class="dlg-body">
+        <h3 class="dlg-title" id="dlg-title"></h3>
+        <p class="dlg-tags"></p>
+        <div class="dlg-info"></div>
+      </div>
     </div>
   </dialog>
 
