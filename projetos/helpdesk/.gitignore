@@ -1,0 +1,8 @@
+# Credenciais locais (criar a partir de config.example.php)
+/config/config.php
+# Anexos enviados e logs: nunca vão para o GitHub
+/storage/anexos/*
+!/storage/anexos/.gitkeep
+!/storage/anexos/.htaccess
+/storage/logs/*
+!/storage/logs/.gitkeep

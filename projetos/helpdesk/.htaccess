@@ -1,0 +1,10 @@
+# Se o site apontar por engano para esta pasta (e não para public/), manda tudo para public/
+# e bloqueia o resto. O certo é a raiz do site ser a pasta public/.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(?!public/)(.*)$ public/$1 [L]
+</IfModule>
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>
+Options -Indexes

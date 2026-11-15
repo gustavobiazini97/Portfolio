@@ -1,0 +1,2 @@
+# Esta pasta nunca é servida pelo Apache (só o public/ é público)
+Require all denied

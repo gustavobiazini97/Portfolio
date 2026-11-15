@@ -1,0 +1,27 @@
+# Apache: pasta pública (a ÚNICA que deve ser a raiz do site).
+
+# Sem listagem de pastas
+Options -Indexes
+
+# Ficheiro inicial
+DirectoryIndex index.php
+
+# Bloquear ficheiros escondidos e de backup/configuração, por precaução
+<FilesMatch "(^\.|\.(sql|bak|old|orig|swp|ini|log|env|dist|lock|md)$)">
+    Require all denied
+</FilesMatch>
+
+# Cabeçalhos para os ficheiros estáticos (CSS, JS, SVG); o PHP envia os seus próprios
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "same-origin"
+    Header always unset X-Powered-By
+</IfModule>
+
+# PHP (se o alojamento deixar mudar aqui): nada de erros no ecrã nem versão do PHP
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag expose_php Off
+    php_flag session.use_trans_sid Off
+</IfModule>
