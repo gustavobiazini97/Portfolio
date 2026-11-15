@@ -6,6 +6,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#F5F3F8">
 <title><?= e($titulo === $appNome ? $appNome : $titulo . ' · ' . $appNome) ?></title>
+<!-- Descrição para motores de busca -->
+<meta name="description" content="Regista e compara os episódios de anime que vês a dois. PHP/MySQL, API REST e app Android em Flutter.">
+<!-- Open Graph: pré-visualização do link no LinkedIn, WhatsApp, etc. (os URLs têm de ser absolutos e públicos) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Anime a Dois">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:url" content="<?= e(url_absoluto()) ?>">
+<meta property="og:title" content="Anime a Dois — app web + Android">
+<meta property="og:description" content="Regista e compara os episódios de anime que vês a dois. PHP/MySQL, API REST e app Android em Flutter.">
+<meta property="og:image" content="<?= e(url_absoluto() . 'img/og-image.png') ?>">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="Anime a Dois: ecrã inicial da app com a biblioteca de séries">
+<!-- Cartão grande no X/Twitter -->
+<meta name="twitter:card" content="summary_large_image">
 <!-- Tema guardado aplicado antes de pintar a página -->
 <script src="<?= e(asset('js/tema.js')) ?>"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
