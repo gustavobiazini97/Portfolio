@@ -135,6 +135,8 @@ section[id], footer[id] { scroll-margin-top: 80px; }
 }
 .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* Logótipo (em vez de imagem de capa): centrado e inteiro, por cima do gradiente */
+/* Print do projeto como capa: mostra o canto de cima do ecrã */
+.cover img.cover-print { object-position: top left; }
 .cover img.cover-logo { inset: 18%; width: 64%; height: 64%; object-fit: contain; }
 /* Logos com fundo próprio (quadrado, ex.: Helpdesk TI) ficam mais pequenos, para não encherem a capa */
 .cover img.cover-logo.logo-quadrado { inset: 28%; width: 44%; height: 44%; }
@@ -172,11 +174,13 @@ section[id], footer[id] { scroll-margin-top: 80px; }
 /* Dialog */
 .proj-dialog {
   margin: auto; padding: 0; border: 1px solid var(--rule); border-radius: 22px; overflow: hidden;
-  width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto;
+  width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
   background: var(--card); color: var(--ink);
 }
-/* O scroll dentro da janela não passa para a página de trás */
-.proj-dialog { overscroll-behavior: contain; }
+/* Quem faz scroll é o contentor de dentro (o X fica fixo por cima);
+   o scroll não passa para a página de trás */
+.proj-dialog[open] { display: flex; flex-direction: column; }
+.dlg-scroll { overflow-y: auto; overscroll-behavior: contain; max-height: inherit; }
 /* Com a janela aberta, a página de fundo fica parada (não faz scroll) */
 html:has(.proj-dialog[open]) { overflow: hidden; }
 .proj-dialog::backdrop { background: oklch(0.15 0.01 60 / 0.45); backdrop-filter: blur(4px); }
@@ -191,6 +195,7 @@ html:has(.proj-dialog[open]) { overflow: hidden; }
 .dlg-cover { aspect-ratio: 16 / 7; }
 .dlg-cover .cover-status { display: none; }
 .dlg-close {
+  z-index: 2;
   position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
   background: color-mix(in oklch, var(--card) 85%, transparent); color: var(--ink); font-size: 14px; backdrop-filter: blur(6px);
 }
@@ -237,3 +242,17 @@ footer { padding: 9vh 0 8vh; border-top: 1px solid var(--rule); margin-top: 30px
 html.reveal-ready .reveal { opacity: 0; transform: translateY(18px); }
 html.reveal-ready .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce){ html.reveal-ready .reveal { opacity: 1; transform: none; transition: none; } }
+
+/* Galeria de prints na janela de detalhes: desliza para o lado (o próximo espreita à direita) */
+.galeria {
+  display: flex; gap: 12px; margin: 22px -28px 4px; padding: 0 28px 10px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 28px;
+  overscroll-behavior-x: contain; scrollbar-width: thin;
+}
+.galeria figure { flex: 0 0 88%; scroll-snap-align: start; margin: 0; }
+.galeria a { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); }
+.galeria img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; background: var(--paper); }
+.galeria figcaption { margin-top: 8px; font-size: 13.5px; color: var(--ink-faint); }
+/* Com galeria, a capa grande da janela sai (os prints já mostram o projeto) */
+.proj-dialog.com-galeria .dlg-cover { display: none; }
+.proj-dialog.com-galeria .dlg-body { padding-top: 60px; }

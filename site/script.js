@@ -23,8 +23,10 @@ document.querySelectorAll('.card-face').forEach(face => {
     dlg.querySelector('.dlg-title').textContent = card.querySelector('.card-title').textContent;
     dlg.querySelector('.dlg-tags').textContent = card.querySelector('.card-sub span').textContent;
     dlg.querySelector('.dlg-info').replaceChildren(card.querySelector('.card-info').content.cloneNode(true));
+    // Projetos com prints: a galeria substitui a capa grande
+    dlg.classList.toggle('com-galeria', !!dlg.querySelector('.dlg-info .galeria'));
     dlg.showModal();
-    dlg.scrollTop = 0;
+    dlg.querySelector('.dlg-scroll').scrollTop = 0;   // abre sempre no topo
   });
 });
 dlg.querySelector('.dlg-close').addEventListener('click', () => dlg.close());
