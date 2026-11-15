@@ -192,6 +192,7 @@ class PerfilController extends Controller
             session_regenerate_id(true);   // credenciais novas, sessão nova
             SessaoLonga::terminarTodas($user);   // os outros telemóveis têm de entrar outra vez...
             SessaoLonga::criar($user);           // ...e este mantém-se
+            Token::where('user_id', $user->id)->delete();   // a app Android também (antes ficava com sessão)
             $this->responder(true, 'Palavra-passe alterada.');
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
@@ -299,6 +300,11 @@ class PerfilController extends Controller
         $this->exigirPost();
         $user = $this->exigirLogin();
         $pref = Preferencia::de($user);
+
+        // No máximo 5 testes por hora: sem isto o botão servia para encher de emails a caixa de alguém
+        if (!Limite::registar('teste-notif:' . $user->id, 5, 3600)) {
+            $this->json(['ok' => false, 'mensagem' => 'Já fizeste muitos testes. Tenta daqui a uma hora.'], 429);
+        }
 
         $msg = ['titulo' => 'Anime a Dois', 'corpo' => 'As notificações estão a funcionar 🎉',
                 'url' => url_absoluto() . url('home'), 'tag' => 'teste'];

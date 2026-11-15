@@ -311,7 +311,7 @@ class User extends Model
 
         ['nome' => $nome, 'username' => $username, 'password' => $password] = static::validarNovos($dados);
 
-        $user = static::create([
+        $novo = fn () => static::create([
             'nome'          => $nome,
             'username'      => $username,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
@@ -319,10 +319,17 @@ class User extends Model
         ]);
 
         if ($convite !== null) {
-            // Amigo convidado: biblioteca vazia e amigo de quem convidou (sem par)
-            Amizade::usarConvite($convite, $user);
-            return $user;
+            // Amigo convidado: biblioteca vazia e amigo de quem convidou (sem par).
+            // Tudo numa transação: se o convite já tiver sido usado (dois registos ao mesmo tempo),
+            // a conta também não fica criada (antes ficava uma conta solta, sem o amigo).
+            return Capsule::connection()->transaction(function () use ($novo, $convite) {
+                $user = $novo();
+                Amizade::usarConvite($convite, $user);
+                return $user;
+            });
         }
+
+        $user = $novo();
 
         // Segunda conta do casal: ficam par uma da outra
         $primeiro = static::where('id', '!=', $user->id)->orderBy('id')->first();

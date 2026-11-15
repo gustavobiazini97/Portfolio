@@ -157,3 +157,58 @@ function medalha_pct(array $m): int
 {
     return $m['meta'] > 0 ? (int) min(100, floor($m['atual'] * 100 / $m['meta'])) : 0;
 }
+
+// Cabeçalhos de segurança de todas as respostas (páginas e API). Chamado logo no início de index.php e api.php.
+//   CSP: só scripts e estilos do próprio site (+ Google Fonts); imagens das capas só dos sites de anime;
+//        o browser só fala com o próprio site e com as APIs de anime do config.php; a app não abre dentro de iframes.
+//   O resto: sem adivinhar tipos (nosniff), sem iframes, referrer curto, sem câmara/micro/localização, HTTPS forçado (HSTS).
+function cabecalhos_seguranca(bool $api = false): void
+{
+    header_remove('X-Powered-By');                       // não anunciar a versão do PHP
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+
+    // HSTS só faz sentido (e só é aceite) por HTTPS
+    $https = !empty($_SERVER['HTTPS']) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    if ($https) {
+        header('Strict-Transport-Security: max-age=31536000');
+    }
+
+    if ($api) {
+        // JSON: não há nada para carregar nem para mostrar
+        header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'");
+        return;
+    }
+
+    // Origens das APIs de anime (o browser pede-lhes os dados das séries)
+    $apis = [];
+    foreach ((Database::config()['apis'] ?? []) as $url) {
+        $p = parse_url((string) $url);
+        if (isset($p['scheme'], $p['host'])) {
+            $apis[] = $p['scheme'] . '://' . $p['host'];
+        }
+    }
+    // Capas: os mesmos domínios aceites em DadosAnime::capa (e subdomínios)
+    $capas = [];
+    foreach (DadosAnime::DOMINIOS_CAPA as $d) {
+        $capas[] = 'https://' . $d;
+        $capas[] = 'https://*.' . $d;
+    }
+
+    header('Content-Security-Policy: ' . implode('; ', [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob: " . implode(' ', $capas),
+        "connect-src 'self' " . implode(' ', array_unique($apis)),
+        "worker-src 'self'",
+        "manifest-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+    ]));
+}

@@ -11,6 +11,9 @@ ini_set('display_errors', '0');
 
 require __DIR__ . '/../app/bootstrap.php';
 
+// Cabeçalhos de segurança (versão da API: só JSON)
+cabecalhos_seguranca(true);
+
 // ---------- CORS ----------
 // A app Android não precisa disto, mas assim a API também se pode testar a partir de uma página web.
 // Não há cookies envolvidos (só o token no cabeçalho), por isso "*" é seguro.
@@ -99,14 +102,13 @@ $falhar = function (string $mensagem, int $estado): never {
     exit;
 };
 
-// Raiz: identificação da API (útil para ver se está no ar)
+// Raiz: identificação da API (útil para ver se está no ar). A lista de rotas não sai daqui: está no docs/API.md
 if ($rota === '/') {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'ok'     => true,
         'api'    => 'Anime a Dois',
         'versao' => 2,
-        'rotas'  => array_map(fn ($r) => $r[0] . ' ' . $r[1], $rotas),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }

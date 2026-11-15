@@ -1,5 +1,12 @@
 [
   {
+    "versao": "1.11.1",
+    "notas": [
+      "Mais segurança: o login bloqueia 15 minutos depois de várias tentativas erradas",
+      "Juntar-te a uma série de um amigo passa a enviar-lhe um convite (só veem juntos quando ele aceitar)"
+    ]
+  },
+  {
     "versao": "1.11.0",
     "notas": [
       "O \"Atualizar\" agora é feito dentro da app: descarrega com barra de progresso e abre logo o instalador, sem passar pelo browser"

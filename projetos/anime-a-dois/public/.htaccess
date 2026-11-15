@@ -18,3 +18,12 @@
     # (com ?rota= e não api.php/…: depois de um rewrite o alojamento não passa o PATH_INFO)
     RewriteRule ^api/(.*)$ api.php?rota=/$1 [QSA,L]
 </IfModule>
+
+# Cabeçalhos de segurança também nos ficheiros estáticos (CSS, JS, imagens, manifest).
+# As páginas PHP já os mandam (cabecalhos_seguranca em app/core/helpers.php); "setifempty" não os duplica.
+<IfModule mod_headers.c>
+    Header setifempty X-Content-Type-Options "nosniff"
+    Header setifempty X-Frame-Options "DENY"
+    Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
+    Header always unset X-Powered-By
+</IfModule>

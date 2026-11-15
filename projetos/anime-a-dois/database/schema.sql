@@ -226,3 +226,13 @@ CREATE TABLE IF NOT EXISTS medalhas_obtidas (
   PRIMARY KEY (user_id, medalha_id),
   CONSTRAINT fk_mo_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Limites contra abuso (força bruta no login, emails de teste...). Uma linha por chave
+-- (ex.: 'login-ip:1.2.3.4', 'login-user:gustavo'): quantas vezes aconteceu desde 'inicio'.
+-- A chave pode ter o username, por isso guarda-se só o sha256 dela.
+CREATE TABLE IF NOT EXISTS limites (
+  chave_hash CHAR(64)          NOT NULL PRIMARY KEY,
+  contagem   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  inicio     DATETIME          NOT NULL,             -- começo da janela atual
+  bloqueado_ate DATETIME       NULL                  -- preenchido quando passa o máximo
+) ENGINE=InnoDB;
