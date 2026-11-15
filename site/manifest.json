@@ -1,15 +1,15 @@
 {
   "name": "Gustavo — Portfólio",
   "short_name": "Gustavo°",
-  "description": "Portfólio de Gustavo Biazini: projetos em produção e concluídos, percurso e contacto.",
+  "description": "Portfólio de Gustavo Biazini: projetos, percurso e contactos.",
   "lang": "pt",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#e4e8ec",
-  "theme_color": "#e4e8ec",
+  "background_color": "#fbf8f3",
+  "theme_color": "#fbf8f3",
   "categories": ["education", "personalization"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
