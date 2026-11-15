@@ -199,7 +199,8 @@ html:has(.proj-dialog[open]) { overflow: hidden; }
 .dlg-close {
   z-index: 2;
   position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
-  background: color-mix(in oklch, var(--card) 85%, transparent); color: var(--ink); font-size: 14px; backdrop-filter: blur(6px);
+  background: var(--card); border: 1px solid var(--rule); color: var(--ink); font-size: 14px;
+  box-shadow: 0 4px 12px -6px rgb(0 0 0 / .25);   /* fundo opaco: o X lê-se por cima do texto */
 }
 .dlg-close:focus { outline: none; }
 .dlg-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -251,7 +252,7 @@ html.reveal-ready .reveal.in { opacity: 1; transform: none; }
   overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 28px;
   overscroll-behavior-x: contain; scrollbar-width: thin;
 }
-.galeria figure { flex: 0 0 88%; scroll-snap-align: start; margin: 0; }
+.galeria figure { flex: 0 0 78%; max-width: 420px; scroll-snap-align: start; margin: 0; }
 .galeria a { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); }
 .galeria img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; background: var(--paper); }
 .galeria figcaption { margin-top: 8px; font-size: 13.5px; color: var(--ink-faint); }
@@ -260,5 +261,5 @@ html.reveal-ready .reveal.in { opacity: 1; transform: none; }
 .proj-dialog.com-galeria .dlg-body { padding-top: 60px; }
 
 /* Prints de telemóvel (ao alto): mais estreitos, cabem quase dois de cada vez */
-.galeria-telemovel figure { flex-basis: 46%; }
+.galeria-telemovel figure { flex-basis: 40%; max-width: 190px; }
 .galeria-telemovel img { aspect-ratio: 720 / 1447; object-fit: contain; }
