@@ -344,6 +344,11 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 
 - A MariaDB do alojamento está no fuso de Paris: as colunas com `DEFAULT CURRENT_TIMESTAMP` (amizades, pedidos, convites) ficavam 1 h à frente. `Database::boot()` passa a ligar com `timezone` = fuso do PHP (Europe/Lisbon). Vistos e comentários já eram gravados pelo PHP e estavam certos. As linhas antigas criadas pela BD continuam 1 h à frente.
 
+### Pré-visualização do link (15 de novembro, só servidor)
+
+- `layout/header.php` passa a ter meta description e Open Graph/Twitter. Assim o link mostra título, descrição e imagem no LinkedIn (Featured), no WhatsApp, etc. Antes o LinkedIn não conseguia gerar a pré-visualização e não deixava guardar.
+- Imagem nova `public/img/og-image.png` (1200×627), feita com a captura do ecrã inicial. Os URLs são absolutos (`url_absoluto()`).
+
 ### Processo de lançamento (17 de outubro)
 
 - A 1.4.0 não abria: o R8 apagava métodos do `shared_preferences` (chamado do Dart por JNI). Regras do R8 no workflow
