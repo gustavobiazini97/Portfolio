@@ -148,6 +148,14 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .saudacao-resumo { margin-top: 2px; font-size: 12.5px; font-weight: 600; color: var(--par-txt); text-decoration: none;
                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .saudacao-resumo:hover { text-decoration: underline; }
+/* Telemóveis estreitos: o Início tem 4 botões no topo e o "Olá, <nome>" ficava cortado.
+   Botões, foto e espaços um pouco mais pequenos para o nome caber */
+@media (max-width: 430px) {
+  .pagina-inicio .topo-acoes { gap: 6px; }
+  .pagina-inicio .topo-acoes .btn-redondo { width: 38px; height: 38px; }
+  .pagina-inicio .saudacao { gap: 10px; }
+  .pagina-inicio .avatar-saudacao { width: 36px; height: 36px; }
+}
 .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 15px; font-weight: 700; }
 
 /* Logótipo (img/logo.svg): dois ecrãs empilhados — o teu à frente, o do par atrás */
@@ -543,6 +551,14 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
 .ponto-par { border-color: var(--par-txt); }
 .ponto-tu.v  { background: var(--tu-txt); }
 .ponto-par.v { background: var(--par-txt); }
+
+/* Telemóveis altos (só o site; a app Flutter não usa este CSS): sobrava espaço vazio
+   por cima e por baixo dos cartões, por isso ficam maiores e enchem a pista */
+@media (max-width: 899px) and (min-height: 760px) {
+  .pista { padding-left: calc(50% - 99px); padding-right: calc(50% - 99px); }   /* o cartão ativo continua ao centro */
+  .ep { flex-basis: 198px; height: min(292px, 100%); padding: 20px; }
+  .ep-num { font-size: 54px; }
+}
 
 /* Ecrãs baixos: os cartões já mostram título e quem viu, por isso o painel de baixo sai
    para os cartões caberem inteiros */
