@@ -2,7 +2,7 @@
 // e permite que o Chrome o ofereça como app instalável.
 
 // Mudar a versão obriga a recriar a cache (e apaga a antiga no activate)
-const CACHE = 'portfolio-v8';
+const CACHE = 'portfolio-v9';
 
 // Ficheiros base, guardados logo na instalação
 const SHELL = [

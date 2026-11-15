@@ -137,6 +137,8 @@ section[id], footer[id] { scroll-margin-top: 80px; }
 /* Logótipo (em vez de imagem de capa): centrado e inteiro, por cima do gradiente */
 /* Print do projeto como capa: mostra o canto de cima do ecrã */
 .cover img.cover-print { object-position: top left; }
+/* Prints de telemóvel: mostra o meio do ecrã (a biblioteca), não o topo */
+.cover img.cover-print.cover-print-meio { object-position: center 38%; }
 .cover img.cover-logo { inset: 18%; width: 64%; height: 64%; object-fit: contain; }
 /* Logos com fundo próprio (quadrado, ex.: Helpdesk TI) ficam mais pequenos, para não encherem a capa */
 .cover img.cover-logo.logo-quadrado { inset: 28%; width: 44%; height: 44%; }
@@ -256,3 +258,7 @@ html.reveal-ready .reveal.in { opacity: 1; transform: none; }
 /* Com galeria, a capa grande da janela sai (os prints já mostram o projeto) */
 .proj-dialog.com-galeria .dlg-cover { display: none; }
 .proj-dialog.com-galeria .dlg-body { padding-top: 60px; }
+
+/* Prints de telemóvel (ao alto): mais estreitos, cabem quase dois de cada vez */
+.galeria-telemovel figure { flex-basis: 46%; }
+.galeria-telemovel img { aspect-ratio: 720 / 1447; object-fit: contain; }
