@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Logo: um bilhete (ticket) com o picotado e um visto — pedido aberto, pedido resolvido -->
+  <rect width="64" height="64" rx="16" fill="#2e6a8e"/>
+  <path d="M14 22a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4v5a5 5 0 0 0 0 10v5a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4v-5a5 5 0 0 0 0-10z" fill="#fff"/>
+  <path d="M40 19v26" stroke="#2e6a8e" stroke-width="2" stroke-dasharray="3 3"/>
+  <path d="M21 32.5l4.5 4.5L34 28" fill="none" stroke="#2e6a8e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
