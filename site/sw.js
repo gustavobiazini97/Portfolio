@@ -2,14 +2,14 @@
 // e permite que o Chrome o ofereça como app instalável.
 
 // Mudar a versão obriga a recriar a cache (e apaga a antiga no activate)
-const CACHE = 'portfolio-v9';
+const CACHE = 'portfolio-v10';
 
 // Ficheiros base, guardados logo na instalação
 const SHELL = [
   './',
   './index.html',
-  './style.css',
-  './script.js',
+  './style.css?v=10',
+  './script.js?v=10',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
@@ -19,7 +19,8 @@ const SHELL = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE)
-      .then(cache => cache.addAll(SHELL))
+      // cache: 'reload' vai sempre à rede (sem isto, o browser podia dar a cópia antiga da sua própria cache)
+      .then(cache => cache.addAll(SHELL.map(u => new Request(u, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
