@@ -175,6 +175,10 @@ section[id], footer[id] { scroll-margin-top: 80px; }
   width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto;
   background: var(--card); color: var(--ink);
 }
+/* O scroll dentro da janela não passa para a página de trás */
+.proj-dialog { overscroll-behavior: contain; }
+/* Com a janela aberta, a página de fundo fica parada (não faz scroll) */
+html:has(.proj-dialog[open]) { overflow: hidden; }
 .proj-dialog::backdrop { background: oklch(0.15 0.01 60 / 0.45); backdrop-filter: blur(4px); }
 .proj-dialog[open] { animation: dlg-in 0.4s cubic-bezier(.2,.7,.3,1); }
 .proj-dialog[open]::backdrop { animation: fade-in 0.3s ease; }
