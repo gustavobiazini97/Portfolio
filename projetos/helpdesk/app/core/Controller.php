@@ -53,7 +53,9 @@ abstract class Controller
             flash('aviso', 'Define uma palavra-passe tua antes de continuar.');
             redirecionar('perfil', 'index');
         }
+        // (no config.php, 'admin_2fa_obrigatorio' => false desliga isto: só para testes locais)
         if ($u['papel'] === 'admin' && (int) $u['totp_ativo'] !== 1 && (int) $u['mudar_password'] !== 1
+            && config('admin_2fa_obrigatorio', true)
             && !in_array($rota, ['perfil/configurar2fa', 'perfil/ativar2fa'], true)) {
             flash('aviso', 'As contas de administrador precisam de verificação em dois passos (2FA).');
             redirecionar('perfil', 'configurar2fa');

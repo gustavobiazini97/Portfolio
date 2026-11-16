@@ -6,6 +6,9 @@ return [
     // true só no PC de desenvolvimento: mostra os erros no ecrã. Em produção fica SEMPRE false.
     'debug' => false,
 
+    // 2FA obrigatório para administradores. Pôr false SÓ num PC de testes (nunca em produção).
+    'admin_2fa_obrigatorio' => true,
+
     // Nome mostrado no topo, no título das páginas e nos emails
     'app_nome' => 'Helpdesk TI',
     'empresa'  => 'Macolis',
