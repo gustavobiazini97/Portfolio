@@ -83,36 +83,23 @@
   <button type="submit" class="btn btn-secundario">Guardar</button>
 </form>
 
-<!-- Notificações: o que receber (linhas) e por onde (colunas) -->
+<!-- Notificações: o que receber no telemóvel (app Android e site instalado). Já não há avisos por email. -->
 <form class="form vidro notif" method="post" action="<?= e(url('perfil', 'guardarNotificacoes')) ?>">
   <?= csrf_campo() ?>
   <h2 class="notif-titulo">Notificações</h2>
-  <p class="notif-sub">Quando o teu par ou um amigo marca episódios, comenta, traz uma série nova ou te pede amizade.</p>
+  <p class="notif-sub">Avisos no telemóvel quando o teu par ou um amigo marca episódios, comenta, traz uma série nova ou te pede amizade. Escolhe o que queres receber.</p>
 
-  <div class="notif-grade" role="group" aria-label="O que receber e por onde">
-    <span></span><span class="notif-col">Telemóvel</span><span class="notif-col">Email</span>
-
-    <span>Episódios marcados</span>
-    <label class="interruptor"><input type="checkbox" name="ep_push" value="1" <?= $pref->ep_push ? 'checked' : '' ?>><i></i><span class="escondido">Episódios no telemóvel</span></label>
-    <label class="interruptor"><input type="checkbox" name="ep_email" value="1" <?= $pref->ep_email ? 'checked' : '' ?>><i></i><span class="escondido">Episódios por email</span></label>
-
-    <span>Comentários</span>
-    <label class="interruptor"><input type="checkbox" name="com_push" value="1" <?= $pref->com_push ? 'checked' : '' ?>><i></i><span class="escondido">Comentários no telemóvel</span></label>
-    <label class="interruptor"><input type="checkbox" name="com_email" value="1" <?= $pref->com_email ? 'checked' : '' ?>><i></i><span class="escondido">Comentários por email</span></label>
-
-    <span>Pedidos de amizade</span>
-    <label class="interruptor"><input type="checkbox" name="amigo_push" value="1" <?= $pref->amigo_push ? 'checked' : '' ?>><i></i><span class="escondido">Amizades no telemóvel</span></label>
-    <label class="interruptor"><input type="checkbox" name="amigo_email" value="1" <?= $pref->amigo_email ? 'checked' : '' ?>><i></i><span class="escondido">Amizades por email</span></label>
-
-    <span>Séries novas e propostas</span>
-    <label class="interruptor"><input type="checkbox" name="serie_push" value="1" <?= $pref->serie_push ? 'checked' : '' ?>><i></i><span class="escondido">Séries no telemóvel</span></label>
-    <label class="interruptor"><input type="checkbox" name="serie_email" value="1" <?= $pref->serie_email ? 'checked' : '' ?>><i></i><span class="escondido">Séries por email</span></label>
+  <div class="notif-grade" role="group" aria-label="O que receber no telemóvel">
+    <?php foreach ([
+      'ep_push'    => 'Episódios marcados',
+      'com_push'   => 'Comentários',
+      'amigo_push' => 'Pedidos de amizade',
+      'serie_push' => 'Séries novas e propostas',
+    ] as $campo => $rotulo): ?>
+      <span><?= e($rotulo) ?></span>
+      <label class="interruptor"><input type="checkbox" name="<?= $campo ?>" value="1" <?= $pref->$campo ? 'checked' : '' ?>><i></i><span class="escondido"><?= e($rotulo) ?></span></label>
+    <?php endforeach; ?>
   </div>
-
-  <label class="campo">
-    <span>email</span>
-    <input type="email" name="email" value="<?= e($pref->email ?? '') ?>" autocomplete="email" placeholder="só se quiseres receber por email">
-  </label>
 
   <button type="submit" class="btn btn-secundario">Guardar notificações</button>
 

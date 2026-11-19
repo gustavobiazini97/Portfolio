@@ -67,6 +67,14 @@ foreach ($colunas as [$tabela, $coluna, $definicao]) {
     }
 }
 
+// Avisos por email acabaram: apaga os emails guardados e desliga as colunas antigas (não guardar dados sem uso)
+$limpos = Capsule::table('preferencias')
+    ->where(fn ($q) => $q->whereNotNull('email')->orWhere('ep_email', 1)->orWhere('com_email', 1)->orWhere('amigo_email', 1)->orWhere('serie_email', 1))
+    ->update(['email' => null, 'ep_email' => 0, 'com_email' => 0, 'amigo_email' => 0, 'serie_email' => 0]);
+if ($limpos > 0) {
+    echo "Emails das notificações apagados: $limpos.\n";
+}
+
 // Backoffice: se ainda não há nenhum admin, a conta mais antiga (a do dono da app) passa a admin.
 // Depois disto só se muda no backoffice.
 if (Capsule::table('users')->where('admin', 1)->count() === 0 && Capsule::table('users')->count() > 0) {

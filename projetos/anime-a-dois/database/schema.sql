@@ -92,18 +92,19 @@ CREATE TABLE IF NOT EXISTS config_app (
   valor TEXT         NOT NULL
 ) ENGINE=InnoDB;
 
--- O que cada pessoa quer receber, e por onde (sem linha = valores por defeito)
+-- O que cada pessoa quer receber no telemóvel (sem linha = tudo ligado).
+-- As colunas *_email e email são ANTIGAS: os avisos por email acabaram (19/11/2026) e o migrate.php limpa-as.
 CREATE TABLE IF NOT EXISTS preferencias (
   user_id    INT UNSIGNED PRIMARY KEY,
-  email      VARCHAR(190) NULL,                    -- para onde vão os emails (opcional)
+  email      VARCHAR(190) NULL,                    -- ANTIGO (fica sempre vazio)
   ep_push    TINYINT(1)   NOT NULL DEFAULT 1,      -- episódios marcados → telemóvel
-  ep_email   TINYINT(1)   NOT NULL DEFAULT 0,      -- episódios marcados → email
+  ep_email   TINYINT(1)   NOT NULL DEFAULT 0,      -- ANTIGO
   com_push   TINYINT(1)   NOT NULL DEFAULT 1,      -- comentários → telemóvel
-  com_email  TINYINT(1)   NOT NULL DEFAULT 0,      -- comentários → email
+  com_email  TINYINT(1)   NOT NULL DEFAULT 0,      -- ANTIGO
   amigo_push  TINYINT(1)  NOT NULL DEFAULT 1,      -- pedidos de amizade (recebido / aceite) → telemóvel
-  amigo_email TINYINT(1)  NOT NULL DEFAULT 0,      -- pedidos de amizade → email
+  amigo_email TINYINT(1)  NOT NULL DEFAULT 0,      -- ANTIGO
   serie_push  TINYINT(1)  NOT NULL DEFAULT 1,      -- séries adicionadas/propostas → telemóvel
-  serie_email TINYINT(1)  NOT NULL DEFAULT 0,      -- séries adicionadas/propostas → email
+  serie_email TINYINT(1)  NOT NULL DEFAULT 0,      -- ANTIGO
   CONSTRAINT fk_pref_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -121,7 +122,17 @@ CREATE TABLE IF NOT EXISTS tokens (
   CONSTRAINT fk_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Telemóveis/browsers com notificações ativas (uma pessoa pode ter vários)
+-- Telemóveis com a app Android que recebem notificações pelo Firebase (token FCM; ver app/models/Fcm.php)
+CREATE TABLE IF NOT EXISTS dispositivos (
+  id        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id   INT UNSIGNED NOT NULL,
+  token     VARCHAR(255) NOT NULL UNIQUE,         -- token do Firebase deste telemóvel
+  criado_em DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  visto_em  DATETIME     NULL,                     -- última vez que a app o confirmou
+  CONSTRAINT fk_disp_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Browsers com notificações ativas (site instalado; Web Push). Uma pessoa pode ter vários
 CREATE TABLE IF NOT EXISTS subscricoes (
   id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id    INT UNSIGNED NOT NULL,

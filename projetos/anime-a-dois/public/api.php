@@ -84,6 +84,9 @@ $rotas = [
     ['DELETE', '/perfil/foto',                        PerfilApi::class,      'removerFoto'],
     ['GET',    '/perfil/notificacoes',                PerfilApi::class,      'notificacoes'],
     ['PUT',    '/perfil/notificacoes',                PerfilApi::class,      'guardarNotificacoes'],
+    ['POST',   '/perfil/notificacoes/teste',          PerfilApi::class,      'testarNotificacao'],
+    ['POST',   '/dispositivos',                       PerfilApi::class,      'registarDispositivo'],
+    ['DELETE', '/dispositivos',                       PerfilApi::class,      'removerDispositivo'],
     ['GET',    '/utilizadores/{id}/foto',             PerfilApi::class,      'foto'],
 ];
 

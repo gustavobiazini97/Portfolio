@@ -15,7 +15,7 @@ class PerfilController extends Controller
             'versao'      => Novidade::ultima(),   // "nível de atualização" mostrado no botão de procurar atualizações
             'pref'        => Preferencia::de($user),
             'vapidPublica' => Notificador::vapid()['publicKey'],   // o browser precisa dela para subscrever
-            'telemoveis'  => Subscricao::where('user_id', $user->id)->count(),
+            'telemoveis'  => Subscricao::where('user_id', $user->id)->count() + Dispositivo::where('user_id', $user->id)->count(),
         ]);
     }
 
@@ -294,32 +294,13 @@ class PerfilController extends Controller
         $this->json(['ok' => true, 'mensagem' => 'Notificações desligadas neste telemóvel.']);
     }
 
-    // POST: envia uma notificação de teste para ti (telemóvel e/ou email)
+    // POST: envia uma notificação de teste para os teus telemóveis (app e site instalado)
     public function testarNotificacao(): void
     {
         $this->exigirPost();
         $user = $this->exigirLogin();
-        $pref = Preferencia::de($user);
-
-        // No máximo 5 testes por hora: sem isto o botão servia para encher de emails a caixa de alguém
-        if (!Limite::registar('teste-notif:' . $user->id, 5, 3600)) {
-            $this->json(['ok' => false, 'mensagem' => 'Já fizeste muitos testes. Tenta daqui a uma hora.'], 429);
-        }
-
-        $msg = ['titulo' => 'Anime a Dois', 'corpo' => 'As notificações estão a funcionar 🎉',
-                'url' => url_absoluto() . url('home'), 'tag' => 'teste'];
-
-        $partes = [];
-        try {
-            $n = Notificador::push($user, $msg);
-            $partes[] = $n > 0 ? 'enviada para ' . plural($n, 'telemóvel', 'telemóveis') : 'nenhum telemóvel ativo';
-        } catch (Throwable $e) {
-            $partes[] = 'o push falhou';
-        }
-        if ($pref->email) {
-            $partes[] = Notificador::email($pref->email, $msg) ? 'email enviado' : 'o email falhou';
-        }
-        $this->json(['ok' => true, 'mensagem' => 'Teste: ' . implode(', ', $partes) . '.']);
+        [$ok, $mensagem] = Notificador::teste($user);
+        $this->json(['ok' => $ok, 'mensagem' => $mensagem], $ok ? 200 : 429);
     }
 
     // Resposta comum: JSON para o fetch, ou aviso + volta ao perfil (Post/Redirect/Get)

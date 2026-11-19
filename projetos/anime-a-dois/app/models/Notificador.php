@@ -1,6 +1,7 @@
 <?php
-// Envia ao par as notificações de "marcou episódios", "comentou" e "adicionou/propôs uma série",
-// por telemóvel (Web Push) e/ou email, conforme as preferências DELE. Uma falha aqui nunca estraga o marcar/comentar.
+// Envia as notificações de "marcou episódios", "comentou", séries e amizades para o telemóvel de quem as deve
+// receber, se essa pessoa as tiver ligadas: app Android (Firebase, ver Fcm.php) e site instalado (Web Push).
+// Uma falha aqui nunca estraga o marcar/comentar.
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Minishlink\WebPush\Subscription;
@@ -121,26 +122,56 @@ class Notificador
         ]);
     }
 
+    // Notificação de teste para a própria pessoa (botão no perfil, site e app). Devolve [ok, mensagem].
+    // No máximo 5 por hora, para o botão não servir para encher o telemóvel de avisos.
+    public static function teste(User $user): array
+    {
+        if (!Limite::registar('teste-notif:' . $user->id, 5, 3600)) {
+            return [false, 'Já fizeste muitos testes. Tenta daqui a uma hora.'];
+        }
+        $n = self::telemovel($user, [
+            'titulo' => 'Anime a Dois',
+            'corpo'  => 'As notificações estão a funcionar 🎉',
+            'url'    => url_absoluto() . url('home'),
+            'tag'    => 'teste',
+        ]);
+        return [true, $n > 0
+            ? 'Teste enviado para ' . plural($n, 'telemóvel', 'telemóveis') . '.'
+            : 'Nenhum telemóvel com notificações ativas.'];
+    }
+
     // ---------- Envio ----------
 
-    // Envia a uma pessoa pelos canais que ela escolheu; $tipo: 'ep', 'com', 'serie' ou 'amigo'
+    // Envia a uma pessoa, se ela tiver este tipo ligado; $tipo: 'ep', 'com', 'serie' ou 'amigo'
     private static function paraPessoa(User $destino, string $tipo, array $msg): void
     {
-        $par  = $destino;
-        $pref = Preferencia::de($par);
+        if (!Preferencia::de($destino)->{$tipo . '_push'}) {
+            return;
+        }
 
         // Links absolutos (a notificação abre fora da página)
         $msg['url'] = url_absoluto() . $msg['url'];
 
         // Depois de a resposta chegar ao telemóvel de quem marcou (não atrasa o botão)
-        depois(function () use ($par, $pref, $tipo, $msg) {
-            if ($pref->{$tipo . '_push'}) {
-                self::push($par, $msg);
-            }
-            if ($pref->{$tipo . '_email'} && $pref->email) {
-                self::email($pref->email, $msg);
-            }
-        });
+        depois(fn () => self::telemovel($destino, $msg));
+    }
+
+    // Para todos os telemóveis da pessoa: app Android (Firebase) + site instalado (Web Push).
+    // Devolve quantos a receberam. Uma falha num canal não impede o outro.
+    public static function telemovel(User $destino, array $msg): int
+    {
+        $n = 0;
+        try {
+            $n += Fcm::enviar($destino, $msg);
+        } catch (Throwable $e) {
+            error_log('[fcm] ' . $e->getMessage());
+        }
+        try {
+            $n += self::push($destino, $msg);
+        } catch (Throwable $e) {
+            error_log('Push falhou: ' . $e->getMessage());
+        }
+        return $n;
     }
 
     // Web Push para todos os telemóveis do par; subscrições que já não existem são apagadas
@@ -180,19 +211,5 @@ class Notificador
             }
         }
         return $enviados;
-    }
-
-    // Email simples em texto, pelo correio do alojamento
-    public static function email(string $para, array $msg): bool
-    {
-        $de = Database::config()['email_de'] ?? 'animeadois@alwaysdata.net';
-        $cabecalhos = implode("\r\n", [
-            'From: Anime a Dois <' . $de . '>',
-            'Content-Type: text/plain; charset=UTF-8',
-            'Content-Transfer-Encoding: 8bit',
-        ]);
-        $corpo = $msg['corpo'] . "\n\nAbrir: " . $msg['url'] . "\n\n— Anime a Dois (podes desligar estes emails no teu perfil)";
-
-        return @mail($para, mb_encode_mimeheader($msg['titulo'], 'UTF-8'), $corpo, $cabecalhos);
     }
 }

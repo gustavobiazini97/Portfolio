@@ -1,5 +1,6 @@
 <?php
-// O que cada pessoa quer receber (episódios / comentários / séries) e por onde (telemóvel / email).
+// O que cada pessoa quer receber no telemóvel: episódios, comentários, séries e pedidos de amizade.
+// (Chega à app Android pelo Firebase e ao site instalado pelo Web Push. Já não há avisos por email.)
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,42 +11,37 @@ class Preferencia extends Model
     public $incrementing = false;
     public $timestamps = false;
 
-    protected $fillable = ['user_id', 'email', 'ep_push', 'ep_email', 'com_push', 'com_email', 'serie_push', 'serie_email', 'amigo_push', 'amigo_email'];
+    // Os quatro interruptores (o formulário do site e a API usam estes nomes)
+    const TIPOS = ['ep_push', 'com_push', 'amigo_push', 'serie_push'];
 
-    protected $casts = ['ep_push' => 'boolean', 'ep_email' => 'boolean', 'com_push' => 'boolean', 'com_email' => 'boolean',
-                        'serie_push' => 'boolean', 'serie_email' => 'boolean', 'amigo_push' => 'boolean', 'amigo_email' => 'boolean'];
+    protected $fillable = ['user_id', 'ep_push', 'com_push', 'serie_push', 'amigo_push'];
 
-    // Preferências de uma pessoa; sem linha na tabela devolve os valores por defeito (só telemóvel)
+    protected $casts = ['ep_push' => 'boolean', 'com_push' => 'boolean', 'serie_push' => 'boolean', 'amigo_push' => 'boolean'];
+
+    // Preferências de uma pessoa; sem linha na tabela fica tudo ligado
     public static function de(User $user): Preferencia
     {
         return static::find($user->id)
-            ?? new static(['user_id' => $user->id, 'email' => null, 'ep_push' => true, 'ep_email' => false, 'com_push' => true, 'com_email' => false,
-                           'serie_push' => true, 'serie_email' => false, 'amigo_push' => true, 'amigo_email' => false]);
+            ?? new static(['user_id' => $user->id, 'ep_push' => true, 'com_push' => true, 'serie_push' => true, 'amigo_push' => true]);
     }
 
-    // Guarda o formulário do perfil; lança InvalidArgumentException com a mensagem para o utilizador
+    // Guarda os interruptores (o que não vier marcado fica desligado)
     public static function guardar(User $user, array $dados): Preferencia
     {
-        $email = trim($dados['email'] ?? '');
-        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException('Esse email não parece válido.');
+        $valores = [];
+        foreach (self::TIPOS as $tipo) {
+            $valores[$tipo] = !empty($dados[$tipo]);
         }
+        return static::updateOrCreate(['user_id' => $user->id], $valores);
+    }
 
-        $querEmail = !empty($dados['ep_email']) || !empty($dados['com_email']) || !empty($dados['serie_email']) || !empty($dados['amigo_email']);
-        if ($querEmail && $email === '') {
-            throw new InvalidArgumentException('Para receber por email, escreve o teu email.');
+    // Para a API: os quatro valores
+    public function paraJson(): array
+    {
+        $r = [];
+        foreach (self::TIPOS as $tipo) {
+            $r[$tipo] = (bool) $this->$tipo;
         }
-
-        return static::updateOrCreate(['user_id' => $user->id], [
-            'email'     => $email === '' ? null : $email,
-            'ep_push'   => !empty($dados['ep_push']),
-            'ep_email'  => !empty($dados['ep_email']),
-            'com_push'  => !empty($dados['com_push']),
-            'com_email' => !empty($dados['com_email']),
-            'serie_push'  => !empty($dados['serie_push']),
-            'serie_email' => !empty($dados['serie_email']),
-            'amigo_push'  => !empty($dados['amigo_push']),
-            'amigo_email' => !empty($dados['amigo_email']),
-        ]);
+        return $r;
     }
 }

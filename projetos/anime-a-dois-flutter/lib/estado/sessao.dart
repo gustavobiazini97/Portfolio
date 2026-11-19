@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import 'avisos.dart';
 
 class Sessao extends ChangeNotifier {
   Sessao._();
@@ -91,6 +92,7 @@ class Sessao extends ChangeNotifier {
 
   // Termina a sessão neste telemóvel (avisa a API; se falhar, sai na mesma)
   Future<void> sair() async {
+    await Avisos.instancia.desativar(); // antes do logout: ainda há token para dizer à API
     try {
       await Api.instancia.post('/auth/logout');
     } on ApiErro {

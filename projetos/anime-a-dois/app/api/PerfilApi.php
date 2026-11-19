@@ -105,30 +105,46 @@ class PerfilApi extends ApiController
         exit;
     }
 
-    // GET /perfil/notificacoes — o que queres receber e por onde
+    // GET /perfil/notificacoes — o que queres receber no telemóvel
     public function notificacoes(): void
     {
         $user = $this->exigirToken();
-        $this->json(['ok' => true, 'preferencias' => $this->prefJson(Preferencia::de($user))]);
+        $this->json(['ok' => true, 'preferencias' => Preferencia::de($user)->paraJson()]);
     }
 
-    // PUT /perfil/notificacoes  { email, ep_push, ep_email, com_push, com_email }
+    // PUT /perfil/notificacoes  { ep_push, com_push, amigo_push, serie_push }
     public function guardarNotificacoes(): void
     {
         $user = $this->exigirToken();
-        $pref = Preferencia::guardar($user, $this->corpo());   // valida o email → 422 se falhar
-        $this->json(['ok' => true, 'mensagem' => 'Notificações guardadas.', 'preferencias' => $this->prefJson($pref)]);
+        $pref = Preferencia::guardar($user, $this->corpo());
+        $this->json(['ok' => true, 'mensagem' => 'Notificações guardadas.', 'preferencias' => $pref->paraJson()]);
     }
 
-    // Preferências com tipos certos (booleanos em vez de 0/1)
-    private function prefJson(Preferencia $p): array
+    // POST /perfil/notificacoes/teste — notificação de teste para os teus telemóveis (máx. 5 por hora)
+    public function testarNotificacao(): void
     {
-        return [
-            'email'     => $p->email,
-            'ep_push'   => (bool) $p->ep_push,
-            'ep_email'  => (bool) $p->ep_email,
-            'com_push'  => (bool) $p->com_push,
-            'com_email' => (bool) $p->com_email,
-        ];
+        $user = $this->exigirToken();
+        [$ok, $mensagem] = Notificador::teste($user);
+        $ok ? $this->ok($mensagem) : $this->erro($mensagem, 429);
+    }
+
+    // POST /dispositivos { token } — este telemóvel passa a receber as tuas notificações (token do Firebase)
+    public function registarDispositivo(): void
+    {
+        $user = $this->exigirToken();
+        try {
+            Dispositivo::registar($user, (string) $this->campo('token', ''));
+        } catch (InvalidArgumentException $e) {
+            $this->erro($e->getMessage());
+        }
+        $this->ok('Notificações ativas neste telemóvel.');
+    }
+
+    // DELETE /dispositivos { token } — terminar sessão: este telemóvel deixa de receber
+    public function removerDispositivo(): void
+    {
+        $user = $this->exigirToken();
+        Dispositivo::remover($user, (string) $this->campo('token', ''));
+        $this->ok('Notificações desligadas neste telemóvel.');
     }
 }

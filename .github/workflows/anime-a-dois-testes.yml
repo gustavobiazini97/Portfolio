@@ -76,3 +76,4 @@ jobs:
           php -S 127.0.0.1:8099 -t public > /tmp/servidor.log 2>&1 &
           sleep 1
           php tests/seguranca_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }
+          php tests/notificacoes_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }

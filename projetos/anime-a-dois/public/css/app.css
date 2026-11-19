@@ -336,7 +336,7 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .notif-titulo { font-size: 15px; font-weight: 500; }
 .notif-sub { margin-top: -8px; font-size: 13px; color: var(--suave); }
 /* Grelha: o quê (linhas) × por onde (colunas) */
-.notif-grade { display: grid; grid-template-columns: 1fr 72px 56px; align-items: center; row-gap: 12px; font-size: 14px; }
+.notif-grade { display: grid; grid-template-columns: 1fr 56px; align-items: center; row-gap: 12px; font-size: 14px; }
 .notif-col { font-size: 12px; color: var(--suave); text-align: center; }
 .notif-grade .interruptor { justify-self: center; }
 

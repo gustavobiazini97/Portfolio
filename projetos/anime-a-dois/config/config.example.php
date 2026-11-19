@@ -21,8 +21,12 @@ return [
     // Número máximo de contas: o registo fecha quando chega a este valor
     'max_contas' => 2,
 
-    // Remetente dos emails de notificação (no alwaysdata, o email da conta)
+    // Contacto das chaves VAPID (Web Push do site instalado); não se enviam emails
     'email_de' => 'animeadois@alwaysdata.net',
+
+    // Chave da conta de serviço do Firebase (JSON secreto) para as notificações da app Android.
+    // Por defeito: firebase-conta.json na pasta acima da app (no alwaysdata, ~/firebase-conta.json).
+    // 'fcm_conta' => '/caminho/para/firebase-conta.json',
 
     // APIs de anime, chamadas pelo browser (o servidor não as usa):
     //   anilist → pesquisa, capas e número de episódios; kitsu → títulos dos episódios;

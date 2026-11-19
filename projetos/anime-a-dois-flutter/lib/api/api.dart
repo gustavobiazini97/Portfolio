@@ -57,8 +57,10 @@ class Api {
   Future<Map<String, dynamic>> put(String rota, [Map<String, dynamic>? corpo]) =>
       _enviar(() => http.put(_uri(rota), headers: _comJson, body: jsonEncode(corpo ?? {})));
 
-  Future<Map<String, dynamic>> delete(String rota) =>
-      _enviar(() => http.delete(_uri(rota), headers: cabecalhos));
+  // Com corpo (opcional) em JSON, ex.: DELETE /dispositivos { token }
+  Future<Map<String, dynamic>> delete(String rota, [Map<String, dynamic>? corpo]) => _enviar(() => corpo == null
+      ? http.delete(_uri(rota), headers: cabecalhos)
+      : http.delete(_uri(rota), headers: _comJson, body: jsonEncode(corpo)));
 
   // Envia um ficheiro (multipart), ex.: a foto de perfil
   Future<Map<String, dynamic>> enviarFicheiro(String rota, String campo, String caminho) {

@@ -131,7 +131,10 @@ As medalhas são calculadas a partir dos dados que já existem (Model `Conquista
 | POST | `/perfil/apagar` | 🔒 | `password` |
 | POST | `/perfil/foto` | 🔒 | multipart, campo `foto` |
 | DELETE | `/perfil/foto` | 🔒 | |
-| GET / PUT | `/perfil/notificacoes` | 🔒 | `email`, `ep_push`, `ep_email`, `com_push`, `com_email` |
+| GET / PUT | `/perfil/notificacoes` | 🔒 | `ep_push`, `com_push`, `amigo_push`, `serie_push` (booleanos) |
+| POST | `/perfil/notificacoes/teste` | 🔒 | (máx. 5 por hora; 429 depois) |
+| POST | `/dispositivos` | 🔒 | `token` (Firebase Cloud Messaging deste telemóvel) |
+| DELETE | `/dispositivos` | 🔒 | `token` (ao terminar sessão) |
 | GET | `/utilizadores/{id}/foto` | 🔒 | (a imagem) |
 
 ## Objetos
@@ -154,4 +157,4 @@ As medalhas são calculadas a partir dos dados que já existem (Model `Conquista
 
 - Backoffice de admin e popup de novidades: só no site.
 - Sincronizar fillers/episódios novos de séries em emissão: feito pelo site quando alguém abre a série.
-- Notificações nativas na app (precisaria de Firebase): continuam a chegar pela app do site e por email.
+- (As notificações da app chegam pelo Firebase: a app regista o token em `POST /dispositivos` e o servidor envia com `app/models/Fcm.php`.)
