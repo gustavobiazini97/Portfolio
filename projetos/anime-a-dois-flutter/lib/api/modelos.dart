@@ -364,23 +364,21 @@ class ConviteAmigo {
 
 // ---------- Notificações ----------
 
+// O que a pessoa quer receber no telemóvel (já não há avisos por email)
 class Preferencias {
-  String email;
-  bool epPush, epEmail, comPush, comEmail;
+  bool epPush, comPush, amigoPush, seriePush;
 
   Preferencias.deJson(Map<String, dynamic> j)
-      : email = j['email'] as String? ?? '',
-        epPush = j['ep_push'] == true,
-        epEmail = j['ep_email'] == true,
-        comPush = j['com_push'] == true,
-        comEmail = j['com_email'] == true;
+      : epPush = j['ep_push'] != false,
+        comPush = j['com_push'] != false,
+        amigoPush = j['amigo_push'] != false,
+        seriePush = j['serie_push'] != false;
 
   // Formato que o PUT /perfil/notificacoes espera
   Map<String, dynamic> paraJson() => {
-        'email': email,
         'ep_push': epPush,
-        'ep_email': epEmail,
         'com_push': comPush,
-        'com_email': comEmail,
+        'amigo_push': amigoPush,
+        'serie_push': seriePush,
       };
 }

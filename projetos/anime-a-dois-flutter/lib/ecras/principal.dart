@@ -18,6 +18,7 @@ import 'amigos.dart';
 import 'biblioteca.dart';
 import 'inicio.dart';
 import 'pessoa.dart';
+import '../estado/avisos.dart';
 
 class EcraPrincipal extends StatefulWidget {
   const EcraPrincipal({super.key});
@@ -41,6 +42,8 @@ class _EcraPrincipalState extends State<EcraPrincipal> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) Atualizacoes.verificarAoAbrir(context);
     });
+    // Notificações: pede a permissão (só da primeira vez) e regista este telemóvel no servidor
+    Avisos.instancia.ativar();
   }
 
   // Separadores (o "+" não é um separador: está entre o 2.º e o 3.º)

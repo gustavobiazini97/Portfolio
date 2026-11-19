@@ -1,5 +1,13 @@
 [
   {
+    "versao": "1.12.0",
+    "notas": [
+      "A app passa a receber notificações: episódios, comentários, séries e pedidos de amizade",
+      "Nas definições escolhes o que queres receber e tens um botão para enviar um teste",
+      "Os avisos por email acabaram"
+    ]
+  },
+  {
     "versao": "1.11.2",
     "notas": [
       "Terminar sessão está agora no topo do Perfil, ao lado da ⚙️ (antes era preciso ir às definições e descer até ao fim)"

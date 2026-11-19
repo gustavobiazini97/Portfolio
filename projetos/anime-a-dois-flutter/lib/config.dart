@@ -15,6 +15,13 @@ const String appNome = 'Anime a Dois';
 // Vai nos convites partilhados em Amigos.
 const String linkApp = 'https://animeadois.alwaysdata.net/app';
 
+// Projeto Firebase (notificações; ver estado/avisos.dart). Vêm do google-services.json da app Android
+// e não são secretos (vão dentro de qualquer APK). Vazios = notificações desligadas.
+const String firebaseApiKey = 'AIzaSyDaD5ZWUaZucsZnijgS7lLn1_qGUCxyGEY';
+const String firebaseAppId = '1:195788818177:android:037b2345b62b4c56bc7d00';
+const String firebaseSenderId = '195788818177';
+const String firebaseProjectId = 'anime-a-dois';
+
 // Ficheiro com a última versão publicada (gerado pelo workflow do APK, na release do GitHub).
 // O APK de teste é compilado com --dart-define=VERSAO_URL=… a apontar para a release de teste.
 const String linkVersao = String.fromEnvironment(

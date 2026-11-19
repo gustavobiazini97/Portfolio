@@ -82,6 +82,37 @@ jobs:
             sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>\n    <application|' "$M"
           grep -n 'INTERNET\|INSTALL_PACKAGES\|android:label' "$M"
 
+      # Notificações (Firebase): ícone pequeno branco + cor, permissão do Android 13+ e minSdk 23 (exigido pelo Firebase)
+      - name: Notificações (Firebase)
+        run: |
+          cp -r android-extra/res/. android/app/src/main/res/
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q 'POST_NOTIFICATIONS' "$M" || \
+            sed -i 's|<application|<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <application|' "$M"
+          python3 - <<'PY'
+          import pathlib
+          m = pathlib.Path("android/app/src/main/AndroidManifest.xml")
+          s = m.read_text()
+          meta = ('<meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_notificacao"/>\n'
+                  '        <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/notificacao"/>\n'
+                  '        <activity')
+          if "default_notification_icon" not in s:
+              if "<activity" not in s:
+                  raise SystemExit("AndroidManifest sem <activity>")
+              s = s.replace("<activity", meta, 1)
+              m.write_text(s)
+          g = pathlib.Path("android/app/build.gradle.kts")
+          t = g.read_text()
+          if "minSdk = flutter.minSdkVersion" in t:
+              t = t.replace("minSdk = flutter.minSdkVersion", "minSdk = maxOf(flutter.minSdkVersion, 23)")
+              g.write_text(t)
+          elif "minSdk" not in t:
+              raise SystemExit("build.gradle.kts sem minSdk")
+          print("Manifest e minSdk ajustados.")
+          PY
+          grep -n 'POST_NOTIFICATIONS\|default_notification' "$M"
+          grep -n 'minSdk' android/app/build.gradle.kts
+
       # MainActivity com o canal do instalador (android-extra/MainActivity.kt) por cima do gerado
       - name: MainActivity (instalar atualizações)
         run: |

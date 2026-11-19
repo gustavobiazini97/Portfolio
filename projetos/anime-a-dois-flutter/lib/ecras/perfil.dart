@@ -1,5 +1,5 @@
 // Definições do perfil (abre na ⚙️ do separador Perfil): foto, nome e utilizador, palavra-passe, cores (6 paletas), privacidade,
-// notificações, tema, terminar sessão e apagar conta.
+// notificações (só telemóvel, com botão de teste), tema e apagar conta. Terminar sessão está no topo do Perfil.
 // Os dados aparecem como texto (lápis para editar) e a palavra-passe muda-se numa folha que sobe de baixo:
 // nada de campos sempre abertos.
 
@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
+import '../estado/avisos.dart';
 import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
@@ -33,12 +34,12 @@ class _EcraPerfilState extends State<EcraPerfil> {
   final _atual = TextEditingController();
   final _nova = TextEditingController();
   final _confirmar = TextEditingController();
-  final _email = TextEditingController();
 
   // Botões a rodar (um por secção)
   bool _aGuardarNome = false;
   bool _aEditarDados = false; // "Os teus dados" em modo de edição (lápis)
   bool _aGuardarNotif = false;
+  bool _aTestar = false;
   bool _aGuardarFoto = false;
   bool _soJuntos = false; // privacidade: os amigos só veem as séries que vês com eles
   String _versao = ''; // versão instalada (ex.: "1.3.0 (build 45)")
@@ -55,7 +56,7 @@ class _EcraPerfilState extends State<EcraPerfil> {
 
   @override
   void dispose() {
-    for (final c in [_nome, _username, _atual, _nova, _confirmar, _email]) {
+    for (final c in [_nome, _username, _atual, _nova, _confirmar]) {
       c.dispose();
     }
     super.dispose();
@@ -71,7 +72,6 @@ class _EcraPerfilState extends State<EcraPerfil> {
         _soJuntos = Sessao.instancia.soJuntos;
         _definirUser(Utilizador.deJson(r[0]['user'] as Map<String, dynamic>));
         _pref = Preferencias.deJson(r[1]['preferencias'] as Map<String, dynamic>);
-        _email.text = _pref!.email;
         _erro = null;
       });
     } on ApiErro catch (e) {
@@ -215,7 +215,6 @@ class _EcraPerfilState extends State<EcraPerfil> {
   Future<void> _guardarNotificacoes() async {
     final pref = _pref;
     if (pref == null) return;
-    pref.email = _email.text.trim();
     setState(() => _aGuardarNotif = true);
     try {
       final d = await Api.instancia.put('/perfil/notificacoes', pref.paraJson());
@@ -226,6 +225,20 @@ class _EcraPerfilState extends State<EcraPerfil> {
       if (mounted) aviso(context, e.mensagem, erro: true);
     } finally {
       if (mounted) setState(() => _aGuardarNotif = false);
+    }
+  }
+
+  // Notificação de teste para este e os outros telemóveis da pessoa (máx. 5 por hora)
+  Future<void> _testarNotificacao() async {
+    setState(() => _aTestar = true);
+    try {
+      await Avisos.instancia.ativar(); // garante que este telemóvel está registado
+      final d = await Api.instancia.post('/perfil/notificacoes/teste');
+      if (mounted) aviso(context, d['mensagem'] as String);
+    } on ApiErro catch (e) {
+      if (mounted) aviso(context, e.mensagem, erro: true);
+    } finally {
+      if (mounted) setState(() => _aTestar = false);
     }
   }
 
@@ -489,26 +502,24 @@ class _EcraPerfilState extends State<EcraPerfil> {
               children: [
                 const TituloSecao('Notificações'),
                 Text(
-                  'O que recebes quando o teu par marca episódios ou comenta. '
-                  '"Telemóvel" é a app do site instalada (Web Push); esta app ainda não recebe notificações.',
+                  'Avisos no telemóvel quando o teu par ou um amigo marca episódios, comenta, '
+                  'traz uma série nova ou te pede amizade. Escolhe o que queres receber.',
                   style: textos.bodySmall?.copyWith(color: p.suave),
                 ),
                 const SizedBox(height: 6),
-                _interruptor('Episódios → telemóvel', pref.epPush, (v) => pref.epPush = v),
-                _interruptor('Episódios → email', pref.epEmail, (v) => pref.epEmail = v),
-                _interruptor('Comentários → telemóvel', pref.comPush, (v) => pref.comPush = v),
-                _interruptor('Comentários → email', pref.comEmail, (v) => pref.comEmail = v),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  autocorrect: false,
-                  decoration: const InputDecoration(labelText: 'Email (opcional)'),
-                ),
+                _interruptor('Episódios marcados', pref.epPush, (v) => pref.epPush = v),
+                _interruptor('Comentários', pref.comPush, (v) => pref.comPush = v),
+                _interruptor('Pedidos de amizade', pref.amigoPush, (v) => pref.amigoPush = v),
+                _interruptor('Séries novas e propostas', pref.seriePush, (v) => pref.seriePush = v),
                 const SizedBox(height: 12),
                 FilledButton(
                   onPressed: _aGuardarNotif ? null : _guardarNotificacoes,
                   child: const Text('Guardar notificações'),
+                ),
+                const SizedBox(height: 6),
+                OutlinedButton(
+                  onPressed: _aTestar ? null : _testarNotificacao,
+                  child: const Text('Enviar teste'),
                 ),
               ],
             ),
