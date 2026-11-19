@@ -19,12 +19,21 @@ class AuthApi extends ApiController
     // POST /auth/login  { username, password, dispositivo? }
     public function login(): void
     {
-        $user = User::autenticar((string) $this->campo('username', ''), (string) $this->campo('password', ''));
+        $username = (string) $this->campo('username', '');
+
+        // Força bruta: demasiadas falhas deste IP ou para este utilizador → 429, sem verificar a palavra-passe
+        if (Limite::loginBloqueado($username)) {
+            $this->erro(Limite::MENSAGEM_LOGIN, 429);
+        }
+
+        $user = User::autenticar($username, (string) $this->campo('password', ''));
 
         // Null guard: mesma mensagem para utilizador inexistente e palavra-passe errada
         if ($user === null) {
+            Limite::loginFalhou($username);
             $this->erro('Utilizador ou palavra-passe errados.', 401);
         }
+        Limite::loginCerto($username);
 
         $this->json([
             'ok'    => true,

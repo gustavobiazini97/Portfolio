@@ -344,6 +344,22 @@ Sugestão do professor: expor os dados por uma API e fazer uma app nativa que a 
 
 - A MariaDB do alojamento está no fuso de Paris: as colunas com `DEFAULT CURRENT_TIMESTAMP` (amizades, pedidos, convites) ficavam 1 h à frente. `Database::boot()` passa a ligar com `timezone` = fuso do PHP (Europe/Lisbon). Vistos e comentários já eram gravados pelo PHP e estavam certos. As linhas antigas criadas pela BD continuam 1 h à frente.
 
+### Segurança (15 de novembro, servidor + app 1.11.1)
+
+Auditoria ao código seguindo o checklist das regras de construção (OWASP). Corrigido:
+
+- **Limite de tentativas de login** (`Limite`, tabela `limites`): 5 falhas por utilizador ou 20 por IP em 15 min bloqueiam 15 min, no site e na API (429). As falhas ficam no log.
+- **Séries:** só quem tem a série na biblioteca a pode atualizar (antes qualquer conta mexia em qualquer série). Ao criar ou atualizar, o servidor confirma nome, capa, total e emissão no AniList (`DadosAnime::confirmar`); episódios além do total confirmado ficam de fora. Se o AniList não responder, ficam os dados do browser.
+- **Juntar a uma série de um amigo** passa a enviar-lhe um convite (só veem juntos quando ele aceitar; se ele já te tinha convidado, é como aceitar). Com o par continua direto. Antes um amigo tornava-se companheiro sem autorização e via comentários e progresso, furando o "só o que vemos juntos".
+- **Cabeçalhos de segurança** em todas as respostas (`cabecalhos_seguranca()`): CSP, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS (por HTTPS), sem X-Powered-By. `display_errors` desligado também no site.
+- **Mudar a palavra-passe no site** termina também as sessões da app Android; repor a palavra-passe no backoffice termina todas as sessões dessa conta.
+- **Push:** só endpoints dos serviços de push dos browsers (FCM, Mozilla, Windows, Apple). **Testar notificação:** no máximo 5 por hora.
+- **Fotos:** imagens com mais de 8000 px de lado ou 40 MP são recusadas antes de abrir (evita esgotar a memória).
+- **API:** a raiz (`/api.php`) já não lista as rotas. **Registo por convite** numa transação (sem contas soltas).
+- **Testes:** `tests/seguranca_test.php` + workflow `anime-a-dois-testes.yml` (MariaDB + servidor do PHP) em cada push e PR.
+
+Por fazer (precisa do painel do alwaysdata): chave SSH para o deploy e um utilizador da base de dados só para a app, em vez da palavra-passe da conta para tudo; ativar "forçar HTTPS" no site.
+
 ### Pré-visualização do link (15 de novembro, só servidor)
 
 - `layout/header.php` passa a ter meta description e Open Graph/Twitter. Assim o link mostra título, descrição e imagem no LinkedIn (Featured), no WhatsApp, etc. Antes o LinkedIn não conseguia gerar a pré-visualização e não deixava guardar.

@@ -28,6 +28,7 @@ Sucesso: `{ "ok": true, ... }`. Erro: `{ "ok": false, "mensagem": "..." }`, pron
 |---|---|
 | 200 / 201 | Correu bem (201 ao criar conta, série ou comentário) |
 | 401 | Sem token, token errado ou expirado → voltar ao login |
+| 429 | Demasiadas tentativas de login (5 falhas por utilizador ou 20 por IP em 15 min) → esperar 15 min |
 | 403 | Série fora da tua biblioteca, ou comentário de outra pessoa |
 | 404 | Rota, série, episódio, comentário ou pessoa inexistente |
 | 405 | Rota existe, mas com outro método |
@@ -67,12 +68,12 @@ Sucesso: `{ "ok": true, ... }`. Erro: `{ "ok": false, "mensagem": "..." }`, pron
 | POST | `/series/{slug}/convites` | 🔒 | `com` | "Quero ver contigo" |
 | POST | `/series/{slug}/convites/aceitar` | 🔒 | `de` | aceita: passam a ver juntos |
 | DELETE | `/series/{slug}/convites/{id}` | 🔒 | | recusa (ou cancela o que enviaste) |
-| POST | `/series/{slug}/juntar` | 🔒 | `com?` | entra numa série de alguém ligado a ti |
+| POST | `/series/{slug}/juntar` | 🔒 | `com?` | entra numa série de alguém ligado a ti; com o par veem juntos logo, com um amigo fica um convite para ele aceitar (`resultado`: `so`, `juntos` ou `convite`) |
 | DELETE | `/series/{slug}/juntos/{id}` | 🔒 | | deixam de ver juntos |
 | DELETE | `/series/{slug}` | 🔒 | | tira da tua biblioteca (só sem episódios marcados) |
 
 `info` e `episodios` vêm da pesquisa feita no telemóvel (AniList; episódios do Jikan ou do Kitsu), tal como no site;
-o servidor valida tudo em `DadosAnime`.
+o servidor valida tudo em `DadosAnime` e, ao criar ou atualizar uma série, confirma nome, capa e total no AniList.
 
 ### Comentários
 

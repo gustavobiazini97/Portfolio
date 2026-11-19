@@ -79,12 +79,12 @@ class BibliotecaApi extends ApiController
         $user  = $this->exigirToken();
         $serie = $this->serieOu404($slug);
         $com   = (int) $this->campo('com', 0) > 0 ? $this->ligado((int) $this->campo('com'), $user) : null;
-        $serie->juntarSe($user, $com);
+        $resultado = $serie->juntarSe($user, $com);
         if ($com !== null) {
-            Notificador::serie($user, $serie, 'juntou', $com);
+            // Com o par (ou a aceitar um convite) passam a ver juntos; com um amigo fica um convite para ele aceitar
+            Notificador::serie($user, $serie, $resultado === 'juntos' ? 'juntou' : 'convite', $com);
         }
-        $this->ok($com ? $serie->nomeCurto() . ' entrou na tua biblioteca e vês com ' . $com->nome . '.'
-                       : $serie->nomeCurto() . ' entrou na tua biblioteca.');
+        $this->ok(Serie::textoJuntar($serie, $resultado, $com), ['resultado' => $resultado]);
     }
 
     // DELETE /series/{slug}/juntos/{id} — tu e {id} deixam de ver a série juntos (cada um fica com a sua)

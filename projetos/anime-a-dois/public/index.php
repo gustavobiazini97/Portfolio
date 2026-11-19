@@ -14,6 +14,13 @@ session_start();
 
 require __DIR__ . '/../app/bootstrap.php';
 
+// Erros do PHP nunca aparecem na página em produção (ficam só no log do servidor)
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
+// CSP, nosniff, sem iframes, HSTS... (ver cabecalhos_seguranca em app/core/helpers.php)
+cabecalhos_seguranca();
+
 // Sessão expirada mas com "manter sessão iniciada": reabre-a pelo cookie
 SessaoLonga::restaurar();
 

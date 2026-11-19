@@ -254,6 +254,10 @@ class Serie extends Model
             });
         }
 
+        // Série nova na app: o AniList confirma nome, capa e total (os dados do browser podiam ser falsos)
+        $info = DadosAnime::confirmar($info);
+        $episodios = DadosAnime::cortar($episodios, $info);
+
         $total = self::totalDe($info, $episodios);
         if ($total < 1) {
             throw new InvalidArgumentException('Ainda não se sabe quantos episódios tem ' . $info['nome'] . '.');
@@ -298,6 +302,12 @@ class Serie extends Model
     public function atualizarDoMal(array $info, ?array $episodios, bool $comFillers = false): int
     {
         $antes = (int) $this->total_episodios;
+
+        // O AniList confirma capa, total e emissão; episódios além do total confirmado ficam de fora
+        $info = DadosAnime::confirmar($info);
+        if ($episodios !== null) {
+            $episodios = DadosAnime::cortar($episodios, $info);
+        }
         $this->capa = $info['capa'] ?? $this->capa;
 
         // Série do seed: só a capa (os episódios vêm do Naruto Fillers)
@@ -470,8 +480,11 @@ class Serie extends Model
 
     // Entras numa série que o teu par ou um amigo já tem (fila "está a ver", perfil de um amigo).
     //   $com = null → entra na tua biblioteca, cada um vê a sua (sem partilhar nada);
-    //   $com = ele  → passam a vê-la juntos (ele é avisado)
-    public function juntarSe(User $u, ?User $com): void
+    //   $com = o par → passam a vê-la juntos logo (o par já vê tudo um do outro);
+    //   $com = um amigo → precisa do sim dele: fica um convite para ele (ou, se ele já te tinha convidado, aceitas).
+    //   Sem isto um amigo tornava-se companheiro sem autorização e via comentários e progresso (furando o "só juntos").
+    // Devolve o que aconteceu: 'so' (só tu), 'juntos' (passam a ver juntos) ou 'convite' (à espera do amigo)
+    public function juntarSe(User $u, ?User $com): string
     {
         if ($this->naBibliotecaDe($u)) {
             throw new InvalidArgumentException($this->nomeCurto() . ' já está na tua biblioteca.');
@@ -481,12 +494,34 @@ class Serie extends Model
                 throw new InvalidArgumentException($this->nomeCurto() . ' não está na biblioteca dessa pessoa.');
             }
         }
-        Capsule::connection()->transaction(function () use ($u, $com) {
+
+        // O amigo já te tinha convidado para esta série: é o mesmo que aceitar
+        $jaConvidado = $com !== null && Capsule::table('convites_serie')
+            ->where('serie_id', $this->id)->where('de_id', $com->id)->where('para_id', $u->id)->exists();
+        $direto = $com !== null && ((int) $com->id === (int) $u->par_id || $jaConvidado);
+
+        return Capsule::connection()->transaction(function () use ($u, $com, $direto) {
             $this->juntarA($u, 'a_ver');
-            if ($com !== null) {
-                $this->ligar($u, $com);
+            if ($com === null) {
+                return 'so';
             }
+            if ($direto) {
+                $this->ligar($u, $com);   // também apaga convites pendentes entre os dois
+                return 'juntos';
+            }
+            $this->convidar($u, $com);
+            return 'convite';
         });
+    }
+
+    // Mensagem do juntarSe() para o site e para a app
+    public static function textoJuntar(Serie $serie, string $resultado, ?User $com): string
+    {
+        return match ($resultado) {
+            'juntos'  => $serie->nomeCurto() . ' entrou na tua biblioteca e vês com ' . $com->nome . '.',
+            'convite' => $serie->nomeCurto() . ' entrou na tua biblioteca. ' . $com->nome . ' recebeu um convite para verem juntos.',
+            default   => $serie->nomeCurto() . ' entrou na tua biblioteca.',
+        };
     }
 
     // Tu e $com deixam de ver a série juntos (cada um fica com a sua biblioteca e o seu progresso)

@@ -5,6 +5,8 @@
               $capa (função: Serie + classe → HTML da capa) */
 $s    = $item['serie'];
 $prog = $s->progressoDe($dono);
+// O par junta-se logo; um amigo só depois de aceitar o convite (ver Serie::juntarSe)
+$ehPar = (int) $dono->par_id === (int) ($_SESSION['user_id'] ?? 0);
 ?>
 <dialog class="folha vidro folha-par" id="juntar-<?= (int) $dono->id ?>-<?= e($s->slug) ?>" aria-label="<?= e($s->nomeCurto()) ?>">
   <div class="folha-cima">
@@ -33,7 +35,12 @@ $prog = $s->progressoDe($dono);
       <?= csrf_campo() ?>
       <input type="hidden" name="serie" value="<?= e($s->slug) ?>">
       <input type="hidden" name="com" value="<?= (int) $dono->id ?>">
-      <button type="submit" class="btn btn-secundario">Ver com <?= e($dono->nome) ?></button>
+      <button type="submit" class="btn btn-secundario"><?= $ehPar ? 'Ver com ' : 'Convidar ' ?><?= e($dono->nome) ?></button>
     </form>
-    <p class="pessoa-legenda par-nota">Vêem juntos: o teu progresso começa do zero e <?= e($dono->nome) ?> recebe um aviso.</p>
+    <?php if ($ehPar): ?>
+      <p class="pessoa-legenda par-nota">Vêem juntos: o teu progresso começa do zero e <?= e($dono->nome) ?> recebe um aviso.</p>
+    <?php else: ?>
+      <!-- Com um amigo é preciso o sim dele: só passam a ver juntos quando ele aceitar o convite -->
+      <p class="pessoa-legenda par-nota">A série entra já na tua biblioteca e <?= e($dono->nome) ?> recebe um convite. Quando aceitar, passam a ver juntos.</p>
+    <?php endif; ?>
 </dialog>

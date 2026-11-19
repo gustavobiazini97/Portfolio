@@ -31,6 +31,11 @@ class Foto extends Model
         if ($info === false || !in_array($info[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP, IMAGETYPE_GIF], true)) {
             throw new InvalidArgumentException('Escolhe uma imagem JPG, PNG ou WebP.');
         }
+        // Uma imagem pequena em bytes pode dizer que tem 50 000 × 50 000 píxeis e esgotar a memória ao abrir:
+        // recusar antes de a descomprimir (8000 px de lado e 40 megapíxeis chegam para qualquer telemóvel)
+        if ($info[0] < 1 || $info[1] < 1 || $info[0] > 8000 || $info[1] > 8000 || $info[0] * $info[1] > 40_000_000) {
+            throw new InvalidArgumentException('Essa imagem é grande demais. Escolhe uma mais pequena.');
+        }
 
         $origem = @imagecreatefromstring(file_get_contents($caminho));
         if ($origem === false) {

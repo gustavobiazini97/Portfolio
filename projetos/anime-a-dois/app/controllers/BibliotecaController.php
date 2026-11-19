@@ -43,11 +43,15 @@ class BibliotecaController extends Controller
     public function atualizar(): void
     {
         $this->exigirPost();
-        $this->exigirLogin();
+        $user = $this->exigirLogin();
 
         $serie = Serie::porSlug($_POST['serie'] ?? null);
         if ($serie === null || $serie->mal_id === null) {
             $this->json(['ok' => false, 'mensagem' => 'Essa série já não existe.'], 404);
+        }
+        // Só quem tem a série na biblioteca a pode atualizar (antes qualquer conta mexia em qualquer série)
+        if (!$serie->naBibliotecaDe($user)) {
+            $this->json(['ok' => false, 'mensagem' => $serie->nomeCurto() . ' não está na tua biblioteca.'], 403);
         }
 
         try {
@@ -113,13 +117,12 @@ class BibliotecaController extends Controller
 
         try {
             $com = (int) ($_POST['com'] ?? 0) > 0 ? $this->ligado((int) $_POST['com'], $user) : null;
-            $serie->juntarSe($user, $com);
+            $resultado = $serie->juntarSe($user, $com);
             if ($com !== null) {
-                Notificador::serie($user, $serie, 'juntou', $com);
+                // Com o par (ou a aceitar um convite) passam a ver juntos; com um amigo fica um convite para ele aceitar
+                Notificador::serie($user, $serie, $resultado === 'juntos' ? 'juntou' : 'convite', $com);
             }
-            $this->responder(true,
-                $com ? $serie->nomeCurto() . ' entrou na tua biblioteca e vês com ' . $com->nome . '.' : $serie->nomeCurto() . ' entrou na tua biblioteca.',
-                url('home', 'index', ['serie' => $serie->slug]));
+            $this->responder(true, Serie::textoJuntar($serie, $resultado, $com), url('home', 'index', ['serie' => $serie->slug]));
         } catch (InvalidArgumentException $e) {
             $this->responder(false, $e->getMessage());
         }

@@ -87,6 +87,9 @@ class AdminController extends Controller
                 }
                 $conta->password_hash = password_hash($nova, PASSWORD_DEFAULT);
                 $conta->save();
+                // Palavra-passe reposta: todas as sessões dessa conta (site mantido e app) terminam
+                Token::where('user_id', $conta->id)->delete();
+                \Illuminate\Database\Capsule\Manager::table('sessoes_longas')->where('user_id', $conta->id)->delete();
             }
             $this->flash('sucesso', 'Conta atualizada.');
             $this->redirect('admin');

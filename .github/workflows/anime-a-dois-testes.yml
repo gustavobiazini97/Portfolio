@@ -1,0 +1,74 @@
+# Testes do Anime a Dois (site + API) com uma base de dados MariaDB e o servidor do PHP a correr.
+# Correm a cada push e em cada pull request que mexa na app: um teste a falhar fica a vermelho no PR,
+# antes de chegar ao main (e ao deploy).
+
+name: Testes Anime a Dois
+
+on:
+  push:
+    paths:
+      - 'projetos/anime-a-dois/**'
+      - '.github/workflows/anime-a-dois-testes.yml'
+  pull_request:
+    paths:
+      - 'projetos/anime-a-dois/**'
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projetos/anime-a-dois
+
+    # Base de dados só para os testes (começa vazia em cada execução)
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: raiz
+          MARIADB_DATABASE: anime_teste
+          MARIADB_USER: app
+          MARIADB_PASSWORD: app
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, pdo_mysql, curl, mbstring
+          tools: composer
+
+      - name: composer install
+        run: composer install --no-interaction --no-progress
+
+      # config.php de teste a partir do exemplo
+      - name: Gerar config.php
+        run: |
+          php -r '
+            $c = require "config/config.example.php";
+            $c["db"]["host"] = "127.0.0.1";
+            $c["db"]["database"] = "anime_teste";
+            $c["db"]["username"] = "app";
+            $c["db"]["password"] = "app";
+            $c["max_contas"] = 2;
+            file_put_contents("config/config.php", "<?php\nreturn " . var_export($c, true) . ";\n");
+          '
+
+      - name: Criar as tabelas
+        run: php database/migrate.php
+
+      - name: Testes sem base de dados
+        run: php tests/medalhas_datas_test.php
+
+      # O site corre no servidor embutido do PHP; os testes falam com ele por HTTP
+      - name: Testes de segurança
+        run: |
+          php -S 127.0.0.1:8099 -t public > /tmp/servidor.log 2>&1 &
+          sleep 1
+          php tests/seguranca_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }

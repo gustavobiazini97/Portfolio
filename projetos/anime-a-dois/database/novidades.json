@@ -166,6 +166,15 @@
       "itens": [
         "Toca numa medalha que já ganhaste para ver o dia em que a conseguiste."
       ]
+    },
+    {
+      "id": 20,
+      "data": "2026-11-15",
+      "titulo": "Mais segurança",
+      "itens": [
+        "O login bloqueia 15 minutos depois de várias tentativas erradas.",
+        "Juntar-te a uma série de um amigo envia-lhe um convite: só passam a ver juntos quando ele aceitar."
+      ]
     }
   ]
 }

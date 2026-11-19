@@ -554,7 +554,8 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
             ),
             onPressed: _ocupado ? null : () => _juntar(s, comEle: true),
             icon: const Icon(Icons.group_add_rounded, size: 18),
-            label: Text('Ver com ${u.nome}', overflow: TextOverflow.ellipsis),
+            // Com um amigo é um convite (ele tem de aceitar); com o par passam logo a ver juntos
+            label: Text('${_ehPar ? 'Ver com' : 'Convidar'} ${u.nome}', overflow: TextOverflow.ellipsis),
           ),
         ),
         PopupMenuButton<String>(

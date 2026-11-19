@@ -22,14 +22,25 @@ class AuthController extends Controller
     {
         $this->exigirPost();
 
+        $username = (string) ($_POST['username'] ?? '');
+
+        // Força bruta: demasiadas falhas deste IP ou para este utilizador → nem se verifica a palavra-passe
+        if (Limite::loginBloqueado($username)) {
+            $this->guardarAntigo(['username' => $username]);
+            $this->flash('erro', Limite::MENSAGEM_LOGIN);
+            $this->redirect('auth', 'login');
+        }
+
         try {
-            $user = User::autenticar($_POST['username'] ?? '', $_POST['password'] ?? '');
+            $user = User::autenticar($username, (string) ($_POST['password'] ?? ''));
 
             if ($user === null) {
-                $this->guardarAntigo(['username' => $_POST['username'] ?? '']);
+                Limite::loginFalhou($username);
+                $this->guardarAntigo(['username' => $username]);
                 $this->flash('erro', 'Utilizador ou palavra-passe errados.');
                 $this->redirect('auth', 'login');
             }
+            Limite::loginCerto($username);
 
             // Novo ID de sessão ao entrar (evita fixação de sessão)
             session_regenerate_id(true);
