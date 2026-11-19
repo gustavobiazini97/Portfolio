@@ -53,6 +53,8 @@ class Fcm
         if ($tokens === [] || $conta === null) {
             return 0;
         }
+        // O ícone da notificação fica com a cor da paleta que esta pessoa escolheu na app
+        $msg['cor'] ??= User::CORES_PALETA[(int) $destino->paleta] ?? User::CORES_PALETA[0];
 
         $enviados = 0;
         foreach ($tokens as $token) {
@@ -87,6 +89,7 @@ class Fcm
             'ttl'      => '86400s',                               // guarda até 1 dia se o telemóvel estiver desligado
             'notification' => array_filter([
                 'tag'   => $msg['tag'] ?? null,                   // a mesma etiqueta substitui em vez de empilhar
+                'color' => $msg['cor'] ?? null,                   // cor do ícone (#RRGGBB, a paleta da pessoa)
                 'image' => $msg['imagem'] ?? null,                // capa da série em grande
             ]),
         ];

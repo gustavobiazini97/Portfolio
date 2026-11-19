@@ -108,10 +108,18 @@ jobs:
               g.write_text(t)
           elif "minSdk" not in t:
               raise SystemExit("build.gradle.kts sem minSdk")
+          # APK mais pequeno: as bibliotecas nativas (.so, ~28 MB) vão comprimidas dentro do APK
+          # (o Android descomprime-as ao instalar). Download de cada atualização: ~28 MB → ~13 MB.
+          t = g.read_text()
+          if "useLegacyPackaging" not in t:
+              if "\nandroid {" not in t:
+                  raise SystemExit("build.gradle.kts sem bloco android")
+              t = t.replace("\nandroid {", "\nandroid {\n    packaging { jniLibs { useLegacyPackaging = true } }", 1)
+              g.write_text(t)
           print("Manifest e minSdk ajustados.")
           PY
           grep -n 'POST_NOTIFICATIONS\|default_notification' "$M"
-          grep -n 'minSdk' android/app/build.gradle.kts
+          grep -n 'minSdk\|useLegacyPackaging' android/app/build.gradle.kts
 
       # MainActivity com o canal do instalador (android-extra/MainActivity.kt) por cima do gerado
       - name: MainActivity (instalar atualizações)
@@ -215,7 +223,9 @@ jobs:
           if [ "$GITHUB_REF" != "refs/heads/main" ]; then
             VERSAO_DEFINE="--dart-define=VERSAO_URL=https://github.com/gustavobiazini97/Portfolio/releases/download/anime-a-dois-teste/versao.json"
           fi
+          # --split-debug-info: os símbolos de depuração do Dart ficam fora do APK (mais pequeno; não muda nada na app)
           if ! flutter build apk --release --split-per-abi --target-platform android-arm64 \
+                 --split-debug-info=build/simbolos \
                  --dart-define=API_URL="$API_URL" $VERSAO_DEFINE \
                  --build-number=${{ github.run_number }} > build.txt 2>&1; then
             cat build.txt

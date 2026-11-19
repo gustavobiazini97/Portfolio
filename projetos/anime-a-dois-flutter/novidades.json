@@ -1,5 +1,12 @@
 [
   {
+    "versao": "1.12.1",
+    "notas": [
+      "As notificações mostram o logótipo da app, na cor da paleta que escolheste",
+      "Atualizações mais leves: a app descarrega menos de metade do que antes"
+    ]
+  },
+  {
     "versao": "1.12.0",
     "notas": [
       "A app passa a receber notificações: episódios, comentários, séries e pedidos de amizade",
