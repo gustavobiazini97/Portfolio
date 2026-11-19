@@ -55,6 +55,8 @@ $colunas = [
     ['users', 'paleta',            'TINYINT UNSIGNED NOT NULL DEFAULT 0'],
     ['users', 'admin',             'TINYINT(1) NOT NULL DEFAULT 0'],
     ['users', 'ultimo_acesso',     'DATETIME NULL'],
+    ['users', 'totp_segredo',      'VARCHAR(64) NULL'],
+    ['users', 'totp_passo',        'INT UNSIGNED NULL'],
 ];
 
 $schema = Capsule::schema();

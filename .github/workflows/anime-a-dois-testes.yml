@@ -47,6 +47,10 @@ jobs:
       - name: composer install
         run: composer install --no-interaction --no-progress
 
+      # Dependências com falhas de segurança conhecidas chumbam o teste (e o servidor não publica)
+      - name: composer audit
+        run: composer audit --no-dev --abandoned=report
+
       # config.php de teste a partir do exemplo
       - name: Gerar config.php
         run: |

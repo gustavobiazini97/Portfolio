@@ -24,6 +24,14 @@ class AuthController extends Controller
 
         $username = (string) ($_POST['username'] ?? '');
 
+        // Robô (preencheu o campo isco): conta como falha e responde como a uma palavra-passe errada
+        if ($this->eBot('login')) {
+            Limite::loginFalhou($username);
+            $this->guardarAntigo(['username' => $username]);
+            $this->flash('erro', 'Utilizador ou palavra-passe errados.');
+            $this->redirect('auth', 'login');
+        }
+
         // Força bruta: demasiadas falhas deste IP ou para este utilizador → nem se verifica a palavra-passe
         if (Limite::loginBloqueado($username)) {
             $this->guardarAntigo(['username' => $username]);
@@ -89,6 +97,12 @@ class AuthController extends Controller
     public function registar(): void
     {
         $this->exigirPost();
+
+        // Robô: campo isco preenchido ou formulário enviado em menos de 3 segundos
+        if ($this->eBot('registo', 3)) {
+            $this->flash('erro', 'Pedido inválido. Tenta outra vez.');
+            $this->redirect('auth', 'registo', !empty($_POST['convite']) ? ['convite' => $_POST['convite']] : []);
+        }
 
         try {
             $convite = isset($_POST['convite']) && $_POST['convite'] !== '' ? Amizade::convite($_POST['convite']) : null;

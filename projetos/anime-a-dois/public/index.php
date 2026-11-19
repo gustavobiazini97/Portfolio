@@ -21,6 +21,14 @@ ini_set('log_errors', '1');
 // CSP, nosniff, sem iframes, HSTS... (ver cabecalhos_seguranca em app/core/helpers.php)
 cabecalhos_seguranca();
 
+// Sessão parada há mais de 2 h, ou com mais de 12 h: começa do zero (ver sessao_expirada em helpers.php)
+if (sessao_expirada($_SESSION, time())) {
+    $_SESSION = [];
+    session_regenerate_id(true);
+}
+$_SESSION['_inicio'] ??= time();
+$_SESSION['_ultimo'] = time();
+
 // Sessão expirada mas com "manter sessão iniciada": reabre-a pelo cookie
 SessaoLonga::restaurar();
 
@@ -37,7 +45,7 @@ $rotas = [
     'amigos' => ['index', 'criarConvite', 'pedir', 'aceitar', 'recusar', 'remover'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],
     'biblioteca' => ['adicionar', 'atualizar', 'estado', 'convidar', 'juntar', 'aceitar', 'recusar', 'separar', 'remover'],
-    'admin' => ['index', 'novo', 'criar', 'editar', 'guardar', 'apagar'],
+    'admin' => ['index', 'codigo', 'confirmarCodigo', 'novo', 'criar', 'editar', 'guardar', 'apagar'],
     'perfil' => ['index', 'pessoa', 'medalhas', 'foto', 'enviarFoto', 'removerFoto', 'guardarNome', 'guardarPassword', 'guardarPaleta', 'guardarPrivacidade', 'apagarConta',
                  'guardarNotificacoes', 'subscrever', 'desubscrever', 'testarNotificacao'],
 ];

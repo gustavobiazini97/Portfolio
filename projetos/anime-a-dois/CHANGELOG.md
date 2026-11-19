@@ -360,6 +360,15 @@ Auditoria ao código seguindo o checklist das regras de construção (OWASP). Co
 
 Por fazer (precisa do painel do alwaysdata): utilizador da base de dados só para a app e ativar "forçar HTTPS" no site. A chave SSH deixou de ser precisa (ver "Deploy pelo servidor").
 
+### Segurança para o lançamento (19 de novembro)
+
+- **2FA no backoffice:** código TOTP (Google/Microsoft Authenticator) antes de entrar no admin, pedido outra vez após 30 min sem uso. Na primeira vez mostra a chave para pôr na app. O mesmo código não serve duas vezes e 5 erros em 15 min bloqueiam. Recuperação no SSH: `php database/repor-2fa.php <utilizador>`. Colunas novas `users.totp_segredo` e `users.totp_passo` (nunca saem no JSON).
+- **Sessão:** termina após 2 h sem pedidos ou 12 h desde o início (`sessao_expirada` em helpers.php). Com "manter sessão iniciada" volta logo pelo cookie; o 2FA não.
+- **Anti-bots:** campo isco escondido no login e no registo; o registo também recusa envios em menos de 3 s.
+- **CORS:** a API deixa de enviar `Access-Control-Allow-Origin: *`.
+- **`composer audit`** no workflow de testes: dependências com falhas conhecidas chumbam os testes (e o servidor não publica).
+- **Letra alojada no site** (`public/fonts/`, licença OFL): sem Google Fonts, CSP só `'self'` para estilos e fontes; service worker v10.
+
 ### Deploy pelo servidor (19 de novembro)
 
 - O workflow de deploy (`.github/workflows/anime-a-dois.yml`) e o secret `AD_PASSWORD` saem: o GitHub deixa de ter acesso ao alwaysdata.

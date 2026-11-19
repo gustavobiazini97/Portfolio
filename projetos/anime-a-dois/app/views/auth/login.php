@@ -18,6 +18,7 @@
   <!-- Formulário num painel de vidro, encostado ao fundo do ecrã -->
   <form class="form vidro" method="post" action="<?= e(url('auth', 'entrar')) ?>">
     <?= csrf_campo() ?>
+    <?= isco_campo('login') ?>
 
     <label class="campo">
       <span>utilizador</span>

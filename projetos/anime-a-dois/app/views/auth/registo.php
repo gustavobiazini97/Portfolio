@@ -26,6 +26,7 @@
 
   <form class="form vidro" method="post" action="<?= e(url('auth', 'registar')) ?>">
     <?= csrf_campo() ?>
+    <?= isco_campo('registo') ?>
     <?php if ($convite): ?><input type="hidden" name="convite" value="<?= e($convite->codigo) ?>"><?php endif; ?>
 
     <label class="campo">

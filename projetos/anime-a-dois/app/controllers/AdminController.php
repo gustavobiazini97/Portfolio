@@ -1,9 +1,68 @@
 <?php
 // Backoffice (só contas admin): números da app e gestão de contas (ver, criar, editar, repor palavra-passe, apagar).
 // Quem é admin define-se no database/migrate.php (a conta mais antiga); aqui não se promove ninguém.
+// Todas as páginas pedem antes o código de 2 fatores (exigirAdmin → codigo/confirmarCodigo).
 
 class AdminController extends Controller
 {
+    // GET: pede o código de 6 dígitos; na primeira vez mostra o segredo para pôr na app de autenticação
+    public function codigo(): void
+    {
+        $user = $this->exigirAdminSemCodigo();
+        if (DoisFatores::sessaoValida($user)) {
+            $this->redirect('admin');
+        }
+
+        // Ainda sem 2FA: segredo novo guardado só na sessão até o primeiro código o confirmar
+        $configurar = $user->totp_segredo === null;
+        if ($configurar) {
+            $_SESSION['_2fa_novo'] ??= DoisFatores::novoSegredo();
+        }
+
+        $this->render('admin/codigo', [
+            'titulo'     => 'Código de acesso',
+            'configurar' => $configurar,
+            'segredo'    => $configurar ? $_SESSION['_2fa_novo'] : null,
+            'link'       => $configurar ? DoisFatores::link($_SESSION['_2fa_novo'], $user->username) : null,
+        ]);
+    }
+
+    // POST: verifica o código (e, na primeira vez, grava o segredo)
+    public function confirmarCodigo(): void
+    {
+        $this->exigirPost();
+        $user = $this->exigirAdminSemCodigo();
+
+        if (DoisFatores::bloqueado($user)) {
+            $this->flash('erro', 'Demasiados códigos errados. Espera 15 minutos.');
+            $this->redirect('admin', 'codigo');
+        }
+
+        $codigo = (string) ($_POST['codigo'] ?? '');
+        $segredo = $user->totp_segredo ?? ($_SESSION['_2fa_novo'] ?? null);
+        $passo = $segredo === null ? null
+            : DoisFatores::verificar($segredo, $codigo, $user->totp_passo !== null ? (int) $user->totp_passo : null);
+
+        if ($passo === null) {
+            DoisFatores::falhou($user);
+            $this->flash('erro', 'Código errado ou expirado. Usa o que a app mostra agora.');
+            $this->redirect('admin', 'codigo');
+        }
+
+        try {
+            $user->totp_segredo = $segredo;   // na primeira vez fica gravado aqui
+            $user->totp_passo = $passo;
+            $user->save();
+        } catch (PDOException $e) {
+            $this->flash('erro', 'Não foi possível guardar. Tenta outra vez.');
+            $this->redirect('admin', 'codigo');
+        }
+        unset($_SESSION['_2fa_novo']);
+        Limite::limpar('2fa:' . $user->id);
+        DoisFatores::marcarSessao($user);
+        $this->redirect('admin');
+    }
+
     // GET: números + lista de contas (?q= filtra por nome ou utilizador)
     public function index(): void
     {

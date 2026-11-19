@@ -82,6 +82,22 @@ abstract class Controller
         }
     }
 
+    // Pedido de um robô? Preencheu o campo isco, ou (com $minimo > 0) enviou o formulário
+    // menos de $minimo segundos depois de o abrir (ninguém escreve nome e palavra-passe tão depressa).
+    protected function eBot(string $formulario, int $minimo = 0): bool
+    {
+        if (trim((string) ($_POST[ISCO_CAMPO] ?? '')) !== '') {
+            return true;
+        }
+        if ($minimo > 0) {
+            $mostrado = $_SESSION['_form_em'][$formulario] ?? null;
+            if ($mostrado === null || time() - (int) $mostrado < $minimo) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Utilizador com sessão iniciada, ou null
     protected function utilizador(): ?User
     {
@@ -104,8 +120,19 @@ abstract class Controller
         return $user;
     }
 
-    // Backoffice: só contas admin; as outras vão para o início sem saber que a página existe
+    // Backoffice: só contas admin, e só depois do código de 2 fatores (pedido de 30 em 30 min sem uso).
+    // As outras contas vão para o início sem saber que a página existe.
     protected function exigirAdmin(): User
+    {
+        $user = $this->exigirAdminSemCodigo();
+        if (!DoisFatores::sessaoValida($user)) {
+            $this->redirect('admin', 'codigo');
+        }
+        return $user;
+    }
+
+    // Admin com sessão iniciada, ainda sem o código (só para as páginas do próprio código)
+    protected function exigirAdminSemCodigo(): User
     {
         $user = $this->exigirLogin();
         if (!$user->ehAdmin()) {

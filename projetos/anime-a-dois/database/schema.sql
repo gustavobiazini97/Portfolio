@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
   paleta        TINYINT UNSIGNED NOT NULL DEFAULT 0,   -- cores da app que ele escolheu (índice em User::PALETAS)
   admin         TINYINT(1)   NOT NULL DEFAULT 0,   -- 1 = tem acesso ao backoffice (?c=admin)
   ultimo_acesso DATETIME     NULL,                 -- última vez que abriu a app (atualizado no máximo de 5 em 5 min)
+  totp_segredo  VARCHAR(64)  NULL,                 -- 2FA do backoffice (base32); null = ainda não configurado
+  totp_passo    INT UNSIGNED NULL,                 -- último intervalo de 30 s aceite (o mesmo código não serve duas vezes)
   criado_em     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

@@ -76,6 +76,16 @@ function csrf_campo(): string
     return '<input type="hidden" name="_csrf" value="' . e($_SESSION['_csrf'] ?? '') . '">';
 }
 
+// Anti-bots (login e registo): campo "isco" fora do ecrã que só um robô preenche,
+// e a hora a que o formulário foi mostrado (ver Controller::eBot). Nome pouco comum para o browser não o preencher.
+const ISCO_CAMPO = 'deixar_vazio';
+function isco_campo(string $formulario): string
+{
+    $_SESSION['_form_em'][$formulario] = time();
+    return '<div class="campo-isco" aria-hidden="true"><label>Não preencher'
+        . ' <input type="text" name="' . ISCO_CAMPO . '" value="" tabindex="-1" autocomplete="off"></label></div>';
+}
+
 // Corre uma tarefa DEPOIS de a resposta chegar ao telemóvel (notificações, buscar episódios novos).
 // No alojamento (PHP-FPM) o fastcgi_finish_request() entrega a página primeiro; uma falha aqui
 // fica só no log e nunca estraga o pedido.
@@ -158,8 +168,22 @@ function medalha_pct(array $m): int
     return $m['meta'] > 0 ? (int) min(100, floor($m['atual'] * 100 / $m['meta'])) : 0;
 }
 
+// Tempo de vida da sessão do site: termina após 2 h sem pedidos ou 12 h depois de começar.
+// ("Manter sessão iniciada" reabre-a logo a seguir pelo cookie próprio; o 2FA do backoffice não.)
+const SESSAO_INATIVIDADE = 7200;
+const SESSAO_MAXIMO      = 43200;
+
+// A sessão já passou de algum dos limites? ($s = $_SESSION; sessão sem marcas = acabada de criar)
+function sessao_expirada(array $s, int $agora): bool
+{
+    if (!isset($s['_inicio'], $s['_ultimo'])) {
+        return false;
+    }
+    return $agora - (int) $s['_ultimo'] > SESSAO_INATIVIDADE || $agora - (int) $s['_inicio'] > SESSAO_MAXIMO;
+}
+
 // Cabeçalhos de segurança de todas as respostas (páginas e API). Chamado logo no início de index.php e api.php.
-//   CSP: só scripts e estilos do próprio site (+ Google Fonts); imagens das capas só dos sites de anime;
+//   CSP: só scripts, estilos e fontes do próprio site; imagens das capas só dos sites de anime;
 //        o browser só fala com o próprio site e com as APIs de anime do config.php; a app não abre dentro de iframes.
 //   O resto: sem adivinhar tipos (nosniff), sem iframes, referrer curto, sem câmara/micro/localização, HTTPS forçado (HSTS).
 function cabecalhos_seguranca(bool $api = false): void
@@ -200,8 +224,8 @@ function cabecalhos_seguranca(bool $api = false): void
     header('Content-Security-Policy: ' . implode('; ', [
         "default-src 'self'",
         "script-src 'self'",
-        "style-src 'self' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com",
+        "style-src 'self'",
+        "font-src 'self'",
         "img-src 'self' data: blob: " . implode(' ', $capas),
         "connect-src 'self' " . implode(' ', array_unique($apis)),
         "worker-src 'self'",

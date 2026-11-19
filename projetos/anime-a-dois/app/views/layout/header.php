@@ -23,9 +23,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <!-- Tema guardado aplicado antes de pintar a página -->
 <script src="<?= e(asset('js/tema.js')) ?>"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Letra alojada no próprio site (ver @font-face em app.css); a normal começa a descarregar já -->
+<link rel="preload" href="fonts/m-plus-rounded-1c-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 <!-- App instalável (PWA): manifest e ícones -->
 <link rel="manifest" href="manifest.json">
