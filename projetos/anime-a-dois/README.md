@@ -41,6 +41,13 @@ Uma tarefa agendada no alwaysdata corre `deploy/atualizar.sh` de 5 em 5 minutos,
 
 O `config/config.php` só existe no servidor (com o utilizador próprio da base de dados).
 Instruções de instalação no topo de `deploy/atualizar.sh`; o log fica em `~/admin/logs/jobs/`.
+### Cópias da base de dados
+
+- **alwaysdata:** uma por dia, guardadas 4 dias (painel → Backups; restaurar volta a conta inteira a esse dia).
+- **Semanais (nossas):** o `deploy/atualizar.sh` guarda uma por semana em `~/backups-anime-a-dois/` durante 3 meses.
+  Para restaurar uma, no SSH:
+  `gunzip -c ~/backups-anime-a-dois/backup-AAAA-MM-DD.sql.gz | mysql -h mysql-animeadois.alwaysdata.net -u animeadois -p animeadois_app`
+
 As chaves VAPID das notificações são geradas no próprio servidor na primeira utilização (tabela `config_app`).
 No painel do alwaysdata, o site aponta para a pasta `anime-a-dois/public/`.
 
