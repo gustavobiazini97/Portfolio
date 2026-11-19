@@ -14,6 +14,9 @@ class User extends Model
     // Nunca expor o hash nem o segredo do 2FA se o Model for convertido em array/JSON
     protected $hidden = ['password_hash', 'totp_segredo', 'totp_passo'];
 
+    // Cor pastel "tu" de cada paleta (igual ao app.css e ao paleta.dart da app): pinta o ícone das notificações
+    public const CORES_PALETA = [0 => '#B9D3B0', 1 => '#A9C4EE', 2 => '#C9B6F2', 3 => '#9FD8D2', 4 => '#F4B6CF', 5 => '#A7D3F2'];
+
     // Paletas de cores (índice = users.paleta; 0 = a original). As cores em si estão em public/css/app.css ([data-paleta]).
     public const PALETAS = [
         0 => 'Sálvia e alperce',

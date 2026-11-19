@@ -80,6 +80,7 @@ $verifica('enviado a 1 telemóvel (o vivo)', $n === 1, (string) $n);
 $verifica('mensagem com título e etiqueta', ($envios[0]['mensagem']['notification']['title'] ?? '') === 'Tiago viu o episódio 5'
     && ($envios[0]['mensagem']['android']['notification']['tag'] ?? '') === 'ep-naruto');
 $verifica('projeto certo no URL', ($envios[0]['projeto'] ?? '') === 'teste-aad');
+$verifica('ícone com a cor da paleta da pessoa', ($envios[0]['mensagem']['android']['notification']['color'] ?? '') === User::CORES_PALETA[0]);
 $verifica('telemóvel morto apagado', Dispositivo::where('token', $morto)->doesntExist());
 
 Fcm::enviar($rita, ['titulo' => 'Outra', 'corpo' => 'x']);
