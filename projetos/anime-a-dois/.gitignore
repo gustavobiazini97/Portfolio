@@ -4,3 +4,5 @@
 /config/config.php
 # Cópia do fillers.json feita pelo deploy (o original está em ../naruto-fillers)
 /database/fillers.json
+# Cache do Python (titulos.py)
+__pycache__/

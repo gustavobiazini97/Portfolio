@@ -29,15 +29,18 @@ O GitHub Pages não corre PHP: a app funciona no WAMP, no Termux ou num alojamen
 ## Online (alwaysdata)
 
 A app está alojada no alwaysdata e instala-se no Android a partir do browser.
-O deploy é automático: cada push que mexa nesta pasta corre o workflow
-`.github/workflows/anime-a-dois.yml`, que:
+O deploy é automático, mas é o **servidor que vai buscar** o código ao GitHub
+(repo público): o GitHub não guarda nenhuma palavra-passe nem tem acesso ao alwaysdata.
 
-1. instala as dependências (`composer install`);
-2. gera o `config.php` com os dados do alwaysdata;
-3. envia a app por SSH;
-4. corre `database/migrate.php` e `database/seed.php` no servidor.
+Uma tarefa agendada no alwaysdata corre `deploy/atualizar.sh` de 5 em 5 minutos, que:
 
-Só precisa do secret **`AD_PASSWORD`** no repo (Settings → Secrets and variables → Actions).
+1. vê se o `main` tem alterações nesta pasta (ou no `fillers.json`);
+2. só avança se os testes do GitHub (`testes`) passaram nesse commit;
+3. copia a app para `~/anime-a-dois`, sem tocar no `config/config.php` nem no `vendor/`;
+4. corre `composer install`, `database/migrate.php` e `database/seed.php`.
+
+O `config/config.php` só existe no servidor (com o utilizador próprio da base de dados).
+Instruções de instalação no topo de `deploy/atualizar.sh`; o log fica em `~/admin/logs/jobs/`.
 As chaves VAPID das notificações são geradas no próprio servidor na primeira utilização (tabela `config_app`).
 No painel do alwaysdata, o site aponta para a pasta `anime-a-dois/public/`.
 

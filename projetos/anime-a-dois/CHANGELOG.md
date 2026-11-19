@@ -184,7 +184,7 @@ Serve para registar os episódios que tu e a Andreia já viram, lado a lado. Com
 
 ### Deploy
 
-O workflow `.github/workflows/anime-a-dois.yml` corre em cada push para `feat/anime-a-dois` ou `main` que mexa na pasta da app. Faz isto:
+*(Substituído a 19 de novembro por `deploy/atualizar.sh`, ver mais abaixo.)* O workflow `.github/workflows/anime-a-dois.yml` corria em cada push para `feat/anime-a-dois` ou `main` que mexa na pasta da app. Faz isto:
 
 1. `composer install`;
 2. gera o `config.php` a partir do secret `AD_PASSWORD` (a palavra-passe nunca passa pelo chat nem pelo código);
@@ -358,7 +358,14 @@ Auditoria ao código seguindo o checklist das regras de construção (OWASP). Co
 - **API:** a raiz (`/api.php`) já não lista as rotas. **Registo por convite** numa transação (sem contas soltas).
 - **Testes:** `tests/seguranca_test.php` + workflow `anime-a-dois-testes.yml` (MariaDB + servidor do PHP) em cada push e PR.
 
-Por fazer (precisa do painel do alwaysdata): chave SSH para o deploy e um utilizador da base de dados só para a app, em vez da palavra-passe da conta para tudo; ativar "forçar HTTPS" no site.
+Por fazer (precisa do painel do alwaysdata): utilizador da base de dados só para a app e ativar "forçar HTTPS" no site. A chave SSH deixou de ser precisa (ver "Deploy pelo servidor").
+
+### Deploy pelo servidor (19 de novembro)
+
+- O workflow de deploy (`.github/workflows/anime-a-dois.yml`) e o secret `AD_PASSWORD` saem: o GitHub deixa de ter acesso ao alwaysdata.
+- No lugar, `deploy/atualizar.sh` corre no alwaysdata como tarefa agendada (5 em 5 min): vai buscar o `main` ao GitHub, só publica commits com os testes a passar, copia a app sem tocar no `config.php` e corre `composer install` + migrate + seed.
+- O `config/config.php` passa a existir só no servidor, com um utilizador da base de dados próprio da app.
+- `__pycache__/` no `.gitignore` (tinha ido um `.pyc` para o repo).
 
 ### Pré-visualização do link (15 de novembro, só servidor)
 
