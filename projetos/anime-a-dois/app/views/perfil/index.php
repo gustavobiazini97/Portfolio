@@ -161,10 +161,7 @@
   <button type="button" class="btn-texto vidro" id="btn-atualizar">Procurar atualizações</button>
 </section>
 
-<form class="acao-fundo" method="post" action="<?= e(url('auth', 'sair')) ?>">
-  <?= csrf_campo() ?>
-  <button type="submit" class="btn">Terminar sessão</button>
-</form>
+<!-- Terminar sessão está no topo do Perfil (perfil/pessoa.php), ao lado da ⚙️ -->
 
 <?php if ($user->ehAdmin()): ?>
   <a class="btn btn-secundario" href="<?= e(url('admin')) ?>">Backoffice</a>

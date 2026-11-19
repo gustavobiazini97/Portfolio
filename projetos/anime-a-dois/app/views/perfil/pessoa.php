@@ -32,10 +32,19 @@ $estados = ['a_ver' => 'A ver', 'pausa' => 'Em pausa', 'acabado' => 'Acabado'];
   </a>
   <h1 class="topo-meio"><?= $proprio ? 'Perfil' : e($pessoa->nome) ?></h1>
   <?php if ($proprio): ?>
-    <!-- ⚙️ Definições: foto, nome, palavra-passe, cores, notificações, sair -->
+    <div class="topo-acoes">
+    <!-- Terminar sessão (pede confirmação: está à mão de toques sem querer) -->
+    <form method="post" action="<?= e(url('auth', 'sair')) ?>" data-confirmar="Terminar sessão?">
+      <?= csrf_campo() ?>
+      <button type="submit" class="btn-redondo vidro" aria-label="Terminar sessão" title="Terminar sessão">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </form>
+    <!-- ⚙️ Definições: foto, nome, palavra-passe, cores, notificações -->
     <a class="btn-redondo vidro" href="<?= e(url('perfil')) ?>" aria-label="Definições">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </a>
+    </div>
   <?php else: ?>
     <?php require __DIR__ . '/../layout/botao-tema.php'; ?>
   <?php endif; ?>

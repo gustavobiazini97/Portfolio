@@ -173,6 +173,7 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .topo-meio { font-size: 16px; font-weight: 500; }
 .topo-acoes { display: flex; gap: 8px; flex-shrink: 0; } /* os botões nunca encolhem; a saudação é que corta */
+.topo-acoes form { display: flex; }                        /* botão dentro de um formulário (terminar sessão) */
 /* Saudação do Início: foto + "Olá, <nome>" + resumo das novidades do 🔔 (ocupa o espaço que sobra) */
 .saudacao { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
 .avatar-saudacao { width: 42px; height: 42px; box-shadow: 0 0 0 2px var(--vidro-borda), 0 6px 16px var(--sombra); }
