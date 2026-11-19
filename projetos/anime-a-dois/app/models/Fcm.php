@@ -54,33 +54,67 @@ class Fcm
             return 0;
         }
         // O ícone da notificação fica com a cor da paleta que esta pessoa escolheu na app
-        $msg['cor'] ??= User::CORES_PALETA[(int) $destino->paleta] ?? User::CORES_PALETA[0];
+        $msg['cor'] ??= strtolower(User::CORES_PALETA[(int) $destino->paleta] ?? User::CORES_PALETA[0]);   // #rrggbb
 
         $enviados = 0;
         foreach ($tokens as $token) {
-            $estado = self::enviarUm($conta, $token, $msg);
+            [$estado, $resposta] = self::enviarUm($conta, $token, $msg);
             if ($estado === 401) {
                 // Token de acesso recusado (expirou antes do previsto): pede outro e tenta mais uma vez
                 self::esquecerAcesso();
-                $estado = self::enviarUm($conta, $token, $msg);
+                [$estado, $resposta] = self::enviarUm($conta, $token, $msg);
             }
             if ($estado === 200) {
                 $enviados++;
-            } elseif ($estado === 404 || $estado === 400) {
-                Dispositivo::where('token', $token)->delete();   // UNREGISTERED / token inválido
+                self::guardarEstado('fcm_ultimo_ok', ['quando' => date('Y-m-d H:i:s')]);
+            } elseif (self::telemovelMorto($estado, $resposta)) {
+                Dispositivo::where('token', $token)->delete();   // app desinstalada ou token trocado
             } else {
-                error_log('[fcm] envio falhou: estado ' . $estado);
+                // Outro erro (mensagem recusada, Google em baixo...): o telemóvel fica; o erro fica à vista no backoffice
+                error_log('[fcm] envio falhou: estado ' . $estado . ' ' . mb_substr($resposta, 0, 300));
+                self::guardarEstado('fcm_ultimo_erro', [
+                    'quando'   => date('Y-m-d H:i:s'),
+                    'estado'   => $estado,
+                    'resposta' => mb_substr($resposta, 0, 500),
+                ]);
             }
         }
         return $enviados;
     }
 
-    // POST de uma notificação; devolve o estado HTTP (0 = sem resposta)
-    private static function enviarUm(array $conta, string $token, array $msg): int
+    // O telemóvel já não existe para o Firebase? Só nesses casos se apaga (404, ou 400 a falar do token).
+    // Um 400 por outra razão (ex.: um campo da mensagem) NÃO apaga: senão um erro nosso desligava toda a gente.
+    public static function telemovelMorto(int $estado, string $resposta): bool
+    {
+        if ($estado === 404) {
+            return true;
+        }
+        return $estado === 400 && (str_contains($resposta, 'UNREGISTERED') || stripos($resposta, 'registration token') !== false);
+    }
+
+    // Último envio certo / último erro (o backoffice mostra-os)
+    private static function guardarEstado(string $chave, array $valor): void
+    {
+        try {
+            Capsule::table('config_app')->updateOrInsert(['chave' => $chave], ['valor' => json_encode($valor, JSON_UNESCAPED_UNICODE)]);
+        } catch (Throwable $e) {
+            // sem tabela: não é por isto que a notificação falha
+        }
+    }
+
+    // Para o backoffice: ['ok' => [...] ou null, 'erro' => [...] ou null]
+    public static function estado(): array
+    {
+        $ler = fn (string $c) => json_decode((string) Capsule::table('config_app')->where('chave', $c)->value('valor'), true);
+        return ['ativo' => self::ativo(), 'ok' => $ler('fcm_ultimo_ok'), 'erro' => $ler('fcm_ultimo_erro')];
+    }
+
+    // POST de uma notificação; devolve [estado HTTP (0 = sem resposta), corpo da resposta]
+    private static function enviarUm(array $conta, string $token, array $msg): array
     {
         $acesso = self::acesso($conta);
         if ($acesso === null) {
-            return 0;
+            return [0, 'sem token de acesso (a Google recusou a chave da conta de serviço)'];
         }
 
         $notificacao = ['title' => (string) $msg['titulo'], 'body' => (string) $msg['corpo']];
@@ -100,12 +134,11 @@ class Fcm
             'android'      => $android,
         ]];
 
-        [$estado] = self::http(
+        return self::http(
             self::$base . '/v1/projects/' . rawurlencode($conta['project_id']) . '/messages:send',
             json_encode($corpo, JSON_UNESCAPED_UNICODE),
             ['Content-Type: application/json', 'Authorization: Bearer ' . $acesso]
         );
-        return $estado;
     }
 
     // ---------- Token de acesso (OAuth 2, conta de serviço) ----------
@@ -126,6 +159,8 @@ class Fcm
         $r = json_decode($resposta, true);
         if ($estado !== 200 || empty($r['access_token'])) {
             error_log('[fcm] token de acesso recusado: estado ' . $estado);
+            self::guardarEstado('fcm_ultimo_erro', ['quando' => date('Y-m-d H:i:s'), 'estado' => $estado,
+                'resposta' => 'token de acesso recusado: ' . mb_substr($resposta, 0, 400)]);
             return null;
         }
         Capsule::table('config_app')->updateOrInsert(['chave' => 'fcm_acesso'], ['valor' => json_encode([

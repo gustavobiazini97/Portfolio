@@ -76,6 +76,7 @@ class AdminController extends Controller
             'n'      => Admin::numeros(),
             'top'    => Admin::topSeries(),
             'contas' => Admin::contas($q),
+            'fcm'    => Fcm::estado(),   // notificações da app: ligado? último envio certo e último erro
         ]);
     }
 

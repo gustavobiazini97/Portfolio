@@ -41,6 +41,10 @@ if (preg_match('#^/v1/projects/([^/]+)/messages:send$#', $caminho, $m)) {
     $corpo = json_decode((string) file_get_contents('php://input'), true) ?: [];
     $token = $corpo['message']['token'] ?? '';
     $registar(['tipo' => 'envio', 'projeto' => $m[1], 'token' => $token, 'mensagem' => $corpo['message'] ?? null]);
+    if (str_starts_with($token, 'recusa')) {
+        // Mensagem recusada por um campo (não pelo telemóvel): o telemóvel tem de ficar registado
+        $responder(400, ['error' => ['status' => 'INVALID_ARGUMENT', 'message' => "Invalid value at 'message.android.notification.color'"]]);
+    }
     if ($token === 'morto' . str_repeat('x', 20)) {
         $responder(404, ['error' => ['status' => 'NOT_FOUND', 'details' => [['errorCode' => 'UNREGISTERED']]]]);
     }

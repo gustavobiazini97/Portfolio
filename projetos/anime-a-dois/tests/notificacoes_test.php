@@ -80,8 +80,17 @@ $verifica('enviado a 1 telemóvel (o vivo)', $n === 1, (string) $n);
 $verifica('mensagem com título e etiqueta', ($envios[0]['mensagem']['notification']['title'] ?? '') === 'Tiago viu o episódio 5'
     && ($envios[0]['mensagem']['android']['notification']['tag'] ?? '') === 'ep-naruto');
 $verifica('projeto certo no URL', ($envios[0]['projeto'] ?? '') === 'teste-aad');
-$verifica('ícone com a cor da paleta da pessoa', ($envios[0]['mensagem']['android']['notification']['color'] ?? '') === User::CORES_PALETA[0]);
+$verifica('ícone com a cor da paleta da pessoa', ($envios[0]['mensagem']['android']['notification']['color'] ?? '') === strtolower(User::CORES_PALETA[0]));
 $verifica('telemóvel morto apagado', Dispositivo::where('token', $morto)->doesntExist());
+
+// Mensagem recusada por outra razão (400 sem ser do token): o telemóvel fica e o erro fica guardado
+$recusa = 'recusa' . str_repeat('z', 20);
+Dispositivo::registar($tiago, $recusa);
+Fcm::enviar($tiago, ['titulo' => 'x', 'corpo' => 'y']);
+$verifica('400 por um campo: telemóvel NÃO apagado', Dispositivo::where('token', $recusa)->exists());
+$verifica('400 por um campo: erro guardado para o backoffice', str_contains((string) (Fcm::estado()['erro']['resposta'] ?? ''), 'color'));
+$verifica('último envio certo guardado', !empty(Fcm::estado()['ok']['quando']));
+Dispositivo::where('token', $recusa)->delete();
 
 Fcm::enviar($rita, ['titulo' => 'Outra', 'corpo' => 'x']);
 $tokens = array_filter($pedidos(), fn ($r) => $r['tipo'] === 'token');

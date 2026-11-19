@@ -242,6 +242,8 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .campo-isco { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
 /* Backoffice: chave do 2FA, em letra de largura fixa e fácil de copiar */
+.admin-erro { display: block; margin-top: 4px; font: 12px/1.4 ui-monospace, Consolas, monospace; word-break: break-all; }  /* erro do Firebase no backoffice */
+
 .codigo-segredo {
   padding: 12px 14px; border-radius: 14px; border: 1px solid var(--linha); background: var(--campo);
   font: 500 15px/1.6 ui-monospace, 'SFMono-Regular', Consolas, monospace; letter-spacing: .06em;

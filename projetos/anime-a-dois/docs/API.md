@@ -132,7 +132,7 @@ As medalhas são calculadas a partir dos dados que já existem (Model `Conquista
 | POST | `/perfil/foto` | 🔒 | multipart, campo `foto` |
 | DELETE | `/perfil/foto` | 🔒 | |
 | GET / PUT | `/perfil/notificacoes` | 🔒 | `ep_push`, `com_push`, `amigo_push`, `serie_push` (booleanos) |
-| POST | `/perfil/notificacoes/teste` | 🔒 | (máx. 5 por hora; 429 depois) |
+| POST | `/perfil/notificacoes/teste` | 🔒 | (máx. 20 por hora; 429 depois) |
 | POST | `/dispositivos` | 🔒 | `token` (Firebase Cloud Messaging deste telemóvel) |
 | DELETE | `/dispositivos` | 🔒 | `token` (ao terminar sessão) |
 | GET | `/utilizadores/{id}/foto` | 🔒 | (a imagem) |

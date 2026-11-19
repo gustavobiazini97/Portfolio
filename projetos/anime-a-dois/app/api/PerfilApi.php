@@ -120,7 +120,7 @@ class PerfilApi extends ApiController
         $this->json(['ok' => true, 'mensagem' => 'Notificações guardadas.', 'preferencias' => $pref->paraJson()]);
     }
 
-    // POST /perfil/notificacoes/teste — notificação de teste para os teus telemóveis (máx. 5 por hora)
+    // POST /perfil/notificacoes/teste — notificação de teste para os teus telemóveis (máx. 20 por hora)
     public function testarNotificacao(): void
     {
         $user = $this->exigirToken();
