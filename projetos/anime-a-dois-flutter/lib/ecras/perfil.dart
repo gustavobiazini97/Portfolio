@@ -603,7 +603,7 @@ class _EcraPerfilState extends State<EcraPerfil> {
         ),
         const SizedBox(height: 14),
 
-        // ---------- Aparência e sessão ----------
+        // ---------- Aparência e conta (terminar sessão está no topo do Perfil) ----------
         Vidro(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
           child: Column(
@@ -623,13 +623,6 @@ class _EcraPerfilState extends State<EcraPerfil> {
                 subtitle: Text(_versao.isEmpty ? '' : 'Versão $_versao'),
                 trailing: _aProcurar ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : null,
                 onTap: _aProcurar ? null : _procurarAtualizacoes,
-              ),
-              const Divider(height: 1),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.logout_rounded, color: p.erro),
-                title: Text('Terminar sessão', style: TextStyle(color: p.erro, fontWeight: FontWeight.w700)),
-                onTap: Sessao.instancia.sair,
               ),
               const Divider(height: 1),
               ListTile(

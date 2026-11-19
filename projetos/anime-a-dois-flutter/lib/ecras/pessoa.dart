@@ -4,13 +4,14 @@
 // e as medalhas ficam privadas.
 // Nas séries que ainda não tens dá para te juntares: "Ver com ele" (botão) ou "Só para mim" (menu ⋯).
 // Com EcraPessoa.proprio() é o separador Perfil: os teus números, medalhas e biblioteca (com o dia de cada
-// registo), sem botão de voltar e com a ⚙️ que abre as definições (EcraPerfil).
+// registo), sem botão de voltar, com o botão de terminar sessão e a ⚙️ que abre as definições (EcraPerfil).
 
 import 'package:flutter/material.dart';
 
 import '../api/api.dart';
 import '../api/modelos.dart';
 import '../estado/auto_atualizar.dart';
+import '../estado/sessao.dart';
 import '../tema/paleta.dart';
 import '../widgets/comum.dart';
 import '../widgets/efeitos.dart';
@@ -124,6 +125,22 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
     }
   }
 
+  // Terminar sessão: pede confirmação (o botão está no topo, à mão de toques sem querer)
+  Future<void> _sair() async {
+    final sim = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Terminar sessão?'),
+        content: const Text('Para voltar a entrar precisas do utilizador e da palavra-passe.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Terminar sessão')),
+        ],
+      ),
+    );
+    if (sim == true) await Sessao.instancia.sair();
+  }
+
   // ⚙️ Definições (o antigo ecrã do Perfil); ao voltar recarrega (nome, foto ou cores podem ter mudado)
   Future<void> _abrirDefinicoes() async {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EcraPerfil()));
@@ -148,7 +165,13 @@ class _EcraPessoaState extends State<EcraPessoa> with AutoAtualizar {
                       child: Text(widget.proprio ? 'Perfil' : (_pessoa?.nome ?? ''),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                     ),
-                    // O teu perfil: ⚙️ abre as definições (dados, palavra-passe, cores, notificações…)
+                    // O teu perfil: sair e ⚙️ definições (dados, palavra-passe, cores, notificações…)
+                    if (widget.proprio)
+                      IconButton(
+                        tooltip: 'Terminar sessão',
+                        icon: const Icon(Icons.logout_rounded),
+                        onPressed: _sair,
+                      ),
                     if (widget.proprio)
                       IconButton(
                         tooltip: 'Definições',
