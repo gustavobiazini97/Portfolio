@@ -123,10 +123,10 @@ class Notificador
     }
 
     // Notificação de teste para a própria pessoa (botão no perfil, site e app). Devolve [ok, mensagem].
-    // No máximo 5 por hora, para o botão não servir para encher o telemóvel de avisos.
+    // No máximo 20 por hora (só vai para os teus telemóveis; o limite trava só um botão a ser martelado).
     public static function teste(User $user): array
     {
-        if (!Limite::registar('teste-notif:' . $user->id, 5, 3600)) {
+        if (!Limite::registar('teste-notif:' . $user->id, 20, 3600)) {
             return [false, 'Já fizeste muitos testes. Tenta daqui a uma hora.'];
         }
         $n = self::telemovel($user, [

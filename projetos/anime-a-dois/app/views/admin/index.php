@@ -1,5 +1,5 @@
 <?php
-/* Backoffice. Variáveis: $user, $q (pesquisa), $n (números), $top (séries mais vistas), $contas, $flash */
+/* Backoffice. Variáveis: $user, $q (pesquisa), $n (números), $top (séries mais vistas), $contas, $fcm (estado do Firebase), $flash */
 // Cartão de número: valor grande e legenda
 $cartao = function (int $valor, string $legenda): void { ?>
   <div class="admin-num"><b><?= $valor ?></b><span><?= e($legenda) ?></span></div>
@@ -26,6 +26,15 @@ $cartao = function (int $valor, string $legenda): void { ?>
     <?php $cartao($n['amizades'], 'amizades'); $cartao($n['juntos'], 'séries vistas em conjunto'); ?>
     <?php $cartao($n['comPush'], 'contas com avisos no telemóvel'); $cartao($n['telemoveis'], 'telemóveis ligados'); ?>
   </div>
+  <!-- Notificações da app (Firebase): para perceber porque é que um aviso não chegou -->
+  <p class="pessoa-legenda admin-top">
+    Notificações da app: <?= $fcm['ativo'] ? 'ligadas' : 'desligadas (falta ~/firebase-conta.json no servidor)' ?>
+    <?php if ($fcm['ok']): ?> · último envio certo: <?= e($fcm['ok']['quando']) ?><?php endif; ?>
+  </p>
+  <?php if ($fcm['erro']): ?>
+    <p class="pessoa-legenda admin-top">Último erro (<?= e($fcm['erro']['quando']) ?>, estado <?= (int) $fcm['erro']['estado'] ?>):
+      <code class="admin-erro"><?= e($fcm['erro']['resposta']) ?></code></p>
+  <?php endif; ?>
   <?php if ($top !== []): ?>
     <p class="pessoa-legenda admin-top">Mais vistas: <?= e(implode(' · ', array_map(fn ($t) => $t->nome . ' (' . $t->pessoas . ')', $top))) ?></p>
   <?php endif; ?>
