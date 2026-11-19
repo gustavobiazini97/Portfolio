@@ -24,8 +24,8 @@ class Admin
             'comentarios'   => Capsule::table('comentarios')->count(),
             'amizades'      => intdiv(Capsule::table('amizades')->count(), 2),   // 2 linhas por amizade
             'juntos'        => intdiv(Capsule::table('series_juntos')->count(), 2),
-            'comPush'       => Capsule::table('subscricoes')->distinct()->count('user_id'),
-            'telemoveis'    => Capsule::table('subscricoes')->count(),
+            'comPush'       => Capsule::table('subscricoes')->select('user_id')->union(Capsule::table('dispositivos')->select('user_id'))->get()->count(),
+            'telemoveis'    => Capsule::table('subscricoes')->count() + Capsule::table('dispositivos')->count(),
         ];
     }
 
