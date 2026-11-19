@@ -4,7 +4,8 @@
 // $URL (php -S 127.0.0.1:8099 -t public). Correr com: php tests/seguranca_test.php   (sai com 1 se algum falhar)
 //
 // Cobre: limite de tentativas de login (site e API), cabeçalhos de segurança, raiz da API sem lista de rotas,
-// "juntar" a uma série de um amigo só por convite, só membros atualizam uma série, push só para serviços conhecidos.
+// "juntar" a uma série de um amigo só por convite, só membros atualizam uma série, push só para serviços conhecidos,
+// 2FA do backoffice, anti-bots no login e no registo, CORS fechado, fim da sessão por inatividade.
 
 require __DIR__ . '/../app/bootstrap.php';
 
@@ -116,6 +117,10 @@ $verifica('página: sem X-Powered-By', !str_contains($r['cab'], 'x-powered-by'))
 $r = $http('GET', '/api.php');
 $verifica('API: raiz sem lista de rotas', $r['estado'] === 200 && !str_contains($r['corpo'], 'rotas'));
 $verifica('API: CSP', str_contains($r['cab'], "content-security-policy: default-src 'none'"));
+$verifica('API: sem CORS aberto', !str_contains($r['cab'], 'access-control-allow-origin'));
+$r = $http('GET', '/index.php?c=auth&a=login');
+$verifica('página: CSP sem Google Fonts', !str_contains($r['cab'], 'fonts.googleapis') && !str_contains($r['corpo'], 'fonts.googleapis'));
+$verifica('página: letra alojada no site', str_contains($r['corpo'], 'fonts/m-plus-rounded-1c-latin-400-normal.woff2'));
 
 // ---------- 4. Login pelo site: depois de 6 falhas fica bloqueado (nem a certa entra) ----------
 for ($i = 1; $i <= 6; $i++) {
@@ -165,6 +170,82 @@ $verifica('push: FCM aceite', $s->exists);
 Token::criar($duarte, 'telemovel');
 $http('POST', '/index.php?c=perfil&a=guardarPassword', ['_csrf' => $token, 'atual' => 'segredo123', 'nova' => 'novasenha123', 'confirmar' => 'novasenha123'], ['Accept: application/json']);
 $verifica('tokens da app apagados ao mudar a palavra-passe', Token::where('user_id', $duarte->id)->count() === 0);
+
+// ---------- 9. Sessão: termina por inatividade (2 h) ou ao fim de 12 h ----------
+$agora = time();
+$verifica('sessão nova não expira', !sessao_expirada([], $agora));
+$verifica('sessão ativa não expira', !sessao_expirada(['_inicio' => $agora - 3600, '_ultimo' => $agora - 60], $agora));
+$verifica('2 h parada: expira', sessao_expirada(['_inicio' => $agora - 8000, '_ultimo' => $agora - 7201], $agora));
+$verifica('12 h desde o início: expira', sessao_expirada(['_inicio' => $agora - 43201, '_ultimo' => $agora - 10], $agora));
+
+// ---------- 10. Anti-bots ----------
+// Login com o campo isco preenchido: não entra, mesmo com a palavra-passe certa
+$cookies = [];
+$http('POST', '/index.php?c=auth&a=entrar', ['_csrf' => $csrf(), 'username' => 'carla', 'password' => 'segredo123', 'deixar_vazio' => 'http://spam.exemplo']);
+$verifica('login: isco preenchido não entra', $http('GET', '/index.php?c=home')['estado'] === 302);
+Capsule::table('limites')->delete();
+
+// Registo por convite enviado logo a seguir a abrir a página: recusado; 3 s depois: aceite
+$convite = Amizade::criarConvite($carla);
+$novaConta = ['nome' => 'Eva', 'username' => 'eva', 'password' => 'segredo123', 'password_confirmar' => 'segredo123', 'convite' => $convite];
+$cookies = [];
+$http('POST', '/index.php?c=auth&a=registar', ['_csrf' => $csrf('/index.php?c=auth&a=registo&convite=' . $convite)] + $novaConta);
+$verifica('registo: em menos de 3 s é recusado', User::where('username', 'eva')->doesntExist());
+$cookies = [];
+$tokenRegisto = $csrf('/index.php?c=auth&a=registo&convite=' . $convite);
+$http('POST', '/index.php?c=auth&a=registar', ['_csrf' => $tokenRegisto, 'deixar_vazio' => 'x'] + $novaConta);
+$verifica('registo: isco preenchido é recusado', User::where('username', 'eva')->doesntExist());
+$cookies = [];
+$tokenRegisto = $csrf('/index.php?c=auth&a=registo&convite=' . $convite);
+sleep(4);
+$http('POST', '/index.php?c=auth&a=registar', ['_csrf' => $tokenRegisto] + $novaConta);
+$verifica('registo: pessoa normal cria a conta', User::where('username', 'eva')->exists());
+
+// ---------- 11. Backoffice: 2FA ----------
+User::where('id', $ana->id)->update(['admin' => 1]);
+$cookies = [];
+$http('POST', '/index.php?c=auth&a=entrar', ['_csrf' => $csrf(), 'username' => 'ana', 'password' => 'segredo123']);
+$r = $http('GET', '/index.php?c=admin');
+$verifica('admin sem código vai para a página do código', $r['estado'] === 302 && str_contains($r['cab'], 'a=codigo'));
+$r = $http('GET', '/index.php?c=admin&a=codigo');
+preg_match('/class="codigo-segredo"[^>]*>([A-Z2-7 ]+)</', $r['corpo'], $m);
+$segredo = str_replace(' ', '', $m[1] ?? '');
+$verifica('primeira vez: mostra a chave', strlen($segredo) === 32);
+preg_match('/name="_csrf" value="([a-f0-9]+)"/', $r['corpo'], $m);
+$tokenAdmin = $m[1] ?? '';
+
+$codigoErrado = DoisFatores::codigo($segredo, DoisFatores::passoAtual() + 5);
+$http('POST', '/index.php?c=admin&a=confirmarCodigo', ['_csrf' => $tokenAdmin, 'codigo' => $codigoErrado]);
+$verifica('código errado: continua sem backoffice', $http('GET', '/index.php?c=admin')['estado'] === 302);
+$verifica('código errado: a chave ainda não fica gravada', User::find($ana->id)->totp_segredo === null);
+
+$codigoCerto = DoisFatores::codigo($segredo, DoisFatores::passoAtual());
+$r = $http('POST', '/index.php?c=admin&a=confirmarCodigo', ['_csrf' => $tokenAdmin, 'codigo' => $codigoCerto]);
+$verifica('código certo: entra no backoffice', $http('GET', '/index.php?c=admin')['estado'] === 200);
+$verifica('código certo: chave gravada', User::find($ana->id)->totp_segredo === $segredo);
+$verifica('chave nunca sai no JSON da conta', !array_key_exists('totp_segredo', User::find($ana->id)->toArray()));
+
+// Sessão nova: pede outra vez e o mesmo código não serve duas vezes
+$cookies = [];
+$http('POST', '/index.php?c=auth&a=entrar', ['_csrf' => $csrf(), 'username' => 'ana', 'password' => 'segredo123']);
+$tokenAdmin = $csrf('/index.php?c=admin&a=codigo');
+$verifica('sessão nova: pede o código outra vez', $http('GET', '/index.php?c=admin')['estado'] === 302);
+$http('POST', '/index.php?c=admin&a=confirmarCodigo', ['_csrf' => $tokenAdmin, 'codigo' => $codigoCerto]);
+$verifica('código já usado é recusado', $http('GET', '/index.php?c=admin')['estado'] === 302);
+
+// Demasiados códigos errados: bloqueia, nem o certo entra
+Capsule::table('limites')->delete();
+for ($i = 0; $i < DoisFatores::TENTATIVAS + 1; $i++) {
+    $http('POST', '/index.php?c=admin&a=confirmarCodigo', ['_csrf' => $tokenAdmin, 'codigo' => '000000']);
+}
+$http('POST', '/index.php?c=admin&a=confirmarCodigo', ['_csrf' => $tokenAdmin, 'codigo' => DoisFatores::codigo($segredo, DoisFatores::passoAtual() + 1)]);
+$verifica('2FA: bloqueado depois de muitas falhas', $http('GET', '/index.php?c=admin')['estado'] === 302);
+
+// Quem não é admin nunca chega à página do código
+$cookies = [];
+$http('POST', '/index.php?c=auth&a=entrar', ['_csrf' => $csrf(), 'username' => 'carla', 'password' => 'segredo123']);
+$r = $http('GET', '/index.php?c=admin&a=codigo');
+$verifica('não admin: página do código manda para o início', $r['estado'] === 302 && !str_contains($r['cab'], 'a=codigo'));
 
 echo $falhas === 0 ? "\nTudo certo.\n" : "\n$falhas falha(s).\n";
 exit($falhas === 0 ? 0 : 1);

@@ -3,7 +3,7 @@
 // porque têm dados pessoais e tokens de sessão; sem rede mostra-se a página offline.html.
 
 // Mudar a versão força a atualização da cache nas apps instaladas
-const CACHE = 'anime-a-dois-v9';   // v9: páginas novas (🔔, medalhas, retrospetivas)
+const CACHE = 'anime-a-dois-v10';  // v10: letra alojada no site (sem Google Fonts)
 
 const ESTATICOS = [
   './css/app.css',
@@ -56,17 +56,16 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Fontes do Google: cache primeiro, atualizada em segundo plano
-  const fonte = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
-  const estatico = url.origin === self.location.origin && /\.(css|js|png|json|html)$/.test(url.pathname);
-  if (!fonte && !estatico) return;
+  // Ficheiros do próprio site (incluindo a letra): cache primeiro, atualizada em segundo plano
+  const estatico = url.origin === self.location.origin && /\.(css|js|png|json|html|woff2)$/.test(url.pathname);
+  if (!estatico) return;
 
   e.respondWith(
     caches.open(CACHE).then((c) =>
       c.match(pedido).then((guardado) => {
         const rede = fetch(pedido)
           .then((r) => {
-            if (r.ok || r.type === 'opaque') c.put(pedido, r.clone());   // CSS do Google chega "opaco"
+            if (r.ok) c.put(pedido, r.clone());
             return r;
           })
           .catch(() => guardado);

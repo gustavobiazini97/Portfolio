@@ -11,8 +11,8 @@ class User extends Model
 
     protected $fillable = ['nome', 'username', 'password_hash', 'novidades_vistas'];
 
-    // Nunca expor o hash se o Model for convertido em array/JSON
-    protected $hidden = ['password_hash'];
+    // Nunca expor o hash nem o segredo do 2FA se o Model for convertido em array/JSON
+    protected $hidden = ['password_hash', 'totp_segredo', 'totp_passo'];
 
     // Paletas de cores (índice = users.paleta; 0 = a original). As cores em si estão em public/css/app.css ([data-paleta]).
     public const PALETAS = [

@@ -175,6 +175,15 @@
         "O login bloqueia 15 minutos depois de várias tentativas erradas.",
         "Juntar-te a uma série de um amigo envia-lhe um convite: só passam a ver juntos quando ele aceitar."
       ]
+    },
+    {
+      "id": 21,
+      "data": "2026-11-19",
+      "titulo": "Ainda mais segurança",
+      "itens": [
+        "Sem \"manter sessão iniciada\", a sessão termina ao fim de 2 horas parada.",
+        "A letra da app passa a vir do próprio site: abre mais depressa e sem pedidos ao Google."
+      ]
     }
   ]
 }

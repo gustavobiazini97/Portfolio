@@ -2,6 +2,41 @@
    Visual: vidro fosco (glassmorphism) sobre manchas difusas, letra arredondada e pequena.
    Cores: sálvia = tu, alperce = o teu par; cada série tem um acento só para o separador e o brilho. */
 
+/* ---------- Letra: M PLUS Rounded 1c, alojada no próprio site ----------
+   Ficheiros em public/fonts/ (licença SIL OFL, ver OFL.txt; vindos do pacote @fontsource/m-plus-rounded-1c).
+   Só os pesos usados (400, 500, 700) e só latim + latim estendido: o browser descarrega cada ficheiro
+   apenas quando a página tem letras desse intervalo (unicode-range). Assim nenhum pedido vai ao Google. */
+@font-face {
+  font-family: 'M PLUS Rounded 1c'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../fonts/m-plus-rounded-1c-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../fonts/m-plus-rounded-1c-latin-ext-400-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('../fonts/m-plus-rounded-1c-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('../fonts/m-plus-rounded-1c-latin-ext-500-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../fonts/m-plus-rounded-1c-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../fonts/m-plus-rounded-1c-latin-ext-700-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
 /* ---------- Tokens: tema claro (por defeito) ---------- */
 :root {
   --bg: #F5F3F8;                         /* fundo quase branco, ligeiramente lilás */
@@ -201,6 +236,16 @@ body.pagina-serie { height: 100%; min-height: 0; overflow: hidden; overscroll-be
 .campo input:focus { outline: none; border-color: var(--tu-txt); }
 .campo small { padding-left: 4px; font-size: 12px; color: var(--suave); }
 .form .btn { margin-top: 6px; }
+
+/* Isco anti-bots: campo fora do ecrã que as pessoas não veem nem preenchem (ver Controller::eBot) */
+.campo-isco { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Backoffice: chave do 2FA, em letra de largura fixa e fácil de copiar */
+.codigo-segredo {
+  padding: 12px 14px; border-radius: 14px; border: 1px solid var(--linha); background: var(--campo);
+  font: 500 15px/1.6 ui-monospace, 'SFMono-Regular', Consolas, monospace; letter-spacing: .06em;
+  text-align: center; word-break: break-all; user-select: all;   /* um toque seleciona tudo */
+}
 
 /* ---------- Mensagens flash ---------- */
 .flash { border-radius: 20px; padding: 12px 16px; font-size: 13.5px; }

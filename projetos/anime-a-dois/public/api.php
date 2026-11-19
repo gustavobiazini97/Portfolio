@@ -15,13 +15,10 @@ require __DIR__ . '/../app/bootstrap.php';
 cabecalhos_seguranca(true);
 
 // ---------- CORS ----------
-// A app Android não precisa disto, mas assim a API também se pode testar a partir de uma página web.
-// Não há cookies envolvidos (só o token no cabeçalho), por isso "*" é seguro.
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Authorization, X-Auth-Token, Content-Type');
+// Sem cabeçalhos Access-Control-*: só a app Android (que não usa CORS) e o próprio site chamam a API.
+// Uma página de outro domínio não consegue ler as respostas no browser de quem a visita.
 
-// Pedido de verificação do browser (preflight): basta responder que sim
+// Pedido de verificação do browser (preflight): responde vazio, sem autorizar nada
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
