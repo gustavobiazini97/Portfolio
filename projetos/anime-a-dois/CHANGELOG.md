@@ -360,6 +360,15 @@ Auditoria ao código seguindo o checklist das regras de construção (OWASP). Co
 
 Por fazer (precisa do painel do alwaysdata): utilizador da base de dados só para a app e ativar "forçar HTTPS" no site. A chave SSH deixou de ser precisa (ver "Deploy pelo servidor").
 
+### Cópias semanais da base de dados (19 de novembro)
+
+- O alwaysdata só guarda 4 dias de backups. O `deploy/atualizar.sh` passa a guardar também uma cópia por semana (`mysqldump` + gzip) em `~/backups-anime-a-dois/`, durante 3 meses, só legível pela conta.
+- As credenciais vêm do `config.php` para um ficheiro temporário (nunca na linha de comandos). Se a cópia falhar fica no log e a atualização do site segue na mesma.
+
+### Terminar sessão no topo do Perfil (19 de novembro)
+
+- Botão ao lado da ⚙️ no teu perfil (site e app 1.11.2), com confirmação; saiu do fundo das definições.
+
 ### Segurança para o lançamento (19 de novembro)
 
 - **2FA no backoffice:** código TOTP (Google/Microsoft Authenticator) antes de entrar no admin, pedido outra vez após 30 min sem uso. Na primeira vez mostra a chave para pôr na app. O mesmo código não serve duas vezes e 5 erros em 15 min bloqueiam. Recuperação no SSH: `php database/repor-2fa.php <utilizador>`. Colunas novas `users.totp_segredo` e `users.totp_passo` (nunca saem no JSON).

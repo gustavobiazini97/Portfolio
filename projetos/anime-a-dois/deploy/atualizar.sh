@@ -9,6 +9,8 @@
 #   2. só avança se os testes do GitHub ("testes") passaram nesse commit;
 #   3. copia a app para ~/anime-a-dois (sem tocar no config.php nem no vendor/);
 #   4. composer install + migrate.php + seed.php.
+# E, uma vez por semana, guarda uma cópia da base de dados em ~/backups-anime-a-dois (3 meses).
+# (O alwaysdata só guarda 4 dias; isto cobre problemas que só se notam mais tarde.)
 #
 # Instalação (uma vez, no SSH do alwaysdata):
 #   git clone --depth 1 --filter=blob:none --sparse https://github.com/gustavobiazini97/Portfolio.git ~/repo-portfolio
@@ -29,6 +31,8 @@ main() {
     local TRINCO="$HOME/.anime-a-dois-deploy.lock"            # impede duas execuções ao mesmo tempo
     local APP="projetos/anime-a-dois"
     local FILLERS="projetos/naruto-fillers/data/fillers.json"
+    local BACKUPS="$HOME/backups-anime-a-dois"                # cópias semanais da base de dados
+    local BACKUP_DIAS=92                                      # ~3 meses
 
     # Mensagens com data (ficam no log da tarefa: ~/admin/logs/jobs/)
     log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
@@ -45,6 +49,9 @@ main() {
     # (aspas duplas: o caminho fica fixo já aqui, porque o trap corre depois de main() acabar)
     # shellcheck disable=SC2064
     trap "rmdir '$TRINCO' 2>/dev/null || true" EXIT
+
+    # Cópia semanal da base de dados (se falhar, avisa e segue: nunca impede uma atualização)
+    backup_semanal || log "Cópia semanal da base de dados FALHOU (tento outra vez daqui a 5 min)."
 
     # Primeira vez: o clone ainda não existe
     if [ ! -d "$REPO/.git" ]; then
@@ -129,6 +136,47 @@ main() {
 
     echo "$VERSAO" > "$ESTADO"
     log "Publicado ${COMMIT:0:7}."
+}
+
+# Cópia da base de dados, se a mais recente tiver 7 dias ou mais. Lê as credenciais do config.php do site
+# para um ficheiro temporário (nunca na linha de comandos, onde outros processos as veriam).
+# Restaurar (no SSH):  gunzip -c ~/backups-anime-a-dois/backup-AAAA-MM-DD.sql.gz | mysql -h mysql-animeadois.alwaysdata.net -u animeadois -p animeadois_app
+backup_semanal() {
+    local CONFIG="$SITE/config/config.php"
+    [ -f "$CONFIG" ] || return 0                              # site ainda por instalar: nada a copiar
+
+    mkdir -p "$BACKUPS" && chmod 700 "$BACKUPS"               # só a conta lê (tem os dados de todos)
+    if [ -n "$(find "$BACKUPS" -name 'backup-*.sql.gz' -mtime -7 2>/dev/null)" ]; then
+        return 0                                              # já há uma desta semana
+    fi
+
+    # Credenciais → ficheiro de opções do cliente MySQL (permissões 600), apagado no fim
+    local OPCOES BASE FICHEIRO
+    OPCOES=$(mktemp "$HOME/.backup-opcoes.XXXXXX") || return 1
+    chmod 600 "$OPCOES"
+    BASE=$(php -r '
+        $d = (require $argv[1])["db"];
+        $txt = fn ($v) => "\"" . addcslashes((string) $v, "\\\"") . "\"";
+        file_put_contents($argv[2], "[client]\nhost=" . $txt($d["host"]) . "\nport=" . (int) $d["port"]
+            . "\nuser=" . $txt($d["username"]) . "\npassword=" . $txt($d["password"]) . "\n");
+        echo $d["database"];
+    ' "$CONFIG" "$OPCOES") || { rm -f "$OPCOES"; return 1; }
+
+    # mysqldump → gzip para um ficheiro temporário; só passa a backup-*.sql.gz se tudo correu bem
+    FICHEIRO="$BACKUPS/backup-$(date +%F).sql.gz"
+    if mysqldump --defaults-extra-file="$OPCOES" --single-transaction --quick --no-tablespaces "$BASE" \
+        | gzip -9 > "$FICHEIRO.tmp"; then
+        mv "$FICHEIRO.tmp" "$FICHEIRO"
+        chmod 600 "$FICHEIRO"
+        rm -f "$OPCOES"
+        log "Cópia semanal da base de dados: $(basename "$FICHEIRO") ($(du -h "$FICHEIRO" | cut -f1))."
+    else
+        rm -f "$OPCOES" "$FICHEIRO.tmp"
+        return 1
+    fi
+
+    # Apaga as cópias com mais de 3 meses
+    find "$BACKUPS" -name 'backup-*.sql.gz' -mtime +"$BACKUP_DIAS" -delete
 }
 
 main "$@"
