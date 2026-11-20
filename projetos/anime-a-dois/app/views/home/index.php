@@ -5,7 +5,8 @@
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
               $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $resumo,
               $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar,
-              $sinoPorVer (notificações por ver), $sinoResumo (resumo delas para o topo, ou null), $flash */
+              $sinoPorVer (notificações por ver), $sinoResumo (resumo delas para o topo, ou null), $flash,
+              $pc (blocos do computador: ver home/pc.php) */
 $comecou = $serie && ($meu['vistos'] > 0 || array_sum(array_column($deles, 'vistos')) > 0);
 $nomePar = $parceiro ? $parceiro->nome : null;
 
@@ -64,7 +65,7 @@ $selo = fn (array $item) => match ($item['estado']) {
 <!-- Início em duas colunas no computador (app.css, @media min-width: 900px): à esquerda o último do par,
      a biblioteca, os convites e a fila do par; à direita a série aberta. No telemóvel os contentores
      não contam (display: contents) e fica tudo numa coluna, pela ordem de sempre. -->
-<div class="inicio">
+<div class="inicio<?= $pc['par'] ? ' com-par' : '' ?>">
 <div class="inicio-principal">
 <?php if ($parceiro && $ultimoPar): ?>
   <!-- Último episódio que o par viu (em qualquer série). Se a série também está na tua biblioteca,
@@ -387,6 +388,7 @@ $selo = fn (array $item) => match ($item['estado']) {
 
   <?php foreach ($doPar as $item): $dono = $parceiro; require __DIR__ . '/../layout/folha-juntar.php'; endforeach; ?>
 <?php endif; ?>
+<?php require __DIR__ . '/pc.php'; ?>
 </div><!-- /.inicio -->
 
 <!-- Folha "Adicionar série": pesquisa no MyAnimeList (o js/app.js preenche os resultados).
