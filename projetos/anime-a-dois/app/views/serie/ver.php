@@ -2,7 +2,8 @@
 /* Página da série.
    Variáveis: $serie, $user, $companheiros (Users que vêem a série contigo; vazio se sozinho), $fillers, $meu,
               $deles (progresso de cada companheiro, na mesma ordem), $episodios, $inicial,
-              $sincronizar (o browser vai buscar fillers ou episódios novos), $flash */
+              $sincronizar (o browser vai buscar fillers ou episódios novos), $flash,
+              $lado (colunas laterais, ver serie/lados.php) */
 $nomes = $companheiros->pluck('nome')->all();
 
 // Avatares (foto ou inicial) gerados uma vez e repetidos em todos os cartões
@@ -78,6 +79,14 @@ $temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a leg
 
 <!-- Pista: desliza para os lados; o cartão do centro é o selecionado
      (em "Selecionar vários", tocar num cartão junta-o à seleção) -->
+<div class="pista-zona">
+<!-- Setas para andar episódio a episódio (só em ecrãs largos, com rato) -->
+<button type="button" class="btn-redondo vidro pista-seta pista-seta-esq" id="pista-ant" aria-label="Episódio anterior">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+</button>
+<button type="button" class="btn-redondo vidro pista-seta pista-seta-dir" id="pista-seg" aria-label="Episódio seguinte">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+</button>
 <div class="pista" aria-label="Episódios de <?= e($serie->nome) ?>" data-companheiros="<?= e(json_encode($nomes)) ?>">
   <?php foreach ($episodios as $ep): ?>
     <button type="button"
@@ -115,6 +124,7 @@ $temRecaps = in_array(true, array_column($episodios, 'recap'), true);   // a leg
       </span>
     </button>
   <?php endforeach; ?>
+</div>
 </div>
 
 <!-- Painel do episódio ao centro (o JS mantém-no atualizado) -->
@@ -178,6 +188,8 @@ $celebrar = [
   <span hidden id="sincronizar" data-serie="<?= e($serie->slug) ?>" data-mal="<?= (int) $serie->mal_id ?>"
         data-em-emissao="<?= $serie->em_emissao ? '1' : '0' ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>"></span>
 <?php endif; ?>
+
+<?php require __DIR__ . '/lados.php'; ?>
 
 <!-- Aviso curto depois de marcar (substitui o recarregar da página) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>

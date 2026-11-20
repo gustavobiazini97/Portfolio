@@ -31,6 +31,18 @@ class SerieController extends Controller
             $inicial = min($meu['posicao'] + 1, $serie->total_episodios);
         }
 
+        // Colunas laterais (só aparecem em ecrãs largos): números e arco da série, o que tem acontecido
+        $deles  = $companheiros->map(fn ($c) => $serie->progressoDe($c))->all();   // na ordem dos companheiros
+        $numeros = (new Estatisticas($serie, $user, $companheiros))->calcular();
+        $lado = [
+            'estado'      => Serie::estadoTexto($serie->estadoDe($user)),
+            'previsao'    => $numeros['previsao'],
+            'arco'        => LadoSerie::arcoAtual($numeros['arcos'], $meu, (int) $serie->total_episodios),
+            'distancias'  => LadoSerie::distancias($meu, $companheiros, $deles),
+            'registos'    => LadoSerie::registos($serie, $user, $companheiros),
+            'comentarios' => LadoSerie::comentarios($serie, $user, $companheiros),
+        ];
+
         $this->render('serie/ver', [
             'titulo'     => $serie->nome,
             'serieSlug'  => $serie->slug,
@@ -41,7 +53,8 @@ class SerieController extends Controller
             'serie'     => $serie,
             'fillers'   => $serie->totalFillers(),
             'meu'       => $meu,
-            'deles'     => $companheiros->map(fn ($c) => $serie->progressoDe($c))->all(),   // na ordem dos companheiros
+            'deles'     => $deles,
+            'lado'      => $lado,
             'episodios' => $serie->episodiosPara($user, $companheiros),
             'inicial'   => $inicial,
             // Faltam fillers ou a série em emissão está desatualizada: o browser vai buscar dados novos

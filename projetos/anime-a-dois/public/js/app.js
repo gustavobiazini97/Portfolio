@@ -152,6 +152,108 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
     espera = setTimeout(function () { ativar(maisAoCentro()); }, 90);
   }, { passive: true });
 
+  // ----- Navegação com rato e teclado (computador) -----
+  // Ir para o cartão com o índice i (limitado ao primeiro/último)
+  function irPara(i) {
+    var c = cartoes[Math.max(0, Math.min(cartoes.length - 1, i))];
+    if (!c) return;
+    centrar(c, true);
+    ativar(c);
+  }
+  function passo(d) { irPara(cartoes.indexOf(atual) + d); }
+
+  // Setas ‹ › ao lado da pista
+  var setaAnt = document.getElementById('pista-ant');
+  var setaSeg = document.getElementById('pista-seg');
+  if (setaAnt) setaAnt.addEventListener('click', function () { passo(-1); });
+  if (setaSeg) setaSeg.addEventListener('click', function () { passo(1); });
+
+  // Roda do rato: cada "clique" da roda anda um episódio (o trackpad acumula até chegar a um passo)
+  var rodaAcum = 0, rodaPausa = 0;
+  pista.addEventListener('wheel', function (ev) {
+    if (ev.ctrlKey) return;                                   // ctrl+roda = zoom do browser
+    var d = Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? ev.deltaX : ev.deltaY;
+    if (ev.deltaMode === 1) d *= 40;                          // Firefox: linhas em vez de píxeis
+    ev.preventDefault();
+    var agora = Date.now();
+    if (agora - rodaPausa > 250) rodaAcum = 0;                // gesto novo
+    rodaPausa = agora;
+    rodaAcum += d;
+    if (Math.abs(rodaAcum) >= 60) {
+      passo(rodaAcum > 0 ? 1 : -1);
+      rodaAcum = 0;
+    }
+  }, { passive: false });
+
+  // Teclado: ← → anda um episódio, Home/End vai ao primeiro/último (fora de campos de texto)
+  document.addEventListener('keydown', function (ev) {
+    var alvo = ev.target;
+    if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.isContentEditable)) return;
+    if (document.querySelector('dialog[open]')) return;     // com a folha de comentários aberta, não mexe
+    if (ev.key === 'ArrowLeft')  { ev.preventDefault(); passo(-1); }
+    else if (ev.key === 'ArrowRight') { ev.preventDefault(); passo(1); }
+    else if (ev.key === 'Home') { ev.preventDefault(); irPara(0); }
+    else if (ev.key === 'End')  { ev.preventDefault(); irPara(cartoes.length - 1); }
+  });
+
+  // Arrastar com o rato (clicar e puxar para os lados); um arrasto não conta como clique no cartão
+  var arrasto = null;          // { x, scroll, mexeu }
+  var ignorarClique = false;   // o clique que o browser dispara ao largar um arrasto
+  pista.addEventListener('pointerdown', function (ev) {
+    if (ev.pointerType !== 'mouse' || ev.button !== 0) return;
+    arrasto = { x: ev.clientX, scroll: pista.scrollLeft, mexeu: false };
+  });
+  window.addEventListener('pointermove', function (ev) {
+    if (!arrasto) return;
+    var dx = ev.clientX - arrasto.x;
+    if (!arrasto.mexeu && Math.abs(dx) > 6) {
+      arrasto.mexeu = true;
+      pista.classList.add('a-arrastar');                     // tira o encaixe enquanto se arrasta
+    }
+    if (arrasto.mexeu) pista.scrollLeft = arrasto.scroll - dx;
+  });
+  window.addEventListener('pointerup', function () {
+    if (!arrasto) return;
+    var mexeu = arrasto.mexeu;
+    arrasto = null;
+    if (!mexeu) return;
+    pista.classList.remove('a-arrastar');
+    ignorarClique = true;
+    setTimeout(function () { ignorarClique = false; }, 0);  // só o clique deste mesmo largar
+    var c = maisAoCentro();                                   // larga no cartão mais perto do centro
+    centrar(c, true);
+    ativar(c);
+  });
+  // Corre antes do clique dos cartões (fase de captura) e anula-o se veio de um arrasto
+  pista.addEventListener('click', function (ev) {
+    if (ignorarClique) { ev.stopPropagation(); ev.preventDefault(); }
+  }, true);
+
+  // Colunas laterais (ecrãs largos): um registo ou comentário salta para o episódio;
+  // os comentários abrem também a folha de comentários desse episódio
+  document.querySelectorAll('[data-ir-ep]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var c = porNumero[b.dataset.irEp];
+      if (!c) return;
+      if (multiplo) definirModo(false);
+      irPara(cartoes.indexOf(c));
+      if (b.hasAttribute('data-abrir-coment')) {
+        var bc = document.getElementById('btn-coment');
+        if (bc) setTimeout(function () { bc.click(); }, 350);   // depois de o cartão chegar ao centro
+      }
+    });
+  });
+
+  // Barras do mapa: clicar num ponto salta para esse episódio
+  document.querySelectorAll('.mapa .riscos').forEach(function (barra) {
+    barra.addEventListener('click', function (ev) {
+      var r = barra.getBoundingClientRect();
+      var i = Math.floor((ev.clientX - r.left) / r.width * cartoes.length);
+      if (multiplo) definirModo(false);
+      irPara(i);
+    });
+  });
+
   // ----- Aviso curto -----
   var avisoTempo;
   function mostrarAviso(texto, erro) {

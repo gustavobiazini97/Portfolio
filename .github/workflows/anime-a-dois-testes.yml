@@ -70,10 +70,22 @@ jobs:
       - name: Testes sem base de dados
         run: php tests/medalhas_datas_test.php
 
-      # O site corre no servidor embutido do PHP; os testes falam com ele por HTTP
+      # O site corre no servidor embutido do PHP; os testes falam com ele por HTTP.
+      # As falhas e os erros do PHP também saem como anotações (::error::), visíveis no resumo do Actions sem abrir o log.
       - name: Testes de segurança
         run: |
           php -S 127.0.0.1:8099 -t public > /tmp/servidor.log 2>&1 &
           sleep 1
-          php tests/seguranca_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }
-          php tests/notificacoes_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }
+          correr() {
+            r=0; php "$1" > /tmp/saida.txt 2>&1 || r=$?   # o bash do Actions corre com -e: sem o "||" parava aqui
+            cat /tmp/saida.txt
+            grep -E 'FALHA|Fatal|Warning|Uncaught' /tmp/saida.txt | head -20 | sed "s/^/::error title=$(basename "$1")::/"
+            if [ $r -ne 0 ]; then
+              echo '--- log do servidor ---'; cat /tmp/servidor.log
+              grep -E 'Fatal|Warning|Uncaught|Exception' /tmp/servidor.log | tail -10 | sed 's/^/::error title=servidor::/'
+            fi
+            return $r
+          }
+          correr tests/seguranca_test.php
+          correr tests/notificacoes_test.php
+          correr tests/lado_serie_test.php

@@ -580,6 +580,12 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
   scrollbar-width: none;
 }
 .pista::-webkit-scrollbar { display: none; }
+/* Moldura da pista: ocupa o espaço livre e segura as setas ‹ › (só aparecem em ecrãs largos) */
+.pista-zona { flex: 1 1 0; min-height: 0; display: flex; position: relative; }
+.pista-zona .pista { flex: 1 1 auto; }
+.pista-seta { display: none; }
+.pista.a-arrastar { scroll-snap-type: none; cursor: grabbing; user-select: none; }   /* enquanto se arrasta com o rato */
+.mapa .riscos { cursor: pointer; }   /* clicar num ponto da barra salta para esse episódio */
 .ep {
   flex: 0 0 172px; height: min(236px, 100%);   /* compacto (com espaço para o título), mas nunca maior do que a pista: encolhe em vez de ser cortado */
   scroll-snap-align: center;
@@ -1033,7 +1039,20 @@ html { scroll-behavior: smooth; }
 
   /* --- Página da série: mais cartões à vista e ações centradas --- */
   /* A pista vai de ponta a ponta da janela (não fica cortada nas margens da página) */
-  .pista { margin: 0 calc(50% - 50vw); padding-left: calc(50vw - 100px); padding-right: calc(50vw - 100px); }
+  /* A pista fica dentro da largura da página (antes ia de ponta a ponta e os cartões saíam do ecrã),
+     com as pontas a desvanecer e setas ‹ › por cima */
+  .pista {
+    margin: 0; padding-left: calc(50% - 100px); padding-right: calc(50% - 100px);
+    cursor: grab;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  }
+  .pista-seta {
+    display: grid; position: absolute; top: 50%; z-index: 2;
+    transform: translateY(-50%);
+  }
+  .pista-seta-esq { left: 0; }
+  .pista-seta-dir { right: 0; }
   .ep { flex-basis: 200px; height: min(268px, 100%); }
   .ep-num { font-size: 52px; }
   .pagina-serie .detalhe,
@@ -1047,6 +1066,83 @@ html { scroll-behavior: smooth; }
 /* Ecrãs muito largos: as capas um pouco maiores */
 @media (min-width: 1280px) {
   .pagina-inicio .capa-item { flex-basis: 140px; }
+}
+
+/* ---------- Página da série: colunas laterais (serie/lados.php) ---------- */
+.lado { display: none; }   /* telemóvel e ecrãs médios: só a pista, como sempre */
+
+@media (min-width: 1280px) {
+  /* Três colunas: a série à esquerda, a pista ao meio, a atividade à direita.
+     As linhas são as do meio (topo, aviso, mapa, pista, painel, ações); as laterais vão do mapa até ao fim. */
+  .pagina-serie .ecra {
+    max-width: 1680px;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    column-gap: 28px; row-gap: 14px;
+  }
+  .pagina-serie .ecra > * { grid-column: 2; }
+  .pagina-serie .topo       { grid-column: 1 / -1; grid-row: 1; }   /* o topo vai de ponta a ponta */
+  .pagina-serie .flash      { grid-row: 2; }
+  .pagina-serie .mapa       { grid-row: 3; }
+  .pagina-serie .pista-zona { grid-row: 4; }
+  .pagina-serie .detalhe    { grid-row: 5; }
+  .pagina-serie .acoes      { grid-row: 6; }
+  .pagina-serie .detalhe, .pagina-serie .acoes { justify-self: center; }   /* na grelha, centrar na horizontal é justify */
+
+  .lado {
+    display: flex; flex-direction: column; gap: 14px;
+    grid-row: 3 / -1; min-height: 0;             /* começam à altura do mapa (a linha 2 é a do aviso, quase sempre vazia) */
+    overflow-y: auto; scrollbar-width: thin;     /* se não couber, a coluna desliza sozinha (a página não) */
+    padding: 0 16px 44px; margin: 0 -16px;       /* folga para a sombra dos blocos não ser cortada pela coluna */
+  }
+  .pagina-serie .lado-esq { grid-column: 1; }
+  .pagina-serie .lado-dir { grid-column: 3; }
+}
+
+/* Blocos das colunas */
+.lado-bloco { border-radius: var(--raio); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.lado-titulo { font-size: 13px; font-weight: 500; color: var(--suave); }
+.lado-sub { font-size: 12.5px; color: var(--suave); }
+.lado-nota { font-size: 13px; }
+.lado-vazio { font-size: 13px; color: var(--suave); }
+
+/* Cartão da série: capa, nome, estado e com quem vês */
+.lado-capa { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; max-height: 300px; }
+.lado-nome { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.lado-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lado-com { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+
+/* Números em grelha de 2 */
+.lado-numeros { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.lado-numeros dt { font-size: 11.5px; color: var(--suave); }
+.lado-numeros dd { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.lado-numeros small { font-size: 12px; font-weight: 400; color: var(--suave); }
+
+/* Arco em que vais */
+.lado-arco { font-size: 15px; font-weight: 500; }
+.lado-barra { width: 100%; }
+
+/* Distância entre vocês */
+.lado-distancia { font-size: 14px; font-weight: 500; }
+
+/* Listas de registos e comentários: cada linha é um botão que salta para o episódio */
+.lado-lista { list-style: none; display: flex; flex-direction: column; gap: 2px; margin: 0 -8px; padding: 0; }
+.lado-item {
+  width: 100%; display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px; border-radius: 14px;
+  background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer;
+  transition: background .2s;
+}
+.lado-item:hover, .lado-item:focus-visible { background: var(--trilho); }
+.lado-item .avatar { width: 28px; height: 28px; font-size: 12px; }
+.lado-item-txt { display: flex; flex-direction: column; gap: 2px; font-size: 13px; min-width: 0; }
+.lado-item-txt b { font-weight: 500; }
+.lado-item-txt small { font-size: 11.5px; color: var(--suave); }
+.lado-coment {                       /* o comentário fica em 2 linhas no máximo */
+  color: var(--suave);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 /* =====================================================================================
