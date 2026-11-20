@@ -2,6 +2,7 @@
 /* Retrospetiva (stories, igual à app): ecrãs que avançam sozinhos — tocar à direita = seguinte,
    à esquerda = anterior, manter carregado = pausa — e um cartão final que se partilha como imagem.
    O JS (stories em app.js) trata da navegação e desenha a imagem a partir de data-cartao.
+   No computador (≥ 900 px) os stories ficam num cartão 9:16 ao centro, com setas ‹ › dos lados (app.css).
    Variáveis: $user, $r (Resumo::calcular()), $anual (true = o ano inteiro) */
 
 $periodo = $r['periodo'];
@@ -31,6 +32,13 @@ if ($r['par']) $linhas[] = ['Vs ' . $r['par']['user']->nome, $total . ' × ' . $
 $cartao = ['titulo' => $anual ? 'O meu ' . $periodo['ano'] : 'O meu ' . $periodo['nome'], 'linhas' => $linhas];
 ?>
 <div class="stories" id="stories" data-sair="<?= e(url('retrospetiva')) ?>">
+  <!-- Seta ‹ (só no computador, ao lado do "telemóvel") -->
+  <button type="button" class="stories-seta" id="stories-ant" aria-label="Anterior">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+  </button>
+
+  <!-- No telemóvel ocupa o ecrã todo (display: contents); no computador é um cartão 9:16 ao centro -->
+  <div class="stories-telefone">
   <!-- Barrinhas de progresso (uma por slide) e fechar -->
   <div class="stories-topo">
     <div class="stories-barras" id="stories-barras"></div>
@@ -112,14 +120,16 @@ $cartao = ['titulo' => $anual ? 'O meu ' . $periodo['ano'] : 'O meu ' . $periodo
         </section>
       <?php endif; ?>
 
-      <?php // 9. Extras: séries acabadas, fillers, comentários
+      <?php // 9. Extras: séries acabadas, fillers, comentários — só o que não for zero; sem nada, o slide não aparece
       $extras = [];
       if ($r['acabadas'] !== []) $extras[] = implode(', ', array_map(fn ($s) => $s->nomeCurto(), $r['acabadas']));
-      $extras[] = $r['fillers'] . ' fillers vistos';
-      $extras[] = $r['comentarios'] . ' comentários escritos'; ?>
-      <?= $slide($r['acabadas'] !== [] ? '🏁' : '✨', 'E ainda…',
-                 $r['acabadas'] !== [] ? plural(count($r['acabadas']), 'série acabada', 'séries acabadas') : 'mais umas coisas',
-                 implode(' · ', $extras)) ?>
+      if ($r['fillers'] > 0) $extras[] = plural((int) $r['fillers'], 'filler visto', 'fillers vistos');
+      if ($r['comentarios'] > 0) $extras[] = plural((int) $r['comentarios'], 'comentário escrito', 'comentários escritos'); ?>
+      <?php if ($extras !== []): ?>
+        <?= $slide($r['acabadas'] !== [] ? '🏁' : '✨', 'E ainda…',
+                   $r['acabadas'] !== [] ? plural(count($r['acabadas']), 'série acabada', 'séries acabadas') : 'mais umas coisas',
+                   implode(' · ', $extras)) ?>
+      <?php endif; ?>
 
       <!-- 10. Cartão final (partilhável): o JS desenha a imagem a partir de data-cartao -->
       <section class="story story-final" hidden>
@@ -134,4 +144,10 @@ $cartao = ['titulo' => $anual ? 'O meu ' . $periodo['ano'] : 'O meu ' . $periodo
       </section>
     <?php endif; ?>
   </div>
+  </div><!-- /.stories-telefone -->
+
+  <!-- Seta › (só no computador) -->
+  <button type="button" class="stories-seta" id="stories-seg" aria-label="Seguinte">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </button>
 </div>

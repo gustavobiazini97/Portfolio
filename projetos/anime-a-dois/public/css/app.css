@@ -1473,6 +1473,39 @@ body.pagina-stories { overflow: hidden; }
 .retro-cartao-linha b { font-size: 16px; font-weight: 800; }
 .retro-partilhar { width: 100%; max-width: 320px; background: #fff; color: #1A1F2B; }
 
+/* Telemóvel: o "telemóvel" não existe (os filhos ficam direto no .stories) e não há setas */
+.stories-telefone { display: contents; }
+.stories-seta { display: none; }
+
+/* Computador: os stories num cartão 9:16 ao centro (como o Instagram no PC), barra e texto à escala
+   do cartão, fundo escurecido à volta e setas ‹ › dos lados */
+@media (min-width: 900px) {
+  .stories {
+    flex-direction: row; align-items: center; justify-content: center; gap: 28px;
+    background: radial-gradient(ellipse at 30% 20%, #1B2A22, transparent 60%), radial-gradient(ellipse at 70% 80%, #2A1D14, transparent 60%), #07090C;
+  }
+  .stories-telefone {
+    display: flex; flex-direction: column; position: relative; overflow: hidden;
+    height: min(calc(100dvh - 48px), 820px);
+    aspect-ratio: 9 / 16;                       /* a largura sai da altura: ~460 px num ecrã normal */
+    border-radius: 28px;
+    background: linear-gradient(160deg, #1B2A22, #0E1116 45%, #2A1D14);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .08);
+  }
+  .stories-telefone .stories-topo { padding-top: 14px; }
+  .stories-telefone .stories-palco { max-width: none; }
+  .stories-telefone .story-grande { font-size: 56px; }
+  .stories-seta {
+    display: grid; place-items: center; flex-shrink: 0;
+    width: 48px; height: 48px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(255, 255, 255, .12); color: #fff;
+    transition: background .2s;
+  }
+  .stories-seta:hover { background: rgba(255, 255, 255, .22); }
+  .stories-seta svg { width: 22px; height: 22px; }
+  .stories-seta:disabled { opacity: .3; cursor: default; }
+}
+
 /* ---------- Capas que voam (View Transitions entre páginas) ---------- */
 @view-transition { navigation: auto; }
 .capa-voa, .topo-capa { view-transition-name: capa-serie; }   /* só a capa tocada no Início e a do topo da série */
