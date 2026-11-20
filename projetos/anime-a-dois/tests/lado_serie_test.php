@@ -22,6 +22,8 @@ $verifica = function (string $nome, bool $ok, string $detalhe = '') use (&$falha
 $criar = fn (string $u, string $nome) => User::create(['nome' => $nome, 'username' => $u, 'password_hash' => password_hash('segredo123', PASSWORD_DEFAULT)]);
 $eva  = $criar('lado_eva', 'Eva');
 $filo = $criar('lado_filo', 'Filo');
+Amizade::pedir($filo, 'lado_eva');   // amigos (só amigos ligados podem ver juntos)
+Amizade::aceitar($eva, $filo);
 
 $serie = Serie::create(['slug' => 'lado-teste', 'nome' => 'Lado Teste', 'total_episodios' => 20, 'mal_id' => 999901, 'adicionada_por' => $eva->id]);
 for ($n = 1; $n <= 20; $n++) {
