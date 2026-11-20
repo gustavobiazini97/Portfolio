@@ -1,6 +1,6 @@
 <?php
 /* Blocos do Início no computador (o CSS só os mostra a partir de 1280 px; no telemóvel ficam escondidos).
-   Usa as variáveis de home/index.php: $user, $parceiro, $pedidosAmigos, $capa (função da capa) e
+   Usa as variáveis de home/index.php: $user, $parceiro, $ultimoPar, $pedidosAmigos, $capa (função da capa) e
    $pc = ['tu' => InicioPc::tu, 'par' => InicioPc::par ou null, 'amigos' => InicioPc::amigos].
    Cada bloco tem a sua área na grelha (.inicio em app.css): pc-tu, pc-marco, pc-par-col (espera, juntos, última), pc-amigos. */
 $pcTu = $pc['tu'];
@@ -99,8 +99,24 @@ $pcAvatar = function (User $pcP, string $cor, string $extra = 'avatar-mini'): st
   </div><!-- /.pc-par-col -->
 <?php endif; ?>
 
-<!-- ===== Direita: amigos ===== -->
+<!-- ===== Direita: o último do par (por cima) e os amigos ===== -->
 <aside class="pc-col pc-amigos" aria-label="Amigos">
+  <?php if ($parceiro && $ultimoPar): ?>
+    <!-- Último episódio do par, em qualquer série (no PC substitui o cartão largo do meio, que o CSS esconde).
+         Abre a série nesse episódio se for tua; senão, o perfil do par. -->
+    <?php $pcAbre = $ultimoPar->serie->naBibliotecaDe($user); ?>
+    <a class="pc-bloco vidro pc-link pc-ultimo-par" href="<?= e($pcAbre ? url('serie', 'ver', ['serie' => $ultimoPar->serie->slug, 'ep' => $ultimoPar->numero]) : url('perfil', 'pessoa', ['id' => $parceiro->id])) ?>">
+      <h3 class="pc-titulo"><?= e($parceiro->nome) ?> viu</h3>
+      <span class="pc-ultimo-linha">
+        <?= $pcAvatar($parceiro, 'par') ?>
+        <span class="pc-ultimo-txt">
+          <b><?= e($ultimoPar->serie->nomeCurto()) ?></b>
+          <span class="pc-suave"><?= e('ep. ' . $ultimoPar->numero . ' · ' . LadoSerie::quando(strtotime($ultimoPar->pivot->visto_em))) ?></span>
+        </span>
+      </span>
+    </a>
+  <?php endif; ?>
+
   <h2 class="pc-col-titulo">Amigos</h2>
 
   <section class="pc-bloco vidro">

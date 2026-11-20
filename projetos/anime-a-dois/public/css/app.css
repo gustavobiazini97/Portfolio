@@ -1106,6 +1106,7 @@ html { scroll-behavior: smooth; }
 
   .inicio .pc-col { display: flex; flex-direction: column; gap: 14px; align-self: start; position: sticky; top: 24px; }   /* acompanham o scroll */
   .inicio .pc-marco { display: flex; }
+  .inicio-principal > .ultimo { display: none; }   /* o último do par passa para o topo da coluna da direita (.pc-ultimo-par) */
 }
 
 /* Blocos */
@@ -1119,6 +1120,12 @@ html { scroll-behavior: smooth; }
 .pc-suave { font-size: 12.5px; color: var(--suave); }
 .pc-barra { width: 100%; }
 .pc-convidar { text-align: center; font-size: 14px; }
+
+/* Último do par (topo da direita): foto + série + episódio e quando, sem o número grande */
+.pc-ultimo-linha { display: flex; align-items: center; gap: 10px; }
+.pc-ultimo-linha .avatar { width: 34px; height: 34px; font-size: 13px; }
+.pc-ultimo-txt { display: flex; flex-direction: column; min-width: 0; }
+.pc-ultimo-txt b { font-weight: 500; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Marco do dia */
 .pc-marco { flex-direction: row; align-items: center; border-color: var(--tu-txt); }

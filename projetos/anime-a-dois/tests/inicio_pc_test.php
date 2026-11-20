@@ -139,6 +139,7 @@ $verifica('Início abre (200)', $r['estado'] === 200, (string) $r['estado']);
 $verifica('tem as colunas tu e amigos', str_contains($r['corpo'], 'pc-tu') && str_contains($r['corpo'], 'pc-amigos'));
 $verifica('tem os blocos do par (com-par)', str_contains($r['corpo'], 'inicio com-par') && str_contains($r['corpo'], 'Quem espera por quem'));
 $verifica('última vez juntos na página', str_contains($r['corpo'], 'Alfa 1–3'));
+$verifica('último da Hana no topo da direita', str_contains($r['corpo'], 'pc-ultimo-par') && str_contains($r['corpo'], 'Hana viu'));
 
 // Conta sem par (Inês): sem blocos do par, mas com as colunas
 $cookies = [];
