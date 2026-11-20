@@ -77,7 +77,7 @@ jobs:
           php -S 127.0.0.1:8099 -t public > /tmp/servidor.log 2>&1 &
           sleep 1
           correr() {
-            php "$1" > /tmp/saida.txt 2>&1; r=$?
+            r=0; php "$1" > /tmp/saida.txt 2>&1 || r=$?   # o bash do Actions corre com -e: sem o "||" parava aqui
             cat /tmp/saida.txt
             grep -E 'FALHA|Fatal|Warning|Uncaught' /tmp/saida.txt | head -20 | sed "s/^/::error title=$(basename "$1")::/"
             if [ $r -ne 0 ]; then
