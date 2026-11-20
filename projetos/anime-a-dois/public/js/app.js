@@ -1526,10 +1526,21 @@ function celebrarSerie(json, comigo) {
     gasto = 0; inicio = performance.now();
     slides[atual].classList.remove('entra-story'); void slides[atual].offsetWidth; slides[atual].classList.add('entra-story');
     if (atual === slides.length - 1) enchimentos[atual].style.width = '100%';
+    if (typeof atualizarSetas === 'function') atualizarSetas();
     if (navigator.vibrate) navigator.vibrate(8);
   }
   function seguinte() { if (atual < slides.length - 1) mostrar(atual + 1); }
   function anterior() { mostrar(atual - 1); }
+
+  // Setas ‹ › (só aparecem no computador); apagadas no primeiro/último slide
+  var setaAnt = document.getElementById('stories-ant');
+  var setaSeg = document.getElementById('stories-seg');
+  if (setaAnt) setaAnt.addEventListener('click', function () { anterior(); });
+  if (setaSeg) setaSeg.addEventListener('click', function () { seguinte(); });
+  function atualizarSetas() {
+    if (setaAnt) setaAnt.disabled = atual === 0;
+    if (setaSeg) setaSeg.disabled = atual === slides.length - 1;
+  }
 
   // O tempo do slide atual (para a barrinha e o avanço automático)
   function passo(agora) {
