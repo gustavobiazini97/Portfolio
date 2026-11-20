@@ -67,6 +67,12 @@ class HomeController extends Controller
             'pedidosAmigos' => Amizade::pedidosRecebidos($user)->count(),   // bolinha no ícone dos amigos
             'sinoPorVer'  => count($porVer),                                // número no 🔔
             'sinoResumo'  => Notificacoes::resumo($porVer),                 // linha por baixo do "Olá" (ou null)
+            // Blocos do Início no computador (≥ 1280 px): esquerda (tu), meio (o par) e direita (amigos)
+            'pc'          => [
+                'tu'     => InicioPc::tu($user),
+                'par'    => $par ? InicioPc::par($user, $par) : null,
+                'amigos' => InicioPc::amigos($user),
+            ],
             'esperaPar'   => $user->esperaPar(),   // o que mudou na app desde a última vez que viste
         ]);
     }

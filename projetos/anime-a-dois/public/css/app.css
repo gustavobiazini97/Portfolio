@@ -1068,6 +1068,86 @@ html { scroll-behavior: smooth; }
   .pagina-inicio .capa-item { flex-basis: 140px; }
 }
 
+/* ---------- Início no computador: tu | o par | amigos (home/pc.php) ---------- */
+.inicio .pc-col, .inicio .pc-marco, .inicio .pc-par-col { display: none; }   /* telemóvel e ecrãs médios: o Início de sempre (ganha ao display do .pc-bloco) */
+
+@media (min-width: 1280px) {
+  .pagina-inicio .ecra { max-width: 1680px; }
+
+  /* Sem par: a tua coluna | biblioteca | série aberta | amigos */
+  .inicio {
+    grid-template-columns: 250px minmax(0, 1fr) 380px 270px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "tu principal lado amigos"
+      "tu par       lado amigos";
+    column-gap: 24px;
+  }
+  /* Com par: o meio é dos dois — marco por cima; a série aberta e, ao lado, quem espera, os números a dois
+     e a última vez juntos (.pc-par-col); depois a biblioteca e a fila do par */
+  .inicio.com-par {
+    grid-template-columns: 250px minmax(0, 1fr) minmax(0, 1fr) 270px;
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      "tu marco     marco     amigos"
+      "tu lado      parcol    amigos"
+      "tu principal principal amigos"
+      "tu par       par       amigos";
+  }
+  .inicio-principal         { grid-area: principal; }
+  .inicio > .biblioteca-par { grid-area: par; }
+  .inicio-lado              { grid-area: lado; position: static; }   /* deixa de ser "sticky": as colunas dos lados é que acompanham */
+  .com-par .inicio-lado   { align-self: start; }
+
+  .pc-tu     { grid-area: tu; }
+  .pc-amigos { grid-area: amigos; }
+  .pc-marco  { grid-area: marco; }
+  .inicio .pc-par-col { grid-area: parcol; display: flex; flex-direction: column; gap: 14px; align-self: start; }
+
+  .inicio .pc-col { display: flex; flex-direction: column; gap: 14px; align-self: start; position: sticky; top: 24px; }   /* acompanham o scroll */
+  .inicio .pc-marco { display: flex; }
+}
+
+/* Blocos */
+.pc-col-titulo { font-size: 14px; font-weight: 500; color: var(--suave); }
+.pc-bloco { border-radius: var(--raio); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.pc-link { color: inherit; text-decoration: none; transition: transform .2s; }
+.pc-link:hover { transform: translateY(-2px); }
+.pc-titulo { font-size: 13px; font-weight: 500; color: var(--suave); }
+.pc-num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pc-forte { font-size: 15px; font-weight: 500; }
+.pc-suave { font-size: 12.5px; color: var(--suave); }
+.pc-barra { width: 100%; }
+.pc-convidar { text-align: center; font-size: 14px; }
+
+/* Marco do dia */
+.pc-marco { flex-direction: row; align-items: center; border-color: var(--tu-txt); }
+.pc-marco-texto { font-size: 16px; font-weight: 500; }
+
+/* Quem espera por quem */
+.pc-lista { list-style: none; margin: 0 -8px; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.pc-linha {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  padding: 7px 8px; border-radius: 12px; color: inherit; text-decoration: none; font-size: 14px;
+}
+.pc-linha:hover { background: var(--trilho); }
+.pc-linha-txt { min-width: 0; }
+.pc-linha-serie { flex-shrink: 0; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* o nome nunca sai do cartão */
+.pc-tu-cor { color: var(--tu-txt); }
+.pc-par    { color: var(--par-txt); }
+
+/* Amigos estão a ver: capa pequena + quem e em que episódio */
+.pc-amigos-lista { list-style: none; margin: 0 -8px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pc-amigo { display: flex; gap: 12px; padding: 8px; border-radius: 14px; color: inherit; text-decoration: none; }
+.pc-amigo:hover { background: var(--trilho); }
+.pc-amigo-capa { position: relative; flex-shrink: 0; width: 52px; height: 74px; border-radius: 10px; overflow: hidden; }
+.pc-amigo-capa .capa { width: 100%; height: 100%; object-fit: cover; display: grid; place-items: center; border-radius: 0; }
+.pc-amigo-capa .capa-estado { font-size: 9.5px; padding: 1px 5px; }
+.pc-tens .pc-amigo-capa { opacity: .5; }   /* já está na tua biblioteca */
+.pc-amigo-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; font-size: 13.5px; }
+.pc-amigo-txt b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc-amigo-pessoa { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--suave); }
+
 /* ---------- Página da série: colunas laterais (serie/lados.php) ---------- */
 .lado { display: none; }   /* telemóvel e ecrãs médios: só a pista, como sempre */
 

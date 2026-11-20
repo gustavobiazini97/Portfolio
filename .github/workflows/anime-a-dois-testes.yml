@@ -89,3 +89,4 @@ jobs:
           correr tests/seguranca_test.php
           correr tests/notificacoes_test.php
           correr tests/lado_serie_test.php
+          correr tests/inicio_pc_test.php
