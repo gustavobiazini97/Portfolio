@@ -2,7 +2,8 @@
 /* Página da série.
    Variáveis: $serie, $user, $companheiros (Users que vêem a série contigo; vazio se sozinho), $fillers, $meu,
               $deles (progresso de cada companheiro, na mesma ordem), $episodios, $inicial,
-              $sincronizar (o browser vai buscar fillers ou episódios novos), $flash */
+              $sincronizar (o browser vai buscar fillers ou episódios novos), $flash,
+              $lado (colunas laterais, ver serie/lados.php) */
 $nomes = $companheiros->pluck('nome')->all();
 
 // Avatares (foto ou inicial) gerados uma vez e repetidos em todos os cartões
@@ -187,6 +188,8 @@ $celebrar = [
   <span hidden id="sincronizar" data-serie="<?= e($serie->slug) ?>" data-mal="<?= (int) $serie->mal_id ?>"
         data-em-emissao="<?= $serie->em_emissao ? '1' : '0' ?>" data-url="<?= e(url('biblioteca', 'atualizar')) ?>"></span>
 <?php endif; ?>
+
+<?php require __DIR__ . '/lados.php'; ?>
 
 <!-- Aviso curto depois de marcar (substitui o recarregar da página) -->
 <p class="aviso vidro" id="aviso" role="status" aria-live="polite" hidden></p>

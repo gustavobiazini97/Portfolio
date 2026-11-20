@@ -229,6 +229,21 @@ document.querySelectorAll('[data-alternar-tema]').forEach(function (botao) {
     if (ignorarClique) { ev.stopPropagation(); ev.preventDefault(); }
   }, true);
 
+  // Colunas laterais (ecrãs largos): um registo ou comentário salta para o episódio;
+  // os comentários abrem também a folha de comentários desse episódio
+  document.querySelectorAll('[data-ir-ep]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var c = porNumero[b.dataset.irEp];
+      if (!c) return;
+      if (multiplo) definirModo(false);
+      irPara(cartoes.indexOf(c));
+      if (b.hasAttribute('data-abrir-coment')) {
+        var bc = document.getElementById('btn-coment');
+        if (bc) setTimeout(function () { bc.click(); }, 350);   // depois de o cartão chegar ao centro
+      }
+    });
+  });
+
   // Barras do mapa: clicar num ponto salta para esse episódio
   document.querySelectorAll('.mapa .riscos').forEach(function (barra) {
     barra.addEventListener('click', function (ev) {

@@ -77,3 +77,4 @@ jobs:
           sleep 1
           php tests/seguranca_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }
           php tests/notificacoes_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }
+          php tests/lado_serie_test.php || { echo '--- log do servidor ---'; cat /tmp/servidor.log; exit 1; }
