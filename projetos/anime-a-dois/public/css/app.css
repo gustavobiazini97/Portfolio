@@ -580,6 +580,12 @@ button.capa-item { font: inherit; text-align: left; background: none; border: 0;
   scrollbar-width: none;
 }
 .pista::-webkit-scrollbar { display: none; }
+/* Moldura da pista: ocupa o espaço livre e segura as setas ‹ › (só aparecem em ecrãs largos) */
+.pista-zona { flex: 1 1 0; min-height: 0; display: flex; position: relative; }
+.pista-zona .pista { flex: 1 1 auto; }
+.pista-seta { display: none; }
+.pista.a-arrastar { scroll-snap-type: none; cursor: grabbing; user-select: none; }   /* enquanto se arrasta com o rato */
+.mapa .riscos { cursor: pointer; }   /* clicar num ponto da barra salta para esse episódio */
 .ep {
   flex: 0 0 172px; height: min(236px, 100%);   /* compacto (com espaço para o título), mas nunca maior do que a pista: encolhe em vez de ser cortado */
   scroll-snap-align: center;
@@ -1033,7 +1039,20 @@ html { scroll-behavior: smooth; }
 
   /* --- Página da série: mais cartões à vista e ações centradas --- */
   /* A pista vai de ponta a ponta da janela (não fica cortada nas margens da página) */
-  .pista { margin: 0 calc(50% - 50vw); padding-left: calc(50vw - 100px); padding-right: calc(50vw - 100px); }
+  /* A pista fica dentro da largura da página (antes ia de ponta a ponta e os cartões saíam do ecrã),
+     com as pontas a desvanecer e setas ‹ › por cima */
+  .pista {
+    margin: 0; padding-left: calc(50% - 100px); padding-right: calc(50% - 100px);
+    cursor: grab;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  }
+  .pista-seta {
+    display: grid; position: absolute; top: 50%; z-index: 2;
+    transform: translateY(-50%);
+  }
+  .pista-seta-esq { left: 0; }
+  .pista-seta-dir { right: 0; }
   .ep { flex-basis: 200px; height: min(268px, 100%); }
   .ep-num { font-size: 52px; }
   .pagina-serie .detalhe,
