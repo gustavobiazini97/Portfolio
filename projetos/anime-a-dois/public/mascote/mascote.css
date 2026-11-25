@@ -1,0 +1,74 @@
+/* O mascote do casal: palco, nome e escolha da espécie. Usado pela página mascote.html (app) e pelo site. */
+
+/* O contentor ocupa o espaço que lhe derem (a página inteira na app, uma caixa no site) */
+.mascote {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.mascote-cartao { min-height: 150px; }
+
+/* Na página da app o fundo é transparente (a app pinta o fundo à volta) */
+.mascote-pagina {
+  margin: 0;
+  height: 100vh;
+  background: transparent;
+  font-family: 'M PLUS Rounded 1c', system-ui, sans-serif;
+}
+.mascote-pagina #mascote { height: 100vh; }
+
+/* O canvas não deixa o browser fazer scroll ou zoom quando se arrasta o dedo (é a festinha) */
+.mascote-palco { position: absolute; inset: 0; }
+.mascote-palco canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+
+/* Desenho de reserva (sem WebGL) */
+.mascote-fixo { width: 100%; height: 100%; display: block; }
+
+/* Nome por baixo do bicho */
+.mascote-nome {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4a4350;
+  pointer-events: none;
+}
+.mascote-cartao .mascote-nome { font-size: 0.85rem; bottom: 4px; }
+
+/* Escolha da espécie quando o ovo choca */
+.mascote-escolha {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #4a4350;
+}
+.mascote-escolha-titulo { margin: 0 0 8px; font-size: 0.95rem; }
+.mascote-escolha-botoes { display: flex; gap: 10px; justify-content: center; }
+.mascote-botao {
+  flex: 1;
+  max-width: 140px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  color: #4a4350;
+  background: #f4b183;
+  cursor: pointer;
+}
+.mascote-botao[data-especie="gato"] { background: #a9c4ee; }
+.mascote-botao:disabled { opacity: 0.5; cursor: default; }
+.mascote-oculto { display: none; }

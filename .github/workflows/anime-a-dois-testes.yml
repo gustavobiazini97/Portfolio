@@ -70,6 +70,10 @@ jobs:
       - name: Testes sem base de dados
         run: php tests/medalhas_datas_test.php
 
+      # O mascote 3D constrói-se sem WebGL: a lógica e os corpos testam-se em Node (o runner já traz o node)
+      - name: Testes do mascote (Node)
+        run: node tests/mascote_js_test.js
+
       # O site corre no servidor embutido do PHP; os testes falam com ele por HTTP.
       # As falhas e os erros do PHP também saem como anotações (::error::), visíveis no resumo do Actions sem abrir o log.
       - name: Testes de segurança
