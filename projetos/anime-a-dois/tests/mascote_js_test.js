@@ -152,6 +152,67 @@ teste('raposa: de costas roda o corpo e depois volta a posição normal', () => 
   assert.strictEqual(c.grupo.rotation.y, 0);
 });
 
+// ---------- Gato ----------
+teste('gato: 1 cauda até à adulta e 2 na lendária', () => {
+  for (const [fase, n] of [['cria', 1], ['jovem', 1], ['adulta', 1], ['lendaria', 2]]) {
+    const c = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase })));
+    assert.strictEqual(c.partes.caudas.length, n, fase);
+  }
+});
+teste('gato: 2 orelhas, 2 olhos, 2 pálpebras, 6 bigodes; marca 二 só na lendária', () => {
+  const c = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'adulta' })));
+  assert.strictEqual(c.partes.orelhas.length, 2);
+  assert.strictEqual(c.partes.olhos.length, 2);
+  assert.strictEqual(c.partes.palpebras.length, 2);
+  let bigodes = 0;
+  c.grupo.traverse((n) => { if (n.name === 'bigode') bigodes++; });
+  assert.strictEqual(bigodes, 6);
+  assert.strictEqual(c.grupo.getObjectByName('marca'), undefined);
+  const l = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'lendaria' })));
+  assert.ok(l.grupo.getObjectByName('marca'));
+  assert.ok(l.aura, 'a lendária tem aura');
+});
+teste('gato: espreguiça-se de tempos a tempos (o corpo estica na horizontal)', () => {
+  const c = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'adulta' })));
+  let min = Infinity, max = -Infinity;
+  for (let t = 0; t < 60; t += 0.1) {
+    c.animar('idle', t, 1);
+    min = Math.min(min, c.grupo.scale.x);
+    max = Math.max(max, c.grupo.scale.x);
+  }
+  assert.ok(max / min > 1.05, 'razão ' + max / min);
+});
+teste('gato: a dormir baixa a cabeça e fecha as pálpebras', () => {
+  const c = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'adulta' })));
+  c.animar('idle', 0, 1);
+  const altura = c.partes.cabeca.position.y;
+  const aberta = c.partes.palpebras[0].scale.y;
+  c.animar('dorme', 1, 1);
+  assert.ok(c.partes.cabeca.position.y < altura);
+  assert.ok(c.partes.palpebras[0].scale.y > aberta + 0.5);
+});
+teste('gato: aborrecida bate com a cauda', () => {
+  const c = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'adulta', humor: 'aborrecida' })));
+  c.animar('aborrecida', 0, 1);
+  const a = c.partes.caudas[0].rotation.z;
+  c.animar('aborrecida', 0.16, 1);
+  assert.notStrictEqual(c.partes.caudas[0].rotation.z, a);
+});
+teste('gato: não é a raposa com enfeites (cabeça e corpo com proporções próprias)', () => {
+  const r = M.Corpos.raposa(M.Estado.parametros(estado({ especie: 'raposa', fase: 'adulta' })));
+  const gt = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'adulta' })));
+  assert.notStrictEqual(gt.partes.cabeca.scale.x, r.partes.cabeca.scale.x);
+  assert.notStrictEqual(gt.grupo.getObjectByName('tronco').scale.y, r.grupo.getObjectByName('tronco').scale.y);
+});
+teste('gato: todas as animações correm sem lançar, salta levanta o corpo e de costas roda-o', () => {
+  const c = M.Corpos.gato(M.Estado.parametros(estado({ especie: 'gato', fase: 'lendaria' })));
+  for (const nome of ['idle', 'festinha', 'dorme', 'aborrecida', 'costas', 'eclodir']) for (const t of [0, 0.3, 2.5, 9]) c.animar(nome, t, 1);
+  c.animar('salta', 0.35, 1);
+  assert.ok(c.grupo.position.y > 0.3);
+  c.animar('costas', 1, 1);
+  assert.ok(Math.abs(c.grupo.rotation.y - Math.PI) < 1e-6);
+});
+
 // ---------- Motor ----------
 teste('motor: funções públicas e ponte por defeito (não faz nada)', () => {
   for (const f of ['iniciar', 'definirEstado', 'evento', 'congelar']) assert.strictEqual(typeof M[f], 'function', f);
