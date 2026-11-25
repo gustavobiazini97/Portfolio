@@ -103,6 +103,15 @@ o servidor valida tudo em `DadosAnime` e, ao criar ou atualizar uma série, conf
 
 Calculado dos dados existentes (sem tabela): episódios do par, dos amigos e de quem vê séries contigo (com "só juntos", só as séries em comum), comentários nas séries que vês com alguém (marcações com menos de 3 h de intervalo juntam-se), convites de série e pedidos de amizade por responder, e amizades novas ("X e tu são agora amigos", tipo `amigo`). O "já vi" fica guardado na app.
 
+### Mascote
+
+| Método | Rota | | Corpo / Resposta |
+|---|---|---|---|
+| GET | `/mascote` | 🔒 | `mascote`: `especie` (`raposa`/`gato`, ou `null` até escolherem), `nome` (ou `null`), `cor` (0–5, a paleta), `fase` (`ovo`/`cria`/`jovem`/`adulta`/`lendaria`), `humor` (`feliz`/`aborrecida`/`a_dormir`), `episodiosJuntos`, `deCostas` (estás 15+ episódios atrás numa série que veem juntos), `podeEscolher` (o ovo já chocou e ainda não há espécie). Sem par: `mascote: null` |
+| PUT | `/mascote` | 🔒 | `{ nome?, cor?, especie? }` → `mascote` atualizado. 422 com `mensagem` se o nome (até 20 letras) ou a cor forem inválidos, se o ovo ainda não chocou ou se a espécie já foi escolhida; 422 também sem par |
+
+Um bicho por par. A fase conta os episódios vistos pelos dois (ovo até 9, cria 10–99, jovem 100–299, adulta 300–999, lendária 1000+) e o humor os dias desde o último episódio visto pelos dois (feliz até 2, aborrecida 3–6, a dormir 7 ou mais). Só ficam guardados a espécie, o nome e a cor (tabela `mascotes`); o resto calcula-se. Se o par mudar, o bicho antigo fica guardado e o novo par começa com um ovo.
+
 ### Retrospetivas e medalhas
 
 | Método | Rota | | Resposta |

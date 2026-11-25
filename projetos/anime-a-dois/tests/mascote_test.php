@@ -11,6 +11,9 @@ require __DIR__ . '/../app/bootstrap.php';
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
+// Precisa do site a correr em $URL (php -S 127.0.0.1:8099 -t public) para a parte da API
+$URL = getenv('URL_TESTE') ?: 'http://127.0.0.1:8099';
+
 $falhas = 0;
 $verifica = function (string $nome, bool $ok, string $detalhe = '') use (&$falhas) {
     echo ($ok ? 'ok   ' : 'FALHA') . "  $nome" . ($ok || $detalhe === '' ? '' : "  ($detalhe)") . "\n";
@@ -144,6 +147,52 @@ $ver($gil, 13, $hoje); $ver($hana, 13, $hoje);
 $verifica('humor: viram juntos hoje = feliz', Mascote::estado($gil)['humor'] === 'feliz');
 $limparVistos();
 $verifica('humor: nenhum episódio juntos = feliz', Mascote::estado($gil)['humor'] === 'feliz');
+
+// ---------- API: GET e PUT /mascote ----------
+// Casal ines + ze: 12 episódios juntos na mesma série (o ovo já chocou)
+Capsule::table('series_juntos')->insert([
+    ['serie_id' => $serie->id, 'user_id' => $ines->id, 'com_id' => $ze->id],
+    ['serie_id' => $serie->id, 'user_id' => $ze->id,   'com_id' => $ines->id],
+]);
+foreach (range(1, 12) as $n) { $ver($ines, $n, $hoje); $ver($ze, $n, $hoje); }
+$tokenInes = Token::criar($ines, 'teste');
+$tokenSozinho = Token::criar($sozinho, 'teste');
+$api = function (string $metodo, string $token, array $corpo = []) use ($URL): array {
+    $ch = curl_init($URL . '/api.php?rota=/mascote');
+    $cabecalhos = ['Content-Type: application/json', 'Accept: application/json'];
+    if ($token !== '') {
+        $cabecalhos[] = 'X-Auth-Token: ' . $token;
+    }
+    curl_setopt_array($ch, [
+        CURLOPT_CUSTOMREQUEST  => $metodo,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => $cabecalhos,
+        CURLOPT_POSTFIELDS     => $metodo === 'GET' ? null : json_encode($corpo),
+    ]);
+    $texto = (string) curl_exec($ch);
+    $estado = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+    return [$estado, json_decode($texto, true) ?? [], $texto];
+};
+[$estado] = $api('GET', '');
+$verifica('API: sem token → 401', $estado === 401, (string) $estado);
+[$estado, $j, $texto] = $api('GET', $tokenInes);
+$verifica('API: GET devolve a cria com 12 juntos', $estado === 200 && ($j['mascote']['fase'] ?? '') === 'cria' && ($j['mascote']['podeEscolher'] ?? false) === true, $texto);
+$verifica('API: nunca expõe ids de utilizadores', !str_contains($texto, 'user_a') && !str_contains($texto, 'user_b') && !str_contains($texto, '"id"'));
+[$estado, $j] = $api('GET', $tokenSozinho);
+$verifica('API: sem par → 200 com mascote null', $estado === 200 && array_key_exists('mascote', $j) && $j['mascote'] === null, json_encode($j));
+[$estado, $j] = $api('PUT', $tokenSozinho, ['nome' => 'X']);
+$verifica('API: PUT sem par → 422 com mensagem', $estado === 422 && ($j['mensagem'] ?? '') !== '', (string) $estado);
+[$estado, $j] = $api('PUT', $tokenInes, ['especie' => 'raposa', 'nome' => 'Kuro', 'cor' => 3]);
+$verifica('API: PUT escolhe espécie, nome e cor', $estado === 200 && ($j['mascote']['especie'] ?? '') === 'raposa' && ($j['mascote']['nome'] ?? '') === 'Kuro' && ($j['mascote']['cor'] ?? -1) === 3, json_encode($j));
+[$estado, $j] = $api('PUT', $tokenInes, ['especie' => 'gato']);
+$verifica('API: segunda escolha de espécie → 422 com mensagem', $estado === 422 && ($j['mensagem'] ?? '') !== '', (string) $estado);
+[$estado, $j] = $api('GET', $tokenInes);
+$verifica('API: a espécie continua raposa', ($j['mascote']['especie'] ?? '') === 'raposa');
+[$estado, $j] = $api('PUT', $tokenInes, ['nome' => '<img src=x>']);
+$verifica('API: nome com HTML devolve-se tal e qual (quem desenha é que escapa)', $estado === 200 && ($j['mascote']['nome'] ?? '') === '<img src=x>', json_encode($j));
+[$estado] = $api('PUT', $tokenInes, ['cor' => 9]);
+$verifica('API: cor inválida → 422', $estado === 422, (string) $estado);
 
 // ---------- Troca de par ----------
 $idCasal = Mascote::obter($gil)->id;

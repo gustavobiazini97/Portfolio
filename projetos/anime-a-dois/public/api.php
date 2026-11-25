@@ -68,6 +68,10 @@ $rotas = [
     // Sininho (🔔): o que aconteceu à tua volta nos últimos 30 dias
     ['GET',    '/notificacoes',                       NotificacoesApi::class, 'lista'],
 
+    // O mascote do casal: estado (fase, humor, espécie…) e escolher espécie, nome e cor
+    ['GET',    '/mascote',                            MascoteApi::class,     'ver'],
+    ['PUT',    '/mascote',                            MascoteApi::class,     'guardar'],
+
     // Retrospetivas (mensal e anual) e medalhas
     ['GET',    '/resumos',                            ResumoApi::class,      'periodos'],
     ['GET',    '/resumos/{ano}',                      ResumoApi::class,      'ano'],
