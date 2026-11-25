@@ -157,14 +157,10 @@
             nariz.position.y += 0.012 * Math.sin(t * 22);
           }
         } else if (nome === 'aborrecida') {
-          // Esconde a cara atrás das duas primeiras caudas, que passam para a frente
+          // Amuada: vira a cara (poseBase), baixa as orelhas e deixa as caudas descair; a cara fica sempre à vista
           const u = Math.min(t / 0.6, 1);
-          const lerp = (a, b) => a + (b - a) * u;
-          P.caudas.slice(0, 2).forEach((c, k) => {
-            const lado = k === 0 ? 1 : -1;
-            c.position.set(lerp(0, 0.2 * lado), lerp(0.6, 0.7), lerp(-0.4, 0.95));
-            c.rotation.set(lerp(c.rotation.x, 0.3), 0, lerp(c.rotation.z, 0.5 * lado), 'XZY');   // cruzam-se à frente da cara
-          });
+          P.orelhas.forEach((o, k) => { o.rotation.z += (k === 0 ? -1 : 1) * 0.55 * u; });   // orelhas para trás/para o lado
+          P.caudas.forEach((c) => { c.rotation.x -= 0.5 * u; c.rotation.z *= 0.6; });          // caudas descaídas e mais juntas
         } else if (nome === 'dorme') {
           // As caudas descem para trás
           P.caudas.forEach((c) => { c.rotation.x -= 0.4; });

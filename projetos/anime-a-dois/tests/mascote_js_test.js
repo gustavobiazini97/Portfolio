@@ -122,12 +122,17 @@ teste('raposa: 2 orelhas, 2 olhos, 2 pálpebras; marca 二 só na lendária', ()
   assert.ok(lendaria.grupo.getObjectByName('marca'));
   assert.ok(lendaria.aura, 'a lendária tem aura');
 });
-teste('raposa: aborrecida esconde a cara atrás das caudas (as caudas mexem)', () => {
+teste('raposa: aborrecida baixa as orelhas e deixa as caudas descair, sem tapar a cara', () => {
   const c = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'adulta', humor: 'aborrecida' })));
-  c.animar('aborrecida', 0, 1);
-  const a = c.partes.caudas[0].position.clone();
+  c.animar('idle', 0, 1);
+  const orelha = c.partes.orelhas[0].rotation.z;
+  const cauda = c.partes.caudas[0].rotation.x;
   c.animar('aborrecida', 1, 1);
-  assert.ok(a.distanceTo(c.partes.caudas[0].position) > 0.1);
+  assert.ok(Math.abs(c.partes.orelhas[0].rotation.z - orelha) > 0.3, 'orelhas');
+  assert.ok(c.partes.caudas[0].rotation.x < cauda - 0.3, 'caudas');
+  // nenhuma cauda fica à frente da cara (z da cabeça ~0.14; a cara está em z > 0.5)
+  c.grupo.updateMatrixWorld(true);
+  c.partes.caudas.forEach((t) => assert.ok(t.position.z < 0.3, 'cauda à frente'));
 });
 teste('raposa: a dormir fecha as pálpebras e baixa a cabeça', () => {
   const c = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'adulta' })));
