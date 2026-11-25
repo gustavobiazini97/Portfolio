@@ -249,3 +249,21 @@ CREATE TABLE IF NOT EXISTS limites (
   inicio     DATETIME          NOT NULL,             -- começo da janela atual
   bloqueado_ate DATETIME       NULL                  -- preenchido quando passa o máximo
 ) ENGINE=InnoDB;
+
+-- O mascote do casal (um bicho por par). Só guarda o que não se calcula: a espécie, o nome e a cor.
+-- A fase, o humor e "de costas" calculam-se dos vistos (ver app/models/Mascote.php).
+-- user_a < user_b (o par nos dois sentidos dá sempre a mesma linha); se o par mudar, o bicho antigo fica
+-- guardado e o novo par começa com um ovo. especie fica NULL até o ovo chocar (10 episódios vistos pelos dois).
+CREATE TABLE IF NOT EXISTS mascotes (
+  id        INT UNSIGNED     NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_a    INT UNSIGNED     NOT NULL,
+  user_b    INT UNSIGNED     NOT NULL,
+  especie   VARCHAR(10)      NULL,                          -- 'raposa' | 'gato'; escolhida uma só vez
+  nome      VARCHAR(20)      NULL,                          -- null = nome por defeito, escolhido por quem desenha
+  cor       TINYINT UNSIGNED NOT NULL DEFAULT 0,            -- índice da paleta (0–5)
+  criado_em DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_mascote_par (user_a, user_b),
+  KEY idx_mascote_b (user_b),
+  CONSTRAINT fk_mascote_a FOREIGN KEY (user_a) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_mascote_b FOREIGN KEY (user_b) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

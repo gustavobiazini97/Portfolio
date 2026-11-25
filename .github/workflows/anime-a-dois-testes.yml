@@ -90,3 +90,4 @@ jobs:
           correr tests/notificacoes_test.php
           correr tests/lado_serie_test.php
           correr tests/inicio_pc_test.php
+          correr tests/mascote_test.php
