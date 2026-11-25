@@ -41,6 +41,7 @@ $rotas = [
     'home'  => ['index', 'novidadesVistas'],
     'estatisticas' => ['index'],
     'notificacoes' => ['index', 'filtrar'],
+    'mascote' => ['index', 'guardar'],
     'retrospetiva' => ['index', 'ver'],
     'amigos' => ['index', 'criarConvite', 'pedir', 'aceitar', 'recusar', 'remover'],
     'serie' => ['ver', 'marcar', 'comentarios', 'comentar', 'apagarComentario'],

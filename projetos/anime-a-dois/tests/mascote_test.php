@@ -194,6 +194,84 @@ $verifica('API: nome com HTML devolve-se tal e qual (quem desenha é que escapa)
 [$estado] = $api('PUT', $tokenInes, ['cor' => 9]);
 $verifica('API: cor inválida → 422', $estado === 422, (string) $estado);
 
+// ---------- Site: página, cartão no Início e guardar ----------
+// A Inês (sem a ver) e o casal Gil/Hana: o Gil entra no site com a sessão de browser (cookies + CSRF)
+$cookies = [];
+$http = function (string $metodo, string $caminho, array $campos = []) use ($URL, &$cookies): array {
+    $ch = curl_init($URL . $caminho);
+    $hdrs = $cookies ? ['Cookie: ' . implode('; ', array_map(fn ($k, $v) => "$k=$v", array_keys($cookies), $cookies))] : [];
+    $hdrs[] = 'Accept: application/json, text/html';
+    curl_setopt_array($ch, [CURLOPT_CUSTOMREQUEST => $metodo, CURLOPT_RETURNTRANSFER => true, CURLOPT_HEADER => true, CURLOPT_HTTPHEADER => $hdrs]);
+    if ($campos) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($campos));
+    }
+    $resposta = (string) curl_exec($ch);
+    $tam = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+    $estado = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    $cabecalhos = substr($resposta, 0, $tam);
+    curl_close($ch);
+    foreach (explode("\r\n", $cabecalhos) as $l) {
+        if (preg_match('/^Set-Cookie:\s*([^=]+)=([^;]*)/i', $l, $m)) {
+            $cookies[$m[1]] = $m[2];
+        }
+    }
+    return ['estado' => $estado, 'corpo' => substr($resposta, $tam), 'cabecalhos' => $cabecalhos];
+};
+$csrf = function () use ($http): string {
+    preg_match('/name="_csrf" value="([a-f0-9]+)"/', $http('GET', '/index.php?c=auth&a=login')['corpo'], $m);
+    return $m[1] ?? '';
+};
+$entrar = function (string $utilizador) use ($http, $csrf) {
+    $http('POST', '/index.php?c=auth&a=entrar', ['_csrf' => $csrf(), 'username' => $utilizador, 'password' => 'segredo123']);
+};
+Capsule::table('limites')->delete();
+
+// Sem sessão: a página manda para o login e o guardar não aceita nada
+$r = $http('GET', '/index.php?c=mascote');
+$verifica('site: sem login a página redireciona', $r['estado'] === 302 && stripos($r['cabecalhos'], 'c=auth') !== false, (string) $r['estado']);
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['nome' => 'X']);
+$verifica('site: guardar sem sessão nem CSRF é recusado', $r['estado'] !== 200 && !str_contains($r['corpo'], '"ok":true'), (string) $r['estado']);
+
+// Com par (Gil): cartão no Início, página com o estado, nada de scripts inline
+$entrar('ms_gil');
+$r = $http('GET', '/index.php?c=home');
+$verifica('site: Início com par tem o cartão do bicho', $r['estado'] === 200 && str_contains($r['corpo'], 'id="mascote-cartao"'), (string) $r['estado']);
+$r = $http('GET', '/index.php?c=mascote');
+$verifica('site: página do bicho (200) com data-estado e id mascote', $r['estado'] === 200 && str_contains($r['corpo'], 'data-estado=') && str_contains($r['corpo'], 'id="mascote"'), (string) $r['estado']);
+$verifica('site: página sem scripts inline', !preg_match('/<script(?![^>]*\bsrc=)/i', $r['corpo']));
+$verifica('site: página sem style inline', !preg_match('/<style\b/i', $r['corpo']));
+$verifica('site: página sem o id nem o user_a do mascote', !str_contains($r['corpo'], 'user_a') && !str_contains($r['corpo'], 'user_b'));
+
+// Guardar com CSRF: nome hostil fica escapado na página; sem CSRF é recusado
+$token = $csrf();
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['nome' => '<img src=x onerror=1>']);
+$verifica('site: guardar sem _csrf é recusado', !str_contains($r['corpo'], '"ok":true'), $r['corpo']);
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['_csrf' => $token, 'nome' => '<img src=x onerror=1>', 'cor' => '2']);
+$j = json_decode($r['corpo'], true) ?: [];
+$verifica('site: guardar com _csrf → ok', $r['estado'] === 200 && ($j['ok'] ?? false) === true && ($j['mascote']['nome'] ?? '') === '<img src=x onerror=1>', $r['corpo']);
+$r = $http('GET', '/index.php?c=mascote');
+$verifica('site: o nome vem escapado (&lt;img) e nunca como tag', str_contains($r['corpo'], '&lt;img') && !str_contains($r['corpo'], '<img src=x'));
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['_csrf' => $token, 'nome' => str_repeat('a', 21)]);
+$j = json_decode($r['corpo'], true) ?: [];
+$verifica('site: nome com 21 caracteres → 422 com mensagem', $r['estado'] === 422 && ($j['mensagem'] ?? '') !== '', (string) $r['estado']);
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['_csrf' => $token, 'especie' => 'dragao']);
+$verifica('site: espécie inválida → 422', $r['estado'] === 422, (string) $r['estado']);
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['_csrf' => $token, 'especie' => 'gato']);
+$verifica('site: a espécie já escolhida (raposa) não muda → 422', $r['estado'] === 422 && Mascote::estado($gil)['especie'] === 'raposa', (string) $r['estado']);
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['_csrf' => $token, 'user_a' => '999', 'id' => '1']);
+$verifica('site: campos desconhecidos (user_a, id) são ignorados', Capsule::table('mascotes')->where('user_a', 999)->doesntExist());
+
+// Sem par: sem cartão no Início, a página só avisa e o guardar recusa
+$cookies = [];
+$entrar('ms_sozinho');
+$r = $http('GET', '/index.php?c=home');
+$verifica('site: Início sem par não tem cartão do bicho', $r['estado'] === 200 && !str_contains($r['corpo'], 'mascote-cartao'), (string) $r['estado']);
+$r = $http('GET', '/index.php?c=mascote');
+$verifica('site: página sem par avisa e não tem data-estado', $r['estado'] === 200 && str_contains($r['corpo'], 'ainda não há mascote') && !str_contains($r['corpo'], 'data-estado'), (string) $r['estado']);
+$r = $http('POST', '/index.php?c=mascote&a=guardar', ['_csrf' => $csrf(), 'nome' => 'X']);
+$verifica('site: guardar sem par → 422', $r['estado'] === 422, (string) $r['estado']);
+$cookies = [];
+
 // ---------- Troca de par ----------
 $idCasal = Mascote::obter($gil)->id;
 $parOf($gil, $ines); $parOf($ines, $gil); $parOf($hana, null); $parOf($ze, null);

@@ -3,7 +3,7 @@
    Variáveis: $user, $parceiro (o par, ou null), $companheiros (quem vê a série aberta contigo), $deles (o progresso de cada um),
               $biblioteca (a tua: ['serie','estado','conjunta','companheiros'=>[['user','pct']],'tu']), $doPar (só do par, mesmo formato),
               $convites (['serie','recebido']), $serie (aberta, ou null se a tua biblioteca estiver vazia),
-              $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $resumo,
+              $mascote (Mascote::estado do par, ou null sem par), $meuEstado, $conjunta, $ligados (par + amigos), $enviadosSerie, $ultimoPar (Episodio ou null), $meu, $resumo,
               $podeRemover, $jaCa (mal_id → biblioteca|convite|par), $novidades, $pedidosAmigos, $esperaPar,
               $sinoPorVer (notificações por ver), $sinoResumo (resumo delas para o topo, ou null), $flash,
               $pc (blocos do computador: ver home/pc.php) */
@@ -105,6 +105,11 @@ $selo = fn (array $item) => match ($item['estado']) {
       Enviar convite
     </button>
   </section>
+<?php endif; ?>
+
+<?php if ($mascote !== null): ?>
+  <!-- O bicho do casal (só com par); o toque faz-lhe festas, "Abrir" leva à página grande -->
+  <?php $modo = 'cartao'; require __DIR__ . '/../mascote/cartao.php'; ?>
 <?php endif; ?>
 
 <!-- A tua biblioteca: fila de capas que desliza para os lados. As séries dos dois têm duas barrinhas

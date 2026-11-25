@@ -46,6 +46,7 @@ class HomeController extends Controller
             'serieAcento' => $serie?->acento,
             'user'        => $user,
             'parceiro'    => $par,
+            'mascote'     => Mascote::estado($user),                    // o bicho do par (null sem par: sem cartão)
             'companheiros' => $companheiros,
             'biblioteca'  => $biblioteca,
             'doPar'       => $doPar,
