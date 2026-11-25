@@ -105,6 +105,53 @@ teste('ovo: o balanço do idle mexe no grupo', () => {
   assert.notStrictEqual(c.grupo.rotation.z, a);
 });
 
+// ---------- Raposa ----------
+teste('raposa: caudas 1, 2, 4 e 9 nas fases cria, jovem, adulta e lendária', () => {
+  for (const [fase, n] of [['cria', 1], ['jovem', 2], ['adulta', 4], ['lendaria', 9]]) {
+    const c = M.Corpos.raposa(M.Estado.parametros(estado({ especie: 'raposa', fase })));
+    assert.strictEqual(c.partes.caudas.length, n, fase);
+  }
+});
+teste('raposa: 2 orelhas, 2 olhos, 2 pálpebras; marca 二 só na lendária', () => {
+  const adulta = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'adulta' })));
+  assert.strictEqual(adulta.partes.orelhas.length, 2);
+  assert.strictEqual(adulta.partes.olhos.length, 2);
+  assert.strictEqual(adulta.partes.palpebras.length, 2);
+  assert.strictEqual(adulta.grupo.getObjectByName('marca'), undefined);
+  const lendaria = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'lendaria' })));
+  assert.ok(lendaria.grupo.getObjectByName('marca'));
+  assert.ok(lendaria.aura, 'a lendária tem aura');
+});
+teste('raposa: aborrecida esconde a cara atrás das caudas (as caudas mexem)', () => {
+  const c = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'adulta', humor: 'aborrecida' })));
+  c.animar('aborrecida', 0, 1);
+  const a = c.partes.caudas[0].position.clone();
+  c.animar('aborrecida', 1, 1);
+  assert.ok(a.distanceTo(c.partes.caudas[0].position) > 0.1);
+});
+teste('raposa: a dormir fecha as pálpebras e baixa a cabeça', () => {
+  const c = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'adulta' })));
+  c.animar('idle', 0, 1);
+  const aberta = c.partes.palpebras[0].scale.y;
+  const altura = c.partes.cabeca.position.y;
+  c.animar('dorme', 1, 1);
+  assert.ok(c.partes.palpebras[0].scale.y > aberta + 0.5);
+  assert.ok(c.partes.cabeca.position.y < altura);
+});
+teste('raposa: festinha abana as caudas e salta levanta o corpo; todas as animações correm sem lançar', () => {
+  const c = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'lendaria' })));
+  c.animar('salta', 0.35, 1);
+  assert.ok(c.grupo.position.y > 0.3);
+  for (const nome of ['idle', 'festinha', 'dorme', 'aborrecida', 'costas', 'eclodir']) for (const t of [0, 0.3, 1.7, 9]) c.animar(nome, t, 1);
+});
+teste('raposa: de costas roda o corpo e depois volta a posição normal', () => {
+  const c = M.Corpos.raposa(M.Estado.parametros(estado({ fase: 'adulta' })));
+  c.animar('costas', 1, 1);
+  assert.ok(Math.abs(c.grupo.rotation.y - Math.PI) < 1e-6);
+  c.animar('idle', 1, 1);
+  assert.strictEqual(c.grupo.rotation.y, 0);
+});
+
 // ---------- Motor ----------
 teste('motor: funções públicas e ponte por defeito (não faz nada)', () => {
   for (const f of ['iniciar', 'definirEstado', 'evento', 'congelar']) assert.strictEqual(typeof M[f], 'function', f);

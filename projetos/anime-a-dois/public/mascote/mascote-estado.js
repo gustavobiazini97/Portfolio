@@ -86,7 +86,29 @@
       claro: mistura(b.corpo, '#ffffff', 0.6),
       escuro: mistura(b.corpo, '#5a4a4a', 0.55),
       acento: b.acento,
+      rubor: mistura(b.corpo, '#e8808f', 0.5),     // bochechas e interior das orelhas
     };
+  };
+
+  // Aura da lendária: brilho redondo e suave. No browser é um sprite com degradê; sem canvas (testes em Node) é uma esfera simples.
+  // A opacidade pulsa em poseBase (c.aura.material.opacity).
+  Util.criarAura = function () {
+    const T = g.THREE;
+    if (typeof document === 'undefined') {
+      return new T.Mesh(new T.SphereGeometry(1.2, 12, 8), new T.MeshBasicMaterial({ color: 0xfff0b8, transparent: true, opacity: 0.14, depthWrite: false }));
+    }
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const x = c.getContext('2d');
+    const gr = x.createRadialGradient(64, 64, 4, 64, 64, 62);
+    gr.addColorStop(0, 'rgba(255,240,184,0.95)');
+    gr.addColorStop(0.55, 'rgba(255,240,184,0.35)');
+    gr.addColorStop(1, 'rgba(255,240,184,0)');
+    x.fillStyle = gr;
+    x.fillRect(0, 0, 128, 128);
+    const sprite = new T.Sprite(new T.SpriteMaterial({ map: new T.CanvasTexture(c), transparent: true, opacity: 0.5, depthWrite: false }));
+    sprite.scale.setScalar(3.4);
+    return sprite;
   };
 
   // Material macio e sem brilho (Lambert); transparent só para a aura
@@ -203,6 +225,6 @@
     // Boca: o sorriso achata-se quando está aborrecida ou a dormir
     if (P.boca) P.boca.scale.y = sorriso;
     // Aura da lendária: pulsa devagar
-    if (c.aura) c.aura.material.opacity = 0.14 + 0.06 * Math.sin((t * TAU) / 2.5);
+    if (c.aura) c.aura.material.opacity = (c.aura.isSprite ? 0.55 : 0.14) + (c.aura.isSprite ? 0.2 : 0.06) * Math.sin((t * TAU) / 2.5);
   };
 })(typeof window !== 'undefined' ? window : globalThis);
